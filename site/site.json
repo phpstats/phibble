@@ -3,9 +3,9 @@
     "title": "phibble",
     "tagline": "A typed, immutable data frame for PHP, with readr-style input and output.",
     "summary": [
-        "phibble is a port of R's tibble to PHP, with the readr-style input and output a data frame needs. A DataFrame holds typed columns, treats null as NA, and never changes in place: every operation returns a new frame, so a pipeline cannot disturb the data it was handed.",
-        "Columns are float, int, bool, string, factor, date, datetime, or list-columns. Types are guessed as a frame loads and can be declared per column instead, and casts follow R's as.*() rules. Ordered factors and the forcats functions are included, and printing and glimpse() lay a frame out the way tibble does.",
-        "Frames load from CSV with readr's options and type guessing, from JSON, from PDO statements, and from Laravel, Eloquent, or Doctrine query builders, so an analysis can begin at the application's own database. phibble depends on neither Laravel nor Doctrine.",
+        "phibble is a port of R's tibble to PHP, with the readr-style input and output a data frame needs. A DataFrame holds typed columns, treats null as NA, and never changes in place: every operation returns a new table, so a pipeline cannot disturb the data it was handed.",
+        "Columns are float, int, bool, string, factor, date, datetime, or list-columns. Types are guessed as a table loads and can be declared per column instead, and casts follow R's as.*() rules. Ordered factors and the forcats functions are included, and printing and glimpse() lay a table out the way tibble does.",
+        "Tables load from CSV with readr's options and type guessing, from JSON, from PDO statements, and from Laravel, Eloquent, or Doctrine query builders, so an analysis can begin at the application's own database. phibble depends on neither Laravel nor Doctrine.",
         "select, filter, mutate, arrange, groupBy, summarize, the joins, and tidyr's pivots follow dplyr 1.1 semantics, and Phibble\\Expr records each computation as an inspectable, serializable tree rather than a closure. Three backends implement one Table contract: DataFrame in memory, SqlTable compiling the same verbs to SQLite, PostgreSQL, or MySQL, and PolarsTable running them in Polars. phibble is the table type that phplyr, phit, phpolars, and CmdStanPHP pass between them."
     ],
     "install": [
