@@ -35,9 +35,9 @@ function enframe(array $values, ?string $name = 'name', string $value = 'value')
 }
 
 /** deframe(): see DataFrame::deframe(). */
-function deframe(DataFrame $frame): array
+function deframe(DataFrame $dataFrame): array
 {
-    return $frame->deframe();
+    return $dataFrame->deframe();
 }
 
 /**
