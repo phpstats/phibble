@@ -12,9 +12,9 @@ use function Phibble\tibble;
 use function Phibble\tribble;
 
 it('builds tibbles with recycling and computed columns', function () {
-    $frame = tibble(x: [1, 2, 3], y: 'a', z: fn (DataFrame $t) => array_map(fn ($x) => $x * 2, $t['x']));
+    $df = tibble(x: [1, 2, 3], y: 'a', z: fn (DataFrame $t) => array_map(fn ($x) => $x * 2, $t['x']));
 
-    expect($frame->toColumns())->toBe(['x' => [1, 2, 3], 'y' => ['a', 'a', 'a'], 'z' => [2, 4, 6]])
+    expect($df->toColumns())->toBe(['x' => [1, 2, 3], 'y' => ['a', 'a', 'a'], 'z' => [2, 4, 6]])
         ->and(tibble(x: 1, y: 'a')->nrow())->toBe(1)
         ->and(tibble(a: 1, b: [1, 2])->column('a'))->toBe([1, 1])
         ->and(tibble(a: 1, b: [])->nrow())->toBe(0);
@@ -25,9 +25,9 @@ it('rejects incompatible sizes with tibble\'s message', function () {
 })->throws(InvalidArgumentException::class, "Tibble columns must have compatible sizes.\n• Size 3: Existing data.\n• Size 2: Column `y`.\nℹ Only values of size one are recycled.");
 
 it('splices unnamed tables', function () {
-    $frame = DataFrame::tibble(['x' => [1, 2], DataFrame::tibble(['a' => [3, 4], 'b' => [5, 6]])]);
+    $df = DataFrame::tibble(['x' => [1, 2], DataFrame::tibble(['a' => [3, 4], 'b' => [5, 6]])]);
 
-    expect($frame->columns())->toBe(['x', 'a', 'b']);
+    expect($df->columns())->toBe(['x', 'a', 'b']);
 });
 
 it('builds tribbles row by row', function () {
@@ -57,32 +57,32 @@ it('converts many things with as_tibble', function () {
 });
 
 it('adds rows like add_row', function () {
-    $frame = tibble(x: [1, 2, 3], y: ['a', 'b', 'c']);
+    $df = tibble(x: [1, 2, 3], y: ['a', 'b', 'c']);
 
-    expect($frame->addRow(['x' => 9], before: 1)->toRows())->toBe([
+    expect($df->addRow(['x' => 9], before: 1)->toRows())->toBe([
         ['x' => 1, 'y' => 'a'], ['x' => 9, 'y' => null], ['x' => 2, 'y' => 'b'], ['x' => 3, 'y' => 'c'],
     ])
-        ->and($frame->addRow()->column('x'))->toBe([1, 2, 3, null])
-        ->and($frame->addRow([['x' => 4], ['x' => 5]], after: 0)->column('x'))->toBe([1, 4, 5, 2, 3])
-        ->and($frame->addRow()->types())->toBe($frame->types())
-        ->and(fn () => $frame->addRow(['z' => 1]))
+        ->and($df->addRow()->column('x'))->toBe([1, 2, 3, null])
+        ->and($df->addRow([['x' => 4], ['x' => 5]], after: 0)->column('x'))->toBe([1, 4, 5, 2, 3])
+        ->and($df->addRow()->types())->toBe($df->types())
+        ->and(fn () => $df->addRow(['z' => 1]))
         ->toThrow(InvalidArgumentException::class, "New rows can't add columns.");
 });
 
 it('keeps factor levels when adding rows', function () {
-    $frame = tibble(g: ['b', 'a'])->fctLevels('g', ['b', 'a']);
+    $df = tibble(g: ['b', 'a'])->fctLevels('g', ['b', 'a']);
 
-    expect($frame->addRow(['g' => 'a'])->levels('g'))->toBe(['b', 'a'])
-        ->and($frame->addRow(['g' => 'c'])->levels('g'))->toBe(['b', 'a', 'c']);
+    expect($df->addRow(['g' => 'a'])->levels('g'))->toBe(['b', 'a'])
+        ->and($df->addRow(['g' => 'c'])->levels('g'))->toBe(['b', 'a', 'c']);
 });
 
 it('adds columns like add_column', function () {
-    $frame = tibble(x: [1, 2, 3], y: ['a', 'b', 'c']);
+    $df = tibble(x: [1, 2, 3], y: ['a', 'b', 'c']);
 
-    expect($frame->addColumn(['z' => 0], after: 'x')->columns())->toBe(['x', 'z', 'y'])
-        ->and($frame->addColumn(['z' => 0], before: 0)->columns())->toBe(['z', 'x', 'y'])
-        ->and($frame->addColumn(['z' => [7, 8, 9]])->column('z'))->toBe([7, 8, 9])
-        ->and(fn () => $frame->addColumn(['x' => 1]))
+    expect($df->addColumn(['z' => 0], after: 'x')->columns())->toBe(['x', 'z', 'y'])
+        ->and($df->addColumn(['z' => 0], before: 0)->columns())->toBe(['z', 'x', 'y'])
+        ->and($df->addColumn(['z' => [7, 8, 9]])->column('z'))->toBe([7, 8, 9])
+        ->and(fn () => $df->addColumn(['x' => 1]))
         ->toThrow(InvalidArgumentException::class, 'Column name `x` must not be duplicated.');
 });
 
@@ -95,14 +95,14 @@ it('enframes and deframes', function () {
 });
 
 it('reads columns strictly by property and key', function () {
-    $frame = tibble(price: [1.5, 2.5]);
+    $df = tibble(price: [1.5, 2.5]);
 
-    expect($frame->price)->toBe([1.5, 2.5])
-        ->and($frame['price'])->toBe([1.5, 2.5])
-        ->and(isset($frame->price))->toBeTrue()
-        ->and(isset($frame->pri))->toBeFalse()
-        ->and(fn () => $frame->pri)->toThrow(ColumnNotFound::class)
-        ->and(fn () => $frame['price'] = [1])->toThrow(LogicException::class);
+    expect($df->price)->toBe([1.5, 2.5])
+        ->and($df['price'])->toBe([1.5, 2.5])
+        ->and(isset($df->price))->toBeTrue()
+        ->and(isset($df->pri))->toBeFalse()
+        ->and(fn () => $df->pri)->toThrow(ColumnNotFound::class)
+        ->and(fn () => $df['price'] = [1])->toThrow(LogicException::class);
 });
 
 it('repairs names on request', function () {

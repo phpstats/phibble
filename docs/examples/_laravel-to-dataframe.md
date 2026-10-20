@@ -1,10 +1,10 @@
 ```php
-$frame = Penguin::query()
+$df = Penguin::query()
     ->where('year', 2009)
     ->get()
     ->toDataFrame();
 
-echo $frame->select(['species', 'island', 'body_mass'])->head(3);
+echo $df->select(['species', 'island', 'body_mass'])->head(3);
 ```
 
 ```{.text .output}

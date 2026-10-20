@@ -12,7 +12,7 @@ use function Phibble\Expr\{col, cumsum, desc, lag, mean, round, row_number, str_
 
 dataset('polars mutate', fn () => mutateCases());
 
-it('matches dplyr for mutate expressions in Polars', function (Closure $frame, Expr $expr) {
+it('matches dplyr for mutate expressions in Polars', function (Closure $df, Expr $expr) {
     $case = $this->dataName();
     $case = substr($case, strpos($case, '"') + 1, -1);
     if ($case === 'round') {
@@ -20,7 +20,7 @@ it('matches dplyr for mutate expressions in Polars', function (Closure $frame, E
         $digits = [0, 0, 0, 0, 2, 2, -1];
         $out = array_map(fn ($v, $d) => native(fn () => pt(DataFrame::fromColumns(['v' => [$v]]))->mutate(['out' => round(col('v'), digits: $d)]))->column('out')[0], $values, $digits);
     } else {
-        $out = native(fn () => pt($frame())->mutate(['out' => $expr]))->column('out');
+        $out = native(fn () => pt($df())->mutate(['out' => $expr]))->column('out');
     }
 
     expect(normalise($out))->toBe(expected($case));
@@ -43,9 +43,9 @@ it('matches dplyr for summarise expressions in Polars', function (string $case, 
 })->with(summariseCases());
 
 it('filters with expressions per group in Polars, dropping NA', function () {
-    $frame = native(fn () => pt(exprFrame())->groupBy(['g'])->filter(col('x')->gt(mean(col('x'), na_rm: true))));
+    $df = native(fn () => pt(exprFrame())->groupBy(['g'])->filter(col('x')->gt(mean(col('x'), na_rm: true))));
 
-    expect($frame->column('i'))->toBe([1, 4, 6])
+    expect($df->column('i'))->toBe([1, 4, 6])
         ->and(native(fn () => pt(exprFrame())->filter(col('b')))->column('i'))->toBe([1, 4, 5]);
 });
 

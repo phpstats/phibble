@@ -122,13 +122,13 @@ it('prints the requested number of rows', function () {
 });
 
 it('squeezes columns into a narrow width', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'x' => [123.456, 7.1, 0.5],
         's' => ['abcdefghijklmnopqrstuvwxyz', 'b', 'c'],
         't' => ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'B', 'C'],
     ]);
 
-    expect($frame->format(width: 30))->toBe(printFixture('narrow'));
+    expect($df->format(width: 30))->toBe(printFixture('narrow'));
 });
 
 it('glimpses like tibble', function (string $name) {
@@ -139,9 +139,9 @@ it('glimpses like tibble', function (string $name) {
 ]);
 
 it('prints rowwise tables like dplyr', function () {
-    $frame = DataFrame::fromColumns(['g' => ['a', 'b', 'a'], 'x' => [1, 2, 3]]);
+    $df = DataFrame::fromColumns(['g' => ['a', 'b', 'a'], 'x' => [1, 2, 3]]);
 
-    expect((string) $frame->rowwise())->toBe(printFixture('rowwise'))
-        ->and((string) $frame->rowwise(['g']))->toBe(printFixture('rowwise_id'))
-        ->and($frame->rowwise()->glimpse())->toBe(printFixture('glimpse_rowwise'));
+    expect((string) $df->rowwise())->toBe(printFixture('rowwise'))
+        ->and((string) $df->rowwise(['g']))->toBe(printFixture('rowwise_id'))
+        ->and($df->rowwise()->glimpse())->toBe(printFixture('glimpse_rowwise'));
 })->skip(! method_exists(DataFrame::class, 'rowwise'), 'DataFrame::rowwise() not available yet');

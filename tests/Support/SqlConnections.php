@@ -26,7 +26,7 @@ function sqlConnections(): array
 }
 
 /** A lazy table holding the frame's rows as inline SELECT ... UNION ALL data. */
-function sqlFrom(PDO $pdo, DataFrame $frame): SqlTable
+function sqlFrom(PDO $pdo, DataFrame $df): SqlTable
 {
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     $castFor = fn (Type $type) => match ($type) {
@@ -40,10 +40,10 @@ function sqlFrom(PDO $pdo, DataFrame $frame): SqlTable
     $quote = fn (string $n) => $driver === 'mysql' ? "`{$n}`" : "\"{$n}\"";
     $selects = [];
     $bindings = [];
-    foreach ($frame->toRows() as $i => $row) {
+    foreach ($df->toRows() as $i => $row) {
         $items = [];
         foreach ($row as $name => $value) {
-            $type = $frame->type($name);
+            $type = $df->type($name);
             // Text gets a locale collation (as on a typical Linux server), so the
             // tests catch comparisons that need byte order to match R.
             $collate = $type === Type::String && $driver === 'pgsql' ? ' COLLATE "en-x-icu"' : '';

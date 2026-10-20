@@ -34,14 +34,14 @@ final class Printer
      */
     public static function render(Table $table, ?int $n = null, int $width = 80): string
     {
-        $frame = $table->collect();
-        $rows = $frame->nrow();
-        $columns = $frame->columns();
+        $df = $table->collect();
+        $rows = $df->nrow();
+        $columns = $df->columns();
         $n = $n !== null && $n >= 0 ? $n : ($rows > self::PRINT_MAX ? self::PRINT_MIN : $rows);
-        $shown = $frame->head($n);
+        $shown = $df->head($n);
         $rowsMissing = $rows > $n ? $rows - $n : 0;
 
-        $lines = self::header($frame, $width);
+        $lines = self::header($df, $width);
 
         $body = [];
         $extra = $columns;
@@ -63,7 +63,7 @@ final class Printer
             $footers[] = $words;
         }
         if ($extra !== []) {
-            $footers[] = self::extraColumnsFooter($frame, $extra, $rows > 0 && $shown->nrow() > 0);
+            $footers[] = self::extraColumnsFooter($df, $extra, $rows > 0 && $shown->nrow() > 0);
         }
 
         $budget = self::MAX_FOOTER_LINES;
@@ -80,14 +80,14 @@ final class Printer
     }
 
     /** @return list<string> */
-    private static function header(Table $frame, int $width): array
+    private static function header(Table $df, int $width): array
     {
-        $entries = ['A tibble' => self::bigMark($frame->nrow()).' × '.self::bigMark($frame->ncol())];
-        if (method_exists($frame, 'isRowwise') && $frame->isRowwise()) {
-            $entries['Rowwise'] = implode(', ', $frame->groups());
-        } elseif ($frame->groups() !== []) {
-            $groups = iterator_count((fn () => yield from $frame->eachGroup())());
-            $entries['Groups'] = implode(', ', $frame->groups()).' ['.self::bigMark($groups).']';
+        $entries = ['A tibble' => self::bigMark($df->nrow()).' × '.self::bigMark($df->ncol())];
+        if (method_exists($df, 'isRowwise') && $df->isRowwise()) {
+            $entries['Rowwise'] = implode(', ', $df->groups());
+        } elseif ($df->groups() !== []) {
+            $groups = iterator_count((fn () => yield from $df->eachGroup())());
+            $entries['Groups'] = implode(', ', $df->groups()).' ['.self::bigMark($groups).']';
         }
 
         $labelWidth = max(array_map(fn (string $k) => Pillar::extent($k.':'), array_keys($entries)));
@@ -236,12 +236,12 @@ final class Printer
      * @param list<string> $extra
      * @return list<string>
      */
-    private static function extraColumnsFooter(Table $frame, array $extra, bool $more): array
+    private static function extraColumnsFooter(Table $df, array $extra, bool $more): array
     {
         $total = count($extra);
         $vars = [];
         foreach (array_slice($extra, 0, self::MAX_EXTRA_COLS) as $name) {
-            $vars[] = Pillar::tickIfNeeded($name).' <'.Pillar::typeAbbr($frame, $name).'>';
+            $vars[] = Pillar::tickIfNeeded($name).' <'.Pillar::typeAbbr($df, $name).'>';
         }
         if ($total > self::MAX_EXTRA_COLS) {
             $vars[] = Pillar::ELLIPSIS;

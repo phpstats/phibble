@@ -128,11 +128,11 @@ dataset('lubridate and stringr on Polars', function () {
     ];
 });
 
-it('matches lubridate and stringr on Polars', function (Closure $frame, Expr $expr) {
+it('matches lubridate and stringr on Polars', function (Closure $df, Expr $expr) {
     $case = $this->dataName();
     $case = substr($case, strpos($case, '"') + 1, -1);
     // str_to_title needs ICU word breaks, so it runs on a DataFrame; the rest stay in Polars.
-    $run = fn () => pt($frame())->mutate(['out' => $expr]);
+    $run = fn () => pt($df())->mutate(['out' => $expr]);
     $out = ($case === 'str_to_title' ? $run() : native($run))->column('out');
 
     expect(lsFormatPt($out))->toBe(lsFormatPt(lsExpectedPt($case)));

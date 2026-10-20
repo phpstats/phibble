@@ -65,15 +65,15 @@ function withCsvReader(string $reader, Closure $fn): mixed
 
 it('reads CSV like readr', function (array $case, string $reader) {
     $expected = json_decode((string) file_get_contents(IO_FIXTURES."/expected/{$case['name']}.json"), true);
-    [$frame, $warnings] = withCsvReader($reader, fn () => quietly(fn () => DataFrame::fromCsv(IO_FIXTURES.'/'.$case['file'], ...$case['php'])));
+    [$df, $warnings] = withCsvReader($reader, fn () => quietly(fn () => DataFrame::fromCsv(IO_FIXTURES.'/'.$case['file'], ...$case['php'])));
 
-    expect($frame->columns())->toBe($expected['names'])
+    expect($df->columns())->toBe($expected['names'])
         ->and(count($warnings) > 0)->toBe($expected['problems'] > 0);
 
     foreach ($expected['names'] as $name) {
-        $type = $frame->type($name);
+        $type = $df->type($name);
         $rType = $expected['types'][$name];
-        $values = array_map(fn ($v) => asExpected($v, $type), $frame->column($name));
+        $values = array_map(fn ($v) => asExpected($v, $type), $df->column($name));
         $want = $expected['values'][$name];
 
         if ($rType === 'float' && $type === Type::Int) {
@@ -98,18 +98,18 @@ it('reads CSV like readr', function (array $case, string $reader) {
             expect($values)->toBe($want, "values of column {$name}");
         }
         if ($rType === 'factor') {
-            expect($frame->levels($name))->toBe($expected['levels'][$name]);
+            expect($df->levels($name))->toBe($expected['levels'][$name]);
         }
     }
 })->with(readrCases())->with('csv readers');
 
 it('writes CSV like readr', function () {
     $expected = json_decode((string) file_get_contents(IO_FIXTURES.'/expected/write.json'), true);
-    $frame = DataFrame::fromCsv(IO_FIXTURES.'/write.csv');
+    $df = DataFrame::fromCsv(IO_FIXTURES.'/write.csv');
 
-    expect($frame->toCsv())->toBe($expected['csv'])
-        ->and($frame->toCsv(quote: 'all'))->toBe($expected['csv_all'])
-        ->and($frame->toCsv(na: ''))->toBe($expected['csv_na']);
+    expect($df->toCsv())->toBe($expected['csv'])
+        ->and($df->toCsv(quote: 'all'))->toBe($expected['csv_all'])
+        ->and($df->toCsv(na: ''))->toBe($expected['csv_na']);
 });
 
 it('formats doubles like write_csv', function () {
@@ -129,10 +129,10 @@ it('formats doubles like write_csv', function () {
 // ---------------------------------------------------------------------
 
 it('keeps the original fromCsv and fromCsvString signatures working', function () {
-    $frame = DataFrame::fromCsvString("zip;n\n02134;-\n10001;4\n", ['zip' => 'string'], ';', ['-']);
+    $df = DataFrame::fromCsvString("zip;n\n02134;-\n10001;4\n", ['zip' => 'string'], ';', ['-']);
 
-    expect($frame->column('zip'))->toBe(['02134', '10001'])
-        ->and($frame->column('n'))->toBe([null, 4]);
+    expect($df->column('zip'))->toBe(['02134', '10001'])
+        ->and($df->column('n'))->toBe([null, 4]);
 });
 
 it('reads from streams and gzip files', function () {
@@ -153,9 +153,9 @@ it('reads from streams and gzip files', function () {
 
 it('drops trailing comments and trims what is left', function () {
     // readr leaves "2 " here and so reads y as text; phibble trims after the comment.
-    $frame = DataFrame::fromCsvString("x,y\n1,2 # trailing\n3,4\n", comment: '#');
+    $df = DataFrame::fromCsvString("x,y\n1,2 # trailing\n3,4\n", comment: '#');
 
-    expect($frame->column('y'))->toBe([2, 4]);
+    expect($df->column('y'))->toBe([2, 4]);
 });
 
 it('honours backslash escapes and unquoted files', function () {
@@ -167,9 +167,9 @@ it('honours backslash escapes and unquoted files', function () {
 });
 
 it('reads values with grouping and decimal marks', function () {
-    $frame = DataFrame::fromCsvString("a;b\n1.234,5;7\n", delimiter: ';', decimalMark: ',');
+    $df = DataFrame::fromCsvString("a;b\n1.234,5;7\n", delimiter: ';', decimalMark: ',');
 
-    expect($frame->column('a'))->toBe([1234.5]);
+    expect($df->column('a'))->toBe([1234.5]);
 });
 
 it('accepts col_types as name specs, positions and factor levels', function () {
@@ -235,14 +235,14 @@ it('checks unique names', function (array $names, string $message) {
 // ---------------------------------------------------------------------
 
 it('writes, appends and round-trips CSV files', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'x' => [1.5, null],
         'g' => ['a', 'b'],
         'd' => [new DateTimeImmutable('2024-01-02 10:00:00', new DateTimeZone('America/New_York')), null],
     ])->asFactor('g');
     $path = tempnam(sys_get_temp_dir(), 'phibble');
-    $frame->writeCsv($path);
-    $frame->writeCsv($path, append: true);
+    $df->writeCsv($path);
+    $df->writeCsv($path, append: true);
 
     expect(file_get_contents($path))->toBe("x,g,d\n1.5,a,2024-01-02T15:00:00Z\nNA,b,NA\n1.5,a,2024-01-02T15:00:00Z\nNA,b,NA\n")
         ->and(DataFrame::fromCsv($path)->nrow())->toBe(4);
@@ -250,12 +250,12 @@ it('writes, appends and round-trips CSV files', function () {
 });
 
 it('writes with other delimiters, quoting, escapes and line endings', function () {
-    $frame = DataFrame::fromColumns(['s' => ['a;b', 'say "x"', 'ok']]);
+    $df = DataFrame::fromColumns(['s' => ['a;b', 'say "x"', 'ok']]);
 
-    expect($frame->toCsv(delimiter: ';'))->toBe("s\n\"a;b\"\n\"say \"\"x\"\"\"\nok\n")
-        ->and($frame->toCsv(quote: 'none'))->toBe("s\na;b\nsay \"\"x\"\"\nok\n")
-        ->and($frame->toCsv(escape: 'backslash'))->toBe("s\na;b\n\"say \\\"x\\\"\"\nok\n")
-        ->and($frame->toCsv(colNames: false, eol: "\r\n"))->toBe("a;b\r\n\"say \"\"x\"\"\"\r\nok\r\n");
+    expect($df->toCsv(delimiter: ';'))->toBe("s\n\"a;b\"\n\"say \"\"x\"\"\"\nok\n")
+        ->and($df->toCsv(quote: 'none'))->toBe("s\na;b\nsay \"\"x\"\"\nok\n")
+        ->and($df->toCsv(escape: 'backslash'))->toBe("s\na;b\n\"say \\\"x\\\"\"\nok\n")
+        ->and($df->toCsv(colNames: false, eol: "\r\n"))->toBe("a;b\r\n\"say \"\"x\"\"\"\r\nok\r\n");
 });
 
 it('refuses to write list-columns to CSV', function () {
@@ -268,28 +268,28 @@ it('refuses to write list-columns to CSV', function () {
 
 it('writes JSON records and columns like jsonlite', function () {
     // jsonlite::toJSON(df, dataframe = "rows"/"columns", na = "null", Date = "ISO8601")
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'n' => [1.5, null], 'i' => [1, null], 'l' => [true, null], 's' => ['a', null], 'f' => ['x', null],
         'd' => [new DateTimeImmutable('2024-01-02'), null],
     ], types: ['f' => 'factor', 'd' => 'date']);
 
-    expect($frame->toJson())->toBe(
+    expect($df->toJson())->toBe(
         '[{"n":1.5,"i":1,"l":true,"s":"a","f":"x","d":"2024-01-02"},{"n":null,"i":null,"l":null,"s":null,"f":null,"d":null}]'
     )
-        ->and($frame->toJson('columns'))->toBe(
+        ->and($df->toJson('columns'))->toBe(
             '{"n":[1.5,null],"i":[1,null],"l":[true,null],"s":["a",null],"f":["x",null],"d":["2024-01-02",null]}'
         );
 });
 
 it('writes datetimes in UTC, non-finite numbers as null and nested frames as JSON', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         't' => [new DateTimeImmutable('2024-01-02 10:00:00.25+02:00')],
         'x' => [NAN],
         'nested' => [DataFrame::fromColumns(['a' => [1, 2]])],
     ]);
 
-    expect($frame->toJson())->toBe('[{"t":"2024-01-02T08:00:00.25Z","x":null,"nested":[{"a":1},{"a":2}]}]')
-        ->and($frame->toJson('columns'))->toBe('{"t":["2024-01-02T08:00:00.25Z"],"x":[null],"nested":[{"a":[1,2]}]}')
+    expect($df->toJson())->toBe('[{"t":"2024-01-02T08:00:00.25Z","x":null,"nested":[{"a":1},{"a":2}]}]')
+        ->and($df->toJson('columns'))->toBe('{"t":["2024-01-02T08:00:00.25Z"],"x":[null],"nested":[{"a":[1,2]}]}')
         ->and(DataFrame::fromColumns([])->toJson('columns'))->toBe('{}')
         ->and(DataFrame::fromColumns([])->toJson())->toBe('[]');
 });
@@ -308,10 +308,10 @@ it('reads JSON records and columns', function () {
 });
 
 it('round-trips JSON', function () {
-    $frame = DataFrame::fromColumns(['a' => [1, null, 3], 's' => ['x', 'y', null]]);
+    $df = DataFrame::fromColumns(['a' => [1, null, 3], 's' => ['x', 'y', null]]);
 
-    expect(DataFrame::fromJson($frame->toJson())->toRows())->toBe($frame->toRows())
-        ->and(DataFrame::fromJson($frame->toJson('columns'))->toRows())->toBe($frame->toRows());
+    expect(DataFrame::fromJson($df->toJson())->toRows())->toBe($df->toRows())
+        ->and(DataFrame::fromJson($df->toJson('columns'))->toRows())->toBe($df->toRows());
 });
 
 it('rejects JSON that is not a table', function (string $json) {
@@ -334,9 +334,9 @@ it('reads collections of arrays, models and plain objects', function () {
     $plain->id = 3;
     $plain->name = 'Cy';
 
-    $frame = DataFrame::fromCollection(new Illuminate\Support\Collection([['id' => 1, 'name' => 'Ann'], $model, $plain]));
+    $df = DataFrame::fromCollection(new Illuminate\Support\Collection([['id' => 1, 'name' => 'Ann'], $model, $plain]));
 
-    expect($frame->toRows())->toBe([
+    expect($df->toRows())->toBe([
         ['id' => 1, 'name' => 'Ann'], ['id' => 2, 'name' => 'Bo'], ['id' => 3, 'name' => 'Cy'],
     ])
         ->and(DataFrame::fromCollection(new ArrayIterator([['a' => 1]]))->nrow())->toBe(1)

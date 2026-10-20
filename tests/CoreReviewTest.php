@@ -179,10 +179,10 @@ it('19: skips whitespace-only lines, as readr does', function () {
 });
 
 it('20: reads JSON records and columns with numeric keys', function () {
-    $frame = DataFrame::fromColumns(['0' => [1, 2], 'a' => ['x', 'y']]);
+    $df = DataFrame::fromColumns(['0' => [1, 2], 'a' => ['x', 'y']]);
 
-    expect(DataFrame::fromJson($frame->toJson())->toColumns())->toBe($frame->toColumns())
-        ->and(DataFrame::fromJson($frame->toJson('columns'))->toColumns())->toBe($frame->toColumns());
+    expect(DataFrame::fromJson($df->toJson())->toColumns())->toBe($df->toColumns())
+        ->and(DataFrame::fromJson($df->toJson('columns'))->toColumns())->toBe($df->toColumns());
 });
 
 it('21: formats tiny doubles without a PHP notice', function () {

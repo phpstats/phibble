@@ -11,33 +11,33 @@ use Phibble\Type;
 
 it('builds from rows and round-trips', function () {
     $rows = [['a' => 1, 'b' => 'x'], ['a' => 2, 'b' => 'y']];
-    $frame = DataFrame::fromRows($rows);
+    $df = DataFrame::fromRows($rows);
 
-    expect($frame)->toBeInstanceOf(Table::class)
-        ->and($frame->columns())->toBe(['a', 'b'])
-        ->and($frame->nrow())->toBe(2)
-        ->and($frame->ncol())->toBe(2)
-        ->and(count($frame))->toBe(2)
-        ->and($frame->toRows())->toBe($rows)
-        ->and($frame->toColumns())->toBe(['a' => [1, 2], 'b' => ['x', 'y']]);
+    expect($df)->toBeInstanceOf(Table::class)
+        ->and($df->columns())->toBe(['a', 'b'])
+        ->and($df->nrow())->toBe(2)
+        ->and($df->ncol())->toBe(2)
+        ->and(count($df))->toBe(2)
+        ->and($df->toRows())->toBe($rows)
+        ->and($df->toColumns())->toBe(['a' => [1, 2], 'b' => ['x', 'y']]);
 });
 
 it('fills missing keys with NA and keeps first-appearance column order', function () {
-    $frame = DataFrame::fromRows([['a' => 1], ['b' => 2.5, 'a' => 3]]);
+    $df = DataFrame::fromRows([['a' => 1], ['b' => 2.5, 'a' => 3]]);
 
-    expect($frame->columns())->toBe(['a', 'b'])
-        ->and($frame->column('b'))->toBe([null, 2.5]);
+    expect($df->columns())->toBe(['a', 'b'])
+        ->and($df->column('b'))->toBe([null, 2.5]);
 });
 
 it('builds from columns and rejects ragged columns', function () {
-    $frame = DataFrame::fromColumns(['x' => [1.0, 2.0], 'y' => [true, false]]);
-    expect($frame->types())->toBe(['x' => Type::Float, 'y' => Type::Bool]);
+    $df = DataFrame::fromColumns(['x' => [1.0, 2.0], 'y' => [true, false]]);
+    expect($df->types())->toBe(['x' => Type::Float, 'y' => Type::Bool]);
 
     DataFrame::fromColumns(['x' => [1, 2], 'y' => [1]]);
 })->throws(InvalidArgumentException::class, "Column 'y' has 1 values; expected 2.");
 
 it('infers types from PHP values', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'f' => [1, 2.5, null],
         'i' => [1, null, 3],
         'b' => [true, false, null],
@@ -46,26 +46,26 @@ it('infers types from PHP values', function () {
         'na' => [null, null, null],
     ]);
 
-    expect($frame->types())->toBe([
+    expect($df->types())->toBe([
         'f' => Type::Float, 'i' => Type::Int, 'b' => Type::Bool,
         's' => Type::String, 'd' => Type::DateTime, 'na' => Type::Bool,
     ])
-        ->and($frame->column('f'))->toBe([1.0, 2.5, null])
-        ->and($frame->column('d')[0])->toBeInstanceOf(DateTimeImmutable::class);
+        ->and($df->column('f'))->toBe([1.0, 2.5, null])
+        ->and($df->column('d')[0])->toBeInstanceOf(DateTimeImmutable::class);
 });
 
 it('accepts explicit types', function () {
-    $frame = DataFrame::fromColumns(['x' => [1, 2], 'g' => ['b', 'a']], types: ['x' => 'float', 'g' => Type::Factor]);
+    $df = DataFrame::fromColumns(['x' => [1, 2], 'g' => ['b', 'a']], types: ['x' => 'float', 'g' => Type::Factor]);
 
-    expect($frame->column('x'))->toBe([1.0, 2.0])
-        ->and($frame->type('g'))->toBe(Type::Factor)
-        ->and($frame->levels('g'))->toBe(['a', 'b']);
+    expect($df->column('x'))->toBe([1.0, 2.0])
+        ->and($df->type('g'))->toBe(Type::Factor)
+        ->and($df->levels('g'))->toBe(['a', 'b']);
 });
 
 it('turns values it cannot cast into NA with a warning, as R does', function () {
-    [$frame, $warnings] = quietly(fn () => DataFrame::fromColumns(['x' => ['abc', '2']], types: ['x' => 'int']));
+    [$df, $warnings] = quietly(fn () => DataFrame::fromColumns(['x' => ['abc', '2']], types: ['x' => 'int']));
 
-    expect($frame->column('x'))->toBe([null, 2])
+    expect($df->column('x'))->toBe([null, 2])
         ->and($warnings)->toBe(["NAs introduced by coercion to int in column 'x' (1 value)."]);
 });
 
@@ -98,33 +98,33 @@ it('iterates rows', function () {
 });
 
 it('stores factors as levels and codes', function () {
-    $frame = penguins()->asFactor('species');
-    $storage = $frame->storage('species');
+    $df = penguins()->asFactor('species');
+    $storage = $df->storage('species');
 
     expect($storage)->toBeInstanceOf(FactorColumn::class)
-        ->and($frame->levels('species'))->toBe(['Adelie', 'Chinstrap', 'Gentoo'])
+        ->and($df->levels('species'))->toBe(['Adelie', 'Chinstrap', 'Gentoo'])
         ->and($storage->codes())->toBe([0, 0, 2, 1, 2])
-        ->and($frame->column('species'))->toBe(['Adelie', 'Adelie', 'Gentoo', 'Chinstrap', 'Gentoo']);
+        ->and($df->column('species'))->toBe(['Adelie', 'Adelie', 'Gentoo', 'Chinstrap', 'Gentoo']);
 });
 
 it('uses explicit factor levels and turns unknown values into NA', function () {
-    $frame = penguins()->asFactor('species', ['Gentoo', 'Adelie']);
+    $df = penguins()->asFactor('species', ['Gentoo', 'Adelie']);
 
-    expect($frame->levels('species'))->toBe(['Gentoo', 'Adelie'])
-        ->and($frame->column('species'))->toBe(['Adelie', 'Adelie', 'Gentoo', null, 'Gentoo']);
+    expect($df->levels('species'))->toBe(['Gentoo', 'Adelie'])
+        ->and($df->column('species'))->toBe(['Adelie', 'Adelie', 'Gentoo', null, 'Gentoo']);
 });
 
 it('sorts numeric factor levels numerically', function () {
-    $frame = DataFrame::fromColumns(['n' => [10, 9, 100]])->asFactor('n');
+    $df = DataFrame::fromColumns(['n' => [10, 9, 100]])->asFactor('n');
 
-    expect($frame->levels('n'))->toBe(['9', '10', '100']);
+    expect($df->levels('n'))->toBe(['9', '10', '100']);
 });
 
 it('casts columns', function () {
-    $frame = penguins()->cast(['year' => 'string', 'mass' => Type::Int]);
+    $df = penguins()->cast(['year' => 'string', 'mass' => Type::Int]);
 
-    expect($frame->column('year'))->toBe(['2007', '2008', '2007', '2009', '2008'])
-        ->and($frame->column('mass'))->toBe([3750, 3800, 5000, null, 5400]);
+    expect($df->column('year'))->toBe(['2007', '2008', '2007', '2009', '2008'])
+        ->and($df->column('mass'))->toBe([3750, 3800, 5000, null, 5400]);
 });
 
 it('drops rows with NA', function () {

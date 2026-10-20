@@ -62,9 +62,9 @@ dataset('review cases', function () {
 });
 
 it('matches DataFrame after the review fixes', function (string $sql, Closure $pipeline, Closure $connect) {
-    [$frame, $sqlResult] = viaBoth($connect(), $sql, $pipeline);
+    [$df, $sqlResult] = viaBoth($connect(), $sql, $pipeline);
 
-    expect($sqlResult)->toBe($frame);
+    expect($sqlResult)->toBe($df);
 })->with('review cases')->with('connections');
 
 it('aggregates boolean columns', function (Closure $connect) {
@@ -72,18 +72,18 @@ it('aggregates boolean columns', function (Closure $connect) {
     $sql = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql'
         ? 'SELECT TRUE AS b, 1 AS g UNION ALL SELECT FALSE, 1 UNION ALL SELECT TRUE, 2'
         : 'SELECT 1 AS b, 1 AS g UNION ALL SELECT 0, 1 UNION ALL SELECT 1, 2';
-    [$frame, $sqlResult] = viaBoth($pdo, $sql, fn ($t) => $t->arrange(['g'])->groupBy(['g'])->summarise([
+    [$df, $sqlResult] = viaBoth($pdo, $sql, fn ($t) => $t->arrange(['g'])->groupBy(['g'])->summarise([
         's' => sum(col('b')), 'm' => mean(col('b')), 'lo' => min(col('b')), 'hi' => max(col('b')), 'f' => first(col('b')),
     ]));
 
-    expect($sqlResult)->toBe($frame);
+    expect($sqlResult)->toBe($df);
 })->with('connections');
 
 it('keeps text with trailing spaces apart and picks closest text in byte order', function (Closure $connect) {
     $pdo = $connect();
     $text = fn (string $v) => $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql' ? "CAST('{$v}' AS CHAR)" : "'{$v}'";
-    [$frame, $sqlResult] = viaBoth($pdo, "SELECT {$text('a')} AS s UNION ALL SELECT {$text('a ')}", fn ($t) => $t->groupBy(['s'])->summarise(['n' => n()]));
-    expect($sqlResult)->toBe($frame);
+    [$df, $sqlResult] = viaBoth($pdo, "SELECT {$text('a')} AS s UNION ALL SELECT {$text('a ')}", fn ($t) => $t->groupBy(['s'])->summarise(['n' => n()]));
+    expect($sqlResult)->toBe($df);
 
     $x = SqlTable::query($pdo, "SELECT {$text('a')} AS s");
     $y = SqlTable::query($pdo, "SELECT {$text('B')} AS s2 UNION ALL SELECT {$text('a')}");

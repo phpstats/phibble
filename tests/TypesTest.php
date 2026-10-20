@@ -7,7 +7,7 @@ use Phibble\DataFrame;
 use Phibble\Type;
 
 it('combines PHP types the way R c() does', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'bi' => [true, 2],
         'if' => [1, 2.5],
         'sn' => ['a', 1],
@@ -16,28 +16,28 @@ it('combines PHP types the way R c() does', function () {
         'ln' => [1, [2]],
     ]);
 
-    expect($frame->types())->toBe([
+    expect($df->types())->toBe([
         'bi' => Type::Int, 'if' => Type::Float, 'sn' => Type::String,
         'dt' => Type::DateTime, 'l' => Type::List, 'ln' => Type::List,
     ])
-        ->and($frame->column('bi'))->toBe([1, 2])
-        ->and($frame->column('sn'))->toBe(['a', '1']);
+        ->and($df->column('bi'))->toBe([1, 2])
+        ->and($df->column('sn'))->toBe(['a', '1']);
 });
 
 it('casts to int like as.integer()', function () {
     // as.integer(c(2.7, -2.7, "3.9", "x", TRUE)) is 2 -2 3 NA 1 in R.
-    [$frame, $warnings] = quietly(fn () => DataFrame::fromColumns(['x' => [2.7, -2.7, '3.9', 'x', true]], types: ['x' => 'int']));
+    [$df, $warnings] = quietly(fn () => DataFrame::fromColumns(['x' => [2.7, -2.7, '3.9', 'x', true]], types: ['x' => 'int']));
 
-    expect($frame->column('x'))->toBe([2, -2, 3, null, 1])
+    expect($df->column('x'))->toBe([2, -2, 3, null, 1])
         ->and($warnings)->toHaveCount(1);
 });
 
 it('casts to bool like as.logical()', function () {
     $text = ['TRUE', 'true', 'T', 'True', 'yes', '1', 'FALSE', 'F', 'false', 'False', '0'];
-    [$frame] = quietly(fn () => DataFrame::fromColumns(['s' => $text, 'n' => array_fill(0, 11, 0)], types: ['s' => 'bool']));
+    [$df] = quietly(fn () => DataFrame::fromColumns(['s' => $text, 'n' => array_fill(0, 11, 0)], types: ['s' => 'bool']));
     $numbers = DataFrame::fromColumns(['n' => [0, 2, -1.5]])->cast(['n' => 'bool']);
 
-    expect($frame->column('s'))->toBe([true, true, true, true, null, null, false, false, false, false, null])
+    expect($df->column('s'))->toBe([true, true, true, true, null, null, false, false, false, false, null])
         ->and($numbers->column('n'))->toBe([false, true, true]);
 });
 
@@ -51,44 +51,44 @@ it('formats doubles like as.character()', function () {
 });
 
 it('converts dates and datetimes to numbers like R', function () {
-    $frame = DataFrame::fromCsvString("d,t\n2024-01-02,2024-01-02 10:00:00\n")->cast(['d' => 'float', 't' => 'float']);
+    $df = DataFrame::fromCsvString("d,t\n2024-01-02,2024-01-02 10:00:00\n")->cast(['d' => 'float', 't' => 'float']);
 
-    expect($frame->column('d'))->toBe([19724.0])
-        ->and($frame->column('t'))->toBe([1704189600.0]);
+    expect($df->column('d'))->toBe([19724.0])
+        ->and($df->column('t'))->toBe([1704189600.0]);
 });
 
 it('turns numbers into dates and datetimes like R', function () {
-    $frame = DataFrame::fromColumns(['d' => [19000], 't' => [1704189600]], types: ['d' => 'date', 't' => 'datetime']);
+    $df = DataFrame::fromColumns(['d' => [19000], 't' => [1704189600]], types: ['d' => 'date', 't' => 'datetime']);
 
-    expect($frame->column('d')[0]->format('Y-m-d'))->toBe('2022-01-08')
-        ->and($frame->column('t')[0]->format('Y-m-d H:i:s'))->toBe('2024-01-02 10:00:00');
+    expect($df->column('d')[0]->format('Y-m-d'))->toBe('2022-01-08')
+        ->and($df->column('t')[0]->format('Y-m-d H:i:s'))->toBe('2024-01-02 10:00:00');
 });
 
 it('converts factors like R', function () {
     // factor(c("10", "9", "100")) has levels "10" "100" "9"; as.integer() gives codes 1 3 2.
-    $frame = DataFrame::fromColumns(['f' => ['10', '9', '100']], types: ['f' => 'factor']);
+    $df = DataFrame::fromColumns(['f' => ['10', '9', '100']], types: ['f' => 'factor']);
 
-    expect($frame->levels('f'))->toBe(['10', '100', '9'])
-        ->and($frame->cast(['f' => 'int'])->column('f'))->toBe([1, 3, 2])
-        ->and($frame->cast(['f' => 'string'])->column('f'))->toBe(['10', '9', '100'])
+    expect($df->levels('f'))->toBe(['10', '100', '9'])
+        ->and($df->cast(['f' => 'int'])->column('f'))->toBe([1, 3, 2])
+        ->and($df->cast(['f' => 'string'])->column('f'))->toBe(['10', '9', '100'])
         ->and(DataFrame::fromColumns(['f' => [1.5, 2.0, 10]])->asFactor('f')->levels('f'))->toBe(['1.5', '2', '10'])
         ->and(DataFrame::fromColumns(['f' => [true, false]])->asFactor('f')->levels('f'))->toBe(['FALSE', 'TRUE']);
 });
 
 it('keeps date and datetime apart when parsing text', function () {
-    $frame = DataFrame::fromCsvString("d,t,m\n2024-01-02,2024-01-02T10:00:00Z,2024-01-02\n2024-03-04,2024-03-04 11:30,2024-03-04 08:00\n");
+    $df = DataFrame::fromCsvString("d,t,m\n2024-01-02,2024-01-02T10:00:00Z,2024-01-02\n2024-03-04,2024-03-04 11:30,2024-03-04 08:00\n");
 
-    expect($frame->types())->toBe(['d' => Type::Date, 't' => Type::DateTime, 'm' => Type::DateTime])
-        ->and($frame->column('d')[0]->getTimezone()->getName())->toBe('UTC');
+    expect($df->types())->toBe(['d' => Type::Date, 't' => Type::DateTime, 'm' => Type::DateTime])
+        ->and($df->column('d')[0]->getTimezone()->getName())->toBe('UTC');
 });
 
 it('builds ordered factors', function () {
-    $frame = DataFrame::fromColumns(['o' => ['lo', 'hi', 'mid']])->asOrdered('o', ['lo', 'mid', 'hi']);
+    $df = DataFrame::fromColumns(['o' => ['lo', 'hi', 'mid']])->asOrdered('o', ['lo', 'mid', 'hi']);
 
-    expect($frame->isOrdered('o'))->toBeTrue()
-        ->and($frame->type('o'))->toBe(Type::Factor)
-        ->and($frame->arrange(['o'])->column('o'))->toBe(['lo', 'mid', 'hi'])
-        ->and($frame->asFactor('o')->isOrdered('o'))->toBeFalse();
+    expect($df->isOrdered('o'))->toBeTrue()
+        ->and($df->type('o'))->toBe(Type::Factor)
+        ->and($df->arrange(['o'])->column('o'))->toBe(['lo', 'mid', 'hi'])
+        ->and($df->asFactor('o')->isOrdered('o'))->toBeFalse();
 });
 
 it('matches forcats', function () {
@@ -111,9 +111,9 @@ it('matches forcats', function () {
 
 it('stores list-columns', function () {
     $inner = DataFrame::fromColumns(['a' => [1, 2]]);
-    $frame = DataFrame::fromColumns(['id' => [1, 2], 'data' => [$inner, [1, 2, 3]]]);
+    $df = DataFrame::fromColumns(['id' => [1, 2], 'data' => [$inner, [1, 2, 3]]]);
 
-    expect($frame->type('data'))->toBe(Type::List)
-        ->and($frame->column('data')[0])->toBe($inner)
-        ->and($frame->distinct(['data'])->nrow())->toBe(2);
+    expect($df->type('data'))->toBe(Type::List)
+        ->and($df->column('data')[0])->toBe($inner)
+        ->and($df->distinct(['data'])->nrow())->toBe(2);
 });

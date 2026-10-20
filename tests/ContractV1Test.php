@@ -98,16 +98,16 @@ it('keeps x grouping through joins', function () {
 });
 
 it('sorts groups like dplyr: NA last, factors by level', function () {
-    $frame = DataFrame::fromColumns(['g' => ['b', 'a', null, 'b'], 'x' => [1, 2, 3, 4]]);
-    $counts = $frame->groupBy(['g'])->summarise(['n' => fn ($t) => $t->nrow()]);
+    $df = DataFrame::fromColumns(['g' => ['b', 'a', null, 'b'], 'x' => [1, 2, 3, 4]]);
+    $counts = $df->groupBy(['g'])->summarise(['n' => fn ($t) => $t->nrow()]);
 
     expect($counts->toRows())->toBe([['g' => 'a', 'n' => 1], ['g' => 'b', 'n' => 2], ['g' => null, 'n' => 1]])
-        ->and($frame->fctLevels('g', ['b', 'a'])->groupBy(['g'])->summarise(['n' => fn ($t) => $t->nrow()])->column('g'))
+        ->and($df->fctLevels('g', ['b', 'a'])->groupBy(['g'])->summarise(['n' => fn ($t) => $t->nrow()])->column('g'))
         ->toBe(['b', 'a', null]);
 });
 
 it('runs vectorised closures per group', function () {
-    $frame = DataFrame::fromColumns(['g' => ['a', 'b', 'a', 'b', 'a'], 'x' => [1, 2, 3, 4, 5]])->groupBy(['g']);
+    $df = DataFrame::fromColumns(['g' => ['a', 'b', 'a', 'b', 'a'], 'x' => [1, 2, 3, 4, 5]])->groupBy(['g']);
     $cumsum = function (DataFrame $t): array {
         $total = 0;
 
@@ -117,19 +117,19 @@ it('runs vectorised closures per group', function () {
     };
     $lag = fn (DataFrame $t) => [null, ...array_slice($t->column('x'), 0, -1)];
 
-    $out = $frame->mutateGroups(['cs' => $cumsum, 'prev' => $lag, 'n' => fn (DataFrame $t) => $t->nrow()]);
+    $out = $df->mutateGroups(['cs' => $cumsum, 'prev' => $lag, 'n' => fn (DataFrame $t) => $t->nrow()]);
 
     expect($out->column('cs'))->toBe([1, 2, 4, 6, 9])
         ->and($out->column('prev'))->toBe([null, null, 1, 2, 3])
         ->and($out->column('n'))->toBe([3, 2, 3, 2, 3])
-        ->and($frame->filterGroups(fn (DataFrame $t) => array_map(fn ($x) => $x === max($t->column('x')), $t->column('x')))->column('x'))
+        ->and($df->filterGroups(fn (DataFrame $t) => array_map(fn ($x) => $x === max($t->column('x')), $t->column('x')))->column('x'))
         ->toBe([4, 5]);
 });
 
 it('treats an ungrouped table and single rows as one group', function () {
-    $frame = DataFrame::fromColumns(['x' => [3]]);
+    $df = DataFrame::fromColumns(['x' => [3]]);
 
-    expect($frame->mutateGroups(['y' => fn (DataFrame $t) => [$t->column('x')[0] * 2]])->column('y'))->toBe([6])
+    expect($df->mutateGroups(['y' => fn (DataFrame $t) => [$t->column('x')[0] * 2]])->column('y'))->toBe([6])
         ->and(DataFrame::fromColumns(['x' => [1, 2]])->mutateGroups(['n' => fn (DataFrame $t) => $t->nrow()])->column('n'))->toBe([2, 2]);
 });
 
@@ -138,26 +138,26 @@ it('rejects vectorised results of the wrong length', function () {
 })->throws(InvalidArgumentException::class);
 
 it('takes rows by index, with null giving an NA row', function () {
-    $frame = penguins()->asFactor('species')->groupBy(['species'])->take([4, null, 0]);
+    $df = penguins()->asFactor('species')->groupBy(['species'])->take([4, null, 0]);
 
-    expect($frame->column('species'))->toBe(['Gentoo', null, 'Adelie'])
-        ->and($frame->levels('species'))->toBe(['Adelie', 'Chinstrap', 'Gentoo'])
-        ->and($frame->groups())->toBe(['species'])
+    expect($df->column('species'))->toBe(['Gentoo', null, 'Adelie'])
+        ->and($df->levels('species'))->toBe(['Adelie', 'Chinstrap', 'Gentoo'])
+        ->and($df->groups())->toBe(['species'])
         ->and(fn () => penguins()->take([99]))->toThrow(InvalidArgumentException::class);
 });
 
 it('works rowwise', function () {
-    $frame = DataFrame::fromColumns(['id' => ['a', 'b'], 'x' => [1, 4], 'y' => [3, 2]])->rowwise(['id']);
-    $summary = $frame->summarise(['m' => fn (DataFrame $r) => max($r->column('x')[0], $r->column('y')[0])]);
+    $df = DataFrame::fromColumns(['id' => ['a', 'b'], 'x' => [1, 4], 'y' => [3, 2]])->rowwise(['id']);
+    $summary = $df->summarise(['m' => fn (DataFrame $r) => max($r->column('x')[0], $r->column('y')[0])]);
 
-    expect($frame->isRowwise())->toBeTrue()
-        ->and($frame->groups())->toBe(['id'])
-        ->and($frame->mutateGroups(['m' => fn (DataFrame $r) => max($r->column('x')[0], $r->column('y')[0])])->column('m'))->toBe([3, 4])
+    expect($df->isRowwise())->toBeTrue()
+        ->and($df->groups())->toBe(['id'])
+        ->and($df->mutateGroups(['m' => fn (DataFrame $r) => max($r->column('x')[0], $r->column('y')[0])])->column('m'))->toBe([3, 4])
         ->and($summary->toRows())->toBe([['id' => 'a', 'm' => 3], ['id' => 'b', 'm' => 4]])
         ->and($summary->groups())->toBe(['id'])
         ->and($summary->isRowwise())->toBeFalse()
-        ->and($frame->groupBy(['id'])->isRowwise())->toBeFalse()
-        ->and($frame->ungroup()->isRowwise())->toBeFalse();
+        ->and($df->groupBy(['id'])->isRowwise())->toBeFalse()
+        ->and($df->ungroup()->isRowwise())->toBeFalse();
 });
 
 it('honours summarise .groups', function () {
@@ -168,14 +168,14 @@ it('honours summarise .groups', function () {
 });
 
 it('nests and unnests like tidyr', function () {
-    $frame = DataFrame::fromColumns(['g' => ['b', 'a', 'b'], 'x' => [1, 2, 3], 'y' => [4, 5, 6]]);
-    $nested = $frame->nest(['x', 'y']);
+    $df = DataFrame::fromColumns(['g' => ['b', 'a', 'b'], 'x' => [1, 2, 3], 'y' => [4, 5, 6]]);
+    $nested = $df->nest(['x', 'y']);
 
     expect($nested->column('g'))->toBe(['b', 'a'])
         ->and($nested->type('data'))->toBe(Type::List)
         ->and($nested->column('data')[0]->toColumns())->toBe(['x' => [1, 3], 'y' => [4, 6]])
-        ->and($frame->groupBy(['g'])->nest()->column('g'))->toBe(['b', 'a'])
-        ->and($frame->groupBy(['g'])->nest()->groups())->toBe(['g']);
+        ->and($df->groupBy(['g'])->nest()->column('g'))->toBe(['b', 'a'])
+        ->and($df->groupBy(['g'])->nest()->groups())->toBe(['g']);
 
     $back = $nested->unnest('data');
     expect($back->columns())->toBe(['g', 'x', 'y'])
@@ -187,14 +187,14 @@ it('nests and unnests like tidyr', function () {
 });
 
 it('unnests plain lists and drops empty rows unless asked', function () {
-    $frame = DataFrame::fromColumns(['id' => [1, 2, 3], 'v' => [[10, 20], [], null]]);
+    $df = DataFrame::fromColumns(['id' => [1, 2, 3], 'v' => [[10, 20], [], null]]);
 
-    expect($frame->unnest('v')->toRows())->toBe([['id' => 1, 'v' => 10], ['id' => 1, 'v' => 20]])
-        ->and($frame->unnest('v', keepEmpty: true)->column('id'))->toBe([1, 1, 2, 3]);
+    expect($df->unnest('v')->toRows())->toBe([['id' => 1, 'v' => 10], ['id' => 1, 'v' => 20]])
+        ->and($df->unnest('v', keepEmpty: true)->column('id'))->toBe([1, 1, 2, 3]);
 });
 
 it('produces model data in the agreed shape', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'y' => [1.5, 2.5, null],
         'n' => [1, 2, 3],
         'b' => [true, false, null],
@@ -206,7 +206,7 @@ it('produces model data in the agreed shape', function () {
         ->asOrdered('o', ['lo', 'hi'])
         ->withColumn('d', DataFrame::fromCsvString("d\n1970-01-03\n2024-01-02\nNA\n")->storage('d'));
 
-    expect($frame->toModelData())->toBe([
+    expect($df->toModelData())->toBe([
         'y' => [1.5, 2.5, null],
         'n' => [1, 2, 3],
         'b' => [true, false, null],
@@ -215,7 +215,7 @@ it('produces model data in the agreed shape', function () {
         'o' => ['levels' => ['lo', 'hi'], 'codes' => [0, 1, 0], 'ordered' => true],
         'd' => [2.0, 19724.0, null],
     ])
-        ->and(array_keys($frame->toModelData(['y', 'g'])))->toBe(['y', 'g']);
+        ->and(array_keys($df->toModelData(['y', 'g'])))->toBe(['y', 'g']);
 });
 
 it('refuses list-columns in model data', function () {

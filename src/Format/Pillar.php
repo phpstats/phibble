@@ -72,10 +72,10 @@ final class Pillar
     }
 
     /** The type abbreviation pillar shows, without brackets. */
-    public static function typeAbbr(Table $frame, string $name): string
+    public static function typeAbbr(Table $df, string $name): string
     {
-        $type = $frame->types()[$name];
-        if ($type === Type::Factor && method_exists($frame, 'isOrdered') && $frame->isOrdered($name)) {
+        $type = $df->types()[$name];
+        if ($type === Type::Factor && method_exists($df, 'isOrdered') && $df->isOrdered($name)) {
             return 'ord';
         }
 

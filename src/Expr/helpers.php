@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  *     use function Phibble\Expr\{col, mean, n};
  *
- *     $frame->groupBy(['g'])->summarise(['avg' => mean(col('x')), 'n' => n()]);
+ *     $df->groupBy(['g'])->summarise(['avg' => mean(col('x')), 'n' => n()]);
  *
  * Names follow dplyr. Some (min, max, round, floor, abs, ...) shadow PHP
  * built-ins inside this namespace only, so built-ins are called with a

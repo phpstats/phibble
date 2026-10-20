@@ -6,36 +6,36 @@ use Phibble\DataFrame;
 use Phibble\Type;
 
 it('reads CSV and infers types from text', function () {
-    $frame = DataFrame::fromCsvString(<<<'CSV'
+    $df = DataFrame::fromCsvString(<<<'CSV'
         id,score,ok,day,name,stamp
         1,2.5,true,2024-01-02,Ann,2024-01-02 10:00:00
         2,NA,FALSE,2024-02-29,,2024-01-03T11:30:00Z
         3,1e3,,2024-03-01,"Smith, Bo",
         CSV);
 
-    expect($frame->types())->toBe([
+    expect($df->types())->toBe([
         'id' => Type::Int, 'score' => Type::Float, 'ok' => Type::Bool,
         'day' => Type::Date, 'name' => Type::String, 'stamp' => Type::DateTime,
     ])
-        ->and($frame->column('score'))->toBe([2.5, null, 1000.0])
-        ->and($frame->column('ok'))->toBe([true, false, null])
-        ->and($frame->column('name'))->toBe(['Ann', null, 'Smith, Bo'])
-        ->and($frame->column('day')[1]->format('Y-m-d'))->toBe('2024-02-29');
+        ->and($df->column('score'))->toBe([2.5, null, 1000.0])
+        ->and($df->column('ok'))->toBe([true, false, null])
+        ->and($df->column('name'))->toBe(['Ann', null, 'Smith, Bo'])
+        ->and($df->column('day')[1]->format('Y-m-d'))->toBe('2024-02-29');
 });
 
 it('guesses dates by shape and turns invalid ones into NA, as readr does', function () {
-    [$frame, $warnings] = quietly(fn () => DataFrame::fromCsvString("d,code\n2024-02-30,1\n2024-01-01,x\n"));
+    [$df, $warnings] = quietly(fn () => DataFrame::fromCsvString("d,code\n2024-02-30,1\n2024-01-01,x\n"));
 
-    expect($frame->types())->toBe(['d' => Type::Date, 'code' => Type::String])
-        ->and($frame->column('d')[0])->toBeNull()
+    expect($df->types())->toBe(['d' => Type::Date, 'code' => Type::String])
+        ->and($df->column('d')[0])->toBeNull()
         ->and($warnings)->toHaveCount(1);
 });
 
 it('reads CSV with explicit types, custom NA and delimiters', function () {
-    $frame = DataFrame::fromCsvString("zip;n\n02134;-\n10001;4\n", types: ['zip' => 'string'], delimiter: ';', na: ['-']);
+    $df = DataFrame::fromCsvString("zip;n\n02134;-\n10001;4\n", types: ['zip' => 'string'], delimiter: ';', na: ['-']);
 
-    expect($frame->column('zip'))->toBe(['02134', '10001'])
-        ->and($frame->column('n'))->toBe([null, 4]);
+    expect($df->column('zip'))->toBe(['02134', '10001'])
+        ->and($df->column('n'))->toBe([null, 4]);
 });
 
 it('reads CSV files and strips a BOM', function () {
@@ -47,9 +47,9 @@ it('reads CSV files and strips a BOM', function () {
 });
 
 it('pads short CSV rows with NA and warns, as readr does', function () {
-    [$frame, $warnings] = quietly(fn () => DataFrame::fromCsvString("a,b\n1\n"));
+    [$df, $warnings] = quietly(fn () => DataFrame::fromCsvString("a,b\n1\n"));
 
-    expect($frame->toRows())->toBe([['a' => 1, 'b' => null]])
+    expect($df->toRows())->toBe([['a' => 1, 'b' => null]])
         ->and($warnings[0])->toContain('row 2: expected 2 columns, got 1');
 });
 
@@ -63,38 +63,38 @@ function database(): PDO
 }
 
 it('reads from PDO with positional and named bindings', function () {
-    $frame = DataFrame::fromPdo(database(), 'select * from people where id >= ? order by id', [2]);
+    $df = DataFrame::fromPdo(database(), 'select * from people where id >= ? order by id', [2]);
 
-    expect($frame->nrow())->toBe(2)
-        ->and($frame->types())->toBe([
+    expect($df->nrow())->toBe(2)
+        ->and($df->types())->toBe([
             'id' => Type::Int, 'name' => Type::String, 'height' => Type::Float,
             'born' => Type::Date, 'active' => Type::Int,
         ])
-        ->and($frame->column('height'))->toBe([null, 1.8]);
+        ->and($df->column('height'))->toBe([null, 1.8]);
 
     $named = DataFrame::fromPdo(database(), 'select name from people where name = :name', ['name' => 'Ann']);
     expect($named->column('name'))->toBe(['Ann']);
 });
 
 it('applies explicit types to PDO results', function () {
-    $frame = DataFrame::fromPdo(database(), 'select active from people', types: ['active' => 'bool']);
+    $df = DataFrame::fromPdo(database(), 'select active from people', types: ['active' => 'bool']);
 
-    expect($frame->column('active'))->toBe([true, false, true]);
+    expect($df->column('active'))->toBe([true, false, true]);
 });
 
 it('parses numeric strings from drivers that return text', function () {
     $pdo = database();
     $pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
-    $frame = DataFrame::fromPdo($pdo, 'select id, height from people');
-    expect($frame->types())->toBe(['id' => Type::Int, 'height' => Type::Float]);
+    $df = DataFrame::fromPdo($pdo, 'select id, height from people');
+    expect($df->types())->toBe(['id' => Type::Int, 'height' => Type::Float]);
 });
 
 it('keeps column names for empty PDO results', function () {
-    $frame = DataFrame::fromPdo(database(), 'select id, name from people where id > 99');
+    $df = DataFrame::fromPdo(database(), 'select id, name from people where id > 99');
 
-    expect($frame->columns())->toBe(['id', 'name'])
-        ->and($frame->nrow())->toBe(0);
+    expect($df->columns())->toBe(['id', 'name'])
+        ->and($df->nrow())->toBe(0);
 });
 
 // Stand-ins with the same duck-typed surface as the real builders.

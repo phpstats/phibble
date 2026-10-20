@@ -45,8 +45,8 @@ function emulatedStatsReadCsv(string $path, array $options): array
             : array_map(fn (int $i) => 'X'.($i + 1), array_keys($header));
         $codes = $options['types'] ?? [];
         $types = implode('', array_map(fn (int $i) => $codes[$i] ?? '?', array_keys($names)));
-        $frame = DataFrame::fromCsv($path, ...[...$common, 'types' => $types === '' ? [] : $types, 'nMax' => $options['n_max'] ?? null]);
-        $kept = $frame->columns();
+        $df = DataFrame::fromCsv($path, ...[...$common, 'types' => $types === '' ? [] : $types, 'nMax' => $options['n_max'] ?? null]);
+        $kept = $df->columns();
     } finally {
         restore_error_handler();
         NativeCsv::enable(true);
@@ -76,7 +76,7 @@ function emulatedStatsReadCsv(string $path, array $options): array
             continue;
         }
         $repaired = $kept[$k++];
-        $storage = $frame->storage($repaired);
+        $storage = $df->storage($repaired);
         $columns[] = [
             'type' => $storage->type()->value,
             'values' => $storage instanceof TemporalColumn ? $storage->ticks() : $storage->values(),

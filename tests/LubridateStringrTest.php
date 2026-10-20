@@ -12,10 +12,10 @@ use function Phibble\Expr\{ceiling_date, col, day, days, difftime, dmy, fixed, f
 
 dataset('lubridate and stringr', fn () => lubridateStringrCases());
 
-it('matches lubridate and stringr', function (Closure $frame, Expr $expr) {
+it('matches lubridate and stringr', function (Closure $df, Expr $expr) {
     $case = $this->dataName();
     $case = substr($case, strpos($case, '"') + 1, -1);
-    [$out] = quietly(fn () => $frame()->mutate(['out' => $expr])->column('out'));
+    [$out] = quietly(fn () => $df()->mutate(['out' => $expr])->column('out'));
 
     expect(lsFormat($out))->toBe(lsFormat(lsExpected($case)));
 })->with('lubridate and stringr');

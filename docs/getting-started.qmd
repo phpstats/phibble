@@ -44,7 +44,7 @@ types.
 
 ## Printing
 
-`echo $frame` prints the frame the way tibble does. The header gives the size,
+`echo $df` prints the frame the way tibble does. The header gives the size,
 each column shows its type, and frames with more than 20 rows show the first
 10. Numbers show three significant digits and NA prints as `NA` (or `<NA>` in
 text columns).
@@ -66,8 +66,8 @@ describes inference, casts, and factors.
 
 ## Reading values
 
-A column reads as a PHP list with `$frame->name`, `$frame['name']`, or
-`$frame->column('name')`. Rows are `Phibble\Row` objects, which read values as
+A column reads as a PHP list with `$df->name`, `$df['name']`, or
+`$df->column('name')`. Rows are `Phibble\Row` objects, which read values as
 properties or array keys. Iterating a frame yields its rows. An unknown column
 name throws `Phibble\Exception\ColumnNotFound`; names are never matched
 partially.

@@ -54,7 +54,7 @@ final class Collections
         return DataFrame::fromRows($rows, $types);
     }
 
-    public static function write(DataFrame $frame): object
+    public static function write(DataFrame $df): object
     {
         if (! class_exists(self::COLLECTION)) {
             throw new RuntimeException(
@@ -63,6 +63,6 @@ final class Collections
         }
         $class = self::COLLECTION;
 
-        return new $class($frame->toRows());
+        return new $class($df->toRows());
     }
 }

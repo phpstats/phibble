@@ -7,12 +7,12 @@ use Phibble\Row;
 use Phibble\Type;
 
 it('is immutable', function () {
-    $frame = penguins();
-    $frame->mutate(['x' => 1])->filter(fn () => false)->groupBy(['species']);
+    $df = penguins();
+    $df->mutate(['x' => 1])->filter(fn () => false)->groupBy(['species']);
 
-    expect($frame->columns())->toBe(['species', 'island', 'mass', 'year'])
-        ->and($frame->nrow())->toBe(5)
-        ->and($frame->groups())->toBe([]);
+    expect($df->columns())->toBe(['species', 'island', 'mass', 'year'])
+        ->and($df->nrow())->toBe(5)
+        ->and($df->groups())->toBe([]);
 });
 
 it('selects columns in the given order', function () {
@@ -30,16 +30,16 @@ it('filters rows, treating NA as false', function () {
 });
 
 it('filters within groups', function () {
-    $frame = penguins()
+    $df = penguins()
         ->groupBy(['species'])
         ->filter(fn (Row $r, DataFrame $g) => $r->year === max($g->column('year')));
 
-    expect($frame->column('year'))->toBe([2008, 2009, 2008])
-        ->and($frame->groups())->toBe(['species']);
+    expect($df->column('year'))->toBe([2008, 2009, 2008])
+        ->and($df->groups())->toBe(['species']);
 });
 
 it('mutates with closures, lists and scalars, in order', function () {
-    $frame = penguins()->mutate([
+    $df = penguins()->mutate([
         'kg' => fn (Row $r) => $r->mass === null ? null : $r->mass / 1000,
         'heavy' => fn (Row $r) => $r->kg === null ? null : $r->kg > 4,
         'id' => [1, 2, 3, 4, 5],
@@ -47,19 +47,19 @@ it('mutates with closures, lists and scalars, in order', function () {
         'year' => fn (Row $r) => $r->year - 2000,
     ]);
 
-    expect($frame->columns())->toBe(['species', 'island', 'mass', 'year', 'kg', 'heavy', 'id', 'source'])
-        ->and($frame->column('kg'))->toBe([3.75, 3.8, 5.0, null, 5.4])
-        ->and($frame->column('heavy'))->toBe([false, false, true, null, true])
-        ->and($frame->column('source'))->toBe(array_fill(0, 5, 'palmer'))
-        ->and($frame->column('year'))->toBe([7, 8, 7, 9, 8]);
+    expect($df->columns())->toBe(['species', 'island', 'mass', 'year', 'kg', 'heavy', 'id', 'source'])
+        ->and($df->column('kg'))->toBe([3.75, 3.8, 5.0, null, 5.4])
+        ->and($df->column('heavy'))->toBe([false, false, true, null, true])
+        ->and($df->column('source'))->toBe(array_fill(0, 5, 'palmer'))
+        ->and($df->column('year'))->toBe([7, 8, 7, 9, 8]);
 });
 
 it('mutates within groups', function () {
-    $frame = penguins()
+    $df = penguins()
         ->groupBy(['species'])
         ->mutate(['n' => fn (Row $r, DataFrame $g) => $g->nrow()]);
 
-    expect($frame->column('n'))->toBe([2, 2, 2, 1, 2]);
+    expect($df->column('n'))->toBe([2, 2, 2, 1, 2]);
 });
 
 it('rejects mutate lists of the wrong length', function () {
@@ -67,27 +67,27 @@ it('rejects mutate lists of the wrong length', function () {
 })->throws(InvalidArgumentException::class);
 
 it('renames with new => old', function () {
-    $frame = penguins()->groupBy(['species'])->rename(['sp' => 'species', 'body_mass' => 'mass']);
+    $df = penguins()->groupBy(['species'])->rename(['sp' => 'species', 'body_mass' => 'mass']);
 
-    expect($frame->columns())->toBe(['sp', 'island', 'body_mass', 'year'])
-        ->and($frame->groups())->toBe(['sp']);
+    expect($df->columns())->toBe(['sp', 'island', 'body_mass', 'year'])
+        ->and($df->groups())->toBe(['sp']);
 });
 
 it('arranges by several keys, stably, with NA last', function () {
-    $frame = penguins()->arrange([['year', 'desc'], 'mass']);
-    expect($frame->column('mass'))->toBe([null, 3800.0, 5400.0, 3750.0, 5000.0]);
+    $df = penguins()->arrange([['year', 'desc'], 'mass']);
+    expect($df->column('mass'))->toBe([null, 3800.0, 5400.0, 3750.0, 5000.0]);
 
-    $frame = penguins()->arrange([['mass', 'desc']]);
-    expect($frame->column('mass'))->toBe([5400.0, 5000.0, 3800.0, 3750.0, null]);
+    $df = penguins()->arrange([['mass', 'desc']]);
+    expect($df->column('mass'))->toBe([5400.0, 5000.0, 3800.0, 3750.0, null]);
 
-    $frame = penguins()->arrange(['island']);
-    expect($frame->column('species'))->toBe(['Adelie', 'Gentoo', 'Gentoo', 'Chinstrap', 'Adelie']);
+    $df = penguins()->arrange(['island']);
+    expect($df->column('species'))->toBe(['Adelie', 'Gentoo', 'Gentoo', 'Chinstrap', 'Adelie']);
 });
 
 it('arranges factors by level order', function () {
-    $frame = penguins()->asFactor('species', ['Gentoo', 'Chinstrap', 'Adelie'])->arrange(['species']);
+    $df = penguins()->asFactor('species', ['Gentoo', 'Chinstrap', 'Adelie'])->arrange(['species']);
 
-    expect($frame->column('species'))->toBe(['Gentoo', 'Gentoo', 'Chinstrap', 'Adelie', 'Adelie']);
+    expect($df->column('species'))->toBe(['Gentoo', 'Gentoo', 'Chinstrap', 'Adelie', 'Adelie']);
 });
 
 it('rejects unknown sort directions', function () {

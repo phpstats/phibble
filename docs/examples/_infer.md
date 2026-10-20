@@ -1,5 +1,5 @@
 ```php
-$frame = DataFrame::fromColumns([
+$df = DataFrame::fromColumns([
     'logical' => [true, false, null],
     'whole' => [1, 2, null],
     'mixed' => [1, 2.5, null],
@@ -10,7 +10,7 @@ $frame = DataFrame::fromColumns([
     'empty' => [null, null, null],
 ]);
 
-echo $frame->glimpse();
+echo $df->glimpse();
 ```
 
 ```{.text .output}

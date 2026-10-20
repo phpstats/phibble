@@ -115,10 +115,10 @@ documentation covers them.
 
 A collected frame can be returned from a controller or passed to a view:
 
-- `$frame->toRows()` gives a list of associative arrays, for JSON responses
+- `$df->toRows()` gives a list of associative arrays, for JSON responses
   and Blade loops.
-- `$frame->toJson()` gives the same rows as a JSON string, or the columns with
+- `$df->toJson()` gives the same rows as a JSON string, or the columns with
   `toJson('columns')`.
-- `$frame->toCollection()` returns a Laravel collection of rows.
-- `$frame->toModelData()` gives the columns in the form phit's model
+- `$df->toCollection()` returns a Laravel collection of rows.
+- `$df->toModelData()` gives the columns in the form phit's model
   functions accept.

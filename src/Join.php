@@ -347,11 +347,11 @@ final class Join
      * @param list<string> $names
      * @return list<?string>
      */
-    private static function keys(DataFrame $frame, array $names, bool $naMatches): array
+    private static function keys(DataFrame $df, array $names, bool $naMatches): array
     {
-        $columns = array_map(fn (string $n) => $frame->column($n), $names);
+        $columns = array_map(fn (string $n) => $df->column($n), $names);
         $keys = [];
-        for ($i = 0; $i < $frame->nrow(); $i++) {
+        for ($i = 0; $i < $df->nrow(); $i++) {
             $parts = [];
             foreach ($columns as $values) {
                 $value = $values[$i];

@@ -15,7 +15,7 @@ use function Phibble\Expr\{all, any, as_string, between, case_when, coalesce, co
 
 dataset('mutate', fn () => mutateCases());
 
-it('matches dplyr for mutate expressions', function (Closure $frame, Expr $expr) {
+it('matches dplyr for mutate expressions', function (Closure $df, Expr $expr) {
     $case = $this->dataName();
     $case = substr($case, strpos($case, '"') + 1, -1);
     if ($case === 'round') {
@@ -24,7 +24,7 @@ it('matches dplyr for mutate expressions', function (Closure $frame, Expr $expr)
         $digits = [0, 0, 0, 0, 2, 2, -1];
         $out = array_map(fn ($v, $d) => DataFrame::fromColumns(['v' => [$v]])->mutate(['out' => round(col('v'), digits: $d)])->column('out')[0], $values, $digits);
     } else {
-        $out = $frame()->mutate(['out' => $expr])->column('out');
+        $out = $df()->mutate(['out' => $expr])->column('out');
     }
 
     expect(normalise($out))->toBe(expected($case));
@@ -47,9 +47,9 @@ it('matches dplyr for summarise expressions', function (string $case, Expr $expr
 
 
 it('filters with expressions per group, dropping NA', function () {
-    $frame = exprFrame()->groupBy(['g'])->filter(col('x')->gt(mean(col('x'), na_rm: true)));
+    $df = exprFrame()->groupBy(['g'])->filter(col('x')->gt(mean(col('x'), na_rm: true)));
 
-    expect($frame->column('i'))->toBe([1, 4, 6])
+    expect($df->column('i'))->toBe([1, 4, 6])
         ->and(exprFrame()->filter(col('b'))->column('i'))->toBe([1, 4, 5]);
 });
 
@@ -80,9 +80,9 @@ it('validates calls against the registry', function () {
 });
 
 it('returns doubles from mean() of integers, as R does', function () {
-    $frame = DataFrame::fromColumns(['g' => ['a', 'a', 'b'], 'i' => [2, 4, 3]]);
+    $df = DataFrame::fromColumns(['g' => ['a', 'a', 'b'], 'i' => [2, 4, 3]]);
 
-    expect($frame->groupBy(['g'])->summarise(['m' => mean(col('i'))])->column('m'))->toBe([3.0, 3.0])
-        ->and($frame->groupBy(['g'])->summarise(['m' => mean(col('i'))])->type('m'))->toBe(Phibble\Type::Float)
-        ->and($frame->summarise(['m' => Phibble\Expr\call('mean', col('i'))])->column('m'))->toBe([3.0]);
+    expect($df->groupBy(['g'])->summarise(['m' => mean(col('i'))])->column('m'))->toBe([3.0, 3.0])
+        ->and($df->groupBy(['g'])->summarise(['m' => mean(col('i'))])->type('m'))->toBe(Phibble\Type::Float)
+        ->and($df->summarise(['m' => Phibble\Expr\call('mean', col('i'))])->column('m'))->toBe([3.0]);
 });

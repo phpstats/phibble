@@ -62,10 +62,10 @@ it('applies global scopes such as soft deletes', function () {
 });
 
 it('adds toDataFrame() to builders and collections', function () {
-    $frame = Capsule::table('patients')->whereNull('deleted_at')->orderBy('id')->toDataFrame();
+    $df = Capsule::table('patients')->whereNull('deleted_at')->orderBy('id')->toDataFrame();
 
-    expect($frame)->toBeInstanceOf(DataFrame::class)
-        ->and($frame->column('age'))->toBe([34, 61, 45, 52])
+    expect($df)->toBeInstanceOf(DataFrame::class)
+        ->and($df->column('age'))->toBe([34, 61, 45, 52])
         ->and(LaravelTestPatient::query()->orderBy('id')->toDataFrame()->column('clinic'))->toBe(['a', 'a', 'b', 'b'])
         ->and(LaravelTestPatient::query()->orderBy('id')->get()->toDataFrame()->column('age'))->toBe([34, 61, 45, 52])
         ->and((new Collection([['x' => 1], ['x' => 2]]))->toDataFrame()->column('x'))->toBe([1, 2]);

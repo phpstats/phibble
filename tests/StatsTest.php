@@ -5,10 +5,10 @@ declare(strict_types=1);
 use Phibble\DataFrame;
 
 it('builds the x matrix and y vector for stats functions', function () {
-    $frame = DataFrame::fromColumns(['x1' => [1, 2, null], 'x2' => [true, false, true], 'y' => [1.5, 2.5, 3.5]]);
+    $df = DataFrame::fromColumns(['x1' => [1, 2, null], 'x2' => [true, false, true], 'y' => [1.5, 2.5, 3.5]]);
 
-    expect($frame->toMatrix(['x1', 'x2']))->toBe([[1.0, 1.0], [2.0, 0.0], [null, 1.0]])
-        ->and($frame->toVector('y'))->toBe([1.5, 2.5, 3.5]);
+    expect($df->toMatrix(['x1', 'x2']))->toBe([[1.0, 1.0], [2.0, 0.0], [null, 1.0]])
+        ->and($df->toVector('y'))->toBe([1.5, 2.5, 3.5]);
 });
 
 it('refuses non-numeric matrix columns', function () {
@@ -16,16 +16,16 @@ it('refuses non-numeric matrix columns', function () {
 })->throws(InvalidArgumentException::class, "Column 'species' is string");
 
 it('feeds Phit\fit_ols', function () {
-    $frame = DataFrame::fromColumns(['x' => [1, 2, 3, 4, 5], 'y' => [3.0, 5.0, 7.0, 9.0, 11.0]]);
+    $df = DataFrame::fromColumns(['x' => [1, 2, 3, 4, 5], 'y' => [3.0, 5.0, 7.0, 9.0, 11.0]]);
 
-    $fit = Phit\fit_ols($frame->toMatrix(['x']), $frame->toVector('y'));
+    $fit = Phit\fit_ols($df->toMatrix(['x']), $df->toVector('y'));
 
     expect($fit['coefficients'][0])->toEqualWithDelta(1.0, 1e-9)
         ->and($fit['coefficients'][1])->toEqualWithDelta(2.0, 1e-9);
 })->skip(! function_exists('Phit\\fit_ols'), 'phit extension not loaded');
 
 it('passes NA through to Phit\fit_ols, which drops the row and warns once', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'x' => [1, 2, 3, 4, 5, null],
         'y' => [3.0, 5.0, 7.0, 9.0, 11.0, 2.0],
     ]);
@@ -37,7 +37,7 @@ it('passes NA through to Phit\fit_ols, which drops the row and warns once', func
         return true;
     }, E_WARNING);
     try {
-        $fit = Phit\fit_ols($frame->toMatrix(['x']), $frame->toVector('y'));
+        $fit = Phit\fit_ols($df->toMatrix(['x']), $df->toVector('y'));
     } finally {
         restore_error_handler();
     }

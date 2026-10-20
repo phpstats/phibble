@@ -1,18 +1,18 @@
 ```php
-$frame = tibble(x: [1, 2, 3], y: ['a', 'b', 'c']);
+$df = tibble(x: [1, 2, 3], y: ['a', 'b', 'c']);
 
-var_dump($frame->x === $frame['x']);
-echo json_encode($frame->column('y')), "\n";
+var_dump($df->x === $df['x']);
+echo json_encode($df->column('y')), "\n";
 
-$row = $frame->row(1);
+$row = $df->row(1);
 echo $row->x, ' ', $row['y'], "\n";
 
-foreach ($frame as $i => $row) {
+foreach ($df as $i => $row) {
     echo "{$i}: {$row->y}\n";
 }
 
 try {
-    $frame->z;
+    $df->z;
 } catch (Phibble\Exception\ColumnNotFound $e) {
     echo $e->getMessage(), "\n";
 }

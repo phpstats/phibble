@@ -67,10 +67,10 @@ final readonly class CsvSource implements Source
         $o = $this->options;
         if ($this->path !== null && NativeCsv::available() && NativeCsv::supports($this->path, $o)) {
             $this->finish();
-            [$frame, $problems] = NativeCsv::read($this->path, $o);
+            [$df, $problems] = NativeCsv::read($this->path, $o);
             self::warn($problems);
 
-            return $frame;
+            return $df;
         }
         $records = $this->records();
         $problems = [];

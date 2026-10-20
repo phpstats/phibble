@@ -1,13 +1,13 @@
 <?php
 
-$frame = tibble(
+$df = tibble(
     a: [true, false, null, null],
     b: [null, null, true, false],
     x: [2.5, 0.5, -1.5, 2.675],
     y: [1, null, 3, 4],
 );
 
-echo $frame->mutate([
+echo $df->mutate([
     'and' => col('a')->and(col('b')),
     'or' => col('a')->or(col('b')),
     'sum' => col('y')->add(1),

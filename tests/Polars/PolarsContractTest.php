@@ -109,12 +109,12 @@ it('keeps x grouping through joins', function () {
 });
 
 it('sorts groups like dplyr: NA last, factors by level', function () {
-    $frame = DataFrame::fromColumns(['g' => ['b', 'a', null, 'b'], 'x' => [1, 2, 3, 4]]);
-    $counts = native(fn () => pt($frame)->groupBy(['g'])->summarise(['n' => n()]));
+    $df = DataFrame::fromColumns(['g' => ['b', 'a', null, 'b'], 'x' => [1, 2, 3, 4]]);
+    $counts = native(fn () => pt($df)->groupBy(['g'])->summarise(['n' => n()]));
 
     expect($counts->toRows())->toBe([['g' => 'a', 'n' => 1], ['g' => 'b', 'n' => 2], ['g' => null, 'n' => 1]])
-        ->and(pt($frame->fctLevels('g', ['b', 'a']))->groupBy(['g'])->summarise(['n' => n()])->column('g'))->toBe(['b', 'a', null])
-        ->and(pt($frame->fctLevels('g', ['b', 'a']))->groupBy(['g'])->summarise(['n' => n()])->collect()->levels('g'))->toBe(['b', 'a']);
+        ->and(pt($df->fctLevels('g', ['b', 'a']))->groupBy(['g'])->summarise(['n' => n()])->column('g'))->toBe(['b', 'a', null])
+        ->and(pt($df->fctLevels('g', ['b', 'a']))->groupBy(['g'])->summarise(['n' => n()])->collect()->levels('g'))->toBe(['b', 'a']);
 });
 
 it('iterates groups in sorted order with ungrouped tables', function () {
@@ -137,34 +137,34 @@ it('runs closures by falling back to a DataFrame, keeping groups', function () {
 });
 
 it('takes rows by index, with null giving an NA row', function () {
-    $frame = penguinsPt()->groupBy(['species'])->take([4, null, 0]);
+    $df = penguinsPt()->groupBy(['species'])->take([4, null, 0]);
 
-    expect($frame->column('species'))->toBe(['Gentoo', null, 'Adelie'])
-        ->and($frame->column('mass'))->toBe([5400.0, null, 3750.0])
-        ->and($frame->groups())->toBe(['species'])
+    expect($df->column('species'))->toBe(['Gentoo', null, 'Adelie'])
+        ->and($df->column('mass'))->toBe([5400.0, null, 3750.0])
+        ->and($df->groups())->toBe(['species'])
         ->and(fn () => penguinsPt()->take([99]))->toThrow(InvalidArgumentException::class);
 });
 
 it('works rowwise through the DataFrame fallback', function () {
-    $frame = pt(DataFrame::fromColumns(['id' => ['a', 'b'], 'x' => [1, 4], 'y' => [3, 2]]))->rowwise(['id']);
-    $summary = $frame->summarise(['m' => fn (DataFrame $r) => max($r->column('x')[0], $r->column('y')[0])]);
+    $df = pt(DataFrame::fromColumns(['id' => ['a', 'b'], 'x' => [1, 4], 'y' => [3, 2]]))->rowwise(['id']);
+    $summary = $df->summarise(['m' => fn (DataFrame $r) => max($r->column('x')[0], $r->column('y')[0])]);
 
-    expect($frame->isRowwise())->toBeTrue()
-        ->and($frame->groups())->toBe(['id'])
+    expect($df->isRowwise())->toBeTrue()
+        ->and($df->groups())->toBe(['id'])
         ->and($summary->toRows())->toBe([['id' => 'a', 'm' => 3], ['id' => 'b', 'm' => 4]])
         ->and($summary->groups())->toBe(['id'])
-        ->and($frame->groupBy(['id'])->isRowwise())->toBeFalse();
+        ->and($df->groupBy(['id'])->isRowwise())->toBeFalse();
 });
 
 it('keeps types and round-trips through collect', function () {
-    $frame = DataFrame::fromColumns([
+    $df = DataFrame::fromColumns([
         'i' => [1, null], 'f' => [1.5, null], 'b' => [true, null], 's' => ['x', null],
         'd' => [new DateTimeImmutable('2024-01-02', new DateTimeZone('UTC')), null],
     ])->asFactor('s');
-    $table = pt($frame);
+    $table = pt($df);
 
     expect($table->types())->toBe(['i' => Type::Int, 'f' => Type::Float, 'b' => Type::Bool, 's' => Type::Factor, 'd' => Type::DateTime])
-        ->and($table->collect()->toColumns())->toEqual($frame->toColumns())
+        ->and($table->collect()->toColumns())->toEqual($df->toColumns())
         ->and($table->collect()->levels('s'))->toBe(['x']);
 });
 
@@ -234,20 +234,20 @@ it('lists group rows in group order', function () {
 });
 
 it('ranks and orders factors by level, as phibble v0.1.0 does', function () {
-    $frame = DataFrame::fromColumns(['f' => ['a', 'b', 'c', 'b'], 'x' => [1, 2, 3, 4]])->fctLevels('f', ['c', 'b', 'a']);
+    $df = DataFrame::fromColumns(['f' => ['a', 'b', 'c', 'b'], 'x' => [1, 2, 3, 4]])->fctLevels('f', ['c', 'b', 'a']);
 
-    expect(native(fn () => pt($frame)->mutate(['r' => Phibble\Expr\min_rank(col('f'))]))->column('r'))
-        ->toBe($frame->mutate(['r' => Phibble\Expr\min_rank(col('f'))])->column('r'))
-        ->and(pt($frame)->mutate(['p' => Phibble\Expr\lag(col('x'), order_by: col('f'))])->column('p'))
-        ->toBe($frame->mutate(['p' => Phibble\Expr\lag(col('x'), order_by: col('f'))])->column('p'));
+    expect(native(fn () => pt($df)->mutate(['r' => Phibble\Expr\min_rank(col('f'))]))->column('r'))
+        ->toBe($df->mutate(['r' => Phibble\Expr\min_rank(col('f'))])->column('r'))
+        ->and(pt($df)->mutate(['p' => Phibble\Expr\lag(col('x'), order_by: col('f'))])->column('p'))
+        ->toBe($df->mutate(['p' => Phibble\Expr\lag(col('x'), order_by: col('f'))])->column('p'));
 });
 
 it('creates Polars tables with polars()', function () {
-    $frame = DataFrame::fromColumns(['g' => ['a', 'b', 'a'], 'x' => [1, 2, 3]]);
-    $out = Phibble\polars($frame)->groupBy(['g'])->summarise(['n' => Phibble\Expr\n()]);
+    $df = DataFrame::fromColumns(['g' => ['a', 'b', 'a'], 'x' => [1, 2, 3]]);
+    $out = Phibble\polars($df)->groupBy(['g'])->summarise(['n' => Phibble\Expr\n()]);
 
-    expect(Phibble\polars($frame))->toBeInstanceOf(Phibble\Polars\PolarsTable::class)
-        ->and($out->collect()->toRows())->toBe($frame->groupBy(['g'])->summarise(['n' => Phibble\Expr\n()])->toRows())
+    expect(Phibble\polars($df))->toBeInstanceOf(Phibble\Polars\PolarsTable::class)
+        ->and($out->collect()->toRows())->toBe($df->groupBy(['g'])->summarise(['n' => Phibble\Expr\n()])->toRows())
         ->and(Phibble\polars([['a' => 1]])->collect()->column('a'))->toBe([1]);
 });
 

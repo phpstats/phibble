@@ -24,16 +24,16 @@ use Phibble\DataFrame;
 use function Phibble\{tbl, polars};
 use function Phibble\Expr\{col, mean, n};
 
-$frame = DataFrame::fromCsv('sales.csv');      // in memory
+$df = DataFrame::fromCsv('sales.csv');      // in memory
 $sql = tbl($pdo, 'sales');                     // in the database
-$fast = polars($frame);                        // in Polars
+$fast = polars($df);                        // in Polars
 
 $summary = fn ($t) => $t
     ->filter(col('units')->gt(0))
     ->groupBy(['store'])
     ->summarise(['n' => n(), 'avg' => mean(col('price'))]);
 
-$summary($frame);             // a DataFrame
+$summary($df);             // a DataFrame
 $summary($sql)->collect();    // runs as one SQL query
 $summary($fast)->collect();   // runs in Polars
 ```

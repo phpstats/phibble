@@ -27,12 +27,12 @@ final class SqliteBackend implements Backend
 
     public function load(string $path): Table
     {
-        $frame = DataFrame::fromCsv($path);
+        $df = DataFrame::fromCsv($path);
         $table = basename($path, '.csv');
-        $columns = $frame->columns();
+        $columns = $df->columns();
         // Typed columns: untyped ones store bound values as TEXT, and SQLite
         // orders all TEXT above all numbers.
-        $sqlType = fn (string $c) => match ($frame->type($c)) {
+        $sqlType = fn (string $c) => match ($df->type($c)) {
             Type::Int, Type::Bool => 'INTEGER',
             Type::Float => 'REAL',
             default => 'TEXT',
@@ -40,7 +40,7 @@ final class SqliteBackend implements Backend
         $this->pdo->exec("CREATE TABLE \"{$table}\" (".implode(', ', array_map(fn ($c) => "\"{$c}\" {$sqlType($c)}", $columns)).')');
         $insert = $this->pdo->prepare("INSERT INTO \"{$table}\" VALUES (".implode(', ', array_fill(0, count($columns), '?')).')');
         $this->pdo->beginTransaction();
-        foreach ($frame->toRows() as $row) {
+        foreach ($df->toRows() as $row) {
             $insert->execute(array_map(fn ($v) => $v instanceof \DateTimeInterface ? $v->format('Y-m-d H:i:s') : $v, array_values($row)));
         }
         $this->pdo->commit();

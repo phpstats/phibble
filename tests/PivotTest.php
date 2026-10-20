@@ -36,15 +36,15 @@ dataset('pivot cases', fn () => array_map(fn ($c) => [$c], array_keys(pivotCases
 
 it('matches tidyr pivot specs', function (string $name) {
     $case = pivotCases()[$name];
-    $frame = DataFrame::fromRows($case['data']);
+    $df = DataFrame::fromRows($case['data']);
     $args = $case['args'];
     if (isset($args['idColumns'])) {
         $args['idColumns'] = (array) $args['idColumns'];
     }
 
     [$out, $warnings] = quietly(fn () => $case['kind'] === 'longer'
-        ? $frame->pivotLongerSpec($case['spec'], ...$args)
-        : $frame->pivotWiderSpec($case['spec'], ...$args));
+        ? $df->pivotLongerSpec($case['spec'], ...$args)
+        : $df->pivotWiderSpec($case['spec'], ...$args));
 
     expect($out->columns())->toBe($case['columns'])
         ->and(pivotRows($case['columns'], $out->toRows()))->toBe(pivotRows($case['columns'], $case['rows']));

@@ -18,7 +18,7 @@ use Phibble\Type;
 final class CsvWriter
 {
     public static function format(
-        DataFrame $frame,
+        DataFrame $df,
         string $delimiter = ',',
         string $na = 'NA',
         bool $colNames = true,
@@ -33,7 +33,7 @@ final class CsvWriter
             throw new InvalidArgumentException("escape must be 'double', 'backslash' or 'none', got '{$escape}'.");
         }
 
-        $types = $frame->types();
+        $types = $df->types();
         foreach ($types as $name => $type) {
             if ($type === Type::List) {
                 throw new InvalidArgumentException("Column '{$name}' is a list-column; CSV cannot hold it. Unnest or drop it first.");
@@ -59,11 +59,11 @@ final class CsvWriter
 
         $lines = [];
         if ($colNames) {
-            $lines[] = implode($delimiter, array_map(fn (string $n) => $cell($n, true), $frame->columns()));
+            $lines[] = implode($delimiter, array_map(fn (string $n) => $cell($n, true), $df->columns()));
         }
 
         $columns = [];
-        foreach ($frame->toColumns() as $name => $values) {
+        foreach ($df->toColumns() as $name => $values) {
             $type = $types[$name];
             $textual = in_array($type, [Type::String, Type::Factor, Type::Date, Type::DateTime], true);
             $columns[] = array_map(function (mixed $v) use ($type, $textual, $na, $cell): string {
@@ -73,7 +73,7 @@ final class CsvWriter
             }, $values);
         }
 
-        for ($i = 0, $n = $frame->nrow(); $i < $n; $i++) {
+        for ($i = 0, $n = $df->nrow(); $i < $n; $i++) {
             $lines[] = implode($delimiter, array_column($columns, $i));
         }
 

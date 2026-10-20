@@ -13,11 +13,11 @@ use function Phibble\Expr\{col, desc, lag, mean, n, sum};
 it('matches dplyr for mutate expressions in SQL', function (Closure $connect) {
     $pdo = $connect();
     $failures = [];
-    foreach (mutateCases() as $case => [$frame, $expr]) {
+    foreach (mutateCases() as $case => [$df, $expr]) {
         if ($case === 'round') {
             continue;
         }
-        $table = sqlFrom($pdo, $frame())->arrange(['i']);
+        $table = sqlFrom($pdo, $df())->arrange(['i']);
         $out = $table->mutate(['out' => $expr])->collect()->column('out');
         if (normalise($out) !== expected($case)) {
             $failures[$case] = ['got' => normalise($out), 'want' => expected($case), 'sql' => $table->mutate(['out' => $expr]) instanceof SqlTable];
@@ -48,14 +48,14 @@ it('matches dplyr for grouped mutate and summarise in SQL', function (Closure $c
 
 it('runs verbs lazily and matches DataFrame', function (Closure $connect) {
     $pdo = $connect();
-    $frame = exprFrame();
-    $sql = sqlFrom($pdo, $frame);
+    $df = exprFrame();
+    $sql = sqlFrom($pdo, $df);
 
     $pipeline = fn ($t) => $t->filter(col('x')->gt(1))->select(['i', 'x', 'g'])->rename(['id' => 'i'])->arrange([desc(col('x'))]);
     $lazy = $pipeline($sql);
 
     expect($lazy)->toBeInstanceOf(SqlTable::class)
-        ->and($lazy->collect()->toRows())->toBe($pipeline($frame)->toRows())
+        ->and($lazy->collect()->toRows())->toBe($pipeline($df)->toRows())
         ->and($sql->nrow())->toBe(7)
         ->and($sql->arrange(['i'])->slice(2, 2)->collect()->column('i'))->toBe([3, 4])
         ->and($sql->arrange(['i'])->head(2)->collect()->column('i'))->toBe([1, 2])
@@ -175,7 +175,7 @@ it('matches dplyr join_by in SQL', function (Closure $connect) {
 
 it('translates first, last, nth and str_replace to SQL', function (Closure $connect) {
     $pdo = $connect();
-    $frame = exprFrame()->groupBy(['g'])->arrange(['i']);
+    $df = exprFrame()->groupBy(['g'])->arrange(['i']);
     $sql = sqlFrom($pdo, exprFrame())->groupBy(['g'])->arrange(['i']);
     $aggs = [
         'f' => Phibble\Expr\first(col('x')),
@@ -190,10 +190,10 @@ it('translates first, last, nth and str_replace to SQL', function (Closure $conn
 
     expect($mutated)->toBeInstanceOf(SqlTable::class)
         ->and($summary)->toBeInstanceOf(SqlTable::class)
-        ->and(normalise($mutated->collect()->column('nm2')))->toBe(normalise($frame->mutate($aggs)->column('nm2')));
+        ->and(normalise($mutated->collect()->column('nm2')))->toBe(normalise($df->mutate($aggs)->column('nm2')));
     foreach (array_keys($aggs) as $name) {
-        expect(normalise($summary->collect()->column($name)))->toBe(normalise($frame->summarise($aggs)->column($name)), $name)
-            ->and(normalise($mutated->collect()->column($name)))->toBe(normalise($frame->mutate($aggs)->column($name)), $name);
+        expect(normalise($summary->collect()->column($name)))->toBe(normalise($df->summarise($aggs)->column($name)), $name)
+            ->and(normalise($mutated->collect()->column($name)))->toBe(normalise($df->mutate($aggs)->column($name)), $name);
     }
 
     $replaced = sqlFrom($pdo, exprFrame())->arrange(['i'])->mutate(['r' => Phibble\Expr\str_replace(col('s'), 'a', 'A')]);
@@ -241,8 +241,8 @@ it('matches lubridate and stringr in SQL', function (Closure $connect) {
     $pdo = $connect();
     $failures = [];
     $native = [];
-    foreach (lubridateStringrCases() as $case => [$frame, $expr]) {
-        $source = $frame();
+    foreach (lubridateStringrCases() as $case => [$df, $expr]) {
+        $source = $df();
         if ($source->columns() === ['v'] || in_array($case, ['force_tz', 'with_tz', 'floor_week'], true)) {
             continue; // text-to-date parsing and time zones are covered in memory
         }
@@ -279,18 +279,18 @@ it('keeps source order on stored tables with physical row ids', function (Closur
     foreach ([['a', 10], ['b', 20], ['a', 30]] as [$g, $w]) {
         $pdo->prepare("INSERT INTO lk_{$suffix} VALUES (?, ?)")->execute([$g, $w]);
     }
-    $frame = DataFrame::fromColumns(['g' => array_column($rows, 0), 'x' => array_column($rows, 1)]);
+    $df = DataFrame::fromColumns(['g' => array_column($rows, 0), 'x' => array_column($rows, 1)]);
     $lookup = DataFrame::fromColumns(['g' => ['a', 'b', 'a'], 'w' => [10, 20, 30]]);
     $sql = SqlTable::table($pdo, "ev_{$suffix}");
     $sqlLookup = SqlTable::table($pdo, "lk_{$suffix}");
 
     $pipeline = fn ($t) => $t->groupBy(['g'])->mutate(['run' => Phibble\Expr\cumsum(col('x')), 'rn' => Phibble\Expr\row_number()]);
-    [$memoryJoin] = quietly(fn () => $frame->join($lookup, ['g'], 'left'));
+    [$memoryJoin] = quietly(fn () => $df->join($lookup, ['g'], 'left'));
     [$sqlJoin] = quietly(fn () => $sql->join($sqlLookup, ['g'], 'left'));
 
     expect($sql->showQuery())->toContain($driver === 'pgsql' ? 'ctid' : 'rowid')
-        ->and($sql->collect()->toRows())->toBe($frame->toRows())
-        ->and($pipeline($sql)->collect()->ungroup()->toRows())->toBe($pipeline($frame)->ungroup()->toRows())
+        ->and($sql->collect()->toRows())->toBe($df->toRows())
+        ->and($pipeline($sql)->collect()->ungroup()->toRows())->toBe($pipeline($df)->ungroup()->toRows())
         ->and($sql->distinct(['g'])->collect()->column('g'))->toBe(['b', 'a', 'c'])
         ->and($sqlJoin->collect()->toRows())->toBe($memoryJoin->toRows());
 })->with('connections');
@@ -299,15 +299,15 @@ it('keeps source order on stored tables with physical row ids', function (Closur
 // locale collations and MySQL's default (case-insensitive) collation don't.
 it('compares, sorts, groups and joins text in byte order like R', function (Closure $connect) {
     $pdo = $connect();
-    $frame = DataFrame::fromColumns(['s' => ['b', 'B', 'a', 'A', '  pad', 'b'], 'v' => [1, 2, 3, 4, 5, 6]]);
-    $sql = sqlFrom($pdo, $frame);
+    $df = DataFrame::fromColumns(['s' => ['b', 'B', 'a', 'A', '  pad', 'b'], 'v' => [1, 2, 3, 4, 5, 6]]);
+    $sql = sqlFrom($pdo, $df);
     $other = DataFrame::fromColumns(['s' => ['a', 'B'], 'w' => [10, 20]]);
 
-    expect($sql->arrange(['s', 'v'])->collect()->column('s'))->toBe($frame->arrange(['s', 'v'])->column('s'))
+    expect($sql->arrange(['s', 'v'])->collect()->column('s'))->toBe($df->arrange(['s', 'v'])->column('s'))
         ->and($sql->filter(col('s')->eq('a'))->collect()->column('v'))->toBe([3])
         ->and($sql->filter(col('s')->lt('a'))->arrange(['v'])->collect()->column('v'))->toBe([2, 4, 5])
         ->and($sql->groupBy(['s'])->summarise(['n' => n()])->collect()->toRows())
-        ->toBe($frame->groupBy(['s'])->summarise(['n' => n()])->toRows())
+        ->toBe($df->groupBy(['s'])->summarise(['n' => n()])->toRows())
         ->and($sql->summarise(['m' => Phibble\Expr\max(col('s')), 'lo' => Phibble\Expr\min(col('s'))])->collect()->toRows())
         ->toBe([['m' => 'b', 'lo' => '  pad']])
         ->and($sql->distinct(['s'])->collect()->column('s'))->toBe(['b', 'B', 'a', 'A', '  pad'])

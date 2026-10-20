@@ -205,32 +205,32 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      */
     public static function concat(array $tables): self
     {
-        $frames = array_map(fn (Table $t) => $t->collect(), $tables);
-        if ($frames === []) {
+        $dataFrames = array_map(fn (Table $t) => $t->collect(), $tables);
+        if ($dataFrames === []) {
             return self::fromColumns([]);
         }
 
-        $names = array_values(array_unique(array_merge(...array_map(fn (self $f) => $f->columns(), $frames))));
+        $names = array_values(array_unique(array_merge(...array_map(fn (self $f) => $f->columns(), $dataFrames))));
         $data = [];
         foreach ($names as $name) {
             $values = [];
             $columns = [];
-            foreach ($frames as $frame) {
-                if ($frame->has($name)) {
-                    $columns[] = $frame->data[$name];
-                    array_push($values, ...$frame->data[$name]->values());
+            foreach ($dataFrames as $df) {
+                if ($df->has($name)) {
+                    $columns[] = $df->data[$name];
+                    array_push($values, ...$df->data[$name]->values());
                 } else {
-                    array_push($values, ...array_fill(0, $frame->rows, null));
+                    array_push($values, ...array_fill(0, $df->rows, null));
                 }
             }
 
             $data[$name] = self::combine($columns, $values, $name);
         }
 
-        $rows = array_sum(array_map(fn (self $f) => $f->rows, $frames));
-        $groups = array_values(array_filter($frames[0]->groups, fn (string $g) => in_array($g, $names, true)));
+        $rows = array_sum(array_map(fn (self $f) => $f->rows, $dataFrames));
+        $groups = array_values(array_filter($dataFrames[0]->groups, fn (string $g) => in_array($g, $names, true)));
 
-        return new self($data, $rows, $groups, false, $frames[0]->drop);
+        return new self($data, $rows, $groups, false, $dataFrames[0]->drop);
     }
 
     /**
@@ -302,12 +302,12 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         }
         $names = NameRepair::repair($names, $nameRepair);
 
-        $frame = new self([], 0);
+        $df = new self([], 0);
         $size = null;
         foreach ($names as $i => $name) {
             $value = $values[$i];
             if ($value instanceof Closure) {
-                $value = $value($frame);
+                $value = $value($df);
             }
             $column = match (true) {
                 $value instanceof Column => $value,
@@ -325,8 +325,8 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
             } else {
                 $length = $column->count();
             }
-            if ($size === null || $size === 1 && $frame->data !== [] && $length !== 1) {
-                $frame = $size === 1 && $length !== 1 ? $frame->recycle($length) : $frame;
+            if ($size === null || $size === 1 && $df->data !== [] && $length !== 1) {
+                $df = $size === 1 && $length !== 1 ? $df->recycle($length) : $df;
                 $size = $length;
             } elseif ($length !== $size && $length !== 1) {
                 throw new InvalidArgumentException(
@@ -340,12 +340,12 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
             } elseif ($length === 1 && $size !== 1) {
                 $column = $column->take(array_fill(0, $size, 0));
             }
-            $data = $frame->data;
+            $data = $df->data;
             $data[$name] = $column;
-            $frame = new self($data, $size);
+            $df = new self($data, $size);
         }
 
-        return $frame;
+        return $df;
     }
 
     /**
@@ -417,9 +417,9 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
                 is_object($row) => get_object_vars($row),
                 default => throw new InvalidArgumentException('as_tibble() needs rows as arrays or objects; use enframe() for a plain list.'),
             }, $data);
-            $frame = self::fromRows($rows);
+            $df = self::fromRows($rows);
 
-            return $frame->renameAll(NameRepair::repair($frame->columns(), $nameRepair));
+            return $df->renameAll(NameRepair::repair($df->columns(), $nameRepair));
         }
 
         return self::tibble($data, $nameRepair);
@@ -554,7 +554,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $this->copy(data: $data);
     }
 
-    /** Column access as a property: $frame->price. Unknown names throw; there is no partial matching. */
+    /** Column access as a property: $df->price. Unknown names throw; there is no partial matching. */
     public function __get(string $name): array
     {
         return $this->column($name);
@@ -570,7 +570,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return is_string($offset) && isset($this->data[$offset]);
     }
 
-    /** Column access as an array: $frame['price']. */
+    /** Column access as an array: $df['price']. */
     public function offsetGet(mixed $offset): mixed
     {
         return $this->column((string) $offset);
@@ -611,17 +611,17 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     /** Cast this frame's columns to the types of the same columns in $like. */
     private function withTypesOf(self $like): self
     {
-        $frame = $this;
+        $df = $this;
         foreach ($like->data as $name => $column) {
-            $values = $frame->data[$name]->values();
-            $frame = $frame->withColumn($name, match (true) {
+            $values = $df->data[$name]->values();
+            $df = $df->withColumn($name, match (true) {
                 $column instanceof FactorColumn => FactorColumn::fromValues($values, null),
                 array_all($values, fn ($v) => $v === null) => Infer::column($values, $column->type(), $name),
-                default => $frame->data[$name],
+                default => $df->data[$name],
             });
         }
 
-        return $frame;
+        return $df;
     }
 
     /**
@@ -630,16 +630,16 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      */
     private function copyColumnsFrom(self $like): self
     {
-        $frame = $this;
+        $df = $this;
         foreach ($like->data as $name => $column) {
-            $mine = $frame->data[$name];
+            $mine = $df->data[$name];
             if ($column instanceof FactorColumn && $mine instanceof FactorColumn) {
                 $levels = array_values(array_unique([...$column->levels(), ...$mine->levels()]));
-                $frame = $frame->withColumn($name, FactorColumn::fromValues($mine->values(), $levels, $column->isOrdered()));
+                $df = $df->withColumn($name, FactorColumn::fromValues($mine->values(), $levels, $column->isOrdered()));
             }
         }
 
-        return $frame;
+        return $df;
     }
 
     /**
@@ -846,29 +846,29 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
 
     public function mutate(array $columns): static
     {
-        $frame = $this;
+        $df = $this;
         foreach ($columns as $name => $definition) {
-            $values = $frame->evaluate((string) $name, $definition);
-            $frame = $frame->withColumn((string) $name, $frame->factorResult($definition, $values) ?? $values);
+            $values = $df->evaluate((string) $name, $definition);
+            $df = $df->withColumn((string) $name, $df->factorResult($definition, $values) ?? $values);
         }
 
-        return $frame;
+        return $df;
     }
 
     public function mutateGroups(array $columns): static
     {
-        $frame = $this;
+        $df = $this;
         foreach ($columns as $name => $definition) {
             $name = (string) $name;
             if (! $definition instanceof Closure) {
-                $values = $frame->evaluate($name, $definition);
-                $frame = $frame->withColumn($name, $frame->factorResult($definition, $values) ?? $values);
+                $values = $df->evaluate($name, $definition);
+                $df = $df->withColumn($name, $df->factorResult($definition, $values) ?? $values);
 
                 continue;
             }
-            $values = array_fill(0, $frame->rows, null);
-            foreach ($frame->groupIndex() as [$_, $indices]) {
-                $result = $definition($frame->subset($indices));
+            $values = array_fill(0, $df->rows, null);
+            foreach ($df->groupIndex() as [$_, $indices]) {
+                $result = $definition($df->subset($indices));
                 if (! is_array($result)) {
                     $result = array_fill(0, count($indices), $result);
                 }
@@ -881,10 +881,10 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
                     $values[$indices[$j]] = $value;
                 }
             }
-            $frame = $frame->withColumn($name, $values);
+            $df = $df->withColumn($name, $values);
         }
 
-        return $frame;
+        return $df;
     }
 
     /**
@@ -1224,16 +1224,16 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      */
     public static function bindCols(array $tables): self
     {
-        $frames = array_map(fn (Table $t) => $t->collect(), $tables);
+        $dataFrames = array_map(fn (Table $t) => $t->collect(), $tables);
         $columns = [];
         $names = [];
         $rows = null;
-        foreach ($frames as $frame) {
-            $rows ??= $frame->rows;
-            if ($frame->rows !== $rows) {
-                throw new InvalidArgumentException("Can't bind tables of {$rows} and {$frame->rows} rows.");
+        foreach ($dataFrames as $df) {
+            $rows ??= $df->rows;
+            if ($df->rows !== $rows) {
+                throw new InvalidArgumentException("Can't bind tables of {$rows} and {$df->rows} rows.");
             }
-            foreach ($frame->data as $name => $column) {
+            foreach ($df->data as $name => $column) {
                 $names[] = (string) $name;
                 $columns[] = $column;
             }
@@ -1241,9 +1241,9 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         $names = NameRepair::repair($names, 'unique');
         $out = DataFrame::fromColumns(array_combine($names, $columns));
         // The result keeps the first table's grouping, as bind_cols() does.
-        $groups = $frames === [] ? [] : array_values(array_intersect($frames[0]->groups, $names));
+        $groups = $dataFrames === [] ? [] : array_values(array_intersect($dataFrames[0]->groups, $names));
 
-        return $groups === [] ? $out : $out->groupBy($groups, $frames[0]->drop);
+        return $groups === [] ? $out : $out->groupBy($groups, $dataFrames[0]->drop);
     }
 
     /**
@@ -1294,12 +1294,12 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      */
     public function unnest(array|string $columns, bool $keepEmpty = false): self
     {
-        $frame = $this;
+        $df = $this;
         foreach ((array) $columns as $name) {
-            $frame = $frame->unnestOne($name, $keepEmpty);
+            $df = $df->unnestOne($name, $keepEmpty);
         }
 
-        return $frame;
+        return $df;
     }
 
     private function unnestOne(string $name, bool $keepEmpty): self
@@ -1594,12 +1594,12 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      */
     public function cast(array $types): self
     {
-        $frame = $this;
+        $df = $this;
         foreach ($types as $name => $type) {
-            $frame = $frame->withColumn($name, Infer::convert($this->storage($name), $type, $name));
+            $df = $df->withColumn($name, Infer::convert($this->storage($name), $type, $name));
         }
 
-        return $frame;
+        return $df;
     }
 
     /**
@@ -1689,12 +1689,12 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         $names = $name === null
             ? array_keys(array_filter($this->data, fn (Column $c) => $c instanceof FactorColumn))
             : [$name];
-        $frame = $this;
+        $df = $this;
         foreach ($names as $n) {
-            $frame = $frame->withColumn((string) $n, $frame->factor((string) $n)->dropUnused($only));
+            $df = $df->withColumn((string) $n, $df->factor((string) $n)->dropUnused($only));
         }
 
-        return $frame;
+        return $df;
     }
 
     private function factor(string $name): FactorColumn

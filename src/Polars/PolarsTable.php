@@ -60,13 +60,13 @@ final class PolarsTable implements Table
         if ($table instanceof self) {
             return $table;
         }
-        $frame = $table->collect();
+        $dataFrame = $table->collect();
         $schema = [];
         $factors = [];
         $columns = [];
         $temporal = [];
-        foreach ($frame->columns() as $name) {
-            $storage = $frame->storage($name);
+        foreach ($dataFrame->columns() as $name) {
+            $storage = $dataFrame->storage($name);
             if ($storage instanceof TemporalColumn) {
                 // Dates and datetimes cross as integer ticks, never as objects.
                 $columns[$name] = $storage->ticks();
@@ -77,7 +77,7 @@ final class PolarsTable implements Table
                 $columns[$name] = $storage->values();
             }
         }
-        foreach ($frame->types() as $name => $type) {
+        foreach ($dataFrame->types() as $name => $type) {
             if (isset($temporal[$name])) {
                 $schema[$name] = 'Int64';
 
@@ -96,7 +96,7 @@ final class PolarsTable implements Table
                 $schema[$name] = $dtype;
             }
             if ($type === Type::Factor) {
-                $storage = $frame->storage($name);
+                $storage = $dataFrame->storage($name);
                 $factors[$name] = ['levels' => $storage->levels(), 'ordered' => $storage instanceof FactorColumn && $storage->isOrdered()];
             }
         }
@@ -108,9 +108,9 @@ final class PolarsTable implements Table
             }
             $df = $df->withColumns($casts);
         }
-        self::checkListColumns($frame, $df);
+        self::checkListColumns($dataFrame, $df);
 
-        return new self($df, $frame->groups(), $frame->isRowwise(), $factors, $frame->dropsEmptyGroups());
+        return new self($df, $dataFrame->groups(), $dataFrame->isRowwise(), $factors, $dataFrame->dropsEmptyGroups());
     }
 
     /**
@@ -118,10 +118,10 @@ final class PolarsTable implements Table
      * in every row. Named arrays with different keys would come back with
      * extra NA entries, so such list-columns are refused instead of changed.
      */
-    private static function checkListColumns(DataFrame $frame, PolarsDataFrame $df): void
+    private static function checkListColumns(DataFrame $dataFrame, PolarsDataFrame $df): void
     {
-        foreach ($frame->types() as $name => $type) {
-            if ($type === Type::List && $df->select([$name])->toDict(asSeries: false)[$name] != $frame->column($name)) {
+        foreach ($dataFrame->types() as $name => $type) {
+            if ($type === Type::List && $df->select([$name])->toDict(asSeries: false)[$name] != $dataFrame->column($name)) {
                 throw new InvalidArgumentException(
                     "List-column `{$name}` can't be stored in Polars without changing its values. "
                     .'Polars stores named arrays as structs, so named arrays with different keys gain each other\'s keys. '
@@ -334,12 +334,12 @@ final class PolarsTable implements Table
                 $types[$name] = $type;
             }
         }
-        $frame = DataFrame::fromColumns($columns, $types);
+        $dataFrame = DataFrame::fromColumns($columns, $types);
         if ($this->rowwise) {
-            return $frame->rowwise($this->groups);
+            return $dataFrame->rowwise($this->groups);
         }
 
-        return $this->groups === [] ? $frame : $frame->groupBy($this->groups, $this->dropGroups);
+        return $this->groups === [] ? $dataFrame : $dataFrame->groupBy($this->groups, $this->dropGroups);
     }
 
     // Verbs
@@ -688,7 +688,7 @@ final class PolarsTable implements Table
             }
         }
         $indexed = $this->df->withRowIndex('__row');
-        $frames = [];
+        $dataFrames = [];
         foreach ($combos as $c => $combo) {
             $select = ['__row' => col('__row'), '__combo' => lit($c)];
             foreach ($ids as $id) {
@@ -701,9 +701,9 @@ final class PolarsTable implements Table
                 $source = $feed[serialize(array_values($combo))][$v] ?? null;
                 $select[$v] = ($source === null ? lit(null) : col($source))->cast($targets[$v]);
             }
-            $frames[] = $indexed->select($select);
+            $dataFrames[] = $indexed->select($select);
         }
-        $out = concat($frames, how: 'vertical_relaxed')->sort(['__row', '__combo'], maintainOrder: true);
+        $out = concat($dataFrames, how: 'vertical_relaxed')->sort(['__row', '__combo'], maintainOrder: true);
         if ($dropNa) {
             $out = $out->filter(all_horizontal(...array_map(fn (string $v) => col($v)->isNull(), $values))->not());
         }

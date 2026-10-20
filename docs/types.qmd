@@ -18,8 +18,8 @@ tibble's abbreviation for each type.
 | `Type::DateTime` | `DateTimeImmutable` | `<dttm>` |
 | `Type::List` | any PHP value, including frames | `<list>` |
 
-`null` is NA in every type. `$frame->types()` returns the types by column name
-and `$frame->type('x')` returns one.
+`null` is NA in every type. `$df->types()` returns the types by column name
+and `$df->type('x')` returns one.
 
 ## Inference
 

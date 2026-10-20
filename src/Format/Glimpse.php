@@ -16,19 +16,19 @@ final class Glimpse
 {
     public static function render(Table $table, int $width = 80): string
     {
-        $frame = $table->collect();
-        $lines = ['Rows: '.Pillar::bigMark($frame->nrow()), 'Columns: '.Pillar::bigMark($frame->ncol())];
-        if (method_exists($frame, 'isRowwise') && $frame->isRowwise()) {
-            $lines[] = 'Rowwise: '.implode(', ', $frame->groups());
-        } elseif ($frame->groups() !== []) {
-            $groups = iterator_count((fn () => yield from $frame->eachGroup())());
-            $lines[] = 'Groups: '.implode(', ', $frame->groups()).' ['.Pillar::bigMark($groups).']';
+        $df = $table->collect();
+        $lines = ['Rows: '.Pillar::bigMark($df->nrow()), 'Columns: '.Pillar::bigMark($df->ncol())];
+        if (method_exists($df, 'isRowwise') && $df->isRowwise()) {
+            $lines[] = 'Rowwise: '.implode(', ', $df->groups());
+        } elseif ($df->groups() !== []) {
+            $groups = iterator_count((fn () => yield from $df->eachGroup())());
+            $lines[] = 'Groups: '.implode(', ', $df->groups()).' ['.Pillar::bigMark($groups).']';
         }
-        if ($frame->ncol() === 0) {
+        if ($df->ncol() === 0) {
             return implode("\n", $lines);
         }
 
-        $head = $frame->head(intdiv($width, 3));
+        $head = $df->head(intdiv($width, 3));
         $names = array_map(Pillar::tickIfNeeded(...), $head->columns());
         $nameWidth = max(array_map(Pillar::extent(...), $names));
         foreach ($head->columns() as $i => $name) {
@@ -41,16 +41,16 @@ final class Glimpse
     }
 
     /** @return list<string> */
-    private static function formatColumn(Table $frame, string $name): array
+    private static function formatColumn(Table $df, string $name): array
     {
-        $values = $frame->column($name);
+        $values = $df->column($name);
 
-        return match ($frame->types()[$name]) {
+        return match ($df->types()[$name]) {
             Type::Float => self::formatNumbers($values),
             Type::Int => array_map(fn (?int $v) => $v === null ? 'NA' : (string) $v, $values),
             Type::Bool => array_map(fn (?bool $v) => $v === null ? 'NA' : ($v ? 'TRUE' : 'FALSE'), $values),
             Type::String => array_map(fn (?string $v) => $v === null ? 'NA' : self::quote($v), $values),
-            Type::Factor => self::formatFactor($frame, $name, $values),
+            Type::Factor => self::formatFactor($df, $name, $values),
             Type::Date => array_map(fn (?DateTimeInterface $v) => $v?->format('Y-m-d') ?? 'NA', $values),
             Type::DateTime => self::formatDateTimes($values),
             Type::List => array_map(self::formatListCell(...), $values),
@@ -61,9 +61,9 @@ final class Glimpse
      * @param list<?string> $values
      * @return list<string>
      */
-    private static function formatFactor(Table $frame, string $name, array $values): array
+    private static function formatFactor(Table $df, string $name, array $values): array
     {
-        $levels = method_exists($frame, 'levels') ? $frame->levels($name) : [];
+        $levels = method_exists($df, 'levels') ? $df->levels($name) : [];
         $quote = array_any($levels, fn (string $l) => str_contains($l, ','));
 
         return array_map(fn (?string $v) => $v === null ? 'NA' : ($quote ? self::quote($v) : $v), $values);

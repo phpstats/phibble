@@ -269,9 +269,9 @@ final readonly class SqlTable implements Table
                 : Infer::fromDatabase($columns[$i], $this->hints[$name] ?? null, $name);
             $columns[$i] = null;
         }
-        $frame = DataFrame::fromColumns($data);
+        $df = DataFrame::fromColumns($data);
 
-        return $this->groups === [] ? $frame : $frame->groupBy($this->groups);
+        return $this->groups === [] ? $df : $df->groupBy($this->groups);
     }
 
     public function __toString(): string
