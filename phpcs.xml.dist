@@ -34,12 +34,24 @@
         <exclude-pattern>tests/*</exclude-pattern>
         <exclude-pattern>bench/*</exclude-pattern>
         <exclude-pattern>benchmarks/*</exclude-pattern>
-        <!-- R names the sample variance var(), which is a reserved word in PHP. -->
+        <!-- A name that collides with a PHP reserved word takes a trailing
+             underscore. R's sample variance var() is the one case here. -->
         <properties>
             <property name="allowed" type="array">
                 <element value="var_"/>
             </property>
         </properties>
     </rule>
-    <rule ref="./tools/phpcs/Phpstats/Sniffs/NamingConventions/CamelCapsParameterAndPropertySniff.php"></rule>
+    <rule ref="./tools/phpcs/Phpstats/Sniffs/NamingConventions/CamelCapsParameterAndPropertySniff.php">
+        <!-- Joiner is @internal, and in its private static helpers the case is
+             what tells the two operands apart: $x and $y are the PolarsTables
+             and $X and $Y the PolarsDataFrames built from them, in the usual
+             notation for a pair of design matrices. -->
+        <properties>
+            <property name="allowed" type="array">
+                <element value="X"/>
+                <element value="Y"/>
+            </property>
+        </properties>
+    </rule>
 </ruleset>
