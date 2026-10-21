@@ -65,6 +65,8 @@ function withCsvReader(string $reader, Closure $fn): mixed
 
 it('reads CSV like readr', function (array $case, string $reader) {
     $expected = json_decode((string) file_get_contents(IO_FIXTURES."/expected/{$case['name']}.json"), true);
+    // toJSON(auto_unbox = TRUE) writes a lone column name as a bare string.
+    $expected['names'] = (array) $expected['names'];
     [$df, $warnings] = withCsvReader($reader, fn () => quietly(fn () => DataFrame::fromCsv(IO_FIXTURES.'/'.$case['file'], ...$case['php'])));
 
     expect($df->columns())->toBe($expected['names'])

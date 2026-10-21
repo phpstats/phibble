@@ -199,5 +199,115 @@
     "r": {},
     "php": {},
     "write": true
+  },
+  {
+    "name": "blank_quoted_empty",
+    "file": "blank_quoted_empty.csv",
+    "r": {},
+    "php": {}
+  },
+  {
+    "name": "blank_quoted_empty_only",
+    "file": "blank_quoted_empty_only.csv",
+    "r": {},
+    "php": {}
+  },
+  {
+    "name": "blank_whitespace_line",
+    "file": "blank_whitespace_line.csv",
+    "r": {},
+    "php": {}
+  },
+  {
+    "name": "blank_whitespace_kept",
+    "file": "blank_whitespace_line.csv",
+    "r": {
+      "trim_ws": false,
+      "skip_empty_rows": false
+    },
+    "php": {
+      "trimWs": false,
+      "skipEmptyRows": false
+    }
+  },
+  {
+    "name": "blank_tab_line",
+    "file": "blank_tab_line.csv",
+    "r": {
+      "trim_ws": false
+    },
+    "php": {
+      "trimWs": false
+    }
+  },
+  {
+    "name": "blank_unterminated",
+    "file": "blank_unterminated.csv",
+    "r": {
+      "trim_ws": false
+    },
+    "php": {
+      "trimWs": false
+    }
+  },
+  {
+    "name": "blank_whitespace_file",
+    "file": "blank_whitespace_file.csv",
+    "r": {
+      "trim_ws": false,
+      "col_names": false
+    },
+    "php": {
+      "trimWs": false,
+      "colNames": false
+    }
+  },
+  {
+    "name": "blank_whitespace_delimiter",
+    "file": "blank_whitespace_delimiter.csv",
+    "r": {
+      "delim": " "
+    },
+    "php": {
+      "delimiter": " "
+    }
+  },
+  {
+    "name": "blank_quoted_space",
+    "file": "blank_quoted_space.csv",
+    "r": {
+      "trim_ws": false
+    },
+    "php": {
+      "trimWs": false
+    }
+  },
+  {
+    "name": "blank_cr_line",
+    "file": "blank_cr_line.csv",
+    "r": {},
+    "php": {}
+  },
+  {
+    "name": "blank_leading_comment",
+    "file": "blank_leading_comment.csv",
+    "r": {
+      "comment": "#"
+    },
+    "php": {
+      "comment": "#"
+    }
+  },
+  {
+    "name": "blank_comment_after_row",
+    "file": "blank_comment_after_row.csv",
+    "r": {
+      "comment": "#",
+      "trim_ws": false
+    },
+    "php": {
+      "comment": "#",
+      "trimWs": false
+    }
   }
 ]

@@ -110,11 +110,8 @@ final readonly class CsvSource implements Source
         // Data rows.
         $columns = array_fill(0, $width, []);
         $count = 0;
-        $take = function (int $line, ?array $record) use (&$columns, &$count, &$problems, $width, $o): void {
-            if ($record === null) {
-                $record = array_fill(0, $width, null);
-                $problems[] = "row {$line}: expected {$width} columns, got 0";
-            } elseif (count($record) < $width) {
+        $take = function (int $line, array $record) use (&$columns, &$count, &$problems, $width, $o): void {
+            if (count($record) < $width) {
                 $problems[] = "row {$line}: expected {$width} columns, got ".count($record);
                 $record = array_pad($record, $width, null);
             } elseif (count($record) > $width) {
@@ -144,7 +141,7 @@ final readonly class CsvSource implements Source
         if ($o->nMax === null || $count < $o->nMax) {
             for (; $records->valid(); $records->next()) {
                 $record = $records->current();
-                if ($record === null && $o->skipEmptyRows) {
+                if ($record === null) {
                     continue;
                 }
                 $take($records->key(), $record);
@@ -263,14 +260,16 @@ final readonly class CsvSource implements Source
         // Without quotes or carriage returns, every line is a record and every
         // delimiter separates fields, so plain splitting gives fgetcsv's result.
         if (! str_contains($text, $o->quote) && ! str_contains($text, "\r")) {
+            $ended = str_ends_with($text, "\n");
             $lines = explode("\n", $text);
             unset($text);
             if (end($lines) === '') {
                 array_pop($lines);
             }
-            foreach ($lines as $content) {
+            $last = array_key_last($lines);
+            foreach ($lines as $i => $content) {
                 $line++;
-                yield $line => (trim($content, " \t") === '' ? null : explode($o->delimiter, $content));
+                yield $line => $this->record($content, explode($o->delimiter, $content), $ended || $i !== $last);
             }
 
             return;
@@ -280,9 +279,16 @@ final readonly class CsvSource implements Source
         fwrite($memory, $text);
         unset($text);
         rewind($memory);
+        $start = 0;
         while (($record = fgetcsv($memory, null, $o->delimiter, $o->quote, '')) !== false) {
             $line++;
-            yield $line => ($record === [null] || self::blank($record) ? null : $record);
+            // The bytes fgetcsv() just consumed, so blank() sees the raw line.
+            $end = (int) ftell($memory);
+            fseek($memory, $start);
+            $raw = (string) fread($memory, $end - $start);
+            fseek($memory, $end);
+            $start = $end;
+            yield $line => $this->record($raw, $record === [null] ? [''] : $record, str_ends_with($raw, "\n"));
         }
         fclose($memory);
     }
@@ -306,17 +312,26 @@ final readonly class CsvSource implements Source
         $delim = $o->delimiter;
         $quote = $o->quote;
         $comment = $o->comment;
+        $emitted = false;
 
         while ($pos < $length) {
             $line++;
+            $start = $pos;
             $fields = [];
             $field = '';
             $inQuotes = false;
-            $sawContent = false;
 
             // A line that starts with the comment string is dropped entirely.
-            if ($comment !== '' && substr_compare($text, $comment, $pos, strlen($comment)) === 0) {
-                $end = strpos($text, "\n", $pos);
+            // Before the first record readr looks past leading whitespace for
+            // it; after one, such a line is a record holding that whitespace.
+            $at = $pos;
+            if (! $emitted) {
+                while ($at < $length && ($text[$at] === ' ' || $text[$at] === "\t")) {
+                    $at++;
+                }
+            }
+            if ($comment !== '' && $at < $length && substr_compare($text, $comment, $at, strlen($comment)) === 0) {
+                $end = strpos($text, "\n", $at);
                 $pos = $end === false ? $length : $end + 1;
                 $line--;
 
@@ -364,7 +379,6 @@ final readonly class CsvSource implements Source
                 if ($c === $delim) {
                     $fields[] = $field;
                     $field = '';
-                    $sawContent = true;
                     $pos++;
 
                     continue;
@@ -372,7 +386,6 @@ final readonly class CsvSource implements Source
                 if ($quote !== '' && $c === $quote && trim($field) === '') {
                     $inQuotes = true;
                     $field = '';
-                    $sawContent = true;
                     $pos++;
 
                     continue;
@@ -384,24 +397,37 @@ final readonly class CsvSource implements Source
                     continue;
                 }
                 $field .= $c;
-                $sawContent = true;
                 $pos++;
             }
 
-            if (! $sawContent && $field === '' && $fields === []) {
-                yield $line => null;
-
-                continue;
-            }
             $fields[] = $field;
-            yield $line => self::blank($fields) ? null : $fields;
+            $raw = substr($text, $start, $pos - $start);
+            $record = $this->record($raw, $fields, str_ends_with($raw, "\n"));
+            $emitted = $emitted || $record !== null;
+            yield $line => $record;
         }
     }
 
-    /** A line holding only spaces or tabs counts as empty, as in readr. */
-    private static function blank(array $record): bool
+    /**
+     * One line's record, or null for a blank line that skipEmptyRows drops.
+     *
+     * readr decides blankness from the raw line rather than from the parsed
+     * fields, so a quoted empty string is a field holding data while a line of
+     * spaces or tabs is blank whatever trimWs says. It also never drops a last
+     * line the file left unterminated.
+     *
+     * @param  list<?string>  $fields
+     * @return list<?string>|null
+     */
+    private function record(string $raw, array $fields, bool $terminated): ?array
     {
-        return count($record) === 1 && trim((string) $record[0], " \t") === '';
+        return $terminated && $this->options->skipEmptyRows && self::blank($raw) ? null : $fields;
+    }
+
+    /** A line holding only spaces, tabs or carriage returns is empty, as in readr. */
+    private static function blank(string $line): bool
+    {
+        return trim($line, " \t\r\n") === '';
     }
 
     /**
