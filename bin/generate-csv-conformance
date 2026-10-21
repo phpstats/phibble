@@ -1,0 +1,370 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Write tests/fixtures/csv-conformance.json: the CSV cases that phibble's
+ * reader and the phit extension's Phit\read_csv() must agree on, with
+ * phibble's answers recorded.
+ *
+ * Usage: bin/generate-csv-conformance [--out=PATH]
+ *
+ * phibble's PHP reader is the reference. Every case here is read through
+ * tests/Support/NativeCsvEmulator.php, which implements the Phit\read_csv()
+ * contract on top of that reader, so what this file records is phibble's
+ * behaviour by construction. phit commits a byte-identical copy of the file
+ * and checks itself against it in tests/csv-conformance.php; phibble checks
+ * itself against it in tests/CsvConformanceTest.php, so a change in either
+ * reader fails in its own repository and the file cannot rot unnoticed.
+ *
+ * Not coverable here, as opposed to merely not covered
+ * -----------------------------------------------------
+ * The contract under test is Phit\read_csv(), so the corpus is generated at
+ * that level rather than at DataFrame::fromCsv()'s. A case built from a
+ * phibble option or readr letter the extension does not accept cannot be
+ * replayed against phit at all. Those parts of phibble's CSV surface are
+ * absent here on purpose, and phibble's own suite covers them: tests/IoTest.php
+ * reads tests/fixtures/io/cases.json and tests/fixtures/io/expected/*.json,
+ * generated from tests/r/io.R against readr.
+ *
+ *   - select           Phit\read_csv() has no such option (io.R's "select" case).
+ *   - nameRepair       Phit\read_csv() has no such option and repairs no names
+ *                      ("dupnames", "dupnames_universal").
+ *   - colNames as a list of names. Phit\read_csv() takes a bool only
+ *                      ("colnames_given").
+ *   - the readr letter f (factor) and the letter n (number). phit's TypeCode
+ *     has eight members and neither of these; phibble parses both in PHP after
+ *     the native call ("coltypes", "coltypes_named").
+ *
+ * Deliberately excluded, awaiting a ruling
+ * ----------------------------------------
+ * A single-field record whose only field is a quoted empty string ("" alone on
+ * a line) is excluded. The two readers diverge on it and the reference is the
+ * side that looks wrong: CsvSource::blank() tests the parsed field value, so a
+ * quoted empty field cannot be told apart from a blank line and the record is
+ * dropped while tokenizing, where skipEmptyRows cannot rescue it. phit keeps
+ * the field. Recording either behaviour here would freeze it as the contract,
+ * so the case stays out until that is settled.
+ *
+ * The encoding
+ * ------------
+ * One JSON file, inputs included, so phit copies one artifact. Scalars follow
+ * the encoding of phibble's existing tests/fixtures/io/expected/*.json: ints
+ * and bools as JSON ints and bools, floats as their shortest round-tripping
+ * decimal text with "Inf", "-Inf" and "NaN" as those literals, dates as
+ * 2024-01-02, datetimes as 2024-01-02T10:00:00.000000Z, and a missing value as
+ * null. JSON has no Inf or NaN, and a raw double would depend on each side's
+ * float formatting. csvConformanceScalar() below is this side's one copy of
+ * that conversion; phit/tests/csv-conformance.php holds the other.
+ *
+ * Bytes that are not valid UTF-8 pass through both readers unchanged, so the
+ * corpus includes them. A case input that is not valid UTF-8 is recorded in
+ * "input_base64" instead of "input"; any other string that is not valid UTF-8
+ * (a column name, a value) is recorded as {"b64": "..."}. Nothing is passed
+ * through JSON_INVALID_UTF8_SUBSTITUTE, which is lossy and would make the
+ * expectation wrong rather than unreadable.
+ *
+ * "problems" is phibble's list. The native reader also reports unterminated
+ * quoted fields and the PHP reader does not, so each case carries a closed
+ * list, "phit_extra_problems", of the exact extra strings phit is expected to
+ * add; it is empty for all but the unterminated-quote cases. phit's test
+ * asserts set equality against the union, so an unexpected extra problem fails
+ * rather than being subtracted away by a pattern.
+ */
+
+declare(strict_types=1);
+
+require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/../tests/Support/NativeCsvEmulator.php';
+
+// Floats are recorded as their shortest round-tripping decimal text, which is
+// what json_encode() gives at the default serialize_precision of -1.
+ini_set('serialize_precision', '-1');
+if (json_encode(0.1) !== '0.1' || json_encode(1.0) !== '1' || json_encode(0.1 + 0.2) !== '0.30000000000000004') {
+    fwrite(STDERR, "serialize_precision does not give shortest round-tripping floats.\n");
+    exit(1);
+}
+
+const CSV_CONFORMANCE_FIXTURE = __DIR__.'/../tests/fixtures/csv-conformance.json';
+
+/**
+ * A string as the fixture records it: itself when it is valid UTF-8, and
+ * {"b64": ...} when it is not, because JSON cannot hold the raw bytes.
+ *
+ * @return string|array{b64: string}
+ */
+function csvConformanceText(string $value): string|array
+{
+    return preg_match('//u', $value) === 1 ? $value : ['b64' => base64_encode($value)];
+}
+
+/**
+ * One value as the fixture records it. The emulator returns what
+ * Phit\read_csv() returns: PHP scalars, and temporal columns as ticks (days
+ * for a date, microseconds for a datetime).
+ */
+function csvConformanceScalar(mixed $value, string $type): mixed
+{
+    if ($value === null) {
+        return null;
+    }
+
+    return match ($type) {
+        'date' => gmdate('Y-m-d', (int) $value * 86400),
+        'datetime' => csvConformanceDateTime((int) $value),
+        'float' => match (true) {
+            is_nan($value) => 'NaN',
+            is_infinite($value) => $value > 0 ? 'Inf' : '-Inf',
+            default => (string) json_encode($value),
+        },
+        'string' => csvConformanceText((string) $value),
+        default => $value,
+    };
+}
+
+/** Microseconds since the epoch as 2024-01-02T10:00:00.000000Z. */
+function csvConformanceDateTime(int $microseconds): string
+{
+    $seconds = intdiv($microseconds, 1_000_000);
+    $fraction = $microseconds - $seconds * 1_000_000;
+    if ($fraction < 0) {
+        $seconds--;
+        $fraction += 1_000_000;
+    }
+
+    return gmdate('Y-m-d\TH:i:s', $seconds).'.'.sprintf('%06d', $fraction).'Z';
+}
+
+/**
+ * Read one case through the emulator and encode the result.
+ *
+ * @param  array{input: string, options: array<string, mixed>}  $case
+ * @return array{names: list<mixed>, columns: list<mixed>, problems: list<mixed>}
+ */
+function csvConformanceRead(array $case, string $directory): array
+{
+    $path = $directory.'/case.csv';
+    file_put_contents($path, $case['input']);
+    $result = emulatedStatsReadCsv($path, $case['options']);
+
+    return csvConformanceEncode($result);
+}
+
+/**
+ * Encode a Phit\read_csv()-shaped result.
+ *
+ * @param  array{names: list<string>, columns: list<?array{type: string, values: list<mixed>, failed: int}>, problems: list<string>}  $result
+ * @return array{names: list<mixed>, columns: list<mixed>, problems: list<mixed>}
+ */
+function csvConformanceEncode(array $result): array
+{
+    return [
+        'names' => array_map(csvConformanceText(...), $result['names']),
+        'columns' => array_map(fn (?array $column) => $column === null ? null : [
+            'type' => $column['type'],
+            'values' => array_map(fn (mixed $v) => csvConformanceScalar($v, $column['type']), $column['values']),
+            'failed' => $column['failed'],
+        ], $result['columns']),
+        'problems' => array_map(csvConformanceText(...), $result['problems']),
+    ];
+}
+
+/**
+ * The cases, hand-picked for coverage rather than sampled: every option
+ * Phit\read_csv() accepts at its default and at one non-default value, all
+ * eight TypeCode members, and the structural edges both readers have to agree
+ * on. tests/csv-phibble.php in phit stays the selective deep tier, thousands of
+ * random cases run by hand with both packages on disk.
+ *
+ * @return list<array{name: string, input: string, options: array<string, mixed>, phit_extra_problems?: list<string>}>
+ */
+function csvConformanceCases(): array
+{
+    $cases = [];
+    $case = function (string $name, string $input, array $options = [], array $phitExtraProblems = []) use (&$cases): void {
+        $cases[] = ['name' => $name, 'input' => $input, 'options' => $options, 'phit_extra_problems' => $phitExtraProblems];
+    };
+
+    // --- Every accepted option, at its default and at one other value -------
+    $case('option/delimiter/default', "a,b\n1,x\n2,y\n", ['delimiter' => ',']);
+    $case('option/delimiter/semicolon', "a;b\n1;x\n2;y\n", ['delimiter' => ';']);
+    $case('option/quote/default', "a,b\n\"x,1\",2\n", ['quote' => '"']);
+    $case('option/quote/apostrophe', "a,b\n'x,1',2\n", ['quote' => "'"]);
+    $case('option/escape_double/default', "a\n\"x\"\"y\"\n", ['escape_double' => true]);
+    $case('option/escape_double/off', "a\n\"x\"\"y\"\n", ['escape_double' => false]);
+    $case('option/escape_backslash/default', "a\n\"x\\\"y\"\n", ['escape_backslash' => false]);
+    $case('option/escape_backslash/on', "a\n\"x\\\"y\"\n", ['escape_backslash' => true]);
+    $case('option/trim_ws/default', "a,b\n  1  ,  x  \n", ['trim_ws' => true]);
+    $case('option/trim_ws/off', "a,b\n  1  ,  x  \n", ['trim_ws' => false]);
+    $case('option/skip_empty_rows/default', "a,b\n1,x\n\n2,y\n", ['skip_empty_rows' => true]);
+    $case('option/skip_empty_rows/off', "a,b\n1,x\n\n2,y\n", ['skip_empty_rows' => false]);
+    $case('option/col_names/default', "a,b\n1,x\n", ['col_names' => true]);
+    $case('option/col_names/off', "a,b\n1,x\n", ['col_names' => false]);
+    $case('option/skip/default', "a,b\n1,x\n", ['skip' => 0]);
+    $case('option/skip/two', "junk\nmore junk\na,b\n1,x\n", ['skip' => 2]);
+    $case('option/guess_max/default', "a\n1\n2\n3.5\n", ['guess_max' => 1000]);
+    $case('option/guess_max/two', "a\n1\n2\n3.5\n", ['guess_max' => 2]);
+    $case('option/n_max/default', "a\n1\n2\n3\n", ['n_max' => null]);
+    $case('option/n_max/two', "a\n1\n2\n3\n", ['n_max' => 2]);
+    $case('option/comment/default', "a,b\n#1,x\n2,y\n", ['comment' => '']);
+    $case('option/comment/hash', "a,b\n#1,x\n2,y\n", ['comment' => '#']);
+    $case('option/decimal_mark/default', "a\n1.5\n2.25\n", ['decimal_mark' => '.']);
+    $case('option/decimal_mark/comma', "a;b\n1,5;2\n2,25;3\n", ['delimiter' => ';', 'decimal_mark' => ',']);
+    $case('option/grouping_mark/default', "a\n\"1,234\"\n\"2,345\"\n", ['grouping_mark' => null]);
+    $case('option/grouping_mark/none', "a\n\"1,234\"\n\"2,345\"\n", ['grouping_mark' => '']);
+    $case('option/na/default', "a,b\n1,NA\n2,\n", ['na' => ['', 'NA']]);
+    $case('option/na/dash', "a,b\n1,-\n2,NA\n", ['na' => ['-']]);
+    $case('option/types/default', "a,b\n1,2\n", ['types' => []]);
+    $case('option/types/string-and-int', "a,b\n1,2\n", ['types' => ['c', 'i']]);
+
+    // --- All eight TypeCode members -----------------------------------------
+    $typed = "i,l,d,c,D,T\n1,TRUE,1.5,007,2024-01-02,2024-01-02 10:00:00\n2,FALSE,2,abc,2024-01-03,2024-01-03T11:30:45.5\n,,,,,\n";
+    $case('type/guess', $typed, ['types' => ['?', '?', '?', '?', '?', '?']]);
+    $case('type/logical', $typed, ['types' => ['_', 'l', '_', '_', '_', '_']]);
+    $case('type/integer', $typed, ['types' => ['i', '_', '_', '_', '_', '_']]);
+    $case('type/double', $typed, ['types' => ['_', '_', 'd', '_', '_', '_']]);
+    $case('type/character', $typed, ['types' => ['_', '_', '_', 'c', '_', '_']]);
+    $case('type/date', $typed, ['types' => ['_', '_', '_', '_', 'D', '_']]);
+    $case('type/datetime', $typed, ['types' => ['_', '_', '_', '_', '_', 'T']]);
+    $case('type/skip', $typed, ['types' => ['_', '?', '?', '?', '?', '?']]);
+    $case('type/by-position', $typed, ['types' => [3 => 'c', 1 => 'c']]);
+    $case('type/past-the-end', "a,b\n1,2\n", ['types' => ['c', 'c', 'c', 'c']]);
+    $case('type/parse-failures', "i,D\nx,2024-13-40\n1,2024-01-02\n", ['types' => ['i', 'D']]);
+
+    // --- Records and line endings -------------------------------------------
+    $case('structure/ragged-short', "a,b,c\n1,2,3\n4,5\n6,7,8\n");
+    $case('structure/ragged-long', "a,b,c\n1,2,3\n4,5,6,7\n");
+    $case('structure/ragged-both-and-empty', "a,b,c\n1,2,3\n4,5\n6,7,8,9\n\n", ['skip_empty_rows' => false]);
+    $case('structure/bom', "\u{FEFF}a,b\n1,x\n");
+    $case('structure/crlf', "a,b\r\n1,x\r\n2,y\r\n");
+    $case('structure/cr', "a,b\r1,x\r2,y\r");
+    $case('structure/no-trailing-newline', "a,b\n1,x");
+    $case('structure/empty-file', '');
+    $case('structure/only-empty-lines', "\n\n\n");
+    $case('structure/embedded-newline', "a,b\n\"line1\nline2\",x\n");
+    $case('structure/no-quote-character', "a,b\n\"x,1\n", ['quote' => '']);
+    $case('structure/duplicate-names', "a,a,b\n1,2,3\n");
+    $case('structure/empty-name', "a,,b\n1,2,3\n");
+    $case('structure/single-cell', "a\n1\n");
+    $case('structure/tab-delimited', "a\tb\n1\tx\n", ['delimiter' => "\t"]);
+    $case('structure/skip-past-the-end', "a\n1\n", ['skip' => 5]);
+    $case('structure/whitespace-only-fields', "a,b\n , \n  ,\t\n", ['trim_ws' => false]);
+    $case('structure/comment-line', "a,b\n# a note\n1,x\n", ['comment' => '#']);
+    $case('structure/value-then-comment', "a,b\n2 # x,y\n3,z\n", ['comment' => '#']);
+    $case('structure/comment-in-header', "# a note\na,b\n1,x\n", ['comment' => '#']);
+    $case('structure/invalid-utf8', "\xFF,b\n\xFE\xFF,x\n");
+    $case(
+        'structure/unterminated-quote',
+        "a,b\n\"x,1\n",
+        [],
+        ['row 2: unterminated quoted field at end of file'],
+    );
+    $case(
+        'structure/unterminated-quote-only-field',
+        "a\n\"x\n",
+        [],
+        ['row 2: unterminated quoted field at end of file'],
+    );
+
+    // --- No data rows (the five cases task 1 added to phit/tests/csv.php) ----
+    // With no data rows a column is string, before the guesser's empty-column
+    // rule can make it bool. Four ways to read no data rows, then the contrasts.
+    $case('zero-rows/header-only', "a,b\n");
+    $case('zero-rows/n-max-zero', "a,b\n1,2\n", ['n_max' => 0]);
+    $case('zero-rows/every-row-skipped', "junk\nmore junk\na,b\n", ['skip' => 2]);
+    $case('zero-rows/every-row-empty', "a,b\n\n\n");
+    $case('zero-rows/header-only-typed', "a,b\n", ['types' => ['l']]);
+    $case('zero-rows/all-na-with-a-data-row', "a\nNA\n");
+    $case('zero-rows/empty-rows-kept', "a,b\n\n\n", ['skip_empty_rows' => false]);
+
+    // --- Guessing and parsing -----------------------------------------------
+    $case('values/bool-spellings', "a,b,c,d\nT,TRUE,true,1\nF,FALSE,false,0\n");
+    $case('values/int-and-float', "i,d\n1,1.5\n-2,-0.5\n");
+    $case('values/negative-zero-and-exponents', "a\n-0.0\n1e5\n1E-5\n-.5e-3\n");
+    $case('values/inf-and-nan', "a\nInf\n-Inf\nNaN\n1.5\n");
+    $case('values/int64-edges', "a\n9223372036854775807\n-9223372036854775808\n");
+    $case('values/int-overflow', "a\n12345678901234567890\n1\n");
+    $case('values/leading-zeroes-are-strings', "a\n007\n1\n");
+    $case('values/mixed-forces-string', "a\n1\nx\n2\n");
+    $case('values/all-na-column', "a,b\nNA,1\n,2\n");
+    $case('values/dates', "a\n2024-01-02\n2024-12-31\n");
+    $case('values/datetimes', "a\n2024-01-02 10:00:00\n2024-01-03T11:30:45.123456Z\n");
+    $case('values/datetime-offsets', "a\n2024-01-02T10:00:00+05:30\n2024-01-02T10:00:00-0800\n");
+    $case('values/pre-epoch-temporals', "d,t\n1969-12-31,1969-12-31T23:59:59.5\n1900-01-01,1900-01-01T00:00:00\n");
+    $case('values/quoted-numbers-stay-numbers', "a\n\"1\"\n\"2\"\n");
+    $case('values/quote-inside-unquoted-field', "a\nx\"y\n1\n");
+    $case('values/guess-max-sampling', "a,b\n1,2\n3,4\n5,6\n7,8.5\n", ['guess_max' => 3]);
+    $case('values/na-overrides-the-guess', "a\n1\nmissing\n2\n", ['na' => ['missing']]);
+    $case('values/empty-na-list', "a,b\n,1\nNA,2\n", ['na' => []]);
+    $case('values/grouped-numbers', "a;b\n1.234,5;2\n", ['delimiter' => ';', 'decimal_mark' => ',', 'grouping_mark' => '.']);
+
+    return $cases;
+}
+
+/** @return array<string, mixed> */
+function csvConformanceDocument(): array
+{
+    $directory = sys_get_temp_dir().'/phibble-csv-conformance-'.getmypid();
+    @mkdir($directory);
+    try {
+        $cases = [];
+        foreach (csvConformanceCases() as $case) {
+            $encoded = ['name' => $case['name']];
+            if (preg_match('//u', $case['input']) === 1) {
+                $encoded['input'] = $case['input'];
+            } else {
+                $encoded['input_base64'] = base64_encode($case['input']);
+            }
+            $encoded['options'] = $case['options'];
+            $encoded['expected'] = csvConformanceRead($case, $directory);
+            $encoded['phit_extra_problems'] = $case['phit_extra_problems'];
+            $cases[] = $encoded;
+        }
+    } finally {
+        array_map(unlink(...), glob($directory.'/*') ?: []);
+        @rmdir($directory);
+    }
+
+    return [
+        'about' => 'CSV cases phibble\'s PHP reader and Phit\\read_csv() must agree on, with phibble\'s answers. Generated; do not edit by hand.',
+        'generator' => 'phibble bin/generate-csv-conformance',
+        'contract' => 'Phit\\read_csv()',
+        'encoding' => [
+            'input' => 'The file\'s bytes. Not valid UTF-8: "input_base64" instead.',
+            'options' => 'Phit\\read_csv() option names and values.',
+            'strings' => 'A name, value or problem that is not valid UTF-8 is {"b64": "<base64>"}.',
+            'float' => 'Shortest round-tripping decimal text, or "Inf", "-Inf", "NaN".',
+            'date' => 'YYYY-MM-DD.',
+            'datetime' => 'YYYY-MM-DDTHH:MM:SS.uuuuuuZ.',
+            'null' => 'A missing value.',
+            'phit_extra_problems' => 'The exact extra problems phit is expected to add to "problems", which is phibble\'s list. A closed list: phit\'s problems must equal the union.',
+        ],
+        'not_coverable' => 'phibble options and readr letters Phit\\read_csv() cannot express (select, nameRepair, colNames as a list, the letters f and n) are absent on purpose and are covered by phibble\'s tests/fixtures/io suite. See bin/generate-csv-conformance.',
+        'excluded' => 'A single-field record holding only a quoted empty string is excluded: the readers diverge and the reference is the side that looks wrong. See bin/generate-csv-conformance.',
+        'cases' => $cases,
+    ];
+}
+
+function csvConformanceMain(array $argv): int
+{
+    $out = CSV_CONFORMANCE_FIXTURE;
+    foreach (array_slice($argv, 1) as $argument) {
+        if (str_starts_with($argument, '--out=')) {
+            $out = substr($argument, 6);
+
+            continue;
+        }
+        fwrite(STDERR, "Usage: bin/generate-csv-conformance [--out=PATH]\n");
+
+        return 1;
+    }
+    $document = csvConformanceDocument();
+    $json = json_encode($document, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)."\n";
+    file_put_contents($out, $json);
+    printf("%s: %d cases, %d bytes\n", $out, count($document['cases']), strlen($json));
+
+    return 0;
+}
+
+if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
+    exit(csvConformanceMain($argv ?? []));
+}
