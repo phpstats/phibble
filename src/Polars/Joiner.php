@@ -235,6 +235,9 @@ final class Joiner
     }
 
     /**
+     * The case carries meaning here: $x and $y are the two tables, and $X and
+     * $Y the data frames built from them.
+     *
      * @param list<array{0: string, 1: string}> $pairs
      * @param array{0: string, 1: string} $suffix
      * @return array{0: PolarsDataFrame, 1: array<string, array{levels: list<string>, ordered: bool}>}
