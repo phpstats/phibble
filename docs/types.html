@@ -335,7 +335,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<p><code>null</code> is NA in every type. <code>$frame-&gt;types()</code> returns the types by column name and <code>$frame-&gt;type('x')</code> returns one.</p>
+<p><code>null</code> is NA in every type. <code>$df-&gt;types()</code> returns the types by column name and <code>$df-&gt;type('x')</code> returns one.</p>
 </section>
 <section id="inference" class="level2">
 <h2 class="anchored" data-anchor-id="inference">Inference</h2>
@@ -347,7 +347,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Arrays and other objects make a list-column.</li>
 <li>A column that is entirely NA is bool, R’s logical type.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$frame</span> <span class="op">=</span> DataFrame::fromColumns([</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> DataFrame::fromColumns([</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'logical'</span> =&gt; [<span class="kw">true</span><span class="ot">,</span> <span class="kw">false</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'whole'</span> =&gt; [<span class="dv">1</span><span class="ot">,</span> <span class="dv">2</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mixed'</span> =&gt; [<span class="dv">1</span><span class="ot">,</span> <span class="fl">2.5</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
@@ -358,7 +358,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'empty'</span> =&gt; [<span class="kw">null</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$frame</span>-&gt;glimpse()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;glimpse()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Rows: 3
 Columns: 8
 $ logical   &lt;lgl&gt; TRUE, FALSE, NA
@@ -385,13 +385,13 @@ $ empty     &lt;lgl&gt; NA, NA, NA</code></pre>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">true</span><span class="ot">;</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>})<span class="ot">;</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="va">$frame</span> <span class="op">=</span> DataFrame::fromColumns([</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> DataFrame::fromColumns([</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x'</span> =&gt; [<span class="fl">2.7</span><span class="ot">,</span> <span class="op">-</span><span class="fl">2.7</span><span class="ot">,</span> <span class="st">'3.9'</span><span class="ot">,</span> <span class="st">'abc'</span>]<span class="ot">,</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'flag'</span> =&gt; [<span class="st">'TRUE'</span><span class="ot">,</span> <span class="st">'T'</span><span class="ot">,</span> <span class="st">'yes'</span><span class="ot">,</span> <span class="st">'0'</span>]<span class="ot">,</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'n'</span> =&gt; [<span class="fl">1.0</span><span class="ot">,</span> <span class="fl">0.1</span> <span class="op">+</span> <span class="fl">0.2</span><span class="ot">,</span> <span class="fl">1e5</span><span class="ot">,</span> <span class="dv">1</span> <span class="op">/</span> <span class="dv">3</span>]<span class="ot">,</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">$cast</span> <span class="op">=</span> <span class="va">$frame</span>-&gt;cast([<span class="st">'x'</span> =&gt; <span class="st">'int'</span><span class="ot">,</span> <span class="st">'flag'</span> =&gt; <span class="st">'bool'</span><span class="ot">,</span> <span class="st">'n'</span> =&gt; <span class="st">'string'</span>])<span class="ot">;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">$cast</span> <span class="op">=</span> <span class="va">$df</span>-&gt;cast([<span class="st">'x'</span> =&gt; <span class="st">'int'</span><span class="ot">,</span> <span class="st">'flag'</span> =&gt; <span class="st">'bool'</span><span class="ot">,</span> <span class="st">'n'</span> =&gt; <span class="st">'string'</span>])<span class="ot">;</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$cast</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Warning: NAs introduced by coercion to int in column 'x' (1 value).
@@ -555,13 +555,13 @@ fctCollapse               ["brush-tailed","Chinstrap"]</code></pre>
 <section id="model-data" class="level2">
 <h2 class="anchored" data-anchor-id="model-data">Model data</h2>
 <p><code>toModelData()</code> returns columns in the form phit’s model functions read. Numbers, bools, and strings are plain lists. Dates and datetimes become days and seconds since the epoch. A factor becomes an array with its levels, its 0-based codes, and whether it is ordered, so a model keeps the frame’s level order, including unused levels. A list-column throws.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$frame</span> <span class="op">=</span> tibble(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tibble(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    mass<span class="ot">:</span> [<span class="fl">3750.0</span><span class="ot">,</span> <span class="fl">3800.0</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    male<span class="ot">:</span> [<span class="kw">true</span><span class="ot">,</span> <span class="kw">false</span><span class="ot">,</span> <span class="kw">true</span>]<span class="ot">,</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    species<span class="ot">:</span> [<span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'Gentoo'</span><span class="ot">,</span> <span class="st">'Adelie'</span>]<span class="ot">,</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)-&gt;asFactor(<span class="st">'species'</span><span class="ot">,</span> [<span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'Chinstrap'</span><span class="ot">,</span> <span class="st">'Gentoo'</span>])<span class="ot">;</span></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="va">$frame</span>-&gt;toModelData()<span class="ot">,</span> <span class="cn">JSON_PRETTY_PRINT</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="va">$df</span>-&gt;toModelData()<span class="ot">,</span> <span class="cn">JSON_PRETTY_PRINT</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>{
     "mass": [
         3750,

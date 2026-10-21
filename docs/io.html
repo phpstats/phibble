@@ -374,7 +374,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="st">    3;94110;4,25;2024-05-04</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="st">    CSV;</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">$frame = DataFrame::fromCsvString(</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">$df = DataFrame::fromCsvString(</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="st">    $text,</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">    types: ['zip' =&gt; 'c'],</span></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="st">    delimiter: ';',</span></span>
@@ -383,7 +383,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="st">    decimalMark: ',',</span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="st">);</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="st">echo $frame;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="st">echo $df;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 3 × 4
      id zip   score visited   
   &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;date&gt;    
@@ -490,9 +490,9 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">true</span><span class="ot">;</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>})<span class="ot">;</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">$frame</span> <span class="op">=</span> DataFrame::fromCsvString(<span class="st">"id,score</span><span class="sc">\n</span><span class="st">1,2.5</span><span class="sc">\n</span><span class="st">2,oops</span><span class="sc">\n</span><span class="st">3</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span> types<span class="ot">:</span> [<span class="st">'score'</span> =&gt; <span class="st">'double'</span>])<span class="ot">;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> DataFrame::fromCsvString(<span class="st">"id,score</span><span class="sc">\n</span><span class="st">1,2.5</span><span class="sc">\n</span><span class="st">2,oops</span><span class="sc">\n</span><span class="st">3</span><span class="sc">\n</span><span class="st">"</span><span class="ot">,</span> types<span class="ot">:</span> [<span class="st">'score'</span> =&gt; <span class="st">'double'</span>])<span class="ot">;</span></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$frame</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Warning: One or more parsing issues: row 4: expected 2 columns, got 1; column 'score': 1 value could not be parsed as float.
 # A tibble: 3 × 2
      id score
@@ -504,13 +504,13 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <section id="writing-csv" class="level2">
 <h2 class="anchored" data-anchor-id="writing-csv">Writing CSV</h2>
 <p><code>writeCsv($path)</code> writes a file and <code>toCsv()</code> returns the text. The format follows readr’s <code>write_csv()</code>. Values are quoted only when needed, NA is written as <code>NA</code>, logicals as <code>TRUE</code> and <code>FALSE</code>, dates in ISO 8601, and datetimes in UTC with a <code>Z</code>. Factors are written as their labels, and list-columns throw.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$frame</span> <span class="op">=</span> tribble(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tribble(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'name'</span><span class="ot">,</span> <span class="st">'note'</span><span class="ot">,</span> <span class="st">'score'</span><span class="ot">,</span> <span class="st">'seen'</span>]<span class="ot">,</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Ana'</span><span class="ot">,</span> <span class="st">'likes "quotes"'</span><span class="ot">,</span> <span class="fl">1e5</span><span class="ot">,</span> <span class="kw">true</span>]<span class="ot">,</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Ben'</span><span class="ot">,</span> <span class="st">'a, b'</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">false</span>]<span class="ot">,</span></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$frame</span>-&gt;toCsv()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toCsv()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>name,note,score,seen
 Ana,"likes ""quotes""",100000,TRUE
 Ben,"a, b",NA,FALSE</code></pre>
@@ -519,10 +519,10 @@ Ben,"a, b",NA,FALSE</code></pre>
 <section id="json" class="level2">
 <h2 class="anchored" data-anchor-id="json">JSON</h2>
 <p><code>toJson()</code> writes a list of records, and <code>toJson('columns')</code> writes an object of columns. NA is written as <code>null</code> and kept in every record. <code>DataFrame::fromJson()</code> reads either shape and detects which one it has.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$frame</span> <span class="op">=</span> tibble(id<span class="ot">:</span> [<span class="dv">1</span><span class="ot">,</span> <span class="dv">2</span>]<span class="ot">,</span> score<span class="ot">:</span> [<span class="fl">2.5</span><span class="ot">,</span> <span class="kw">null</span>])<span class="ot">;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tibble(id<span class="ot">:</span> [<span class="dv">1</span><span class="ot">,</span> <span class="dv">2</span>]<span class="ot">,</span> score<span class="ot">:</span> [<span class="fl">2.5</span><span class="ot">,</span> <span class="kw">null</span>])<span class="ot">;</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$frame</span>-&gt;toJson()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$frame</span>-&gt;toJson(<span class="st">'columns'</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toJson()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toJson(<span class="st">'columns'</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> DataFrame::fromJson(<span class="st">'{"id": [1, 2], "ok": [true, null]}'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>[{"id":1,"score":2.5},{"id":2,"score":null}]
@@ -540,9 +540,9 @@ Ben,"a, b",NA,FALSE</code></pre>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">'CREATE TABLE visits (id INTEGER, clinic TEXT, bp REAL, seen TEXT)'</span>)<span class="ot">;</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">"INSERT INTO visits VALUES (1, 'north', 121.5, '2024-05-01'), (2, 'south', NULL, '2024-05-02'), (3, 'north', 133.0, '2024-05-02')"</span>)<span class="ot">;</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="va">$frame</span> <span class="op">=</span> DataFrame::fromPdo(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'SELECT * FROM visits WHERE clinic = ?'</span><span class="ot">,</span> [<span class="st">'north'</span>])<span class="ot">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> DataFrame::fromPdo(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'SELECT * FROM visits WHERE clinic = ?'</span><span class="ot">,</span> [<span class="st">'north'</span>])<span class="ot">;</span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$frame</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 2 × 4
      id clinic    bp seen      
   &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;date&gt;    
