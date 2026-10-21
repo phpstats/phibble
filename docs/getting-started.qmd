@@ -4,7 +4,7 @@ title: "Getting started"
 
 ## Imports
 
-The examples on this site import the frame class and phibble's functions like
+The examples on this site import the `DataFrame` class and phibble's functions like
 this:
 
 ```php
@@ -19,11 +19,11 @@ names with PHP built-ins. In a file that imports
 them, a bare `round($x)` calls phibble's expression helper. Write `\round($x)`
 for PHP's function.
 
-## Building frames
+## Building data frames
 
-`tibble()` builds a frame column by column. Each named argument is a column.
+`tibble()` builds a data frame column by column. Each named argument is a column.
 A list gives one value per row, and a single value is repeated for every row.
-A closure receives the frame built so far, so a column can be computed from
+A closure receives the data frame built so far, so a column can be computed from
 earlier ones.
 
 {{< include examples/_tibble.md >}}
@@ -44,14 +44,14 @@ types.
 
 ## Printing
 
-`echo $df` prints the frame the way tibble does. The header gives the size,
-each column shows its type, and frames with more than 20 rows show the first
+`echo $df` prints the data frame the way tibble does. The header gives the size,
+each column shows its type, and data frames with more than 20 rows show the first
 10. Numbers show three significant digits and NA prints as `NA` (or `<NA>` in
 text columns).
 
 {{< include examples/_read-csv.md >}}
 
-`glimpse()` returns one line per column, which suits wide frames:
+`glimpse()` returns one line per column, which suits wide data frames:
 
 {{< include examples/_glimpse.md >}}
 
@@ -68,7 +68,7 @@ describes inference, casts, and factors.
 
 A column reads as a PHP list with `$df->name`, `$df['name']`, or
 `$df->column('name')`. Rows are `Phibble\Row` objects, which read values as
-properties or array keys. Iterating a frame yields its rows. An unknown column
+properties or array keys. Iterating a data frame yields its rows. An unknown column
 name throws `Phibble\Exception\ColumnNotFound`; names are never matched
 partially.
 
@@ -78,7 +78,7 @@ partially.
 
 DataFrames have the dplyr verbs as methods: `select()`, `filter()`, `mutate()`,
 `rename()`, `arrange()`, `groupBy()`, `summarise()`, `distinct()`, `slice()`,
-`head()`, and `join()`. Each returns a new frame.
+`head()`, and `join()`. Each returns a new data frame.
 
 `filter()` and `mutate()` accept a row closure, which receives a `Row` and
 returns a value. `arrange()` takes column names, or `[name, 'desc']` pairs.
@@ -93,13 +93,13 @@ form that SQL and Polars backends can translate.
 
 ## Groups
 
-`groupBy()` records grouping columns on the frame. `summarise()` returns one
+`groupBy()` records grouping columns on the data frame. `summarise()` returns one
 row per group, with groups in sorted order and NA last, as dplyr does. With
 several grouping columns, the result keeps all but the last.
 
 {{< include examples/_tour.md >}}
 
-In a grouped frame, `filter()` and `mutate()` work within each group. An
+In a grouped data frame, `filter()` and `mutate()` work within each group. An
 aggregate inside `mutate()` is computed per group and repeated for each of the
 group's rows:
 
@@ -137,7 +137,7 @@ both tables:
 
 ## Immutability
 
-Methods never change the frame they are called on:
+Methods never change the data frame they are called on:
 
 {{< include examples/_immutable.md >}}
 

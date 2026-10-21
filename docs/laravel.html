@@ -282,7 +282,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Laravel is not a dependency. The examples on this page use Eloquent with an in-memory SQLite database that holds the <code>penguins</code> data, through a model with a <code>measured()</code> scope that keeps rows with a body mass.</p>
 <section id="from-a-collection-or-query-to-a-dataframe" class="level2">
 <h2 class="anchored" data-anchor-id="from-a-collection-or-query-to-a-dataframe">From a collection or query to a DataFrame</h2>
-<p><code>toDataFrame()</code> builds a frame from the rows of a collection or a query. Column types are inferred from the values, as for <code>DataFrame::fromRows()</code>.</p>
+<p><code>toDataFrame()</code> builds a data frame from the rows of a collection or a query. Column types are inferred from the values, as for <code>DataFrame::fromRows()</code>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> Penguin::query()</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    -&gt;where(<span class="st">'year'</span><span class="ot">,</span> <span class="dv">2009</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    -&gt;get()</span>
@@ -621,7 +621,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="using-the-result" class="level2">
 <h2 class="anchored" data-anchor-id="using-the-result">Using the result</h2>
-<p>A collected frame can be returned from a controller or passed to a view:</p>
+<p>A collected data frame can be returned from a controller or passed to a view:</p>
 <ul>
 <li><code>$df-&gt;toRows()</code> gives a list of associative arrays, for JSON responses and Blade loops.</li>
 <li><code>$df-&gt;toJson()</code> gives the same rows as a JSON string, or the columns with <code>toJson('columns')</code>.</li>

@@ -1,7 +1,7 @@
 # phibble
 
 phibble is a port of R's tibble to PHP, with readr-style input and output.
-A `DataFrame` holds typed columns, treats `null` as NA, and returns a new frame
+A `DataFrame` holds typed columns, treats `null` as NA, and returns a new one
 from every operation. It is the shared table type for
 [phplyr](https://github.com/phpstats/phplyr),
 [phit](https://github.com/phpstats/phit), phpolars, and

@@ -16,7 +16,7 @@ tibble's abbreviation for each type.
 | `Type::Factor` | level labels, stored as codes | `<fct>`, or `<ord>` when ordered |
 | `Type::Date` | `DateTimeImmutable` at midnight UTC | `<date>` |
 | `Type::DateTime` | `DateTimeImmutable` | `<dttm>` |
-| `Type::List` | any PHP value, including frames | `<list>` |
+| `Type::List` | any PHP value, including data frames | `<list>` |
 
 `null` is NA in every type. `$df->types()` returns the types by column name
 and `$df->type('x')` returns one.
@@ -69,7 +69,7 @@ are 0-based indexes into the levels. An ordered factor sorts by level position.
 
 {{< include examples/_factors.md >}}
 
-The forcats functions are `fct*` methods. Each returns a new frame with the
+The forcats functions are `fct*` methods. Each returns a new data frame with the
 column's levels changed.
 
 | Method | Effect |
@@ -97,8 +97,8 @@ otherwise. Text without an offset is read as UTC.
 
 ## List-columns
 
-A list-column holds any PHP value in each row, such as arrays or other frames.
-`nest()` collapses columns into a list-column of frames, one row per unique
+A list-column holds any PHP value in each row, such as arrays or other data frames.
+`nest()` collapses columns into a list-column of data frames, one row per unique
 combination of the remaining columns. `unnest()` expands it again.
 
 {{< include examples/_list-columns.md >}}
@@ -108,7 +108,7 @@ combination of the remaining columns. `unnest()` expands it again.
 `toModelData()` returns columns in the form phit's model functions read.
 Numbers, bools, and strings are plain lists. Dates and datetimes become days
 and seconds since the epoch. A factor becomes an array with its levels, its
-0-based codes, and whether it is ordered, so a model keeps the frame's level
+0-based codes, and whether it is ordered, so a model keeps the data frame's level
 order, including unused levels. A list-column throws.
 
 {{< include examples/_model-data.md >}}

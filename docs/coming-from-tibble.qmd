@@ -23,7 +23,7 @@ their phibble equivalents.
 | `nrow(df)`, `ncol(df)`, `names(df)` | `$df->nrow()`, `$df->ncol()`, `$df->columns()` |
 | `.name_repair = "unique"` | `nameRepair: 'unique'` (also `check_unique`, `universal`, `minimal`) |
 
-In a `tibble()` call, a closure receives the frame built so far and returns a
+In a `tibble()` call, a closure receives the data frame built so far and returns a
 list or a single value. Only single values are recycled, and incompatible
 lengths throw with tibble's message.
 

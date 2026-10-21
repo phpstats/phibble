@@ -330,7 +330,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>Type::List</code></td>
-<td>any PHP value, including frames</td>
+<td>any PHP value, including data frames</td>
 <td><code>&lt;list&gt;</code></td>
 </tr>
 </tbody>
@@ -429,7 +429,7 @@ Warning: NAs introduced by coercion to bool in column 'flag' (2 values).
 3 medium
 4 large 
 bool(true)</code></pre>
-<p>The forcats functions are <code>fct*</code> methods. Each returns a new frame with the column’s levels changed.</p>
+<p>The forcats functions are <code>fct*</code> methods. Each returns a new data frame with the column’s levels changed.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -523,7 +523,7 @@ fctCollapse               ["brush-tailed","Chinstrap"]</code></pre>
 </section>
 <section id="list-columns" class="level2">
 <h2 class="anchored" data-anchor-id="list-columns">List-columns</h2>
-<p>A list-column holds any PHP value in each row, such as arrays or other frames. <code>nest()</code> collapses columns into a list-column of frames, one row per unique combination of the remaining columns. <code>unnest()</code> expands it again.</p>
+<p>A list-column holds any PHP value in each row, such as arrays or other data frames. <code>nest()</code> collapses columns into a list-column of data frames, one row per unique combination of the remaining columns. <code>unnest()</code> expands it again.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)-&gt;select([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'island'</span><span class="ot">,</span> <span class="st">'body_mass'</span>])<span class="ot">;</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="va">$nested</span> <span class="op">=</span> <span class="va">$penguins</span>-&gt;nest([<span class="st">'island'</span><span class="ot">,</span> <span class="st">'body_mass'</span>]<span class="ot">,</span> into<span class="ot">:</span> <span class="st">'data'</span>)<span class="ot">;</span></span>
@@ -554,7 +554,7 @@ fctCollapse               ["brush-tailed","Chinstrap"]</code></pre>
 </section>
 <section id="model-data" class="level2">
 <h2 class="anchored" data-anchor-id="model-data">Model data</h2>
-<p><code>toModelData()</code> returns columns in the form phit’s model functions read. Numbers, bools, and strings are plain lists. Dates and datetimes become days and seconds since the epoch. A factor becomes an array with its levels, its 0-based codes, and whether it is ordered, so a model keeps the frame’s level order, including unused levels. A list-column throws.</p>
+<p><code>toModelData()</code> returns columns in the form phit’s model functions read. Numbers, bools, and strings are plain lists. Dates and datetimes become days and seconds since the epoch. A factor becomes an array with its levels, its 0-based codes, and whether it is ordered, so a model keeps the data frame’s level order, including unused levels. A list-column throws.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tibble(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    mass<span class="ot">:</span> [<span class="fl">3750.0</span><span class="ot">,</span> <span class="fl">3800.0</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    male<span class="ot">:</span> [<span class="kw">true</span><span class="ot">,</span> <span class="kw">false</span><span class="ot">,</span> <span class="kw">true</span>]<span class="ot">,</span></span>

@@ -17,7 +17,7 @@ in-memory SQLite database that holds the `penguins` data, through a model with a
 
 ## From a collection or query to a DataFrame
 
-`toDataFrame()` builds a frame from the rows of a collection or a query. Column
+`toDataFrame()` builds a data frame from the rows of a collection or a query. Column
 types are inferred from the values, as for `DataFrame::fromRows()`.
 
 {{< include examples/_laravel-to-dataframe.md >}}
@@ -113,7 +113,7 @@ documentation covers them.
 
 ## Using the result
 
-A collected frame can be returned from a controller or passed to a view:
+A collected data frame can be returned from a controller or passed to a view:
 
 - `$df->toRows()` gives a list of associative arrays, for JSON responses
   and Blade loops.

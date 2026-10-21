@@ -272,7 +272,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>phibble is a port of R’s tibble to PHP, with the readr-style input and output a data frame needs. A <code>DataFrame</code> holds typed columns, treats <code>null</code> as NA, and never changes in place: every operation returns a new frame.</p>
+<p>phibble is a port of R’s tibble to PHP, with the readr-style input and output a data frame needs. A <code>DataFrame</code> holds typed columns, treats <code>null</code> as NA, and never changes in place: every operation returns a new one.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)<span class="ot">;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="va">$penguins</span></span>
@@ -302,7 +302,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong><a href="https://github.com/phpstats/phplyr">phplyr</a></strong> ports dplyr and tidyr as pipe-able functions.</li>
 <li><strong><a href="https://github.com/phpstats/phit">phit</a></strong> is a native extension for statistical models and descriptive statistics. It reads model data with <code>DataFrame::toModelData()</code>.</li>
 <li><strong>phpolars</strong> is an optional Polars-backed table.</li>
-<li><strong>cmdstanphp</strong> runs Stan models and will accept phibble frames.</li>
+<li><strong>cmdstanphp</strong> runs Stan models and will accept phibble data frames.</li>
 </ul>
 <p>The packages talk to each other through the <code>Table</code> contract. <code>DataFrame</code> is the in-memory implementation. <code>SqlTable</code> implements the same contract over a SQL query, so the verbs compile to SQL and run in the database.</p>
 <section id="install" class="level2">
@@ -314,7 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="where-to-go-next" class="level2">
 <h2 class="anchored" data-anchor-id="where-to-go-next">Where to go next</h2>
 <ul>
-<li><a href="./getting-started.html">Getting started</a> covers building frames, printing, and the verbs.</li>
+<li><a href="./getting-started.html">Getting started</a> covers building data frames, printing, and the verbs.</li>
 <li><a href="./coming-from-tibble.html">Coming from tibble</a> maps tibble, readr, and forcats functions to phibble and lists the places where phibble differs.</li>
 <li><a href="./types.html">Types</a> explains type inference, casts, factors, dates, and list-columns.</li>
 <li><a href="./io.html">Reading and writing data</a> covers CSV, JSON, databases, and Laravel collections.</li>
