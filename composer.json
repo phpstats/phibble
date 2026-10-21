@@ -55,5 +55,8 @@
             "type": "vcs",
             "url": "https://github.com/phpstats/phiz"
         }
-    ]
+    ],
+    "scripts": {
+        "lint": "phpcs"
+    }
 }
