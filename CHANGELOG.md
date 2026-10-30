@@ -33,6 +33,9 @@ change the public API.
   each raw column once typed. On the same table, `fromCsv()` holds 23 MB
   instead of 40 MB and peaks at 56 MB instead of 79 MB; `fromPdo()` holds
   24 MB instead of 41 MB and peaks at 75 MB instead of 114 MB.
+- Joins keep no per-row list of matches, and a single whole-number key is
+  used as the array key itself. A 100,000-row left join on an integer key
+  peaks at 36 MB instead of 95 MB and runs in a third of the time.
 - A named `col_types` entry that matches no column raises an
   `E_USER_WARNING` and the file is read, as readr's `cols()` does. It used to
   throw.

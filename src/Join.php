@@ -79,8 +79,16 @@ final class Join
         $checks = array_map(fn (array $c) => [$x->column($c[0]), $c[1], $y->column($c[2])], $conditions);
         $roll = $closest === null ? null : [$x->column($closest[0]), $closest[1], $y->column($closest[2])];
 
-        // Matches per x row, in y order.
-        $matches = [];
+        // One pass over x: the output rows, plus what the relationship and
+        // unmatched checks need, without holding every row's matches.
+        $semi = $type === 'semi' || $type === 'anti';
+        $keepUnmatchedX = in_array($type, ['left', 'full'], true);
+        $xRows = [];
+        $yRows = [];
+        $kept = [];
+        $timesMatched = [];
+        $xMulti = null;
+        $xUnmatched = null;
         foreach ($xKeys as $i => $key) {
             $found = match (true) {
                 $type === 'cross' || $pairs === [] => $allY,
@@ -90,45 +98,56 @@ final class Join
             if ($checks !== [] || $roll !== null) {
                 $found = self::filterConditions($i, $found, $checks, $roll, $naMatches);
             }
-            $matches[$i] = match ($multiple) {
+            $found = match ($multiple) {
                 'all' => $found,
                 'any', 'first' => array_slice($found, 0, 1),
                 'last' => array_slice($found, -1),
             };
-        }
-        $matchedY = [];
-        foreach ($matches as $i => $found) {
-            foreach ($found as $j) {
-                $matchedY[$j][] = $i;
+            if (count($found) > 1) {
+                $xMulti ??= $i;
             }
-        }
+            if ($found === []) {
+                $xUnmatched ??= $i;
+            }
+            foreach ($found as $j) {
+                $timesMatched[$j] = ($timesMatched[$j] ?? 0) + 1;
+            }
+            if ($semi) {
+                if (($found !== []) === ($type === 'semi')) {
+                    $kept[] = $i;
+                }
 
-        if ($type !== 'cross') {
-            self::checkRelationship($relationship, $matches, $matchedY, $type, $nonEquality);
-            self::checkUnmatched($unmatched, $type, $matches, $matchedY, $y->nrow());
-        }
-
-        if ($type === 'semi' || $type === 'anti') {
-            $rows = array_keys(array_filter($matches, fn (array $m) => ($m !== []) === ($type === 'semi')));
-
-            return $x->take($rows);
-        }
-
-        $xRows = [];
-        $yRows = [];
-        foreach ($matches as $i => $found) {
+                continue;
+            }
             foreach ($found as $j) {
                 $xRows[] = $i;
                 $yRows[] = $j;
             }
-            if ($found === [] && in_array($type, ['left', 'full'], true)) {
+            if ($found === [] && $keepUnmatchedX) {
                 $xRows[] = $i;
                 $yRows[] = null;
             }
         }
+        unset($index, $xKeys, $yKeys);
+
+        if ($type !== 'cross') {
+            $yMulti = null;
+            foreach ($timesMatched as $j => $times) {
+                if ($times > 1 && ($yMulti === null || $j < $yMulti)) {
+                    $yMulti = $j;
+                }
+            }
+            self::checkRelationship($relationship, $xMulti, $yMulti, $type, $nonEquality);
+            self::checkUnmatched($unmatched, $type, $xUnmatched, $timesMatched, $y->nrow());
+        }
+
+        if ($semi) {
+            return $x->take($kept);
+        }
+
         if (in_array($type, ['right', 'full'], true)) {
             for ($j = 0; $j < $y->nrow(); $j++) {
-                if (! isset($matchedY[$j])) {
+                if (! isset($timesMatched[$j])) {
                     $xRows[] = null;
                     $yRows[] = $j;
                 }
@@ -351,6 +370,20 @@ final class Join
     {
         $columns = array_map(fn (string $n) => $df->column($n), $names);
         $keys = [];
+        if (count($columns) === 1) {
+            // One key: whole numbers key by the integer itself, and other values
+            // by their normalised text, which never looks like an integer.
+            foreach ($columns[0] as $value) {
+                $keys[] = match (true) {
+                    $value === null => $naMatches ? 'NA' : null,
+                    is_int($value) => $value,
+                    is_float($value) && is_finite($value) && floor($value) === $value && abs($value) < 2 ** 53 => (int) $value,
+                    default => self::normalise($value),
+                };
+            }
+
+            return $keys;
+        }
         for ($i = 0; $i < $df->nrow(); $i++) {
             $parts = [];
             foreach ($columns as $values) {
@@ -387,28 +420,11 @@ final class Join
     }
 
     /**
-     * @param array<int, list<int>> $matches
-     * @param array<int, list<int>> $matchedY
+     * @param ?int $xMulti The first x row that matches several y rows.
+     * @param ?int $yMulti The first y row that several x rows match.
      */
-    private static function checkRelationship(?string $relationship, array $matches, array $matchedY, string $type, bool $nonEquality = false): void
+    private static function checkRelationship(?string $relationship, ?int $xMulti, ?int $yMulti, string $type, bool $nonEquality = false): void
     {
-        $xMulti = null;
-        foreach ($matches as $i => $found) {
-            if (count($found) > 1) {
-                $xMulti = $i;
-
-                break;
-            }
-        }
-        $yMulti = null;
-        foreach ($matchedY as $j => $found) {
-            if (count($found) > 1) {
-                $yMulti = $j;
-
-                break;
-            }
-        }
-
         if (in_array($relationship, ['one-to-one', 'many-to-one'], true) && $xMulti !== null) {
             throw new InvalidArgumentException('Each row in `x` must match at most 1 row in `y`. Row '.($xMulti + 1).' of `x` matches multiple rows in `y`.');
         }
@@ -428,24 +444,20 @@ final class Join
     }
 
     /**
-     * @param array<int, list<int>> $matches
-     * @param array<int, list<int>> $matchedY
+     * @param ?int $xUnmatched The first x row without a match.
+     * @param array<int, int> $timesMatched How many x rows matched each y row.
      */
-    private static function checkUnmatched(string $unmatched, string $type, array $matches, array $matchedY, int $yRows): void
+    private static function checkUnmatched(string $unmatched, string $type, ?int $xUnmatched, array $timesMatched, int $yRows): void
     {
         if ($unmatched !== 'error') {
             return;
         }
-        if (in_array($type, ['inner', 'right'], true)) {
-            foreach ($matches as $i => $found) {
-                if ($found === []) {
-                    throw new InvalidArgumentException('Each row of `x` must have a match in `y`. Row '.($i + 1).' of `x` does not have a match.');
-                }
-            }
+        if (in_array($type, ['inner', 'right'], true) && $xUnmatched !== null) {
+            throw new InvalidArgumentException('Each row of `x` must have a match in `y`. Row '.($xUnmatched + 1).' of `x` does not have a match.');
         }
         if (in_array($type, ['inner', 'left'], true)) {
             for ($j = 0; $j < $yRows; $j++) {
-                if (! isset($matchedY[$j])) {
+                if (! isset($timesMatched[$j])) {
                     throw new InvalidArgumentException('Each row of `y` must be matched by `x`. Row '.($j + 1).' of `y` was not matched.');
                 }
             }
