@@ -5,6 +5,20 @@ All notable changes to phibble are listed here. The format follows
 [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may
 change the public API.
 
+## [Unreleased]
+
+### Added
+
+- `DataFrame::fromCsvChunked()` and `DataFrame::csvChunks()` read delimited
+  text a chunk of rows at a time, as readr's `read_delim_chunked()` does.
+  Types are guessed from the first chunk and kept for the rest. A 105 MB file
+  reads in 10,000-row chunks within 16 MB.
+
+### Changed
+
+- The CSV reader reads its input in 4 MB blocks instead of all at once, so
+  `fromCsv()` no longer holds the file's text alongside its rows.
+
 ## [0.4.1] - 2026-10-30
 
 ### Fixed
@@ -181,6 +195,7 @@ and cmdstanphp.
   query builders and `->phibble()` for lazy SQL tables. Global scopes such as
   soft deletes apply.
 
+[Unreleased]: https://github.com/phpstats/phibble/compare/v0.4.1...HEAD
 [0.4.1]: https://github.com/phpstats/phibble/releases/tag/v0.4.1
 [0.4.0]: https://github.com/phpstats/phibble/releases/tag/v0.4.0
 [0.3.0]: https://github.com/phpstats/phibble/releases/tag/v0.3.0

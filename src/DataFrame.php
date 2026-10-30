@@ -126,6 +126,74 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
+     * Read delimited text in chunks, as readr::read_delim_chunked(): each
+     * chunk of at most $chunkSize rows is passed to $callback with the
+     * 1-based index of its first row. Returning false from the callback
+     * stops reading. Memory follows the chunk size, not the file's.
+     *
+     * Types not given are guessed from the first chunk (guessMax defaults to
+     * the chunk size, as in readr) and every later chunk is parsed as those
+     * types. Give types, for example ['.default' => 'c'], to skip guessing.
+     * Factors without levels take their levels from each chunk. Each
+     * chunk's problems raise their own warning, with rows numbered from the
+     * start of the file. Options are those of fromCsv(); the PHP reader is
+     * always used.
+     *
+     * @param string|resource $file
+     * @param callable(self, int): (bool|null|void) $callback
+     * @param string|array<int|string, mixed> $types
+     * @param list<string> $na
+     */
+    public static function fromCsvChunked(
+        mixed $file,
+        callable $callback,
+        int $chunkSize = 10_000,
+        string|array $types = [],
+        string $delimiter = ',',
+        array $na = ['', 'NA'],
+        mixed ...$options,
+    ): void {
+        $chunks = self::csvChunks($file, $chunkSize, $types, $delimiter, $na, ...$options);
+        foreach ($chunks as $position => $chunk) {
+            if ($callback($chunk, $position) === false) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * The chunks fromCsvChunked() reads, as a generator keyed by the 1-based
+     * index of each chunk's first row.
+     *
+     *     $kept = [];
+     *     foreach (DataFrame::csvChunks('feed.tsv', delimiter: "\t", types: ['.default' => 'c']) as $chunk) {
+     *         $kept[] = $chunk->filter(col('category')->eq('running'));
+     *     }
+     *     $shoes = DataFrame::concat($kept);
+     *
+     * @param string|resource $file
+     * @param string|array<int|string, mixed> $types
+     * @param list<string> $na
+     * @return Generator<int, self>
+     */
+    public static function csvChunks(
+        mixed $file,
+        int $chunkSize = 10_000,
+        string|array $types = [],
+        string $delimiter = ',',
+        array $na = ['', 'NA'],
+        mixed ...$options,
+    ): Generator {
+        if ($chunkSize < 1) {
+            throw new InvalidArgumentException("The chunk size must be at least 1, got {$chunkSize}.");
+        }
+        $options = new CsvOptions(...['guessMax' => $chunkSize, ...$options, 'types' => $types, 'delimiter' => $delimiter, 'na' => $na]);
+        $source = is_resource($file) ? CsvSource::stream($file, $options) : CsvSource::file((string) $file, $options);
+
+        return $source->chunks($chunkSize);
+    }
+
+    /**
      * Read delimited text from a string; options as fromCsv().
      *
      * @param string|array<int|string, mixed> $types

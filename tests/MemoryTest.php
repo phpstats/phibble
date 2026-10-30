@@ -81,3 +81,37 @@ it('writes CSV in chunks, without holding the whole output', function () {
     expect($written)->toBe($df->toCsv())
         ->and($peak / strlen($written))->toBeLessThan(0.5);
 });
+
+it('reads a file over 100 MB in chunks within a constant amount of memory', function () {
+    $path = tempnam(sys_get_temp_dir(), 'phibble-memory').'.tsv';
+    $handle = fopen($path, 'w');
+    fwrite($handle, "sku\tcategory\tgender\tprice\tdescription\n");
+    $line = "\tRunning Shoes\tWomen\t129.99\t\"Lightweight trainer, \"\"breathable\"\" mesh upper\tand a long description to pad the row out\"\n";
+    for ($i = 0; ftell($handle) < 105_000_000; $i++) {
+        fwrite($handle, implode('', array_map(fn ($j) => 'SKU'.($i * 1000 + $j).$line, range(0, 999))));
+    }
+    fclose($handle);
+
+    try {
+        gc_collect_cycles();
+        $before = memory_get_usage();
+        memory_reset_peak_usage();
+        $rows = 0;
+        $kept = 0;
+        DataFrame::fromCsvChunked($path, function (DataFrame $chunk) use (&$rows, &$kept) {
+            $rows += $chunk->nrow();
+            $kept += count(array_filter($chunk->column('sku'), fn (string $sku) => str_ends_with($sku, '000')));
+        }, delimiter: "\t", types: ['.default' => 'c']);
+        $peak = memory_get_peak_usage() - $before;
+        $size = filesize($path);
+    } finally {
+        unlink($path);
+    }
+
+    expect($size)->toBeGreaterThan(100_000_000)
+        ->and($rows % 1000)->toBe(0)
+        // SKU1000, SKU2000, ...: every thousandth row but the first.
+        ->and($kept)->toBe(intdiv($rows, 1000) - 1)
+        // About 16 MB: one 10,000-row chunk and one 4 MB read block.
+        ->and($peak)->toBeLessThan(32_000_000);
+});

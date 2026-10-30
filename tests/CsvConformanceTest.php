@@ -59,3 +59,22 @@ it('reads the corpus as the committed expectations say', function (array $case) 
         expect($actual['columns'][$i])->toBe($want, "column {$i}");
     }
 })->with(csvConformanceFixtureCases());
+
+it('reads the corpus the same whatever the block size', function (int $blockSize) {
+    $directory = sys_get_temp_dir().'/phibble-csv-blocks-'.getmypid();
+    @mkdir($directory);
+    Phibble\Source\CsvSource::$blockSize = $blockSize;
+    try {
+        foreach (csvConformanceFixtureCases() as $name => [$case]) {
+            $input = array_key_exists('input_base64', $case) ? base64_decode($case['input_base64'], true) : $case['input'];
+            $actual = csvConformanceRead(['input' => $input, 'options' => $case['options']], $directory);
+            expect([$actual['names'], $actual['problems'], $actual['columns']])
+                ->toBe([$case['expected']['names'], $case['expected']['problems'], $case['expected']['columns']], $name);
+            array_map(unlink(...), glob($directory.'/*') ?: []);
+        }
+    } finally {
+        Phibble\Source\CsvSource::$blockSize = 1 << 22;
+        array_map(unlink(...), glob($directory.'/*') ?: []);
+        @rmdir($directory);
+    }
+})->with([1, 2, 3, 5, 8, 64]);

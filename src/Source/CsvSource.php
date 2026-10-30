@@ -21,14 +21,14 @@ use RuntimeException;
  * reports problems (unparseable values, ragged rows) as one warning while
  * still returning the data.
  */
-final readonly class CsvSource implements Source
+final class CsvSource implements Source
 {
     /** @param resource $handle */
     private function __construct(
-        private mixed $handle,
-        private CsvOptions $options,
-        private bool $close,
-        private ?string $path = null,
+        private readonly mixed $handle,
+        private readonly CsvOptions $options,
+        private readonly bool $close,
+        private readonly ?string $path = null,
     ) {}
 
     /** Read a file; ".gz" files are decompressed. */
@@ -72,149 +72,205 @@ final readonly class CsvSource implements Source
 
             return $df;
         }
-        $records = $this->records();
-        $problems = [];
 
-        // Header (or the first record, which sets the column count).
-        $first = null;
-        for (; $records->valid(); $records->next()) {
-            if ($records->current() !== null) {
-                $first = $records->current();
-                $records->next();
-
-                break;
-            }
-        }
-        if ($first === null) {
-            $this->finish();
-
-            return DataFrame::fromColumns([]);
+        foreach ($this->batches(null) as $df) {
+            return $df;
         }
 
-        $record = $first;
-        $record[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $record[0]);
-        $width = count($record);
-        if ($o->colNames === true) {
-            $names = array_map(fn (?string $h) => $o->trimWs ? trim((string) $h) : (string) $h, $record);
-            $rows = [];
-        } else {
-            $names = $o->colNames === false ? [] : array_values(array_map(strval(...), $o->colNames));
-            $rows = [$record];
-        }
-        for ($i = count($names); $i < $width; $i++) {
-            $names[] = 'X'.($i + 1);
-        }
-        $width = count($names);
-        $names = NameRepair::repair($names, $o->nameRepair);
-        $specs = ColTypes::resolve($o->types, $names, $o->select);
-        $kept = array_keys(array_filter($specs, fn ($spec) => $spec !== 'skip'));
+        return DataFrame::fromColumns([]);
+    }
 
-        // Data rows. Skipped columns (including those outside select) are not held.
-        $columns = array_fill(0, $width, []);
-        $count = 0;
-        // Problems name rows as readr::problems() does: the data row's index plus one.
-        // Repeated values in a column share one string. A column whose values
-        // turn out to be mostly distinct stops pooling, so free text pays nothing.
-        $pools = array_fill_keys($kept, []);
-        $take = function (array $record) use (&$columns, &$count, &$problems, &$pools, $width, $kept, $o): void {
-            $row = $count + 2;
-            if (count($record) < $width) {
-                $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
-                $record = array_pad($record, $width, null);
-            } elseif (count($record) > $width) {
-                $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
-                $extra = array_splice($record, $width - 1);
-                $record[] = implode($o->delimiter, array_map(strval(...), $extra));
-            }
-            foreach ($kept as $i) {
-                $value = $record[$i];
-                if ($value !== null) {
-                    if ($o->trimWs) {
-                        $value = trim($value, " \t");
-                    }
-                    if (in_array($value, $o->na, true)) {
-                        $value = null;
-                    } elseif (isset($pools[$i])) {
-                        $value = $pools[$i][$value] ??= $value;
-                    }
-                }
-                $columns[$i][] = $value;
-            }
-            $count++;
-            if ($count % 4096 === 0) {
-                foreach ($pools as $i => $pool) {
-                    if (count($pool) > $count / 2) {
-                        unset($pools[$i]);
-                    }
-                }
-            }
-        };
-
-        foreach ($rows as $row) {
-            if ($o->nMax === null || $count < $o->nMax) {
-                $take($row);
-            }
+    /**
+     * The rows in DataFrames of at most $size rows, keyed by the 1-based
+     * index of each one's first row, as readr's read_delim_chunked() passes
+     * it. Columns are typed once: types not given are guessed from the first
+     * chunk's rows (guessMax of them, sampled as readr samples) and every
+     * later chunk is parsed as those types. Factors without levels take
+     * their levels from each chunk. Each chunk's problems raise their own
+     * warning, with rows numbered from the start of the file.
+     *
+     * @return Generator<int, DataFrame>
+     */
+    public function chunks(int $size): Generator
+    {
+        if ($size < 1) {
+            throw new InvalidArgumentException("The chunk size must be at least 1, got {$size}.");
         }
-        if ($o->nMax === null || $count < $o->nMax) {
+
+        return $this->batches($size);
+    }
+
+    /**
+     * Batches of rows as DataFrames; one batch of every row when $size is
+     * null. A single batch is yielded even for an empty or header-only
+     * input, which read() returns; chunks() yields only batches with rows.
+     *
+     * @return Generator<int, DataFrame>
+     */
+    private function batches(?int $size): Generator
+    {
+        $o = $this->options;
+        try {
+            $records = $this->records();
+
+            // Header (or the first record, which sets the column count).
+            $first = null;
             for (; $records->valid(); $records->next()) {
-                $record = $records->current();
-                if ($record === null) {
-                    continue;
-                }
-                $take($record);
-                if ($o->nMax !== null && $count >= $o->nMax) {
+                if ($records->current() !== null) {
+                    $first = $records->current();
+                    $records->next();
+
                     break;
                 }
             }
-        }
-        unset($pools);
-        if (! $records->valid() && $records->getReturn() === true) {
-            $problems[] = 'row '.($count + 1).': unterminated quoted field at end of file';
-        }
-        $this->finish();
+            if ($first === null) {
+                if ($size === null) {
+                    yield 1 => DataFrame::fromColumns([]);
+                }
 
-        // Types.
-        $parser = new TextParser($o->decimalMark, $o->groupingMark);
-        $sample = self::sampleRows($count, $o->guessMax);
-        $data = [];
-        foreach ($names as $i => $name) {
-            $spec = $specs[$i];
-            if ($spec === 'skip') {
-                continue;
+                return;
             }
-            $values = $columns[$i];
-            if ($spec === null) {
-                // readr reads the columns of a header-only file as text.
-                $type = $count === 0 ? Type::String : $parser->guess(array_map(fn (int $row) => $values[$row], $sample));
-                $spec = ['type' => $type, 'number' => false, 'levels' => null, 'ordered' => false];
-                $grouping = true;
+
+            $record = $first;
+            $record[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $record[0]);
+            $width = count($record);
+            if ($o->colNames === true) {
+                $names = array_map(fn (?string $h) => $o->trimWs ? trim((string) $h) : (string) $h, $record);
+                $pendingRows = [];
             } else {
-                $grouping = false;
+                $names = $o->colNames === false ? [] : array_values(array_map(strval(...), $o->colNames));
+                $pendingRows = [$record];
             }
-            [$column, $failed] = $parser->parse($values, $spec['type'], [
-                'grouping' => $grouping,
-                'number' => $spec['number'],
-                'levels' => $spec['levels'],
-                'ordered' => $spec['ordered'],
-            ]);
-            if ($failed > 0) {
-                $problems[] = "column '{$name}': {$failed} value".($failed === 1 ? '' : 's')." could not be parsed as {$spec['type']->value}";
+            for ($i = count($names); $i < $width; $i++) {
+                $names[] = 'X'.($i + 1);
             }
-            $data[$name] = $column;
+            $width = count($names);
+            $names = NameRepair::repair($names, $o->nameRepair);
+            $specs = ColTypes::resolve($o->types, $names, $o->select);
+            $kept = array_keys(array_filter($specs, fn ($spec) => $spec !== 'skip'));
+            $parser = new TextParser($o->decimalMark, $o->groupingMark);
+
+            // Problems name rows as readr::problems() does: the data row's index plus one.
+            $count = 0;
+            $columns = [];
+            $problems = [];
+            // Repeated values in a column share one string. A column whose values
+            // turn out to be mostly distinct stops pooling, so free text pays nothing.
+            $pools = [];
+            $inBatch = 0;
+            $take = function (array $record) use (&$columns, &$count, &$problems, &$pools, &$inBatch, $width, $kept, $o): void {
+                $row = $count + 2;
+                if (count($record) < $width) {
+                    $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
+                    $record = array_pad($record, $width, null);
+                } elseif (count($record) > $width) {
+                    $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
+                    $extra = array_splice($record, $width - 1);
+                    $record[] = implode($o->delimiter, array_map(strval(...), $extra));
+                }
+                foreach ($kept as $i) {
+                    $value = $record[$i];
+                    if ($value !== null) {
+                        if ($o->trimWs) {
+                            $value = trim($value, " \t");
+                        }
+                        if (in_array($value, $o->na, true)) {
+                            $value = null;
+                        } elseif (isset($pools[$i])) {
+                            $value = $pools[$i][$value] ??= $value;
+                        }
+                    }
+                    $columns[$i][] = $value;
+                }
+                $count++;
+                $inBatch++;
+                if ($inBatch % 4096 === 0) {
+                    foreach ($pools as $i => $pool) {
+                        if (count($pool) > $inBatch / 2) {
+                            unset($pools[$i]);
+                        }
+                    }
+                }
+            };
+
+            $done = false;
+            $batch = 0;
+            while (! $done) {
+                $columns = array_fill_keys($kept, []);
+                $pools = array_fill_keys($kept, []);
+                $problems = [];
+                $inBatch = 0;
+                $full = function () use (&$inBatch, &$count, $size, $o): bool {
+                    return ($size !== null && $inBatch >= $size) || ($o->nMax !== null && $count >= $o->nMax);
+                };
+                while ($pendingRows !== [] && ! $full()) {
+                    $take(array_shift($pendingRows));
+                }
+                for (; ! $full() && $records->valid(); $records->next()) {
+                    if ($records->current() !== null) {
+                        $take($records->current());
+                    }
+                }
+                $capped = $o->nMax !== null && $count >= $o->nMax;
+                // Past any blank lines, to know whether records remain.
+                while (! $capped && $records->valid() && $records->current() === null) {
+                    $records->next();
+                }
+                $exhausted = ! $records->valid();
+                $done = $exhausted || $capped;
+                if ($exhausted && ! $capped && $records->getReturn() === true) {
+                    $problems[] = 'row '.($count + 1).': unterminated quoted field at end of file';
+                }
+                $pools = [];
+                if ($inBatch === 0 && ($size !== null || $batch > 0)) {
+                    self::warn($problems);
+
+                    break;
+                }
+
+                // Types: guessed from the first batch, then fixed for the rest.
+                $sample = self::sampleRows($inBatch, $o->guessMax);
+                $data = [];
+                foreach ($names as $i => $name) {
+                    $spec = $specs[$i];
+                    if ($spec === 'skip') {
+                        continue;
+                    }
+                    $values = $columns[$i];
+                    $columns[$i] = null;
+                    if ($spec === null) {
+                        // readr reads the columns of a header-only file as text.
+                        $type = $inBatch === 0 ? Type::String : $parser->guess(array_map(fn (int $row) => $values[$row], $sample));
+                        $spec = $specs[$i] = ['type' => $type, 'number' => false, 'levels' => null, 'ordered' => false, 'guessed' => true];
+                    }
+                    [$column, $failed] = $parser->parse($values, $spec['type'], [
+                        'grouping' => $spec['guessed'] ?? false,
+                        'number' => $spec['number'],
+                        'levels' => $spec['levels'],
+                        'ordered' => $spec['ordered'],
+                    ]);
+                    if ($failed > 0) {
+                        $problems[] = "column '{$name}': {$failed} value".($failed === 1 ? '' : 's')." could not be parsed as {$spec['type']->value}";
+                    }
+                    $data[$name] = $column;
+                }
+
+                if ($o->select !== null) {
+                    $selected = [];
+                    foreach ($o->select as $name) {
+                        $selected[$name] = $data[$name]
+                            ?? throw new InvalidArgumentException("col_select names unknown column '{$name}'.");
+                    }
+                    $data = $selected;
+                }
+
+                self::warn($problems);
+                $batch++;
+                yield $count - $inBatch + 1 => DataFrame::fromColumns($data);
+            }
+        } finally {
+            $this->finish();
         }
-
-        if ($o->select !== null) {
-            $selected = [];
-            foreach ($o->select as $name) {
-                $selected[$name] = $data[$name]
-                    ?? throw new InvalidArgumentException("col_select names unknown column '{$name}'.");
-            }
-            $data = $selected;
-        }
-
-        self::warn($problems);
-
-        return DataFrame::fromColumns($data);
     }
 
     /** @param list<string> $problems */
@@ -250,8 +306,21 @@ final readonly class CsvSource implements Source
     }
 
     /**
+     * Bytes read from the input at a time. Tests shrink it to put block
+     * boundaries everywhere.
+     *
+     * @internal
+     */
+    public static int $blockSize = 1 << 22;
+
+    /**
      * Records keyed by 1-based line number; null for an empty line. Returns
      * whether the text ended inside an unclosed quote.
+     *
+     * The input is read a block at a time. Each tokenizer gets the text up to
+     * the block's last newline and stops before a record that does not end
+     * inside it (a quoted field running on into the next block), so a record
+     * is never split and the whole input is never held.
      *
      * @return Generator<int, list<?string>|null, mixed, bool>
      */
@@ -261,42 +330,89 @@ final readonly class CsvSource implements Source
         $line = 0;
         for ($i = 0; $i < $o->skip; $i++) {
             if (fgets($this->handle) === false) {
-                return;
+                return false;
             }
             $line++;
         }
+        $fast = $o->comment === '' && $o->escapeDouble && ! $o->escapeBackslash && $o->quote !== '';
+        $first = true;
+        $pending = '';
+        $crOnly = null;
+        $carry = '';
+        $emitted = false;
+        while (true) {
+            $block = (string) fread($this->handle, self::$blockSize);
+            if (! feof($this->handle) && str_ends_with($block, "\r")) {
+                // Keep a CRLF pair in one block.
+                $block .= (string) fread($this->handle, 1);
+            }
+            $final = feof($this->handle);
+            if ($first) {
+                // A UTF-8 byte-order mark (Excel writes one, even before a quoted header).
+                $block = $pending.$block;
+                if (strlen($block) < 3 && ! $final) {
+                    $pending = $block;
 
-        if ($o->comment === '' && $o->escapeDouble && ! $o->escapeBackslash && $o->quote !== '') {
-            return (bool) yield from $this->fastRecords($line);
+                    continue;
+                }
+                if ($line === 0 && str_starts_with($block, "\xEF\xBB\xBF")) {
+                    $block = substr($block, 3);
+                }
+                $first = false;
+            }
+            // Old Mac files end lines in CR alone; the first line break says which.
+            if ($crOnly === null && strpbrk($block, "\r\n") !== false) {
+                $crOnly = ! str_contains($block, "\n");
+            }
+            $text = $carry.($crOnly ? str_replace("\r", "\n", $block) : str_replace("\r\n", "\n", $block));
+            unset($block);
+            $rest = '';
+            if (! $final) {
+                $cut = strrpos($text, "\n");
+                if ($cut === false) {
+                    $carry = $text;
+
+                    continue;
+                }
+                $rest = substr($text, $cut + 1);
+                $text = substr($text, 0, $cut + 1);
+            }
+            [$unterminated, $consumed, $line, $emitted] = $fast
+                ? yield from $this->fastRecords($text, $line, $final)
+                : yield from $this->slowRecords($text, $line, $final, $emitted);
+            if ($final) {
+                return $unterminated;
+            }
+            $carry = substr($text, $consumed).$rest;
         }
-
-        return yield from $this->slowRecords($line);
     }
 
-    /** @return Generator<int, list<?string>|null, mixed, ?bool> */
-    private function fastRecords(int $line): Generator
+    /**
+     * Without quotes, every line is a record and every delimiter separates
+     * fields, so plain splitting gives the tokenizer's result.
+     *
+     * @return Generator<int, list<?string>|null, mixed, array{bool, int, int, bool}>
+     */
+    private function fastRecords(string $text, int $line, bool $final): Generator
     {
         $o = $this->options;
-        $text = self::normalize((string) stream_get_contents($this->handle), $line === 0);
-        // Without quotes or carriage returns, every line is a record and every
-        // delimiter separates fields, so plain splitting gives fgetcsv's result.
-        if (! str_contains($text, $o->quote) && ! str_contains($text, "\r")) {
-            $ended = str_ends_with($text, "\n");
-            $lines = explode("\n", $text);
-            unset($text);
-            if (end($lines) === '') {
-                array_pop($lines);
-            }
-            $last = array_key_last($lines);
-            foreach ($lines as $i => $content) {
-                $line++;
-                yield $line => $this->record($content, explode($o->delimiter, $content), $ended || $i !== $last);
-            }
-
-            return;
+        if (str_contains($text, $o->quote)) {
+            return yield from $this->quotedRecords($text, $line, $final);
+        }
+        $ended = str_ends_with($text, "\n");
+        $length = strlen($text);
+        $lines = explode("\n", $text);
+        unset($text);
+        if (end($lines) === '') {
+            array_pop($lines);
+        }
+        $last = array_key_last($lines);
+        foreach ($lines as $i => $content) {
+            $line++;
+            yield $line => $this->record($content, explode($o->delimiter, $content), $ended || $i !== $last);
         }
 
-        return yield from $this->quotedRecords(str_replace("\r\n", "\n", $text), $line);
+        return [false, $length, $line, true];
     }
 
     /**
@@ -306,11 +422,13 @@ final readonly class CsvSource implements Source
      * a literal quote, so `"x "y" z"` reads as `x y z` and `"x "y",z"` as
      * `x y,z`. Quotes in an unquoted field are literal.
      *
-     * Returns whether the text ended inside quotes.
+     * Returns whether the text ended inside quotes, how many bytes were
+     * read, the line count, and that a record was seen. Unless $final, a
+     * record that does not end in this text is left for the next.
      *
-     * @return Generator<int, list<?string>|null, mixed, bool>
+     * @return Generator<int, list<?string>|null, mixed, array{bool, int, int, bool}>
      */
-    private function quotedRecords(string $text, int $line): Generator
+    private function quotedRecords(string $text, int $line, bool $final): Generator
     {
         $o = $this->options;
         $delim = $o->delimiter;
@@ -331,10 +449,13 @@ final readonly class CsvSource implements Source
                         if ($inQuotes) {
                             $next = strpos($text, $quote, $pos);
                             if ($next === false) {
+                                if (! $final) {
+                                    return [false, $start, $line - 1, true];
+                                }
                                 $fields[] = $field.substr($text, $pos);
                                 yield $line => $this->record(substr($text, $start), $fields, false);
 
-                                return true;
+                                return [true, $length, $line, true];
                             }
                             $field .= substr($text, $pos, $next - $pos);
                             $pos = $next + 1;
@@ -386,11 +507,14 @@ final readonly class CsvSource implements Source
                     break;
                 }
             }
+            if ($end !== "\n" && ! $final) {
+                return [false, $start, $line - 1, true];
+            }
             $raw = substr($text, $start, $pos - $start);
             yield $line => $this->record($raw, $fields, $end === "\n");
         }
 
-        return false;
+        return [false, $length, $line, true];
     }
 
     /**
@@ -441,22 +565,19 @@ final readonly class CsvSource implements Source
      * A character-level reader for comments, backslash escapes, and files
      * without quoting. Quotes follow the rules in quotedRecords().
      *
-     * @return Generator<int, list<?string>|null, mixed, bool>
+     * Returns what quotedRecords() returns; $emitted carries whether a
+     * record has been seen in an earlier block.
+     *
+     * @return Generator<int, list<?string>|null, mixed, array{bool, int, int, bool}>
      */
-    private function slowRecords(int $line): Generator
+    private function slowRecords(string $text, int $line, bool $final, bool $emitted): Generator
     {
         $o = $this->options;
-        $text = self::normalize((string) stream_get_contents($this->handle), $line === 0);
-        if ($text === false) {
-            return false;
-        }
-        $text = str_replace("\r\n", "\n", $text);
         $length = strlen($text);
         $pos = 0;
         $delim = $o->delimiter;
         $quote = $o->quote;
         $comment = $o->comment;
-        $emitted = false;
 
         while ($pos < $length) {
             $line++;
@@ -483,6 +604,7 @@ final readonly class CsvSource implements Source
                 continue;
             }
 
+            $terminated = false;
             while ($pos < $length) {
                 $c = $text[$pos];
                 if ($inQuotes) {
@@ -515,6 +637,7 @@ final readonly class CsvSource implements Source
 
                 if ($c === "\n") {
                     $pos++;
+                    $terminated = true;
 
                     break;
                 }
@@ -537,6 +660,7 @@ final readonly class CsvSource implements Source
                 if ($comment !== '' && substr_compare($text, $comment, $pos, strlen($comment)) === 0) {
                     $end = strpos($text, "\n", $pos);
                     $pos = $end === false ? $length : $end + 1;
+                    $terminated = $end !== false;
 
                     break;
                 }
@@ -558,17 +682,20 @@ final readonly class CsvSource implements Source
                 $pos++;
             }
 
+            if (! $terminated && ! $final) {
+                return [false, $start, $line - 1, $emitted];
+            }
             $fields[] = $this->finishField($field, $quoted);
             $raw = substr($text, $start, $pos - $start);
             $record = $this->record($raw, $fields, str_ends_with($raw, "\n"));
             $emitted = $emitted || $record !== null;
             yield $line => $record;
             if ($inQuotes) {
-                return true;
+                return [true, $length, $line, $emitted];
             }
         }
 
-        return false;
+        return [false, $length, $line, $emitted];
     }
 
     /**
@@ -591,22 +718,6 @@ final readonly class CsvSource implements Source
     private static function blank(string $line): bool
     {
         return trim($line, " \t\r\n") === '';
-    }
-
-    /**
-     * Strip a UTF-8 byte-order mark (Excel writes one, even before a quoted
-     * header) and accept old Mac files whose lines end in CR alone.
-     */
-    private static function normalize(string $text, bool $atStart): string
-    {
-        if ($atStart && str_starts_with($text, "\xEF\xBB\xBF")) {
-            $text = substr($text, 3);
-        }
-        if (! str_contains($text, "\n") && str_contains($text, "\r")) {
-            $text = str_replace("\r", "\n", $text);
-        }
-
-        return $text;
     }
 
     private function finish(): void
