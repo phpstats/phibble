@@ -81,10 +81,10 @@ final class ColTypes
 
         $default = array_key_exists('.default', $types) ? self::spec($types['.default']) : null;
         unset($types['.default']);
-        foreach (array_keys($types) as $name) {
-            if (! in_array((string) $name, $names, true)) {
-                throw new InvalidArgumentException("col_types names unknown column '{$name}'.");
-            }
+        // readr warns about names that match no column and reads the rest.
+        $unknown = array_diff(array_map(strval(...), array_keys($types)), $names);
+        if ($unknown !== []) {
+            trigger_error("The following named parsers don't match the column names: ".implode(', ', $unknown), E_USER_WARNING);
         }
 
         return array_map(fn (string $name) => array_key_exists($name, $types) ? self::spec($types[$name]) : $default, $names);

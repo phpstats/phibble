@@ -223,6 +223,13 @@ it('neither holds nor parses columns outside col_select', function (string $read
         ->and($df->column('score'))->toBe([1.5, 2.5, 3.5]);
 })->with('csv readers');
 
+it('warns about col_types names that match no column and reads the rest, as readr does', function () {
+    [$df, $warnings] = quietly(fn () => DataFrame::fromCsvString("a,b\n1,2\n", ['.default' => 'c', 'zz' => 'l', 'yy' => 'i']));
+
+    expect($warnings)->toBe(["The following named parsers don't match the column names: zz, yy"])
+        ->and($df->types())->toBe(['a' => Type::String, 'b' => Type::String]);
+});
+
 it('rejects col_select names that do not exist', function () {
     DataFrame::fromCsvString("a,b\n1,2\n", select: ['c']);
 })->throws(InvalidArgumentException::class, "unknown column 'c'");

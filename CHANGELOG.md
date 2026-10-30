@@ -24,6 +24,9 @@ change the public API.
 
 ### Changed
 
+- A named `col_types` entry that matches no column raises an
+  `E_USER_WARNING` and the file is read, as readr's `cols()` does. It used to
+  throw.
 - The native CSV reader is used only with phit newer than 0.1.0. phit 0.1.0
   reads stray quotes the old way, so phibble reads CSV in PHP when it is
   loaded.
