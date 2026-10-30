@@ -113,7 +113,10 @@ final readonly class CsvSource implements Source
         $columns = array_fill(0, $width, []);
         $count = 0;
         // Problems name rows as readr::problems() does: the data row's index plus one.
-        $take = function (array $record) use (&$columns, &$count, &$problems, $width, $kept, $o): void {
+        // Repeated values in a column share one string. A column whose values
+        // turn out to be mostly distinct stops pooling, so free text pays nothing.
+        $pools = array_fill_keys($kept, []);
+        $take = function (array $record) use (&$columns, &$count, &$problems, &$pools, $width, $kept, $o): void {
             $row = $count + 2;
             if (count($record) < $width) {
                 $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
@@ -131,11 +134,20 @@ final readonly class CsvSource implements Source
                     }
                     if (in_array($value, $o->na, true)) {
                         $value = null;
+                    } elseif (isset($pools[$i])) {
+                        $value = $pools[$i][$value] ??= $value;
                     }
                 }
                 $columns[$i][] = $value;
             }
             $count++;
+            if ($count % 4096 === 0) {
+                foreach ($pools as $i => $pool) {
+                    if (count($pool) > $count / 2) {
+                        unset($pools[$i]);
+                    }
+                }
+            }
         };
 
         foreach ($rows as $row) {
@@ -155,6 +167,7 @@ final readonly class CsvSource implements Source
                 }
             }
         }
+        unset($pools);
         if (! $records->valid() && $records->getReturn() === true) {
             $problems[] = 'row '.($count + 1).': unterminated quoted field at end of file';
         }

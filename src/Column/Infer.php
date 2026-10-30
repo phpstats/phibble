@@ -56,7 +56,9 @@ final class Infer
      */
     public static function parse(array $values, Type|string|null $type = null, array $na = ['', 'NA'], string $name = ''): Column
     {
-        $values = array_map(fn (?string $v) => $v === null || in_array(trim($v), $na, true) ? null : $v, $values);
+        if ($na !== []) {
+            $values = array_map(fn (?string $v) => $v === null || in_array(trim($v), $na, true) ? null : $v, $values);
+        }
         if ($type !== null) {
             return self::cast($values, Type::parse($type), Type::String, $name);
         }
@@ -97,8 +99,7 @@ final class Infer
      */
     public static function fromDatabase(array $values, Type|string|null $type = null, string $name = ''): Column
     {
-        $present = array_filter($values, fn ($v) => $v !== null);
-        if ($present !== [] && array_all($present, fn ($v) => is_string($v))) {
+        if (array_any($values, fn ($v) => $v !== null) && array_all($values, fn ($v) => $v === null || is_string($v))) {
             return self::parse($values, $type, [], $name);
         }
 
@@ -209,6 +210,18 @@ final class Infer
         }
         if ($type === Type::List) {
             return new ArrayColumn(Type::List, $values);
+        }
+
+        // Values that already have the type need no conversion, so the array is kept rather than copied.
+        $native = match ($type) {
+            Type::Int => is_int(...),
+            Type::Float => is_float(...),
+            Type::Bool => is_bool(...),
+            Type::String => is_string(...),
+            default => null,
+        };
+        if ($native !== null && array_all($values, fn ($v) => $v === null || $native($v))) {
+            return new ArrayColumn($type, $values);
         }
 
         self::$fail ??= new \stdClass();

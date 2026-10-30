@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phibble\Source;
 
 use PDO;
+use PDOStatement;
 use Phibble\Column\Infer;
 use Phibble\DataFrame;
 use Phibble\Exception\ColumnNotFound;
@@ -45,40 +46,66 @@ final readonly class PdoSource implements Source
         }
         $statement->execute();
 
-        $columns = array_fill(0, $statement->columnCount(), []);
-        while (($row = $statement->fetch(PDO::FETCH_NUM)) !== false) {
-            foreach ($row as $i => $value) {
-                $columns[$i][] = $value;
-            }
-        }
+        $columns = self::fetchColumns($statement);
 
         // Columns are typed as the database declared them, so text stays
         // text; only values the driver leaves untyped (SQLite's, or other
         // drivers') are guessed from their text. Explicit types win.
         $declared = Dialect::tryFor($this->pdo)?->resultTypes($statement, $columns) ?? [];
-        $data = [];
-        foreach ($columns as $i => $values) {
+        $positions = [];
+        for ($i = 0; $i < count($columns); $i++) {
             $meta = $statement->getColumnMeta($i);
             // A repeated name keeps the last column, as PDO::FETCH_ASSOC does.
-            $name = $meta === false ? "column{$i}" : $meta['name'];
-            $data[$name] = [$values, $declared[$i] ?? null];
+            $positions[$meta === false ? "column{$i}" : $meta['name']] = $i;
         }
         foreach (array_keys($this->types) as $name) {
-            if (! array_key_exists($name, $data)) {
-                throw ColumnNotFound::named((string) $name, array_map(strval(...), array_keys($data)));
+            if (! array_key_exists($name, $positions)) {
+                throw ColumnNotFound::named((string) $name, array_map(strval(...), array_keys($positions)));
             }
         }
 
+        // Each raw column is released once it is typed.
         $built = [];
-        foreach ($data as $name => [$values, $type]) {
+        foreach ($positions as $name => $i) {
             $name = (string) $name;
-            $type = $this->types[$name] ?? $type;
-            $built[$name] = $values === []
+            $type = $this->types[$name] ?? $declared[$i] ?? null;
+            $built[$name] = $columns[$i] === []
                 ? Infer::column([], $type, $name)
-                : Infer::fromDatabase($values, $type, $name);
+                : Infer::fromDatabase($columns[$i], $type, $name);
+            $columns[$i] = null;
         }
 
         return DataFrame::fromColumns($built);
+    }
+
+    /**
+     * A result's values by column position. Repeated strings in a column
+     * share one string; a column whose values turn out to be mostly
+     * distinct stops pooling, so free text pays nothing.
+     *
+     * @internal
+     *
+     * @return list<list<mixed>>
+     */
+    public static function fetchColumns(PDOStatement $statement): array
+    {
+        $columns = array_fill(0, $statement->columnCount(), []);
+        $pools = array_fill(0, $statement->columnCount(), []);
+        $count = 0;
+        while (($row = $statement->fetch(PDO::FETCH_NUM)) !== false) {
+            foreach ($row as $i => $value) {
+                $columns[$i][] = is_string($value) && isset($pools[$i]) ? $pools[$i][$value] ??= $value : $value;
+            }
+            if (++$count % 4096 === 0) {
+                foreach ($pools as $i => $pool) {
+                    if (count($pool) > $count / 2) {
+                        unset($pools[$i]);
+                    }
+                }
+            }
+        }
+
+        return $columns;
     }
 
     private static function bindable(mixed $value): mixed

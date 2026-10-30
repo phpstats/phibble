@@ -243,12 +243,7 @@ final readonly class SqlTable implements Table
         $statement = $this->run($this->render());
         // Build columns straight from positional rows; each column is then
         // typed in one pass (text from the driver is parsed, as readr would).
-        $columns = array_fill(0, count($this->columns), []);
-        while (($row = $statement->fetch(PDO::FETCH_NUM)) !== false) {
-            foreach ($row as $i => $value) {
-                $columns[$i][] = $value;
-            }
-        }
+        $columns = PdoSource::fetchColumns($statement);
         // Columns are typed as the database declared them; hints (logical
         // expressions that SQLite and MySQL return as 0/1) come first.
         $declared = $this->dialect->resultTypes($statement, $columns);

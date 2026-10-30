@@ -27,6 +27,12 @@ change the public API.
 - `writeCsv()` writes a chunk of rows at a time. On a 100,000-row,
   17.6 MB table its peak memory fell from 161 MB to 3 MB, and the output is
   unchanged.
+- The CSV and PDO readers share one string among a column's repeated
+  values, and stop pooling in a column whose values are mostly distinct.
+  `fromPdo()` no longer copies each column while typing it and releases
+  each raw column once typed. On the same table, `fromCsv()` holds 23 MB
+  instead of 40 MB and peaks at 56 MB instead of 79 MB; `fromPdo()` holds
+  24 MB instead of 41 MB and peaks at 75 MB instead of 114 MB.
 - A named `col_types` entry that matches no column raises an
   `E_USER_WARNING` and the file is read, as readr's `cols()` does. It used to
   throw.
