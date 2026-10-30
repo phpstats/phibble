@@ -68,9 +68,25 @@ sampled the way readr 2 samples them. A column is:
 
 Numbers with leading zeros such as `007` stay strings, as in readr.
 
-When a value cannot be parsed as its column's type, or a row has the wrong
-number of fields, phibble still returns the data. The value becomes NA, and the
-read raises one `E_USER_WARNING` that lists the problems.
+When a value cannot be parsed as its column's type, a row has the wrong number
+of fields, or a quoted field is never closed, phibble still returns the data.
+The value becomes NA, and the read raises one `E_USER_WARNING` that lists the
+problems. Rows are numbered as in `readr::problems()`: the first data row is
+row 2, and skipped, blank, and comment lines are not counted.
+
+## Quotes
+
+Quoted fields follow readr 2's rules. A field is quoted when its first
+character is the quote character. Inside a quoted field, a doubled quote is a
+literal quote. Any other quote turns quoting off or back on and is dropped, so
+`"x "y" z"` reads as `x y z`, and `"x "y",z"` reads as `x y,z`. A quote inside
+a field that does not start with one is kept as it is. With
+`escapeDouble: false`, the quotes inside a quoted field are kept, and only the
+opening and closing quotes are dropped.
+
+Files written with PHP's `fputcsv()` and its default backslash escape contain
+`\"` instead of `""`. readr does not treat the backslash as an escape, and
+neither does phibble unless `escapeBackslash: true` is passed.
 
 {{< include examples/_csv-problems.md >}}
 

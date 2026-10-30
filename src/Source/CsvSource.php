@@ -79,7 +79,7 @@ final readonly class CsvSource implements Source
         $first = null;
         for (; $records->valid(); $records->next()) {
             if ($records->current() !== null) {
-                $first = [$records->key(), $records->current()];
+                $first = $records->current();
                 $records->next();
 
                 break;
@@ -91,7 +91,7 @@ final readonly class CsvSource implements Source
             return DataFrame::fromColumns([]);
         }
 
-        [$line, $record] = $first;
+        $record = $first;
         $record[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $record[0]);
         $width = count($record);
         if ($o->colNames === true) {
@@ -99,7 +99,7 @@ final readonly class CsvSource implements Source
             $rows = [];
         } else {
             $names = $o->colNames === false ? [] : array_values(array_map(strval(...), $o->colNames));
-            $rows = [[$line, $record]];
+            $rows = [$record];
         }
         for ($i = count($names); $i < $width; $i++) {
             $names[] = 'X'.($i + 1);
@@ -112,12 +112,14 @@ final readonly class CsvSource implements Source
         // Data rows. Skipped columns (including those outside select) are not held.
         $columns = array_fill(0, $width, []);
         $count = 0;
-        $take = function (int $line, array $record) use (&$columns, &$count, &$problems, $width, $kept, $o): void {
+        // Problems name rows as readr::problems() does: the data row's index plus one.
+        $take = function (array $record) use (&$columns, &$count, &$problems, $width, $kept, $o): void {
+            $row = $count + 2;
             if (count($record) < $width) {
-                $problems[] = "row {$line}: expected {$width} columns, got ".count($record);
+                $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
                 $record = array_pad($record, $width, null);
             } elseif (count($record) > $width) {
-                $problems[] = "row {$line}: expected {$width} columns, got ".count($record);
+                $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
                 $extra = array_splice($record, $width - 1);
                 $record[] = implode($o->delimiter, array_map(strval(...), $extra));
             }
@@ -136,9 +138,9 @@ final readonly class CsvSource implements Source
             $count++;
         };
 
-        foreach ($rows as [$l, $r]) {
+        foreach ($rows as $row) {
             if ($o->nMax === null || $count < $o->nMax) {
-                $take($l, $r);
+                $take($row);
             }
         }
         if ($o->nMax === null || $count < $o->nMax) {
@@ -147,11 +149,14 @@ final readonly class CsvSource implements Source
                 if ($record === null) {
                     continue;
                 }
-                $take($records->key(), $record);
+                $take($record);
                 if ($o->nMax !== null && $count >= $o->nMax) {
                     break;
                 }
             }
+        }
+        if (! $records->valid() && $records->getReturn() === true) {
+            $problems[] = 'row '.($count + 1).': unterminated quoted field at end of file';
         }
         $this->finish();
 
@@ -232,9 +237,10 @@ final readonly class CsvSource implements Source
     }
 
     /**
-     * Records keyed by 1-based line number; null for an empty line.
+     * Records keyed by 1-based line number; null for an empty line. Returns
+     * whether the text ended inside an unclosed quote.
      *
-     * @return Generator<int, list<?string>|null>
+     * @return Generator<int, list<?string>|null, mixed, bool>
      */
     private function records(): Generator
     {
@@ -248,13 +254,13 @@ final readonly class CsvSource implements Source
         }
 
         if ($o->comment === '' && $o->escapeDouble && ! $o->escapeBackslash && $o->quote !== '') {
-            yield from $this->fastRecords($line);
-        } else {
-            yield from $this->slowRecords($line);
+            return (bool) yield from $this->fastRecords($line);
         }
+
+        return yield from $this->slowRecords($line);
     }
 
-    /** @return Generator<int, list<?string>|null> */
+    /** @return Generator<int, list<?string>|null, mixed, ?bool> */
     private function fastRecords(int $line): Generator
     {
         $o = $this->options;
@@ -277,36 +283,159 @@ final readonly class CsvSource implements Source
             return;
         }
 
-        $memory = fopen('php://temp', 'r+');
-        fwrite($memory, $text);
-        unset($text);
-        rewind($memory);
-        $start = 0;
-        while (($record = fgetcsv($memory, null, $o->delimiter, $o->quote, '')) !== false) {
-            $line++;
-            // The bytes fgetcsv() just consumed, so blank() sees the raw line.
-            $end = (int) ftell($memory);
-            fseek($memory, $start);
-            $raw = (string) fread($memory, $end - $start);
-            fseek($memory, $end);
-            $start = $end;
-            yield $line => $this->record($raw, $record === [null] ? [''] : $record, str_ends_with($raw, "\n"));
-        }
-        fclose($memory);
+        return yield from $this->quotedRecords(str_replace("\r\n", "\n", $text), $line);
     }
 
     /**
-     * A character-level reader for the cases fgetcsv() can't handle:
-     * comments, backslash escapes and unquoted files.
+     * Records from text that has quotes, by vroom's (readr 2's) rules. A
+     * field is quoted when it starts with the quote character. Within it,
+     * every lone quote toggles quoting and is dropped, and a doubled quote is
+     * a literal quote, so `"x "y" z"` reads as `x y z` and `"x "y",z"` as
+     * `x y,z`. Quotes in an unquoted field are literal.
      *
-     * @return Generator<int, list<?string>|null>
+     * Returns whether the text ended inside quotes.
+     *
+     * @return Generator<int, list<?string>|null, mixed, bool>
+     */
+    private function quotedRecords(string $text, int $line): Generator
+    {
+        $o = $this->options;
+        $delim = $o->delimiter;
+        $quote = $o->quote;
+        $length = strlen($text);
+        $pos = 0;
+        while ($pos < $length) {
+            $line++;
+            $start = $pos;
+            $fields = [];
+            $end = null;
+            while (true) {
+                if ($text[$pos] === $quote) {
+                    $field = '';
+                    $pos++;
+                    $inQuotes = true;
+                    while (true) {
+                        if ($inQuotes) {
+                            $next = strpos($text, $quote, $pos);
+                            if ($next === false) {
+                                $fields[] = $field.substr($text, $pos);
+                                yield $line => $this->record(substr($text, $start), $fields, false);
+
+                                return true;
+                            }
+                            $field .= substr($text, $pos, $next - $pos);
+                            $pos = $next + 1;
+                            if ($pos < $length && $text[$pos] === $quote) {
+                                $field .= $quote;
+                                $pos++;
+                            } else {
+                                $inQuotes = false;
+                            }
+
+                            continue;
+                        }
+                        $run = strcspn($text, $delim.$quote."\n", $pos);
+                        $field .= substr($text, $pos, $run);
+                        $pos += $run;
+                        if ($pos < $length && $text[$pos] === $quote) {
+                            if ($pos + 1 < $length && $text[$pos + 1] === $quote) {
+                                $field .= $quote;
+                                $pos += 2;
+                            } else {
+                                $inQuotes = true;
+                                $pos++;
+                            }
+
+                            continue;
+                        }
+
+                        break;
+                    }
+                } else {
+                    $run = strcspn($text, $delim."\n", $pos);
+                    $field = $this->unquoteTrimmed(substr($text, $pos, $run));
+                    $pos += $run;
+                }
+                $fields[] = $field;
+                if ($pos >= $length) {
+                    $end = null;
+
+                    break;
+                }
+                $end = $text[$pos++];
+                if ($end === "\n") {
+                    break;
+                }
+                if ($pos >= $length) {
+                    // A delimiter at the very end leaves one empty field.
+                    $fields[] = '';
+
+                    break;
+                }
+            }
+            $raw = substr($text, $start, $pos - $start);
+            yield $line => $this->record($raw, $fields, $end === "\n");
+        }
+
+        return false;
+    }
+
+    /**
+     * With trimWs, an unquoted field that starts with a quote once trimmed
+     * is unquoted as vroom does: the first quote dropped, doubled quotes
+     * made single, and other quotes dropped.
+     */
+    private function unquoteTrimmed(string $field): string
+    {
+        $quote = $this->options->quote;
+        if (! $this->options->trimWs || $quote === '' || ! str_contains($field, $quote)) {
+            return $field;
+        }
+        $trimmed = trim($field, " \t");
+        if (! str_starts_with($trimmed, $quote)) {
+            return $field;
+        }
+
+        return $this->options->escapeDouble
+            ? strtr(substr($trimmed, 1), [$quote.$quote => $quote, $quote => ''])
+            : self::dropClosingQuote(substr($trimmed, 1), $quote);
+    }
+
+    /**
+     * A field from slowRecords(). Without escapeDouble, vroom keeps the
+     * quotes inside a quoted field and drops only the opening and closing
+     * ones, so slowRecords() keeps every inner quote and the closing one is
+     * dropped here.
+     */
+    private function finishField(string $field, bool $quoted): string
+    {
+        if (! $quoted) {
+            return $this->unquoteTrimmed($field);
+        }
+        if ($this->options->escapeDouble) {
+            return $field;
+        }
+
+        return self::dropClosingQuote($this->options->trimWs ? trim($field, " \t") : $field, $this->options->quote);
+    }
+
+    private static function dropClosingQuote(string $field, string $quote): string
+    {
+        return str_ends_with($field, $quote) ? substr($field, 0, -1) : $field;
+    }
+
+    /**
+     * A character-level reader for comments, backslash escapes, and files
+     * without quoting. Quotes follow the rules in quotedRecords().
+     *
+     * @return Generator<int, list<?string>|null, mixed, bool>
      */
     private function slowRecords(int $line): Generator
     {
         $o = $this->options;
         $text = self::normalize((string) stream_get_contents($this->handle), $line === 0);
         if ($text === false) {
-            return;
+            return false;
         }
         $text = str_replace("\r\n", "\n", $text);
         $length = strlen($text);
@@ -321,6 +450,7 @@ final readonly class CsvSource implements Source
             $start = $pos;
             $fields = [];
             $field = '';
+            $quoted = false;
             $inQuotes = false;
 
             // A line that starts with the comment string is dropped entirely.
@@ -357,6 +487,9 @@ final readonly class CsvSource implements Source
                             continue;
                         }
                         $inQuotes = false;
+                        if (! $o->escapeDouble) {
+                            $field .= $quote;
+                        }
                         $pos++;
 
                         continue;
@@ -372,6 +505,22 @@ final readonly class CsvSource implements Source
 
                     break;
                 }
+                if ($quote !== '' && $c === $quote && ($quoted || $field === '')) {
+                    // Opens a quoted field, or toggles quoting inside one.
+                    if ($quoted && $o->escapeDouble && $pos + 1 < $length && $text[$pos + 1] === $quote) {
+                        $field .= $quote;
+                        $pos += 2;
+
+                        continue;
+                    }
+                    if ($quoted && ! $o->escapeDouble) {
+                        $field .= $quote;
+                    }
+                    $quoted = $inQuotes = true;
+                    $pos++;
+
+                    continue;
+                }
                 if ($comment !== '' && substr_compare($text, $comment, $pos, strlen($comment)) === 0) {
                     $end = strpos($text, "\n", $pos);
                     $pos = $end === false ? $length : $end + 1;
@@ -379,15 +528,9 @@ final readonly class CsvSource implements Source
                     break;
                 }
                 if ($c === $delim) {
-                    $fields[] = $field;
+                    $fields[] = $this->finishField($field, $quoted);
                     $field = '';
-                    $pos++;
-
-                    continue;
-                }
-                if ($quote !== '' && $c === $quote && trim($field) === '') {
-                    $inQuotes = true;
-                    $field = '';
+                    $quoted = false;
                     $pos++;
 
                     continue;
@@ -402,12 +545,17 @@ final readonly class CsvSource implements Source
                 $pos++;
             }
 
-            $fields[] = $field;
+            $fields[] = $this->finishField($field, $quoted);
             $raw = substr($text, $start, $pos - $start);
             $record = $this->record($raw, $fields, str_ends_with($raw, "\n"));
             $emitted = $emitted || $record !== null;
             yield $line => $record;
+            if ($inQuotes) {
+                return true;
+            }
         }
+
+        return false;
     }
 
     /**

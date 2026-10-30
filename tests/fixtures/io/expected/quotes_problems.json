@@ -1,0 +1,28 @@
+{
+  "names": ["a", "b"],
+  "types": {
+    "a": "string",
+    "b": "string"
+  },
+  "levels": {},
+  "values": {
+    "a": [
+      "1",
+      "x \\",
+      "1",
+      "z\"",
+      "a",
+      "6"
+    ],
+    "b": [
+      "2",
+      "z\",3",
+      "x y",
+      null,
+      "b\",5",
+      "7"
+    ]
+  },
+  "problems": 3,
+  "problem_rows": [3, 5, 6]
+}

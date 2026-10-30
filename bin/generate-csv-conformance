@@ -65,10 +65,10 @@
  * through JSON_INVALID_UTF8_SUBSTITUTE, which is lossy and would make the
  * expectation wrong rather than unreadable.
  *
- * "problems" is phibble's list. The native reader also reports unterminated
- * quoted fields and the PHP reader does not, so each case carries a closed
- * list, "phit_extra_problems", of the exact extra strings phit is expected to
- * add; it is empty for all but the unterminated-quote cases. phit's test
+ * "problems" is phibble's list. Each case carries a closed list,
+ * "phit_extra_problems", of the exact extra strings phit is expected to add.
+ * It is empty for every case now that both readers report unterminated
+ * quoted fields. phit's test
  * asserts set equality against the union, so an unexpected extra problem fails
  * rather than being subtracted away by a pattern.
  */
@@ -254,18 +254,24 @@ function csvConformanceCases(): array
     $case('structure/value-then-comment', "a,b\n2 # x,y\n3,z\n", ['comment' => '#']);
     $case('structure/comment-in-header', "# a note\na,b\n1,x\n", ['comment' => '#']);
     $case('structure/invalid-utf8', "\xFF,b\n\xFE\xFF,x\n");
-    $case(
-        'structure/unterminated-quote',
-        "a,b\n\"x,1\n",
-        [],
-        ['row 2: unterminated quoted field at end of file'],
-    );
-    $case(
-        'structure/unterminated-quote-only-field',
-        "a\n\"x\n",
-        [],
-        ['row 2: unterminated quoted field at end of file'],
-    );
+    $case('structure/unterminated-quote', "a,b\n\"x,1\n");
+    $case('structure/unterminated-quote-only-field', "a\n\"x\n");
+
+    // --- Stray quotes, read by vroom's rules (readr 2.x answers) -------------
+    // In a field that starts with a quote, a lone quote toggles quoting and is
+    // dropped and a doubled quote is literal; elsewhere quotes are literal.
+    $case('quotes/backslash-quoted-word', "a,b\n\"x \\\"y\\\" z\",2\n", ['types' => ['c', 'c']]);
+    $case('quotes/stray-pair', "a,b\n\"x \"y\" z\",2\n", ['types' => ['c', 'c']]);
+    $case('quotes/stray-pair-hides-delimiter', "a,b\n\"x \"y\",z\",2\n", ['types' => ['c', 'c']]);
+    $case('quotes/backslash-before-delimiter', "a,b\n\"x \\\", z\",2\n", ['types' => ['c', 'c']]);
+    $case('quotes/doubled', "a,b\n\"x \"\"y\"\" z\",2\n", ['types' => ['c', 'c']]);
+    $case('quotes/in-unquoted-field', "a,b\nx\"y,2\nab\"c\"d,3\n", ['types' => ['c', 'c']]);
+    $case('quotes/text-after-closing-quote', "a,b\n\"x\"y,2\n\"x\" y,3\n", ['types' => ['c', 'c']]);
+    $case('quotes/doubled-then-stray', "a,b\n\"a\"x\"\",2\n\"\"\"a\",3\n", ['types' => ['c', 'c']]);
+    $case('quotes/stray-newline-ends-record', "a,b\n1,\"x \"y\nz\"\n5,6\n", ['types' => ['c', 'c']]);
+    $case('quotes/space-before-quote', "a,b\n  \"a,b\",2\n", ['types' => ['c', 'c']]);
+    $case('quotes/doubled-reopens', "a,b\n\"x\"\",2\n3,4\n", ['types' => ['c', 'c']]);
+    $case('quotes/escape-double-off', "a,b\n\"x \"y\",z\",2\n\"x\"\"\",3\n", ['types' => ['c', 'c'], 'escape_double' => false]);
 
     // --- No data rows (the five cases task 1 added to phit/tests/csv.php) ----
     // With no data rows a column is string, before the guesser's empty-column

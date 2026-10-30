@@ -58,7 +58,7 @@ for (case in cases) {
     opts$col_types <- do.call(cols, c(spec, list(.default = default)))
   }
   for (key in c("na", "skip", "n_max", "comment", "col_names", "col_types", "guess_max",
-                "trim_ws", "skip_empty_rows", "name_repair", "col_select")) {
+                "trim_ws", "skip_empty_rows", "name_repair", "col_select", "escape_double")) {
     if (!is.null(r[[key]])) {
       value <- r[[key]]
       if (is.list(value)) value <- unlist(value)
@@ -72,7 +72,9 @@ for (case in cases) {
     types = lapply(d, type_of),
     levels = lapply(Filter(is.factor, d), levels),
     values = lapply(d, values_of),
-    problems = nrow(problems(d))
+    problems = nrow(problems(d)),
+    # Rows of the structural problems (wrong field counts, unclosed quotes).
+    problem_rows = I(sort(unique(problems(d)$row[grepl("columns|closing quote", problems(d)$expected)])))
   )
   if (isTRUE(case$write)) {
     expected$csv <- format_csv(d)

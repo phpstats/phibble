@@ -13,6 +13,20 @@ change the public API.
   `select`, as readr's `col_select` does. Those columns raised parsing
   warnings and cost time and memory. Rows with the wrong number of fields
   still warn.
+- Quoted CSV fields follow readr 2's rules. Inside a field that starts with a
+  quote, a lone quote toggles quoting and is dropped, so `"x "y" z"` reads as
+  `x y z` and `"x "y",z"` as `x y,z`. Before, the field ended at the first lone
+  quote and the rest was read literally. With `escapeDouble: false`, inner
+  quotes are kept, as in readr.
+- A quoted field left open at the end of the file is reported as a problem.
+- Problems name rows as `readr::problems()` does. Skipped, blank, and comment
+  lines no longer shift the numbers.
+
+### Changed
+
+- The native CSV reader is used only with phit newer than 0.1.0. phit 0.1.0
+  reads stray quotes the old way, so phibble reads CSV in PHP when it is
+  loaded.
 
 ## [0.4.0] - 2026-10-30
 

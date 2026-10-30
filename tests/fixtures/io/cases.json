@@ -157,7 +157,8 @@
     },
     "php": {
       "skipEmptyRows": false
-    }
+    },
+    "problem_rows_differ": "readr numbers an empty line's problem one lower than other rows' (and not at all as data row 1); phibble numbers it like any row."
   },
   {
     "name": "ragged",
@@ -308,6 +309,62 @@
     "php": {
       "comment": "#",
       "trimWs": false
+    }
+  },
+  {
+    "name": "quotes_stray",
+    "file": "quotes_stray.csv",
+    "r": {
+      "col_types": "cc"
+    },
+    "php": {
+      "types": "cc"
+    }
+  },
+  {
+    "name": "quotes_problems",
+    "file": "quotes_problems.csv",
+    "r": {
+      "col_types": "cc"
+    },
+    "php": {
+      "types": "cc"
+    }
+  },
+  {
+    "name": "quotes_unterminated",
+    "file": "quotes_unterminated.csv",
+    "r": {
+      "col_types": "cc"
+    },
+    "php": {
+      "types": "cc"
+    }
+  },
+  {
+    "name": "quotes_escape_double_off",
+    "file": "quotes_escape_double_off.csv",
+    "r": {
+      "col_types": "cc",
+      "escape_double": false
+    },
+    "php": {
+      "types": "cc",
+      "escapeDouble": false
+    }
+  },
+  {
+    "name": "problem_rows_skip_comment",
+    "file": "problem_rows_skip_comment.csv",
+    "r": {
+      "col_types": "cc",
+      "skip": 1,
+      "comment": "#"
+    },
+    "php": {
+      "types": "cc",
+      "skip": 1,
+      "comment": "#"
     }
   }
 ]

@@ -53,6 +53,9 @@ function withCsvReader(string $reader, Closure $fn): mixed
     if ($reader === 'extension' && ! function_exists('Phit\\read_csv')) {
         test()->markTestSkipped('Phit\read_csv() is not available (phit extension not loaded).');
     }
+    if ($reader === 'extension' && ! Phibble\Io\NativeCsv::extensionAgrees()) {
+        test()->markTestSkipped('This phit reads quotes unlike vroom, so phibble does not use it.');
+    }
     Phibble\Io\NativeCsv::enable($reader !== 'php');
     Phibble\Io\NativeCsv::using($reader === 'emulated' ? emulatedStatsReadCsv(...) : null);
     try {
@@ -69,8 +72,16 @@ it('reads CSV like readr', function (array $case, string $reader) {
     $expected['names'] = (array) $expected['names'];
     [$df, $warnings] = withCsvReader($reader, fn () => quietly(fn () => DataFrame::fromCsv(IO_FIXTURES.'/'.$case['file'], ...$case['php'])));
 
+    // Rows named by ragged-row and unclosed-quote problems, as readr::problems() numbers them.
+    preg_match_all('/row (\d+):/', implode("\n", $warnings), $rows);
+    $rows = array_values(array_unique(array_map(intval(...), $rows[1])));
+    sort($rows);
+
     expect($df->columns())->toBe($expected['names'])
         ->and(count($warnings) > 0)->toBe($expected['problems'] > 0);
+    if (! isset($case['problem_rows_differ'])) {
+        expect($rows)->toBe($expected['problem_rows'], 'problem rows');
+    }
 
     foreach ($expected['names'] as $name) {
         $type = $df->type($name);

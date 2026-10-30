@@ -17,5 +17,6 @@
       "b,c"
     ]
   },
-  "problems": 2
+  "problems": 2,
+  "problem_rows": [3, 4]
 }
