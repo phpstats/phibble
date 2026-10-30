@@ -101,12 +101,13 @@ it('reads tab-separated files by the same quote rules', function () {
 
 it('keeps records whole across read blocks', function (int $blockSize) {
     $csv = "a,b\n\"one\ntwo\",1\n\"x \"\"q\"\" y\",2\r\nplain,3\n";
+    $previous = CsvSource::$blockSize;
     CsvSource::$blockSize = $blockSize;
     try {
         $chunks = chunksOf($csv, 2);
         $whole = withCsvFile($csv, fn ($path) => DataFrame::fromCsv($path));
     } finally {
-        CsvSource::$blockSize = 1 << 22;
+        CsvSource::$blockSize = $previous;
     }
 
     expect($whole->column('a'))->toBe(["one\ntwo", 'x "q" y', 'plain'])

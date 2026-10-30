@@ -154,44 +154,12 @@ final class CsvSource implements Source
             $count = 0;
             $columns = [];
             $problems = [];
-            // Repeated values in a column share one string. A column whose values
-            // turn out to be mostly distinct stops pooling, so free text pays nothing.
+            // Repeated values in a column share one string, until a column's
+            // values turn out to be mostly distinct. Besides memory, this saves
+            // time: a repeated value's new string is freed at once and reused.
             $pools = [];
             $inBatch = 0;
-            $take = function (array $record) use (&$columns, &$count, &$problems, &$pools, &$inBatch, $width, $kept, $o): void {
-                $row = $count + 2;
-                if (count($record) < $width) {
-                    $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
-                    $record = array_pad($record, $width, null);
-                } elseif (count($record) > $width) {
-                    $problems[] = "row {$row}: expected {$width} columns, got ".count($record);
-                    $extra = array_splice($record, $width - 1);
-                    $record[] = implode($o->delimiter, array_map(strval(...), $extra));
-                }
-                foreach ($kept as $i) {
-                    $value = $record[$i];
-                    if ($value !== null) {
-                        if ($o->trimWs) {
-                            $value = trim($value, " \t");
-                        }
-                        if (in_array($value, $o->na, true)) {
-                            $value = null;
-                        } elseif (isset($pools[$i])) {
-                            $value = $pools[$i][$value] ??= $value;
-                        }
-                    }
-                    $columns[$i][] = $value;
-                }
-                $count++;
-                $inBatch++;
-                if ($inBatch % 4096 === 0) {
-                    foreach ($pools as $i => $pool) {
-                        if (count($pool) > $inBatch / 2) {
-                            unset($pools[$i]);
-                        }
-                    }
-                }
-            };
+            $naSet = array_fill_keys($o->na, true);
 
             $done = false;
             $batch = 0;
@@ -200,16 +168,46 @@ final class CsvSource implements Source
                 $pools = array_fill_keys($kept, []);
                 $problems = [];
                 $inBatch = 0;
-                $full = function () use (&$inBatch, &$count, $size, $o): bool {
-                    return ($size !== null && $inBatch >= $size) || ($o->nMax !== null && $count >= $o->nMax);
-                };
-                while ($pendingRows !== [] && ! $full()) {
-                    $take(array_shift($pendingRows));
-                }
-                for (; ! $full() && $records->valid(); $records->next()) {
-                    if ($records->current() !== null) {
-                        $take($records->current());
+                $limit = min($size ?? PHP_INT_MAX, $o->nMax === null ? PHP_INT_MAX : $o->nMax - $count);
+                // The hot loop: one pass per record, fields arriving trimmed.
+                while ($inBatch < $limit) {
+                    if ($pendingRows !== []) {
+                        $record = array_shift($pendingRows);
+                    } elseif ($records->valid()) {
+                        $record = $records->current();
+                        $records->next();
+                        if ($record === null) {
+                            continue;
+                        }
+                    } else {
+                        break;
                     }
+                    if (count($record) !== $width) {
+                        $problems[] = 'row '.($count + 2).": expected {$width} columns, got ".count($record);
+                        if (count($record) < $width) {
+                            $record = array_pad($record, $width, null);
+                        } else {
+                            $extra = array_splice($record, $width - 1);
+                            $record[] = implode($o->delimiter, array_map(strval(...), $extra));
+                        }
+                    }
+                    foreach ($kept as $i) {
+                        $value = $record[$i];
+                        $columns[$i][] = match (true) {
+                            $value === null, isset($naSet[$value]) => null,
+                            isset($pools[$i]) => $pools[$i][$value] ??= $value,
+                            default => $value,
+                        };
+                    }
+                    if (($inBatch + 1) % 4096 === 0) {
+                        foreach ($pools as $i => $pool) {
+                            if (count($pool) > ($inBatch + 1) / 2) {
+                                unset($pools[$i]);
+                            }
+                        }
+                    }
+                    $count++;
+                    $inBatch++;
                 }
                 $capped = $o->nMax !== null && $count >= $o->nMax;
                 // Past any blank lines, to know whether records remain.
@@ -401,6 +399,7 @@ final class CsvSource implements Source
         }
         $ended = str_ends_with($text, "\n");
         $length = strlen($text);
+        $trim = $o->trimWs && self::edgeSpace($text, $o->delimiter);
         $lines = explode("\n", $text);
         unset($text);
         if (end($lines) === '') {
@@ -409,7 +408,11 @@ final class CsvSource implements Source
         $last = array_key_last($lines);
         foreach ($lines as $i => $content) {
             $line++;
-            yield $line => $this->record($content, explode($o->delimiter, $content), $ended || $i !== $last);
+            $fields = explode($o->delimiter, $content);
+            if ($trim) {
+                $fields = array_map(fn (string $f) => trim($f, " \t"), $fields);
+            }
+            yield $line => $this->record($content, $fields, $ended || $i !== $last);
         }
 
         return [false, $length, $line, true];
@@ -452,7 +455,7 @@ final class CsvSource implements Source
                                 if (! $final) {
                                     return [false, $start, $line - 1, true];
                                 }
-                                $fields[] = $field.substr($text, $pos);
+                                $fields[] = $this->trimmed($field.substr($text, $pos));
                                 yield $line => $this->record(substr($text, $start), $fields, false);
 
                                 return [true, $length, $line, true];
@@ -490,7 +493,7 @@ final class CsvSource implements Source
                     $field = $this->unquoteTrimmed(substr($text, $pos, $run));
                     $pos += $run;
                 }
-                $fields[] = $field;
+                $fields[] = $this->trimmed($field);
                 if ($pos >= $length) {
                     $end = null;
 
@@ -515,6 +518,30 @@ final class CsvSource implements Source
         }
 
         return [false, $length, $line, true];
+    }
+
+    /**
+     * Whether a space or tab touches the edge of some field in unquoted
+     * text, so that trimming could change it. A tab delimiter is never part
+     * of a field.
+     */
+    private static function edgeSpace(string $text, string $delimiter): bool
+    {
+        foreach (str_split(str_replace($delimiter, '', " \t")) as $w) {
+            if (str_starts_with($text, $w) || str_ends_with($text, $w)
+                || str_contains($text, $w.$delimiter) || str_contains($text, $delimiter.$w)
+                || str_contains($text, $w."\n") || str_contains($text, "\n".$w)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** A field with trimWs applied; the tokenizers trim, so rows need no second pass. */
+    private function trimmed(string $field): string
+    {
+        return $this->options->trimWs ? trim($field, " \t") : $field;
     }
 
     /**
@@ -665,7 +692,7 @@ final class CsvSource implements Source
                     break;
                 }
                 if ($c === $delim) {
-                    $fields[] = $this->finishField($field, $quoted);
+                    $fields[] = $this->trimmed($this->finishField($field, $quoted));
                     $field = '';
                     $quoted = false;
                     $pos++;
@@ -685,7 +712,7 @@ final class CsvSource implements Source
             if (! $terminated && ! $final) {
                 return [false, $start, $line - 1, $emitted];
             }
-            $fields[] = $this->finishField($field, $quoted);
+            $fields[] = $this->trimmed($this->finishField($field, $quoted));
             $raw = substr($text, $start, $pos - $start);
             $record = $this->record($raw, $fields, str_ends_with($raw, "\n"));
             $emitted = $emitted || $record !== null;

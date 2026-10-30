@@ -63,6 +63,7 @@ it('reads the corpus as the committed expectations say', function (array $case) 
 it('reads the corpus the same whatever the block size', function (int $blockSize) {
     $directory = sys_get_temp_dir().'/phibble-csv-blocks-'.getmypid();
     @mkdir($directory);
+    $previous = Phibble\Source\CsvSource::$blockSize;
     Phibble\Source\CsvSource::$blockSize = $blockSize;
     try {
         foreach (csvConformanceFixtureCases() as $name => [$case]) {
@@ -73,7 +74,7 @@ it('reads the corpus the same whatever the block size', function (int $blockSize
             array_map(unlink(...), glob($directory.'/*') ?: []);
         }
     } finally {
-        Phibble\Source\CsvSource::$blockSize = 1 << 22;
+        Phibble\Source\CsvSource::$blockSize = $previous;
         array_map(unlink(...), glob($directory.'/*') ?: []);
         @rmdir($directory);
     }
