@@ -1825,9 +1825,12 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         string $escape = 'double',
         string $eol = "\n",
     ): void {
-        $csv = CsvWriter::format($this, $delimiter, $na, $colNames ?? ! $append, $quote, $escape, $eol);
-        if (file_put_contents($path, $csv, $append ? FILE_APPEND : 0) === false) {
-            throw new \RuntimeException("Cannot write CSV file '{$path}'.");
+        CsvWriter::check($this, $quote, $escape);
+        $handle = @fopen($path, $append ? 'a' : 'w') ?: throw new \RuntimeException("Cannot write CSV file '{$path}'.");
+        try {
+            CsvWriter::write($this, $handle, $delimiter, $na, $colNames ?? ! $append, $quote, $escape, $eol);
+        } finally {
+            fclose($handle);
         }
     }
 

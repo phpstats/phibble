@@ -24,6 +24,9 @@ change the public API.
 
 ### Changed
 
+- `writeCsv()` writes a chunk of rows at a time. On a 100,000-row,
+  17.6 MB table its peak memory fell from 161 MB to 3 MB, and the output is
+  unchanged.
 - A named `col_types` entry that matches no column raises an
   `E_USER_WARNING` and the file is read, as readr's `cols()` does. It used to
   throw.

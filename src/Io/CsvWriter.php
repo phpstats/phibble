@@ -17,6 +17,9 @@ use Phibble\Type;
  */
 final class CsvWriter
 {
+    /** Rows formatted and written at a time, so the whole output is never held. */
+    private const int CHUNK = 2000;
+
     public static function format(
         DataFrame $df,
         string $delimiter = ',',
@@ -26,19 +29,32 @@ final class CsvWriter
         string $escape = 'double',
         string $eol = "\n",
     ): string {
-        if (! in_array($quote, ['needed', 'all', 'none'], true)) {
-            throw new InvalidArgumentException("quote must be 'needed', 'all' or 'none', got '{$quote}'.");
-        }
-        if (! in_array($escape, ['double', 'backslash', 'none'], true)) {
-            throw new InvalidArgumentException("escape must be 'double', 'backslash' or 'none', got '{$escape}'.");
-        }
+        $handle = fopen('php://memory', 'r+') ?: throw new \RuntimeException('Cannot open memory stream.');
+        self::write($df, $handle, $delimiter, $na, $colNames, $quote, $escape, $eol);
+        rewind($handle);
+        $csv = (string) stream_get_contents($handle);
+        fclose($handle);
 
+        return $csv;
+    }
+
+    /**
+     * Write the DataFrame to an open stream, a chunk of rows at a time.
+     *
+     * @param resource $handle
+     */
+    public static function write(
+        DataFrame $df,
+        mixed $handle,
+        string $delimiter = ',',
+        string $na = 'NA',
+        bool $colNames = true,
+        string $quote = 'needed',
+        string $escape = 'double',
+        string $eol = "\n",
+    ): void {
+        self::check($df, $quote, $escape);
         $types = $df->types();
-        foreach ($types as $name => $type) {
-            if ($type === Type::List) {
-                throw new InvalidArgumentException("Column '{$name}' is a list-column; CSV cannot hold it. Unnest or drop it first.");
-            }
-        }
 
         $cell = function (?string $text, bool $textual) use ($delimiter, $quote, $escape): string {
             if ($textual) {
@@ -57,30 +73,54 @@ final class CsvWriter
             return $wrap ? '"'.$text.'"' : $text;
         };
 
-        $lines = [];
         if ($colNames) {
-            $lines[] = implode($delimiter, array_map(fn (string $n) => $cell($n, true), $df->columns()));
+            self::put($handle, implode($delimiter, array_map(fn (string $n) => $cell($n, true), $df->columns())).$eol);
         }
 
-        $columns = [];
-        foreach ($df->toColumns() as $name => $values) {
-            $type = $types[$name];
-            $textual = in_array($type, [Type::String, Type::Factor, Type::Date, Type::DateTime], true);
-            $columns[] = array_map(function (mixed $v) use ($type, $textual, $na, $cell): string {
-                $text = self::text($v, $type);
+        $rows = $df->nrow();
+        for ($start = 0; $start < $rows; $start += self::CHUNK) {
+            $indices = range($start, min($rows, $start + self::CHUNK) - 1);
+            $columns = [];
+            foreach ($types as $name => $type) {
+                $textual = in_array($type, [Type::String, Type::Factor, Type::Date, Type::DateTime], true);
+                $columns[] = array_map(function (mixed $v) use ($type, $textual, $na, $cell): string {
+                    $text = self::text($v, $type);
 
-                return $text === null ? $na : $cell($text, $textual);
-            }, $values);
+                    return $text === null ? $na : $cell($text, $textual);
+                }, $df->storage((string) $name)->take($indices)->values());
+            }
+            $lines = [];
+            foreach (array_keys($indices) as $i) {
+                $lines[] = implode($delimiter, array_column($columns, $i));
+            }
+            self::put($handle, implode($eol, $lines).$eol);
         }
-
-        for ($i = 0, $n = $df->nrow(); $i < $n; $i++) {
-            $lines[] = implode($delimiter, array_column($columns, $i));
-        }
-
-        return $lines === [] ? '' : implode($eol, $lines).$eol;
     }
 
-    /** The text for one value, or null for NA. */
+    /** Reject options and columns that cannot be written, before anything is. */
+    public static function check(DataFrame $df, string $quote, string $escape): void
+    {
+        if (! in_array($quote, ['needed', 'all', 'none'], true)) {
+            throw new InvalidArgumentException("quote must be 'needed', 'all' or 'none', got '{$quote}'.");
+        }
+        if (! in_array($escape, ['double', 'backslash', 'none'], true)) {
+            throw new InvalidArgumentException("escape must be 'double', 'backslash' or 'none', got '{$escape}'.");
+        }
+        foreach ($df->types() as $name => $type) {
+            if ($type === Type::List) {
+                throw new InvalidArgumentException("Column '{$name}' is a list-column; CSV cannot hold it. Unnest or drop it first.");
+            }
+        }
+    }
+
+    /** @param resource $handle */
+    private static function put(mixed $handle, string $text): void
+    {
+        if (fwrite($handle, $text) !== strlen($text)) {
+            throw new \RuntimeException('Cannot write CSV output.');
+        }
+    }
+
     private static function text(mixed $v, Type $type): ?string
     {
         return match (true) {

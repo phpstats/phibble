@@ -7,8 +7,9 @@ use Phibble\DataFrame;
 /*
  * Memory for a mixed-type table: ids, low-cardinality labels, names, prices,
  * ratings, flags, dates, datetimes, and free text. The bounds are multiples of
- * the CSV's size, so they hold at any row count; they sit above what phibble
- * uses now (about 2.3x held, 4.5x peak while reading) to catch regressions.
+ * the CSV's size, so they hold at any row count. They sit above what phibble
+ * uses now (about 1.3x held and 3.2x peak while reading, and about 0.3x
+ * while writing 50,000 rows) to catch regressions.
  */
 
 function mixedCsv(int $rows): string
@@ -58,4 +59,25 @@ it('holds a mixed-type table in under 4x its CSV size, and reads it in under 7x'
     expect($df->nrow())->toBe(20_000)
         ->and($held / $size)->toBeLessThan(4.0)
         ->and($peak / $size)->toBeLessThan(7.0);
+});
+
+it('writes CSV in chunks, without holding the whole output', function () {
+    // Writing costs about one chunk of rows whatever the size, so the bound needs some rows.
+    $csv = mixedCsv(50_000);
+    $df = DataFrame::fromCsvString($csv);
+    $path = tempnam(sys_get_temp_dir(), 'phibble-memory');
+
+    try {
+        gc_collect_cycles();
+        $before = memory_get_usage();
+        memory_reset_peak_usage();
+        $df->writeCsv($path);
+        $peak = memory_get_peak_usage() - $before;
+        $written = (string) file_get_contents($path);
+    } finally {
+        unlink($path);
+    }
+
+    expect($written)->toBe($df->toCsv())
+        ->and($peak / strlen($written))->toBeLessThan(0.5);
 });
