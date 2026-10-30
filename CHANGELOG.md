@@ -24,6 +24,8 @@ change the public API.
 - `NUMERIC` and `DECIMAL` columns are doubles, or integers when every value
   is a whole number. Digits past a double's precision are lost; pass a
   `string` type to keep a decimal exact.
+- `tbl()` throws when it gets bindings with a table name. It used to drop
+  them.
 
 ### Fixed
 

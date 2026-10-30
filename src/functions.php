@@ -49,9 +49,16 @@ function deframe(DataFrame $dataFrame): array
  */
 function tbl(\PDO $pdo, string $from, array $bindings = []): Sql\SqlTable
 {
-    return preg_match('/^\s*(SELECT|WITH)\b/i', $from)
-        ? Sql\SqlTable::query($pdo, $from, $bindings)
-        : Sql\SqlTable::table($pdo, $from);
+    if (preg_match('/^\s*(SELECT|WITH)\b/i', $from)) {
+        return Sql\SqlTable::query($pdo, $from, $bindings);
+    }
+    if ($bindings !== []) {
+        throw new \InvalidArgumentException(
+            "tbl() takes bindings only with a SELECT or WITH query; '{$from}' is read as a table name."
+        );
+    }
+
+    return Sql\SqlTable::table($pdo, $from);
 }
 
 /**

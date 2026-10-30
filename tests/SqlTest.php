@@ -125,6 +125,10 @@ it('opens tables and queries with tbl()', function () {
         ->and((string) Phibble\tbl($pdo, 'SELECT 1 AS a'))->toStartWith("# Source: SQL [SQLite]\n# A tibble: 1 × 1");
 });
 
+it('rejects bindings for a table name in tbl()', function () {
+    Phibble\tbl(new PDO('sqlite::memory:'), 'sqlite_master', [2024]);
+})->throws(InvalidArgumentException::class, "tbl() takes bindings only with a SELECT or WITH query; 'sqlite_master' is read as a table name.");
+
 it('uses every aggregate inside grouped mutate like DataFrame', function (Closure $connect) {
     $pdo = $connect();
     $failures = [];
