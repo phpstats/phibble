@@ -30,11 +30,35 @@ final class ColTypes
     ];
 
     /**
+     * Columns outside $select (col_select) are skipped, so they are never
+     * held or parsed, as in readr.
+     *
+     * @param string|array<int|string, mixed> $types
+     * @param list<string> $names
+     * @param list<string>|null $select
+     * @return list<array{type: Type, number: bool, levels: ?list<string>, ordered: bool}|'skip'|null>
+     */
+    public static function resolve(string|array $types, array $names, ?array $select = null): array
+    {
+        $specs = self::specs($types, $names);
+        if ($select === null) {
+            return $specs;
+        }
+        foreach ($select as $name) {
+            if (! in_array($name, $names, true)) {
+                throw new InvalidArgumentException("col_select names unknown column '{$name}'.");
+            }
+        }
+
+        return array_map(fn ($spec, string $name) => in_array($name, $select, true) ? $spec : 'skip', $specs, $names);
+    }
+
+    /**
      * @param string|array<int|string, mixed> $types
      * @param list<string> $names
      * @return list<array{type: Type, number: bool, levels: ?list<string>, ordered: bool}|'skip'|null>
      */
-    public static function resolve(string|array $types, array $names): array
+    private static function specs(string|array $types, array $names): array
     {
         if (is_string($types)) {
             if (strlen($types) !== count($names)) {

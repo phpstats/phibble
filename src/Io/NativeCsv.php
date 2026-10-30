@@ -86,7 +86,7 @@ final class NativeCsv
         // Column names first (a header-only read), to resolve col_types by name.
         $probe = self::call($path, [...$base, 'n_max' => 0]);
         $names = self::names($probe['names'], $o);
-        $specs = ColTypes::resolve($o->types, $names);
+        $specs = ColTypes::resolve($o->types, $names, $o->select);
 
         $codes = [];
         foreach ($specs as $i => $spec) {

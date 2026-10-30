@@ -106,11 +106,13 @@ final readonly class CsvSource implements Source
         }
         $width = count($names);
         $names = NameRepair::repair($names, $o->nameRepair);
+        $specs = ColTypes::resolve($o->types, $names, $o->select);
+        $kept = array_keys(array_filter($specs, fn ($spec) => $spec !== 'skip'));
 
-        // Data rows.
+        // Data rows. Skipped columns (including those outside select) are not held.
         $columns = array_fill(0, $width, []);
         $count = 0;
-        $take = function (int $line, array $record) use (&$columns, &$count, &$problems, $width, $o): void {
+        $take = function (int $line, array $record) use (&$columns, &$count, &$problems, $width, $kept, $o): void {
             if (count($record) < $width) {
                 $problems[] = "row {$line}: expected {$width} columns, got ".count($record);
                 $record = array_pad($record, $width, null);
@@ -119,7 +121,8 @@ final readonly class CsvSource implements Source
                 $extra = array_splice($record, $width - 1);
                 $record[] = implode($o->delimiter, array_map(strval(...), $extra));
             }
-            foreach ($record as $i => $value) {
+            foreach ($kept as $i) {
+                $value = $record[$i];
                 if ($value !== null) {
                     if ($o->trimWs) {
                         $value = trim($value, " \t");
@@ -153,7 +156,6 @@ final readonly class CsvSource implements Source
         $this->finish();
 
         // Types.
-        $specs = ColTypes::resolve($o->types, $names);
         $parser = new TextParser($o->decimalMark, $o->groupingMark);
         $sample = self::sampleRows($count, $o->guessMax);
         $data = [];

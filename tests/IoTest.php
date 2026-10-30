@@ -192,6 +192,26 @@ it('rejects col_types that do not fit the data', function () {
     DataFrame::fromCsvString("a,b\n1,2\n", 'iii');
 })->throws(InvalidArgumentException::class, '3 letters; the data has 2 columns');
 
+it('neither holds nor parses columns outside col_select', function (string $reader) {
+    // 'notes' holds text that would fail to parse as the requested int.
+    $path = tempnam(sys_get_temp_dir(), 'phibble').'.csv';
+    file_put_contents($path, "id,notes,score\n1,10,1.5\n2,20,2.5\n3,see the thread,3.5\n");
+    try {
+        [$df, $warnings] = withCsvReader($reader, fn () => quietly(
+            fn () => DataFrame::fromCsv($path, ['notes' => 'int'], select: ['score', 'id'])
+        ));
+        [, $unselected] = withCsvReader($reader, fn () => quietly(fn () => DataFrame::fromCsv($path, ['notes' => 'int'])));
+    } finally {
+        unlink($path);
+    }
+
+    expect($warnings)->toBe([])
+        ->and($unselected)->not->toBe([])
+        ->and($df->columns())->toBe(['score', 'id'])
+        ->and($df->column('id'))->toBe([1, 2, 3])
+        ->and($df->column('score'))->toBe([1.5, 2.5, 3.5]);
+})->with('csv readers');
+
 it('rejects col_select names that do not exist', function () {
     DataFrame::fromCsvString("a,b\n1,2\n", select: ['c']);
 })->throws(InvalidArgumentException::class, "unknown column 'c'");
