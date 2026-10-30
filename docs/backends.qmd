@@ -49,7 +49,8 @@ it: `composer.json` lists it as a suggestion, and the class is only loaded when
 used. Expressions, joins (including `join_by` comparisons and rolling joins),
 pivots, and the lubridate and stringr functions run natively in Polars. Steps
 it cannot run, such as PHP closures and `str_to_title()`, run in `DataFrame`.
-`PolarsTable::$fallbacks` counts those steps.
+`PolarsTable::$fallbacks` counts those steps. Set `PolarsTable::$strict = true`
+to throw `PolarsFallback` instead. The message names the verb and the reason.
 
 Two kinds of list-column stay in `DataFrame`. Polars stores named arrays as
 structs, which have every key in every row, so `fromTable()` throws when a

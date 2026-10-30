@@ -165,12 +165,32 @@ final class PolarsTable implements Table
     /** How many verbs fell back to an in-memory DataFrame in this process. */
     public static int $fallbacks = 0;
 
+    /**
+     * Throw PolarsFallback instead of running a verb in an in-memory
+     * DataFrame. Off by default; turn it on to find the steps that leave
+     * Polars.
+     */
+    public static bool $strict = false;
+
     /** Run a verb on an in-memory DataFrame and bring the result back. */
-    private function viaDataFrame(Closure $verb): static
+    private function viaDataFrame(string $verb, string $reason, Closure $run): static
     {
+        if (self::$strict) {
+            throw new PolarsFallback("{$verb}() would run in an in-memory DataFrame: {$reason}");
+        }
         self::$fallbacks++;
 
-        return self::fromTable($verb($this->collect()));
+        return self::fromTable($run($this->collect()));
+    }
+
+    /** Why a verb cannot run in Polars, for PolarsFallback. */
+    private function fallbackReason(bool $closure): string
+    {
+        return match (true) {
+            $closure => 'it has a PHP closure.',
+            $this->rowwise => 'the table is rowwise.',
+            default => 'groupBy(drop: false) keeps empty factor groups, which Polars does not see.',
+        };
     }
 
     private function check(string ...$names): void
@@ -358,15 +378,15 @@ final class PolarsTable implements Table
     {
         try {
             return $this->filterNative($predicate);
-        } catch (Unsupported) {
-            return $this->viaDataFrame(fn (DataFrame $f) => $f->filter($predicate));
+        } catch (Unsupported $e) {
+            return $this->viaDataFrame('filter', $e->getMessage(), fn (DataFrame $f) => $f->filter($predicate));
         }
     }
 
     private function filterNative(Closure|PhibbleExpr $predicate): static
     {
         if ($predicate instanceof Closure || $this->rowwise || $this->keepsEmptyGroups()) {
-            return $this->viaDataFrame(fn (DataFrame $f) => $f->filter($predicate));
+            return $this->viaDataFrame('filter', $this->fallbackReason($predicate instanceof Closure), fn (DataFrame $f) => $f->filter($predicate));
         }
 
         $translator = $this->translator();
@@ -378,22 +398,23 @@ final class PolarsTable implements Table
 
     public function filterGroups(Closure $predicate): static
     {
-        return $this->viaDataFrame(fn (DataFrame $f) => $f->filterGroups($predicate));
+        return $this->viaDataFrame('filterGroups', 'it takes a PHP closure.', fn (DataFrame $f) => $f->filterGroups($predicate));
     }
 
     public function mutate(array $columns): static
     {
         try {
             return $this->mutateNative($columns);
-        } catch (Unsupported) {
-            return $this->viaDataFrame(fn (DataFrame $f) => $f->mutate($columns));
+        } catch (Unsupported $e) {
+            return $this->viaDataFrame('mutate', $e->getMessage(), fn (DataFrame $f) => $f->mutate($columns));
         }
     }
 
     private function mutateNative(array $columns): static
     {
-        if ($this->rowwise || $this->keepsEmptyGroups() || array_any($columns, fn ($v) => $v instanceof Closure)) {
-            return $this->viaDataFrame(fn (DataFrame $f) => $f->mutate($columns));
+        $closure = array_any($columns, fn ($v) => $v instanceof Closure);
+        if ($closure || $this->rowwise || $this->keepsEmptyGroups()) {
+            return $this->viaDataFrame('mutate', $this->fallbackReason($closure), fn (DataFrame $f) => $f->mutate($columns));
         }
         $df = $this->df;
         $factors = $this->factors;
@@ -425,7 +446,7 @@ final class PolarsTable implements Table
 
     public function mutateGroups(array $columns): static
     {
-        return $this->viaDataFrame(fn (DataFrame $f) => $f->mutateGroups($columns));
+        return $this->viaDataFrame('mutateGroups', 'it takes PHP closures.', fn (DataFrame $f) => $f->mutateGroups($columns));
     }
 
     public function rename(array $map): static
@@ -448,8 +469,8 @@ final class PolarsTable implements Table
     {
         try {
             return $this->arrangeNative($keys);
-        } catch (Unsupported) {
-            return $this->viaDataFrame(fn (DataFrame $f) => $f->arrange($keys));
+        } catch (Unsupported $e) {
+            return $this->viaDataFrame('arrange', $e->getMessage(), fn (DataFrame $f) => $f->arrange($keys));
         }
     }
 
@@ -557,15 +578,16 @@ final class PolarsTable implements Table
     {
         try {
             return $this->summariseNative($aggregates, $groups);
-        } catch (Unsupported) {
-            return $this->viaDataFrame(fn (DataFrame $f) => $f->summarise($aggregates, $groups));
+        } catch (Unsupported $e) {
+            return $this->viaDataFrame('summarise', $e->getMessage(), fn (DataFrame $f) => $f->summarise($aggregates, $groups));
         }
     }
 
     private function summariseNative(array $aggregates, ?string $groups): static
     {
-        if ($this->rowwise || $this->keepsEmptyGroups() || array_any($aggregates, fn ($v) => $v instanceof Closure)) {
-            return $this->viaDataFrame(fn (DataFrame $f) => $f->summarise($aggregates, $groups));
+        $closure = array_any($aggregates, fn ($v) => $v instanceof Closure);
+        if ($closure || $this->rowwise || $this->keepsEmptyGroups()) {
+            return $this->viaDataFrame('summarise', $this->fallbackReason($closure), fn (DataFrame $f) => $f->summarise($aggregates, $groups));
         }
         if (! in_array($groups, [null, 'drop_last', 'drop', 'keep', 'rowwise'], true)) {
             throw new InvalidArgumentException("summarise() .groups must be drop_last, drop, keep or rowwise, not '{$groups}'.");

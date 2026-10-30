@@ -27,6 +27,12 @@ change the public API.
 - `tbl()` throws when it gets bindings with a table name. It used to drop
   them.
 
+### Added
+
+- `PolarsTable::$strict`. When it is on, a verb that would run in an
+  in-memory DataFrame throws `PolarsFallback`, naming the verb and the
+  reason.
+
 ### Fixed
 
 - The docs call the visualization library phiz again. 0.3.0 renamed it to

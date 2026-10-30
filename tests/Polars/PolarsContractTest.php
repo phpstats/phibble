@@ -5,9 +5,10 @@ declare(strict_types=1);
 use Phibble\Exception\ColumnNotFound;
 use Phibble\DataFrame;
 use Phibble\Type;
+use Phibble\Polars\PolarsFallback;
 use Phibble\Polars\PolarsTable;
 
-use function Phibble\Expr\{col, mean, n};
+use function Phibble\Expr\{col, mean, n, str_to_title};
 
 // phibble's contract v1 cases (dplyr 1.1.4 outputs), run on the Polars table.
 
@@ -154,6 +155,25 @@ it('works rowwise through the DataFrame fallback', function () {
         ->and($summary->toRows())->toBe([['id' => 'a', 'm' => 3], ['id' => 'b', 'm' => 4]])
         ->and($summary->groups())->toBe(['id'])
         ->and($df->groupBy(['id'])->isRowwise())->toBeFalse();
+});
+
+it('throws instead of falling back in strict mode', function () {
+    PolarsTable::$strict = true;
+    try {
+        $df = penguinsPt();
+        $fallbacks = PolarsTable::$fallbacks;
+
+        expect(fn () => $df->mutate(['kg' => fn (DataFrame $f) => $f->column('mass')]))
+            ->toThrow(PolarsFallback::class, 'mutate() would run in an in-memory DataFrame: it has a PHP closure.')
+            ->and(fn () => $df->mutate(['s' => str_to_title(col('species'))]))
+            ->toThrow(PolarsFallback::class, 'mutate() would run in an in-memory DataFrame: str_to_title() needs ICU word breaks.')
+            ->and(fn () => $df->rowwise()->filter(col('mass')->gt(4000)))
+            ->toThrow(PolarsFallback::class, 'filter() would run in an in-memory DataFrame: the table is rowwise.')
+            ->and($df->filter(col('mass')->gt(4000))->nrow())->toBe(2)
+            ->and(PolarsTable::$fallbacks)->toBe($fallbacks);
+    } finally {
+        PolarsTable::$strict = false;
+    }
 });
 
 it('keeps types and round-trips through collect', function () {
