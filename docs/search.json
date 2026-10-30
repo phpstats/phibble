@@ -613,6 +613,17 @@
     ]
   },
   {
+    "objectID": "io.html#reading-in-chunks",
+    "href": "io.html#reading-in-chunks",
+    "title": "Reading and writing data",
+    "section": "Reading in chunks",
+    "text": "Reading in chunks\nDataFrame::fromCsvChunked() reads a file a chunk of rows at a time, as readr’s read_delim_chunked() does. It passes each chunk to a callback with the 1-based index of the chunk’s first row, and stops if the callback returns false. DataFrame::csvChunks() returns the same chunks as a generator keyed by that index. Memory depends on the chunk size, so a file larger than the memory limit can be filtered down as it is read:\n$kept = [];\nforeach (DataFrame::csvChunks('feed.tsv', chunkSize: 10_000, delimiter: \"\\t\", types: ['.default' =&gt; 'c']) as $chunk) {\n    $kept[] = $chunk-&gt;filter(col('category')-&gt;eq('Running'));\n}\n$running = DataFrame::concat($kept);\nTypes not given are guessed from the first chunk, and every later chunk is parsed as those types. As in readr, guessMax defaults to the chunk size. Give every type, as above, to skip guessing. A value in a later chunk that does not fit its column’s type becomes NA. Factors without levels take their levels from each chunk.\nEvery other option works as it does in fromCsv(). Each chunk’s problems raise their own warning, with rows numbered from the start of the file. The chunked readers always use the PHP reader.",
+    "crumbs": [
+      "Guides",
+      "Reading and writing data"
+    ]
+  },
+  {
     "objectID": "io.html#writing-csv",
     "href": "io.html#writing-csv",
     "title": "Reading and writing data",
