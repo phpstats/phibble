@@ -11,7 +11,7 @@ use Phibble\DataFrame;
 use Phibble\Type;
 
 /**
- * Formats a frame as delimited text the way readr::write_delim() does.
+ * Formats a DataFrame as delimited text the way readr::write_delim() does.
  *
  * @internal
  */

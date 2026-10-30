@@ -7,7 +7,7 @@ namespace Phibble\Source;
 use Phibble\DataFrame;
 
 /**
- * Something that can produce a frame: a file, a query, an API.
+ * Something that can produce a DataFrame: a file, a query, an API.
  */
 interface Source
 {

@@ -63,7 +63,7 @@ final class NativeCsv
     }
 
     /**
-     * @return array{0: DataFrame, 1: list<string>} The frame and its problems.
+     * @return array{0: DataFrame, 1: list<string>} The DataFrame and its problems.
      */
     public static function read(string $path, CsvOptions $o): array
     {

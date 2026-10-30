@@ -11,7 +11,7 @@ final class DataFrameBackend implements Backend
 {
     public function name(): string
     {
-        return 'frame';
+        return 'dataframe';
     }
 
     public function load(string $path): Table

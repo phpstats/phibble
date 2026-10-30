@@ -27,7 +27,7 @@ enum Type: string
             ?? throw new InvalidArgumentException("Unknown column type '{$type}'.");
     }
 
-    /** Short label used when printing a frame, as in tibble. */
+    /** Short label used when printing a table, as in tibble. */
     public function abbreviation(): string
     {
         return match ($this) {

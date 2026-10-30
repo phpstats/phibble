@@ -11,7 +11,7 @@ use Phibble\Column\FactorColumn;
 use Phibble\Column\Infer;
 
 /**
- * dplyr 1.1 joins for in-memory frames.
+ * dplyr 1.1 joins for in-memory DataFrames.
  *
  * @internal Use DataFrame::join().
  */

@@ -48,7 +48,7 @@ final class PolarsTable implements Table
         private readonly bool $dropGroups = true,
     ) {}
 
-    /** Wrap a Polars frame; a LazyFrame is collected. */
+    /** Wrap a Polars DataFrame; a LazyFrame is collected. */
     public static function fromPolars(PolarsDataFrame|LazyFrame $df): self
     {
         return new self($df instanceof LazyFrame ? $df->collect() : $df);
@@ -131,7 +131,7 @@ final class PolarsTable implements Table
         }
     }
 
-    /** The underlying Polars frame. */
+    /** The underlying Polars DataFrame. */
     public function polars(): PolarsDataFrame
     {
         return $this->df;
@@ -685,7 +685,7 @@ final class PolarsTable implements Table
     }
 
     /**
-     * tidyr's pivot_longer_spec(), in Polars: one frame per name-part
+     * tidyr's pivot_longer_spec(), in Polars: one DataFrame per name-part
      * combination, stacked and stably sorted by (input row, combination).
      */
     public function pivotLongerSpec(array $spec, bool $dropNa = false): static

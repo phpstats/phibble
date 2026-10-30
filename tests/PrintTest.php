@@ -6,7 +6,7 @@ use Phibble\DataFrame;
 
 /*
  * Output is compared byte for byte with tibble's, from fixtures written by
- * tests/r/print.R. Each frame here mirrors the R case of the same name.
+ * tests/r/print.R. Each DataFrame here mirrors the R case of the same name.
  */
 
 function printFixture(string $name): string

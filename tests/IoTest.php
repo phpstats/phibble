@@ -283,7 +283,7 @@ it('writes JSON records and columns like jsonlite', function () {
         );
 });
 
-it('writes datetimes in UTC, non-finite numbers as null and nested frames as JSON', function () {
+it('writes datetimes in UTC, non-finite numbers as null and nested DataFrames as JSON', function () {
     $df = DataFrame::fromColumns([
         't' => [new DateTimeImmutable('2024-01-02 10:00:00.25+02:00')],
         'x' => [NAN],

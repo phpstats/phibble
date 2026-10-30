@@ -26,6 +26,8 @@ change the public API.
   `string` type to keep a decimal exact.
 - `tbl()` throws when it gets bindings with a table name. It used to drop
   them.
+- Docblocks, an error message, and test names say `DataFrame` or table
+  instead of the bare "frame". The bench backend `frame` is now `dataframe`.
 
 ### Added
 

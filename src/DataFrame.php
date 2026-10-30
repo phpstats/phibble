@@ -57,7 +57,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     // ---------------------------------------------------------------
 
     /**
-     * Build a frame from rows. Column order follows first appearance;
+     * Build a DataFrame from rows. Column order follows first appearance;
      * keys missing from a row are NA.
      *
      * @param iterable<array<string, mixed>|object> $rows
@@ -90,7 +90,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * Build a frame from columns: name => list of values, or name => Column.
+     * Build a DataFrame from columns: name => list of values, or name => Column.
      *
      * @param array<string, list<mixed>|Column> $columns
      * @param array<string, Type|string> $types Explicit types by column name.
@@ -183,7 +183,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * Build a frame from a Laravel Collection (or anything with all() or
+     * Build a DataFrame from a Laravel Collection (or anything with all() or
      * toArray(), or any iterable). Items may be arrays, Eloquent models or
      * other objects with toArray(), or plain objects. Laravel is not needed.
      *
@@ -270,11 +270,11 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     // ---------------------------------------------------------------
 
     /**
-     * tibble(): build a frame column by column.
+     * tibble(): build a DataFrame column by column.
      *
      * - A list is a column; a scalar (or null) is repeated to the common
      *   length. Only length-1 values are recycled.
-     * - A closure receives the frame built so far and returns a list or a
+     * - A closure receives the DataFrame built so far and returns a list or a
      *   scalar, so columns can be computed from earlier ones.
      * - A Table under an integer key is spliced in column by column.
      *
@@ -349,7 +349,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * tribble(): a frame written row by row. Pass the column names, then
+     * tribble(): a DataFrame written row by row. Pass the column names, then
      * either one list per row or the cells in row order.
      *
      *     DataFrame::tribble(['x', 'y'], [1, 'a'], [2, 'b']);
@@ -382,7 +382,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
 
     /**
      * as_tibble(): turn tables, rows, columns, collections or other
-     * iterables into a frame.
+     * iterables into a DataFrame.
      *
      * - A Table is collected.
      * - A list of associative arrays (or objects) is rows.
@@ -426,7 +426,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * enframe(): an array as a two-column frame of names and values. A list
+     * enframe(): an array as a two-column DataFrame of names and values. A list
      * gets 1-based integer names, as in R.
      *
      * @param array<mixed> $values
@@ -445,7 +445,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * deframe(): a two-column frame as name => value, or a one-column frame
+     * deframe(): a two-column DataFrame as name => value, or a one-column DataFrame
      * as a list.
      *
      * @return array<mixed>
@@ -458,7 +458,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
                 array_map(fn ($k) => (string) $k, array_values($this->toColumns())[0]),
                 array_values($this->toColumns())[1],
             ),
-            default => throw new InvalidArgumentException('deframe() needs a frame with one or two columns.'),
+            default => throw new InvalidArgumentException('deframe() needs a DataFrame with one or two columns.'),
         };
     }
 
@@ -593,7 +593,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return (int) array_search($name, $this->columns(), true);
     }
 
-    /** Repeat a 1-row frame $n times. */
+    /** Repeat a 1-row DataFrame $n times. */
     private function recycle(int $n): self
     {
         return $this->copy(
@@ -608,7 +608,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $this->copy(data: array_combine($names, array_values($this->data)));
     }
 
-    /** Cast this frame's columns to the types of the same columns in $like. */
+    /** Cast this DataFrame's columns to the types of the same columns in $like. */
     private function withTypesOf(self $like): self
     {
         $df = $this;
@@ -1775,7 +1775,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      * - string: list<string|null> (the model sorts levels, as R does)
      * - date: days since 1970-01-01; datetime: seconds since epoch
      * - factor: ['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool],
-     *   with 0-based codes, null for NA, and every level in frame order
+     *   with 0-based codes, null for NA, and every level in table order
      *
      * List-columns cannot be modelled and throw.
      *
@@ -1847,7 +1847,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      * JSON as a list of records ('records') or an object of columns
      * ('columns'). NA is null (records keep every key, unlike jsonlite);
      * dates are "Y-m-d", datetimes ISO 8601 in UTC with "Z", factors their
-     * labels, NaN and infinities null, nested frames nested JSON.
+     * labels, NaN and infinities null, nested DataFrames nested JSON.
      */
     public function toJson(string $orient = 'records', int $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES): string
     {
@@ -1893,14 +1893,14 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
 
     /**
      * Rows per group, with groups sorted by key as dplyr does (ascending,
-     * factors by level, NA last, strings in byte order). Ungrouped frames
-     * have one group holding every row; rowwise frames one group per row.
+     * factors by level, NA last, strings in byte order). Ungrouped tables
+     * have one group holding every row; rowwise tables one group per row.
      *
      * @return list<array{0: array<string, mixed>, 1: list<int>}>
      */
     private function groupIndex(): array
     {
-        // DataFrames are immutable, so each frame's index is computed once.
+        // DataFrames are immutable, so each one's index is computed once.
         static $cache = null;
         $cache ??= new \WeakMap();
 
@@ -2134,7 +2134,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * Rows as a new ungrouped frame, as handed to group closures.
+     * Rows as a new ungrouped DataFrame, as handed to group closures.
      *
      * @param list<int> $indices
      */
@@ -2247,7 +2247,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         });
     }
 
-    /** A column's values, computed once per frame (factor labels are built on demand). */
+    /** A column's values, computed once per DataFrame (factor labels are built on demand). */
     private function wholeColumn(string $name): array
     {
         static $cache = null;

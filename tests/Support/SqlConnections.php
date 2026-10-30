@@ -25,7 +25,7 @@ function sqlConnections(): array
     return $connections;
 }
 
-/** A lazy table holding the frame's rows as inline SELECT ... UNION ALL data. */
+/** A lazy table holding the DataFrame's rows as inline SELECT ... UNION ALL data. */
 function sqlFrom(PDO $pdo, DataFrame $df): SqlTable
 {
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);

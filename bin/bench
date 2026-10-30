@@ -4,7 +4,7 @@
 /*
  * Benchmark Table backends on the data from bench/generate.php.
  *
- * Usage: bin/bench [--backend=frame|sqlite|Some\\Backend\\Class] [--bootstrap=file.php]
+ * Usage: bin/bench [--backend=dataframe|sqlite|Some\\Backend\\Class] [--bootstrap=file.php]
  *                  [--data=dir] [--runs=3] [workload ...]
  *
  * Another package can benchmark its own backend: implement
@@ -43,7 +43,7 @@ $options = getopt('', ['backend:', 'runs:', 'bootstrap:', 'data:'], $rest);
 if (isset($options['bootstrap'])) {
     require $options['bootstrap'];
 }
-$backendName = $options['backend'] ?? 'frame';
+$backendName = $options['backend'] ?? 'dataframe';
 $runs = (int) ($options['runs'] ?? 3);
 $only = array_slice($argv, $rest);
 $data = $options['data'] ?? dirname(__DIR__).'/bench/data';
@@ -77,7 +77,7 @@ $report = function (string $workload, array $timing) use ($backendName): void {
     ]), "\n";
 };
 
-if ($backendName === 'frame') {
+if ($backendName === 'dataframe') {
     foreach (Workloads::csv() as $name => $work) {
         if ($only === [] || in_array($name, $only, true)) {
             $report($name, $time(fn () => $work("{$data}/events.csv")));
@@ -86,11 +86,11 @@ if ($backendName === 'frame') {
 }
 
 $backend = match ($backendName) {
-    'frame' => new DataFrameBackend(),
+    'dataframe' => new DataFrameBackend(),
     'sqlite' => new SqliteBackend(),
     default => class_exists($backendName) && is_subclass_of($backendName, Phibble\Bench\Backend::class)
         ? new $backendName()
-        : throw new InvalidArgumentException("Unknown backend {$backendName}: use frame, sqlite, or a class implementing Phibble\\Bench\\Backend."),
+        : throw new InvalidArgumentException("Unknown backend {$backendName}: use dataframe, sqlite, or a class implementing Phibble\\Bench\\Backend."),
 };
 $events = $backend->load("{$data}/events.csv");
 $dims = $backend->load("{$data}/dims.csv");

@@ -2,7 +2,7 @@
 #
 #     Rscript tests/r/print.R
 #
-# Each case must match the frame built by the same name in tests/PrintTest.php.
+# Each case must match the DataFrame built by the same name in tests/PrintTest.php.
 
 suppressPackageStartupMessages({
   library(tibble)

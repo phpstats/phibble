@@ -160,7 +160,7 @@ it('slices and takes heads', function () {
         ->and(penguins()->head(0)->nrow())->toBe(0);
 });
 
-it('handles empty frames', function () {
+it('handles empty DataFrames', function () {
     $empty = penguins()->filter(fn () => false);
 
     expect($empty->nrow())->toBe(0)
