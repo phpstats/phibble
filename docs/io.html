@@ -247,6 +247,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#csv-files" id="toc-csv-files" class="nav-link active" data-scroll-target="#csv-files">CSV files</a></li>
   <li><a href="#column-types" id="toc-column-types" class="nav-link" data-scroll-target="#column-types">Column types</a></li>
   <li><a href="#guessing" id="toc-guessing" class="nav-link" data-scroll-target="#guessing">Guessing</a></li>
+  <li><a href="#quotes" id="toc-quotes" class="nav-link" data-scroll-target="#quotes">Quotes</a></li>
   <li><a href="#writing-csv" id="toc-writing-csv" class="nav-link" data-scroll-target="#writing-csv">Writing CSV</a></li>
   <li><a href="#json" id="toc-json" class="nav-link" data-scroll-target="#json">JSON</a></li>
   <li><a href="#databases" id="toc-databases" class="nav-link" data-scroll-target="#databases">Databases</a></li>
@@ -483,7 +484,12 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <li>string otherwise.</li>
 </ul>
 <p>Numbers with leading zeros such as <code>007</code> stay strings, as in readr.</p>
-<p>When a value cannot be parsed as its column’s type, or a row has the wrong number of fields, phibble still returns the data. The value becomes NA, and the read raises one <code>E_USER_WARNING</code> that lists the problems.</p>
+<p>When a value cannot be parsed as its column’s type, a row has the wrong number of fields, or a quoted field is never closed, phibble still returns the data. The value becomes NA, and the read raises one <code>E_USER_WARNING</code> that lists the problems. Rows are numbered as in <code>readr::problems()</code>: the first data row is row 2, and skipped, blank, and comment lines are not counted.</p>
+</section>
+<section id="quotes" class="level2">
+<h2 class="anchored" data-anchor-id="quotes">Quotes</h2>
+<p>Quoted fields follow readr 2’s rules. A field is quoted when its first character is the quote character. Inside a quoted field, a doubled quote is a literal quote. Any other quote turns quoting off or back on and is dropped, so <code>"x "y" z"</code> reads as <code>x y z</code>, and <code>"x "y",z"</code> reads as <code>x y,z</code>. A quote inside a field that does not start with one is kept as it is. With <code>escapeDouble: false</code>, the quotes inside a quoted field are kept, and only the opening and closing quotes are dropped.</p>
+<p>Files written with PHP’s <code>fputcsv()</code> and its default backslash escape contain <code>\"</code> instead of <code>""</code>. readr does not treat the backslash as an escape, and neither does phibble unless <code>escapeBackslash: true</code> is passed.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_error_handler</span>(<span class="kw">function</span> (<span class="dt">int</span> <span class="va">$level</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$message</span>)<span class="ot">:</span> <span class="dt">bool</span> {</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"Warning: </span>{<span class="va">$message</span>}<span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>

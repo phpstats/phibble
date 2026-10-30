@@ -595,7 +595,18 @@
     "href": "io.html#guessing",
     "title": "Reading and writing data",
     "section": "Guessing",
-    "text": "Guessing\nWithout explicit types, phibble guesses each column from up to guessMax rows, sampled the way readr 2 samples them. A column is:\n\nbool if every value is T, F, TRUE, FALSE, True, False, true, or false,\nint if every value is a whole number (readr guesses double here),\nfloat if every value is a number, including Inf and NaN,\ndate if every value is an ISO 8601 date,\ndatetime if every value is an ISO 8601 date and time,\nstring otherwise.\n\nNumbers with leading zeros such as 007 stay strings, as in readr.\nWhen a value cannot be parsed as its column’s type, or a row has the wrong number of fields, phibble still returns the data. The value becomes NA, and the read raises one E_USER_WARNING that lists the problems.\nset_error_handler(function (int $level, string $message): bool {\n    echo \"Warning: {$message}\\n\";\n\n    return true;\n});\n\n$df = DataFrame::fromCsvString(\"id,score\\n1,2.5\\n2,oops\\n3\\n\", types: ['score' =&gt; 'double']);\n\necho $df;\nWarning: One or more parsing issues: row 4: expected 2 columns, got 1; column 'score': 1 value could not be parsed as float.\n# A tibble: 3 × 2\n     id score\n  &lt;int&gt; &lt;dbl&gt;\n1     1   2.5\n2     2  NA  \n3     3  NA",
+    "text": "Guessing\nWithout explicit types, phibble guesses each column from up to guessMax rows, sampled the way readr 2 samples them. A column is:\n\nbool if every value is T, F, TRUE, FALSE, True, False, true, or false,\nint if every value is a whole number (readr guesses double here),\nfloat if every value is a number, including Inf and NaN,\ndate if every value is an ISO 8601 date,\ndatetime if every value is an ISO 8601 date and time,\nstring otherwise.\n\nNumbers with leading zeros such as 007 stay strings, as in readr.\nWhen a value cannot be parsed as its column’s type, a row has the wrong number of fields, or a quoted field is never closed, phibble still returns the data. The value becomes NA, and the read raises one E_USER_WARNING that lists the problems. Rows are numbered as in readr::problems(): the first data row is row 2, and skipped, blank, and comment lines are not counted.",
+    "crumbs": [
+      "Guides",
+      "Reading and writing data"
+    ]
+  },
+  {
+    "objectID": "io.html#quotes",
+    "href": "io.html#quotes",
+    "title": "Reading and writing data",
+    "section": "Quotes",
+    "text": "Quotes\nQuoted fields follow readr 2’s rules. A field is quoted when its first character is the quote character. Inside a quoted field, a doubled quote is a literal quote. Any other quote turns quoting off or back on and is dropped, so \"x \"y\" z\" reads as x y z, and \"x \"y\",z\" reads as x y,z. A quote inside a field that does not start with one is kept as it is. With escapeDouble: false, the quotes inside a quoted field are kept, and only the opening and closing quotes are dropped.\nFiles written with PHP’s fputcsv() and its default backslash escape contain \\\" instead of \"\". readr does not treat the backslash as an escape, and neither does phibble unless escapeBackslash: true is passed.\nset_error_handler(function (int $level, string $message): bool {\n    echo \"Warning: {$message}\\n\";\n\n    return true;\n});\n\n$df = DataFrame::fromCsvString(\"id,score\\n1,2.5\\n2,oops\\n3\\n\", types: ['score' =&gt; 'double']);\n\necho $df;\nWarning: One or more parsing issues: row 4: expected 2 columns, got 1; column 'score': 1 value could not be parsed as float.\n# A tibble: 3 × 2\n     id score\n  &lt;int&gt; &lt;dbl&gt;\n1     1   2.5\n2     2  NA  \n3     3  NA",
     "crumbs": [
       "Guides",
       "Reading and writing data"
