@@ -5,7 +5,7 @@ All notable changes to phibble are listed here. The format follows
 [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may
 change the public API.
 
-## [0.3.1] - Unreleased
+## [0.4.0] - 2026-10-30
 
 ### Changed
 
@@ -143,7 +143,7 @@ and cmdstanphp.
   query builders and `->phibble()` for lazy SQL tables. Global scopes such as
   soft deletes apply.
 
-[0.3.1]: https://github.com/phpstats/phibble/releases/tag/v0.3.1
+[0.4.0]: https://github.com/phpstats/phibble/releases/tag/v0.4.0
 [0.3.0]: https://github.com/phpstats/phibble/releases/tag/v0.3.0
 [0.2.0]: https://github.com/phpstats/phibble/releases/tag/v0.2.0
 [0.1.0]: https://github.com/phpstats/phibble/releases/tag/v0.1.0
