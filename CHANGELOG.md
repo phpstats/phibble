@@ -16,11 +16,22 @@ change the public API.
   the phit extension (`ext-phit`), and the docs link to
   [phit](https://github.com/phpstats/phit). `stats_read_csv()` from the
   php-stats extension is no longer used.
+- `fromPdo()`, `fromQuery()`, the Laravel `->toDataFrame()` macro, and
+  `SqlTable` type PostgreSQL and MySQL columns from their declared types.
+  Text columns stay text, so `'TRUE'` and `'2024-01-02'` in a `TEXT` column
+  are strings, and `'2024-02-30'` no longer becomes NA. Empty results keep
+  their column types. SQLite results are still guessed from their values.
+- `NUMERIC` and `DECIMAL` columns are doubles, or integers when every value
+  is a whole number. Digits past a double's precision are lost; pass a
+  `string` type to keep a decimal exact.
 
 ### Fixed
 
 - The docs call the visualization library phiz again. 0.3.0 renamed it to
   phit by mistake.
+- PostgreSQL `timestamptz` values with an hour-only offset, such as
+  `2024-01-02 03:04:05-05`, parse as datetimes. `"Infinity"` and
+  `"-Infinity"` convert to numbers, as in R's `as.numeric()`.
 
 ## [0.3.0] - 2026-10-17
 

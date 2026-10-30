@@ -24,7 +24,7 @@ final class Infer
 {
     private const string DATE = '/^\d{4}-\d{2}-\d{2}$/';
 
-    private const string DATETIME = '/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?$/';
+    private const string DATETIME = '/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}(:?\d{2})?)?$/';
 
     /** Marks a value that cannot be converted; it becomes NA with a warning. */
     private static ?object $fail = null;
@@ -335,14 +335,15 @@ final class Infer
 
     private static function isNumber(string $v): bool
     {
-        return is_numeric($v) || in_array($v, ['Inf', '-Inf', 'NaN', 'inf', '-inf', 'nan'], true);
+        // As R's as.numeric(), which also reads PostgreSQL's "Infinity".
+        return is_numeric($v) || in_array(strtolower($v), ['inf', '-inf', 'infinity', '-infinity', 'nan'], true);
     }
 
     private static function toFloat(string $v): float
     {
         return match (strtolower($v)) {
-            'inf' => INF,
-            '-inf' => -INF,
+            'inf', 'infinity' => INF,
+            '-inf', '-infinity' => -INF,
             'nan' => NAN,
             default => (float) $v,
         };

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Phibble\Sql;
 
+use Phibble\Type;
+
 final class MysqlDialect extends Dialect
 {
     public function name(): string
@@ -56,6 +58,23 @@ final class MysqlDialect extends Dialect
     public function isTextColumn(array $meta): bool
     {
         return in_array($meta['native_type'] ?? '', ['VAR_STRING', 'STRING', 'BLOB'], true);
+    }
+
+    public function columnType(array $meta): ?Type
+    {
+        return match ($meta['native_type'] ?? null) {
+            'VAR_STRING', 'STRING', 'BLOB', 'JSON', 'TIME', 'ENUM', 'SET' => Type::String,
+            'TINY', 'SHORT', 'INT24', 'LONG', 'LONGLONG', 'YEAR' => Type::Int,
+            'FLOAT', 'DOUBLE' => Type::Float,
+            'DATE' => Type::Date,
+            'DATETIME', 'TIMESTAMP' => Type::DateTime,
+            default => null,
+        };
+    }
+
+    public function isDecimalColumn(array $meta): bool
+    {
+        return in_array($meta['native_type'] ?? null, ['NEWDECIMAL', 'DECIMAL'], true);
     }
 
     public function datePart(string $part, Fragment $x): Fragment

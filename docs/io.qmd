@@ -97,8 +97,36 @@ reads either shape and detects which one it has.
 ## Databases
 
 `DataFrame::fromPdo()` runs a query with positional or named bindings and loads the
-result. Drivers that return numbers as text, as MySQL's does, are handled by
-parsing all-text columns with the CSV guessing rules.
+result. PostgreSQL and MySQL report each column's declared type, and phibble
+uses it:
+
+| Declared type | Column type |
+| --- | --- |
+| Text types, JSON, UUID, `TIME`, intervals, arrays, and enums | string |
+| `BOOLEAN` (PostgreSQL) | bool |
+| Integer types and MySQL's `YEAR` | int |
+| `REAL`, `DOUBLE PRECISION`, `FLOAT`, and `DOUBLE` | float |
+| `NUMERIC` and `DECIMAL` | float, or int when every value is a whole number |
+| `DATE` | date |
+| `TIMESTAMP`, `TIMESTAMPTZ`, and `DATETIME` | datetime |
+
+A text column stays text, so `'TRUE'` and `'2024-01-02'` in a `TEXT` column
+are strings. Only values without a declared type are guessed with the CSV
+rules. SQLite stores values without a column type, so its results are always
+guessed, and so are results from other drivers.
+
+`NUMERIC` and `DECIMAL` values become doubles, as RPostgres and RMariaDB read
+them. A double holds about 15 significant digits, so
+`12345678901234567.89` loses its last digits. Prices such as `NUMERIC(10,2)`
+fit. Pass a `string` type to keep a decimal exact:
+
+```php
+DataFrame::fromPdo($pdo, 'SELECT id, balance FROM accounts', types: ['balance' => 'string']);
+```
+
+Explicit types always take precedence over declared ones. `fromQuery()`, the
+Laravel `->toDataFrame()` macro, and `SqlTable::collect()` follow the same
+rules.
 
 {{< include examples/_pdo.md >}}
 
@@ -108,7 +136,8 @@ parsing all-text columns with the CSV guessing rules.
   `toSql()`, `getBindings()`, and its connection's PDO object.
 - A Doctrine DBAL `QueryBuilder` is read through `getSQL()` and
   `getParameters()`. Pass a PDO or DBAL connection as the second argument to
-  run the SQL through PDO. Without one, the builder runs the query itself.
+  run the SQL through PDO. Without one, the builder runs the query itself and
+  phibble guesses every column, since DBAL results carry no column types.
 
 To keep a query in the database and run verbs there, use a
 [SQL table](sql.qmd) instead.

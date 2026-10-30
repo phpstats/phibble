@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Phibble\Sql;
 
+use Phibble\Type;
+
 final class PostgresDialect extends Dialect
 {
     public function name(): string
@@ -47,9 +49,24 @@ final class PostgresDialect extends Dialect
         return Fragment::format('({} COLLATE "C")', [$x]);
     }
 
-    public function isBoolColumn(array $meta): bool
+    public function columnType(array $meta): ?Type
     {
-        return ($meta['native_type'] ?? '') === 'bool';
+        // Every other type (text, json, uuid, time, interval, arrays, enums)
+        // reaches PHP as text and stays text.
+        return match ($meta['native_type'] ?? null) {
+            null => null,
+            'bool' => Type::Bool,
+            'int2', 'int4', 'int8', 'oid' => Type::Int,
+            'float4', 'float8' => Type::Float,
+            'date' => Type::Date,
+            'timestamp', 'timestamptz' => Type::DateTime,
+            default => Type::String,
+        };
+    }
+
+    public function isDecimalColumn(array $meta): bool
+    {
+        return ($meta['native_type'] ?? null) === 'numeric';
     }
 
     public function isTextColumn(array $meta): bool

@@ -6,6 +6,8 @@ namespace Phibble\Sql;
 
 use InvalidArgumentException;
 use PDO;
+use PDOStatement;
+use Phibble\Type;
 
 /**
  * SQL differences between SQLite, PostgreSQL and MySQL.
@@ -14,13 +16,19 @@ abstract class Dialect
 {
     public static function for(PDO $pdo): self
     {
+        return self::tryFor($pdo) ?? throw new InvalidArgumentException(
+            'SqlTable supports SQLite, PostgreSQL and MySQL, not '.$pdo->getAttribute(PDO::ATTR_DRIVER_NAME).'.'
+        );
+    }
+
+    /** The dialect for a connection, or null for a driver SqlTable does not support. */
+    public static function tryFor(PDO $pdo): ?self
+    {
         return match ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)) {
             'sqlite' => new SqliteDialect(),
             'pgsql' => new PostgresDialect(),
             'mysql' => new MysqlDialect(),
-            default => throw new InvalidArgumentException(
-                'SqlTable supports SQLite, PostgreSQL and MySQL, not '.$pdo->getAttribute(PDO::ATTR_DRIVER_NAME).'.'
-            ),
+            default => null,
         };
     }
 
@@ -111,10 +119,59 @@ abstract class Dialect
         return false;
     }
 
-    /** @param array<string, mixed> $meta Whether a column is boolean. */
-    public function isBoolColumn(array $meta): bool
+    /**
+     * The type a result column was declared with, from
+     * PDOStatement::getColumnMeta(). Null when the driver does not say, and
+     * the values are guessed from their text instead.
+     *
+     * @param array<string, mixed> $meta
+     */
+    public function columnType(array $meta): ?Type
+    {
+        return null;
+    }
+
+    /**
+     * Whether a result column is an exact decimal (NUMERIC, DECIMAL).
+     *
+     * @param array<string, mixed> $meta
+     */
+    public function isDecimalColumn(array $meta): bool
     {
         return false;
+    }
+
+    /**
+     * Types for a result's columns, by position, from the driver's metadata.
+     * Positions left out have no declared type, and are guessed.
+     *
+     * Decimals become doubles, as RPostgres and RMariaDB read them, so digits
+     * past a double's 15 or so are lost; whole-number decimals (as from
+     * SUM over BIGINT) that fit become integers. Pass a 'string' type to
+     * keep a decimal exact.
+     *
+     * @param list<list<mixed>> $columns The result's values, by position.
+     * @return array<int, Type>
+     */
+    public function resultTypes(PDOStatement $statement, array $columns): array
+    {
+        $types = [];
+        for ($i = 0; $i < $statement->columnCount(); $i++) {
+            $meta = $statement->getColumnMeta($i);
+            if ($meta === false) {
+                continue;
+            }
+            $type = $this->isDecimalColumn($meta)
+                ? (array_all($columns[$i] ?? [], fn ($v) => $v === null || is_int($v) || (is_string($v) && filter_var($v, FILTER_VALIDATE_INT) !== false))
+                    ? Type::Int
+                    : Type::Float)
+                : $this->columnType($meta);
+            if ($type !== null) {
+                $types[$i] = $type;
+            }
+        }
+
+        return $types;
     }
 
     /** A date part as a number: year, month, day, hour, minute, second, yday, dow (0 = Sunday). */

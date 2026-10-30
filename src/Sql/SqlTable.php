@@ -113,7 +113,7 @@ final readonly class SqlTable implements Table
             if ($meta !== false && $dialect->isTextColumn($meta)) {
                 $text[] = $name;
             }
-            if ($meta !== false && $dialect->isBoolColumn($meta)) {
+            if ($meta !== false && $dialect->columnType($meta) === Type::Bool) {
                 $hints[$name] = Type::Bool;
             }
         }
@@ -206,12 +206,11 @@ final readonly class SqlTable implements Table
         // Fetch one column but keep the row order, which may use other columns.
         $template = 'SELECT '.$this->dialect->quote($name).' FROM ({}) AS '.$this->alias().' ORDER BY {}';
         $parts = [$this->from, (new Compiler($this->dialect, text: $this->text))->orderBy($this->rowOrder())];
-        $rows = $this->run(Fragment::format($template, $parts))->fetchAll(PDO::FETCH_ASSOC);
-        $hints = array_intersect_key($this->hints, [$name => true]);
+        $statement = $this->run(Fragment::format($template, $parts));
+        $values = $statement->fetchAll(PDO::FETCH_COLUMN);
+        $type = $this->hints[$name] ?? $this->dialect->resultTypes($statement, [$values])[0] ?? null;
 
-        return $rows === []
-            ? []
-            : DataFrame::fromRows($rows, $hints, parseStrings: true)->column($name);
+        return $values === [] ? [] : Infer::fromDatabase($values, $type, $name)->values();
     }
 
     public function groups(): array
@@ -250,23 +249,15 @@ final readonly class SqlTable implements Table
                 $columns[$i][] = $value;
             }
         }
+        // Columns are typed as the database declared them; hints (logical
+        // expressions that SQLite and MySQL return as 0/1) come first.
+        $declared = $this->dialect->resultTypes($statement, $columns);
         $data = [];
-        // Before PHP 8.4, pdo_pgsql returns float4/float8 as text, so "2" would
-        // parse as an integer and "Infinity" not at all. PHP 8.4 returns floats.
-        $pgFloats = PHP_VERSION_ID < 80400 && $this->dialect->name() === 'PostgreSQL';
         foreach ($this->columns as $i => $name) {
-            if ($pgFloats && in_array($statement->getColumnMeta($i)['native_type'] ?? '', ['float4', 'float8'], true)) {
-                $columns[$i] = array_map(fn ($v) => match ($v) {
-                    null => null,
-                    'Infinity' => INF,
-                    '-Infinity' => -INF,
-                    'NaN' => NAN,
-                    default => (float) $v,
-                }, $columns[$i]);
-            }
+            $type = $this->hints[$name] ?? $declared[$i] ?? null;
             $data[$name] = $columns[$i] === []
-                ? Infer::column([], $this->hints[$name] ?? null, $name)
-                : Infer::fromDatabase($columns[$i], $this->hints[$name] ?? null, $name);
+                ? Infer::column([], $type, $name)
+                : Infer::fromDatabase($columns[$i], $type, $name);
             $columns[$i] = null;
         }
         $df = DataFrame::fromColumns($data);
