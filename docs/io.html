@@ -517,7 +517,8 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">$running</span> <span class="op">=</span> DataFrame::concat(<span class="va">$kept</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Types not given are guessed from the first chunk, and every later chunk is parsed as those types. As in readr, <code>guessMax</code> defaults to the chunk size. Give every type, as above, to skip guessing. A value in a later chunk that does not fit its column’s type becomes NA. Factors without levels take their levels from each chunk.</p>
-<p>Every other option works as it does in <code>fromCsv()</code>. Each chunk’s problems raise their own warning, with rows numbered from the start of the file. The chunked readers always use the PHP reader.</p>
+<p>Every other option works as it does in <code>fromCsv()</code>. Each chunk’s problems raise their own warning, with rows numbered from the start of the file.</p>
+<p>When the <a href="https://github.com/phpstats/phit">phit</a> extension is loaded (0.2.0 or later), the chunks are read natively with <code>Phit\CsvReader</code>, about three times faster on a wide tab-separated file. The results are the same as the PHP reader’s, which is used otherwise.</p>
 </section>
 <section id="writing-csv" class="level2">
 <h2 class="anchored" data-anchor-id="writing-csv">Writing CSV</h2>
