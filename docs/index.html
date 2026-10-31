@@ -158,12 +158,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Getting started</span></a>
   </div>
 </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./coming-from-tibble.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Coming from tibble</span></a>
-  </div>
-</li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
@@ -173,6 +167,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./coming-from-tibble.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Coming from tibble</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./types.html" class="sidebar-item-text sidebar-link">
@@ -203,23 +203,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">phibble for Laravel developers</span></a>
   </div>
 </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Backends</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./backends.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Backends</span></a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./contract.html" class="sidebar-item-text sidebar-link">
@@ -228,12 +228,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
   </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Contributing</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./development.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Development</span></a>
   </div>
 </li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -244,8 +255,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#install" id="toc-install" class="nav-link active" data-scroll-target="#install">Install</a></li>
-  <li><a href="#where-to-go-next" id="toc-where-to-go-next" class="nav-link" data-scroll-target="#where-to-go-next">Where to go next</a></li>
+  <li><a href="#tables" id="toc-tables" class="nav-link active" data-scroll-target="#tables">Tables</a></li>
+  <li><a href="#backends" id="toc-backends" class="nav-link" data-scroll-target="#backends">Backends</a></li>
+  <li><a href="#other-packages" id="toc-other-packages" class="nav-link" data-scroll-target="#other-packages">Other packages</a></li>
+  <li><a href="#install" id="toc-install" class="nav-link" data-scroll-target="#install">Install</a></li>
   </ul>
 </nav>
     </div>
@@ -272,13 +285,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>phibble is a port of R’s tibble to PHP, with the readr-style input and output a data frame needs. A <code>DataFrame</code> holds typed columns, treats <code>null</code> as NA, and never changes in place: every operation returns a new one.</p>
+<p>phibble is a data frame library for PHP. A <code>DataFrame</code> is a table of named, typed columns, such as the rows of a CSV file or a database query. phibble reads such tables, filters, sorts, groups, joins, and summarizes them, and writes them back out. Its design and names follow R’s tibble and readr packages, and its verbs follow dplyr.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)<span class="ot">;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="va">$penguins</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'body_mass'</span>)-&gt;isNa()-&gt;not())</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'sex'</span>])</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    -&gt;summarise([</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'n'</span> =&gt; n()<span class="ot">,</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass'</span> =&gt; mean(col(<span class="st">'body_mass'</span>))<span class="ot">,</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'flipper'</span> =&gt; median(col(<span class="st">'flipper_len'</span>))<span class="ot">,</span></span>
@@ -297,31 +310,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 6 Gentoo    female    58 4680.    212 
 7 Gentoo    male      61 5485.    221 
 8 Gentoo    &lt;NA&gt;       4 4588.    216</code></pre>
-<p>phibble is the shared table type of a small family of packages for statistics in PHP. The other packages read and return phibble tables:</p>
+<section id="tables" class="level2">
+<h2 class="anchored" data-anchor-id="tables">Tables</h2>
 <ul>
-<li><strong><a href="https://github.com/phpstats/phplyr">phplyr</a></strong> ports dplyr and tidyr as pipe-able functions.</li>
-<li><strong><a href="https://github.com/phpstats/phit">phit</a></strong> is a native extension for statistical models and descriptive statistics. It reads model data with <code>DataFrame::toModelData()</code>.</li>
-<li><strong>phpolars</strong> is an optional Polars-backed table.</li>
-<li><strong>cmdstanphp</strong> runs Stan models and will accept phibble data frames.</li>
+<li>Every column has one type: float, int, bool, string, factor, date, datetime, or list. Types are guessed as a table loads, or declared per column.</li>
+<li>PHP <code>null</code> is a missing value (R’s NA) in every type.</li>
+<li>A <code>DataFrame</code> never changes in place. Every method returns a new table.</li>
+<li>Tables load from CSV, JSON, PDO queries, Laravel and Doctrine query builders, and Laravel collections, and write to CSV and JSON.</li>
 </ul>
-<p>The packages talk to each other through the <code>Table</code> contract. <code>DataFrame</code> is the in-memory implementation. <code>SqlTable</code> implements the same contract over a SQL query, so the verbs compile to SQL and run in the database.</p>
+<p>The <a href="./types.html">types guide</a> and <a href="./io.html">reading and writing data</a> cover these in detail.</p>
+</section>
+<section id="backends" class="level2">
+<h2 class="anchored" data-anchor-id="backends">Backends</h2>
+<p>Three classes implement the <code>Phibble\Contracts\Table</code> interface, and all three are part of phibble:</p>
+<ul>
+<li><code>Phibble\DataFrame</code> holds the data in PHP arrays.</li>
+<li><code>Phibble\Sql\SqlTable</code> compiles the verbs to SQL for SQLite, PostgreSQL, and MySQL.</li>
+<li><code>Phibble\Polars\PolarsTable</code> runs the verbs in Polars. It needs the php_polars extension from <a href="https://github.com/phpstats/phpolars">phpolars</a>.</li>
+</ul>
+<p>A step that a backend cannot run itself, such as a PHP closure, runs in a <code>DataFrame</code>. The <a href="./backends.html">backends page</a> describes how results can still differ between backends.</p>
+</section>
+<section id="other-packages" class="level2">
+<h2 class="anchored" data-anchor-id="other-packages">Other packages</h2>
+<p>The other PHPstats packages read and return phibble tables:</p>
+<ul>
+<li><a href="https://github.com/phpstats/phplyr">phplyr</a> provides dplyr and tidyr as PHP functions and method chains.</li>
+<li><a href="https://github.com/phpstats/phit">phit</a> fits statistical models, reading their data through <code>DataFrame::toModelData()</code>. Its extension also speeds up phibble’s CSV reader.</li>
+<li><a href="https://github.com/phpstats/phpolars">phpolars</a> provides the Polars extension that <code>PolarsTable</code> uses.</li>
+<li><a href="https://github.com/phpstats/phiz">phiz</a> plots a <code>DataFrame</code> directly.</li>
+<li><a href="https://github.com/phpstats/CmdStanPHP">CmdStanPHP</a> accepts a <code>DataFrame</code> as model data and returns draws and summaries as tables.</li>
+</ul>
+</section>
 <section id="install" class="level2">
 <h2 class="anchored" data-anchor-id="install">Install</h2>
-<p>phibble needs PHP 8.3 or later. PHP 8.5 adds the <code>|&gt;</code> pipe operator, which phibble and phplyr pipelines can use.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">composer</span> require phpstats/phibble</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>phibble has no required dependencies beyond PHP’s PDO extension. It works with Laravel and Doctrine query builders without depending on either.</p>
-</section>
-<section id="where-to-go-next" class="level2">
-<h2 class="anchored" data-anchor-id="where-to-go-next">Where to go next</h2>
+<p>Requirements:</p>
 <ul>
-<li><a href="./getting-started.html">Getting started</a> covers building data frames, printing, and the verbs.</li>
-<li><a href="./coming-from-tibble.html">Coming from tibble</a> maps tibble, readr, and forcats functions to phibble and lists the places where phibble differs.</li>
-<li><a href="./types.html">Types</a> explains type inference, casts, factors, dates, and list-columns.</li>
-<li><a href="./io.html">Reading and writing data</a> covers CSV, JSON, databases, and Laravel collections.</li>
-<li><a href="./expr.html">Expressions</a> documents <code>Phibble\Expr</code>, the inspectable expressions that every backend evaluates the same way.</li>
-<li><a href="./sql.html">SQL tables</a> documents <code>SqlTable</code>, which runs verbs in SQLite, PostgreSQL, or MySQL.</li>
-<li><a href="./contract.html">The Table contract</a> is for authors of new backends.</li>
+<li>PHP 8.3 or later. <code>composer.json</code> allows <code>^8.3</code>, and CI tests PHP 8.3, 8.4, and 8.5.</li>
+<li>The PDO extension.</li>
 </ul>
+<p>Optional:</p>
+<ul>
+<li>The phit extension reads CSV natively. <code>fromCsv()</code> uses phit 0.1.1 or later, and the chunked readers use phit 0.2.0 or later.</li>
+<li>The php_polars extension enables <code>PolarsTable</code>.</li>
+<li><code>illuminate/database</code> enables the Laravel macros.</li>
+</ul>
+<p>Pipelines can use PHP 8.5’s <code>|&gt;</code> operator. Method chains work on every supported version.</p>
 
 
 </section>
