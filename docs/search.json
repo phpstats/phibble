@@ -483,7 +483,7 @@
     "href": "development.html#documentation",
     "title": "Development",
     "section": "Documentation",
-    "text": "Documentation\nThe site is a Quarto project in docs/. Every example is a PHP file in docs/examples/. bin/docs-examples runs each example with docs/data as the working directory and writes its code and output to docs/examples/_&lt;name&gt;.md, which the pages include. Quarto never runs PHP.\nbin/render-docs refreshes the examples, renders the site, and copies the result into docs/ for GitHub Pages:\nPHP=php85 bin/render-docs\nbin/docs-examples name refreshes one example. Set QUARTO when the quarto command is not on the path.",
+    "text": "Documentation\nThe site is a Quarto project in docs/. Every example is a PHP file in docs/examples/. bin/docs-examples runs each example with docs/data as the working directory and writes its code and output to docs/examples/_&lt;name&gt;.md, which the pages include. Quarto never runs PHP.\nbin/render-docs refreshes the examples, renders the site, and copies the result into docs/. Commit the rendered HTML, because phpstats.org imports it from docs/ and never runs Quarto:\nPHP=php85 bin/render-docs\nbin/docs-examples name refreshes one example. Set QUARTO when the quarto command is not on the path.\nThe documentation is published at https://phibble.phpstats.org/docs. GitHub Pages serves only redirects there: the pages workflow runs bin/pages-redirects, which writes one redirect page for each page in docs/.",
     "crumbs": [
       "Contributing",
       "Development"
