@@ -382,7 +382,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td><code>summarise($aggregates)</code></td>
-<td><code>DataFrame</code> and <code>SqlTable</code> also have the alias <code>summarize()</code>. Returns one row per group: the keys, then one column per entry. Each entry is a closure given the group’s table or an expression of size 1. The result drops the last grouping level, and a rowwise table keeps its id columns. The optional second argument is dplyr’s <code>.groups</code>: <code>'drop_last'</code> (the default), <code>'drop'</code>, <code>'keep'</code>, or <code>'rowwise'</code>.</td>
+<td><code>DataFrame</code>, <code>SqlTable</code>, and <code>PolarsTable</code> also have the alias <code>summarize()</code>, which the interface does not declare. Returns one row per group: the keys, then one column per entry. Each entry is a closure given the group’s table or an expression of size 1. The result drops the last grouping level, and a rowwise table keeps its id columns. The optional second argument is dplyr’s <code>.groups</code>: <code>'drop_last'</code> (the default), <code>'drop'</code>, <code>'keep'</code>, or <code>'rowwise'</code>.</td>
 </tr>
 <tr class="even">
 <td><code>distinct($names)</code></td>
@@ -521,7 +521,7 @@ ul.task-list li input[type="checkbox"] {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/phpstats\.github\.io\/phibble\/");
+        var filterRegex = new RegExp("https:\/\/phibble\.phpstats\.org\/docs\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

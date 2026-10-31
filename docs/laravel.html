@@ -376,7 +376,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="with-phplyr" class="level2">
 <h2 class="anchored" data-anchor-id="with-phplyr">With phplyr</h2>
-<p><a href="https://github.com/phpstats/phplyr">phplyr</a> provides dplyr’s verbs as functions for PHP 8.5’s pipe operator and as a method chain on every supported PHP version. Its verbs call the same table methods, so a phplyr pipeline on <code>phibble()</code> also runs in the database. phplyr’s own <code>col()</code> and aggregates take camelCase options such as <code>naRm:</code>:</p>
+<p><a href="https://github.com/phpstats/phplyr">phplyr</a> provides dplyr’s verbs as functions for PHP 8.5’s pipe operator and as a method chain on PHP 8.3, 8.4, and 8.5. Its verbs call the same table methods, so a phplyr pipeline on <code>phibble()</code> also runs in the database. phplyr’s own <code>col()</code> and aggregates take camelCase options such as <code>naRm:</code>:</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset" data-group="syntax">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">PHP 8.5+</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">PHP 8.3–8.4</a></li></ul>
 <div class="tab-content" data-group="syntax">
@@ -736,7 +736,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/phpstats\.github\.io\/phibble\/");
+        var filterRegex = new RegExp("https:\/\/phibble\.phpstats\.org\/docs\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
