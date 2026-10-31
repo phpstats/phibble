@@ -1,0 +1,37 @@
+---
+title: "Read a CSV file into a typed table"
+---
+
+This example reads a small CSV file into a `DataFrame`, with each column's
+type guessed from its values and one type declared.
+
+It needs phibble, installed as described in
+[Installation](../getting-started.qmd#installation).
+
+The data is [`readings.csv`](https://raw.githubusercontent.com/phpstats/phibble/main/docs/data/readings.csv),
+six weather readings from two stations:
+
+```text
+date,station,temp_c,rain_mm,wind_kmh,windy
+2024-03-01,north,7.5,0.0,12,FALSE
+2024-03-01,south,9.1,1.2,31,TRUE
+2024-03-02,north,6.8,NA,18,FALSE
+2024-03-02,south,8.4,3.5,35,TRUE
+2024-03-03,north,10.2,0.0,9,FALSE
+2024-03-03,south,11.0,0.4,22,FALSE
+```
+
+Save it next to this script and run the script with `php`:
+
+{{< include _read-a-csv.md >}}
+
+`DataFrame::fromCsv()` guesses a type for each column, as readr's
+`read_csv()` does. `date` holds ISO 8601 dates, so it is a date column.
+`temp_c` and `rain_mm` hold decimals, so they are floats, and `wind_kmh` holds
+whole numbers, so it is an int. `windy` holds `TRUE` and `FALSE`, so it is a
+bool. The `NA` in `rain_mm` is a missing value, which phibble stores as
+`null`. `types` declares `station` a factor, which the guess would have read
+as a string. The type of each column prints under its name.
+
+[Reading and writing data](../io.qmd) lists the other options of
+`fromCsv()`, and [Types](../types.qmd) describes the column types.

@@ -42,6 +42,21 @@
         "chain": "use function Phibble\\Expr\\{col, desc, mean, n, sum};\n\n$orders = \\Phibble\\DataFrame::fromCsv('orders.csv', types: [\n    'channel' => 'factor',\n    'coupon' => 'bool',\n    'returned' => 'bool',\n]);\n\necho $orders\n    ->filter(col('returned')->not())\n    ->mutate(['item_price' => col('total')->div(col('items'))])\n    ->groupBy(['channel'])\n    ->summarize([\n        'orders' => n(),\n        'revenue' => sum(col('total')),\n        'item_price' => mean(col('item_price')),\n        'coupons' => mean(col('coupon')),\n    ], groups: 'drop')\n    ->arrange([desc(col('revenue'))]);",
         "output": "# A tibble: 3 × 5\n  channel orders revenue item_price coupons\n  <fct>    <int>   <dbl>      <dbl>   <dbl>\n1 web        211  19450.       32.9  0.327 \n2 store      109  12065.       41.8  0.174 \n3 phone       65   9024.       51.2  0.0615"
     },
+    "examples": [
+        {
+            "path": "examples/read-a-csv",
+            "title": "Read a CSV file into a typed table",
+            "description": "Reads a small CSV file of weather readings, guessing each column's type and declaring one as a factor."
+        },
+        {
+            "path": "examples/database-table",
+            "title": "Query a database table",
+            "description": "Summarizes an SQLite table with phibble's verbs, which compile to one SQL query.",
+            "also": [
+                "phplyr"
+            ]
+        }
+    ],
     "docs": {
         "root": "docs",
         "format": "quarto",
@@ -53,6 +68,14 @@
             {
                 "title": "Getting started",
                 "path": "getting-started.qmd"
+            },
+            {
+                "title": "Read a CSV file into a typed table",
+                "path": "examples/read-a-csv.qmd"
+            },
+            {
+                "title": "Query a database table",
+                "path": "examples/database-table.qmd"
             },
             {
                 "title": "Coming from tibble",
