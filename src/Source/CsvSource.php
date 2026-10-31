@@ -197,6 +197,8 @@ final class CsvSource implements Source
                         } else {
                             $extra = array_splice($record, $width - 1);
                             $record[] = implode($o->delimiter, array_map(strval(...), $extra));
+                            // Joining with a space or tab delimiter can put whitespace at the edges.
+                            $trim = $o->trimWs;
                         }
                     }
                     foreach ($kept as $i) {

@@ -376,5 +376,29 @@
     "php": {
       "types": "cc"
     }
+  },
+  {
+    "name": "ragged_space",
+    "file": "ragged_space.csv",
+    "r": {
+      "col_types": "cc",
+      "delim": " "
+    },
+    "php": {
+      "types": "cc",
+      "delimiter": " "
+    }
+  },
+  {
+    "name": "ragged_tab",
+    "file": "ragged_tab.csv",
+    "r": {
+      "col_types": "cc",
+      "delim": "\t"
+    },
+    "php": {
+      "types": "cc",
+      "delimiter": "\t"
+    }
   }
 ]

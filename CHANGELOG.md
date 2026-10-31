@@ -5,6 +5,15 @@ All notable changes to phibble are listed here. The format follows
 [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may
 change the public API.
 
+## [Unreleased]
+
+### Fixed
+
+- A row with more fields than columns, split on a space or tab delimiter,
+  now has its joined last field trimmed, as readr does. 0.5.0 skipped the
+  trim when no single field had a space or tab at its edge, so
+  `1  x  y  ` read with a space delimiter gave ` x  y  ` instead of `x  y`.
+
 ## [0.5.0] - 2026-10-30
 
 ### Added
@@ -202,6 +211,7 @@ and cmdstanphp.
   query builders and `->phibble()` for lazy SQL tables. Global scopes such as
   soft deletes apply.
 
+[Unreleased]: https://github.com/phpstats/phibble/compare/v0.5.0...HEAD
 [0.5.0]: https://github.com/phpstats/phibble/releases/tag/v0.5.0
 [0.4.1]: https://github.com/phpstats/phibble/releases/tag/v0.4.1
 [0.4.0]: https://github.com/phpstats/phibble/releases/tag/v0.4.0
