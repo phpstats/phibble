@@ -9,15 +9,11 @@
         "select, filter, mutate, arrange, groupBy, summarize, the joins, and tidyr's pivots follow dplyr 1.1 semantics, and Phibble\\Expr records each computation as an inspectable, serializable tree rather than a closure. Three backends implement one Table contract: DataFrame in memory, SqlTable compiling the same verbs to SQLite, PostgreSQL, or MySQL, and PolarsTable running them in Polars. phibble is the table type that phplyr, phit, phpolars, and CmdStanPHP pass between them."
     ],
     "install": [
-        "composer config repositories.phibble vcs https://github.com/phpstats/phibble",
-        "composer require phpstats/phibble:dev-main"
+        "composer require phpstats/phibble"
     ],
     "requires": [
-        "PHP 8.3, 8.4, or 8.5",
-        "PHP's PDO extension",
-        "illuminate/database, optional, for the Laravel collection and query builder integration",
-        "The phit extension, optional, for its native CSV reader",
-        "The php_polars extension, optional, for PolarsTable"
+        "PHP 8.3+",
+        "PDO extension"
     ],
     "repository": "https://github.com/phpstats/phibble",
     "example": {
@@ -73,5 +69,10 @@
                 "path": "development.qmd"
             }
         ]
-    }
+    },
+    "optional": [
+        "illuminate/database",
+        "phit extension",
+        "php_polars extension"
+    ]
 }
