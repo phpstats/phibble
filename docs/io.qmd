@@ -114,8 +114,12 @@ does not fit its column's type becomes NA. Factors without levels take their
 levels from each chunk.
 
 Every other option works as it does in `fromCsv()`. Each chunk's problems
-raise their own warning, with rows numbered from the start of the file. The
-chunked readers always use the PHP reader.
+raise their own warning, with rows numbered from the start of the file.
+
+When the [phit](https://github.com/phpstats/phit) extension is loaded (0.2.0 or
+later), the chunks are read natively with `Phit\CsvReader`, about three times
+faster on a wide tab-separated file. The results are the same as the PHP
+reader's, which is used otherwise.
 
 ## Writing CSV
 

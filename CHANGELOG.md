@@ -13,11 +13,18 @@ change the public API.
   text a chunk of rows at a time, as readr's `read_delim_chunked()` does.
   Types are guessed from the first chunk and kept for the rest. A 105 MB file
   reads in 10,000-row chunks within 16 MB.
+- With phit 0.2.0 or later loaded, the chunked readers use its
+  `Phit\CsvReader`, about three times faster on a wide tab-separated file,
+  with the same results as the PHP reader.
 
 ### Changed
 
 - The CSV reader reads its input in 4 MB blocks instead of all at once, so
-  `fromCsv()` no longer holds the file's text alongside its rows.
+  `fromCsv()` no longer holds the file's text alongside its rows. A CR at the
+  end of a block waits for the next one, and the first 4 MB decide whether
+  lines end in CR alone, so results do not depend on the block size.
+- The PHP CSV reader trims only blocks that have a space or tab at a field's
+  edge, and finds NA strings with a hash lookup.
 
 ## [0.4.1] - 2026-10-30
 

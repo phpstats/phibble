@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Phibble\Io;
 
 use Closure;
+use Generator;
 use InvalidArgumentException;
 use Phibble\Column\ArrayColumn;
 use Phibble\Column\Column;
 use Phibble\Column\TemporalColumn;
 use Phibble\DataFrame;
 use Phibble\NameRepair;
+use Phibble\Source\CsvSource;
 use Phibble\Type;
 
 /**
@@ -72,12 +74,65 @@ final class NativeCsv
             && ! str_ends_with(strtolower($path), '.gz');
     }
 
+    /** Whether phit can read in chunks (Phit\CsvReader, from phit 0.2.0). */
+    public static function chunksAvailable(): bool
+    {
+        return self::$enabled
+            && getenv('PHIBBLE_NATIVE_CSV') !== '0'
+            && self::$reader === null
+            && class_exists('Phit\\CsvReader');
+    }
+
     /**
      * @return array{0: DataFrame, 1: list<string>} The DataFrame and its problems.
      */
     public static function read(string $path, CsvOptions $o): array
     {
-        $base = [
+        $base = self::options($o);
+
+        // Column names first (a header-only read), to resolve col_types by name.
+        $probe = self::call($path, [...$base, 'n_max' => 0]);
+        $names = self::names($probe['names'], $o);
+        $specs = ColTypes::resolve($o->types, $names, $o->select);
+
+        $result = self::call($path, [...$base, 'n_max' => $o->nMax, 'types' => self::codes($specs)]);
+        [$df, $problems] = self::finish($result, $names, $specs, $o);
+
+        return [$df, [...array_values($result['problems'] ?? []), ...$problems]];
+    }
+
+    /**
+     * The chunks of CsvSource::chunks(), read by Phit\CsvReader: positions,
+     * types fixed from the first chunk, and problems per chunk, as there.
+     *
+     * @return Generator<int, DataFrame>
+     */
+    public static function chunks(string $path, CsvOptions $o, int $size): Generator
+    {
+        $base = self::options($o);
+        $names = self::names((new \Phit\CsvReader($path, $base))->names(), $o);
+        if ($names === []) {
+            return;
+        }
+        $specs = ColTypes::resolve($o->types, $names, $o->select);
+        $reader = new \Phit\CsvReader($path, [...$base, 'n_max' => $o->nMax, 'types' => self::codes($specs)]);
+        while (($chunk = $reader->next($size)) !== null) {
+            if ($chunk['rows'] === 0) {
+                CsvSource::warn(array_values($chunk['problems']));
+
+                return;
+            }
+            [$df, $problems] = self::finish($chunk, $names, $specs, $o);
+            CsvSource::warn([...array_values($chunk['problems']), ...$problems]);
+
+            yield $chunk['position'] => $df;
+        }
+    }
+
+    /** @return array<string, mixed> The options Phit\read_csv() and Phit\CsvReader take. */
+    private static function options(CsvOptions $o): array
+    {
+        return [
             'delimiter' => $o->delimiter,
             'quote' => $o->quote,
             'escape_double' => $o->escapeDouble,
@@ -92,31 +147,45 @@ final class NativeCsv
             'decimal_mark' => $o->decimalMark,
             'grouping_mark' => $o->groupingMark,
         ];
+    }
 
-        // Column names first (a header-only read), to resolve col_types by name.
-        $probe = self::call($path, [...$base, 'n_max' => 0]);
-        $names = self::names($probe['names'], $o);
-        $specs = ColTypes::resolve($o->types, $names, $o->select);
+    /**
+     * phit's type codes. Factors and readr's "number" are read as text and
+     * parsed in PHP.
+     *
+     * @param list<array{type: Type, number: bool, levels: ?list<string>, ordered: bool}|'skip'|null> $specs
+     * @return list<string>
+     */
+    private static function codes(array $specs): array
+    {
+        return array_map(fn ($spec) => match (true) {
+            $spec === null => '?',
+            $spec === 'skip' => '_',
+            $spec['number'], $spec['type'] === Type::Factor => 'c',
+            default => match ($spec['type']) {
+                Type::Bool => 'l',
+                Type::Int => 'i',
+                Type::Float => 'd',
+                Type::Date => 'D',
+                Type::DateTime => 'T',
+                default => 'c',
+            },
+        }, $specs);
+    }
 
-        $codes = [];
-        foreach ($specs as $i => $spec) {
-            $codes[$i] = match (true) {
-                $spec === null => '?',
-                $spec === 'skip' => '_',
-                $spec['number'], $spec['type'] === Type::Factor => 'c',
-                default => match ($spec['type']) {
-                    Type::Bool => 'l',
-                    Type::Int => 'i',
-                    Type::Float => 'd',
-                    Type::Date => 'D',
-                    Type::DateTime => 'T',
-                    default => 'c',
-                },
-            };
-        }
-
-        $result = self::call($path, [...$base, 'n_max' => $o->nMax, 'types' => $codes]);
-        $problems = array_values($result['problems'] ?? []);
+    /**
+     * A native result as a DataFrame, with the problems found finishing it:
+     * factors and numbers parsed in PHP, select applied, and each column's
+     * failed parses reported.
+     *
+     * @param array{columns: list<array{type: string, values: list<mixed>, failed: int}|null>} $result
+     * @param list<string> $names
+     * @param list<array{type: Type, number: bool, levels: ?list<string>, ordered: bool}|'skip'|null> $specs
+     * @return array{0: DataFrame, 1: list<string>}
+     */
+    private static function finish(array $result, array $names, array $specs, CsvOptions $o): array
+    {
+        $problems = [];
         $parser = new TextParser($o->decimalMark, $o->groupingMark);
         $data = [];
         foreach ($names as $i => $name) {

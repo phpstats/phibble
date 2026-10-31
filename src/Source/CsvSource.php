@@ -96,6 +96,11 @@ final class CsvSource implements Source
         if ($size < 1) {
             throw new InvalidArgumentException("The chunk size must be at least 1, got {$size}.");
         }
+        if ($this->path !== null && NativeCsv::chunksAvailable() && NativeCsv::supports($this->path, $this->options)) {
+            $this->finish();
+
+            return NativeCsv::chunks($this->path, $this->options, $size);
+        }
 
         return $this->batches($size);
     }
@@ -169,12 +174,15 @@ final class CsvSource implements Source
                 $problems = [];
                 $inBatch = 0;
                 $limit = min($size ?? PHP_INT_MAX, $o->nMax === null ? PHP_INT_MAX : $o->nMax - $count);
-                // The hot loop: one pass per record, fields arriving trimmed.
+                // The hot loop: one pass per record. The tokenizers' key says
+                // whether the record's fields may need trimming.
                 while ($inBatch < $limit) {
                     if ($pendingRows !== []) {
                         $record = array_shift($pendingRows);
+                        $trim = $o->trimWs;
                     } elseif ($records->valid()) {
                         $record = $records->current();
+                        $trim = $records->key();
                         $records->next();
                         if ($record === null) {
                             continue;
@@ -193,6 +201,9 @@ final class CsvSource implements Source
                     }
                     foreach ($kept as $i) {
                         $value = $record[$i];
+                        if ($trim && $value !== null) {
+                            $value = trim($value, " \t");
+                        }
                         $columns[$i][] = match (true) {
                             $value === null, isset($naSet[$value]) => null,
                             isset($pools[$i]) => $pools[$i][$value] ??= $value,
@@ -271,8 +282,14 @@ final class CsvSource implements Source
         }
     }
 
-    /** @param list<string> $problems */
-    private static function warn(array $problems): void
+    /**
+     * Raise one warning listing a read's problems, if it has any.
+     *
+     * @internal
+     *
+     * @param list<string> $problems
+     */
+    public static function warn(array $problems): void
     {
         if ($problems !== []) {
             $shown = array_slice($problems, 0, 5);
@@ -311,8 +328,13 @@ final class CsvSource implements Source
      */
     public static int $blockSize = 1 << 22;
 
+    /** The first bytes, at most, that decide whether lines end in CR alone. */
+    private const int WINDOW = 1 << 22;
+
     /**
-     * Records keyed by 1-based line number; null for an empty line. Returns
+     * Records, keyed by whether their fields may need trimming (with
+     * trimWs, unquoted text without a space or tab at any field's edge
+     * needs none); null for an empty line. Returns
      * whether the text ended inside an unclosed quote.
      *
      * The input is read a block at a time. Each tokenizer gets the text up to
@@ -320,7 +342,7 @@ final class CsvSource implements Source
      * inside it (a quoted field running on into the next block), so a record
      * is never split and the whole input is never held.
      *
-     * @return Generator<int, list<?string>|null, mixed, bool>
+     * @return Generator<bool, list<?string>|null, mixed, bool>
      */
     private function records(): Generator
     {
@@ -333,34 +355,32 @@ final class CsvSource implements Source
             $line++;
         }
         $fast = $o->comment === '' && $o->escapeDouble && ! $o->escapeBackslash && $o->quote !== '';
-        $first = true;
+        // $pending holds bytes read but not yet tokenized: the first window,
+        // which decides the line endings, or a CR held back in case an LF follows.
         $pending = '';
         $crOnly = null;
         $carry = '';
         $emitted = false;
         while (true) {
-            $block = (string) fread($this->handle, self::$blockSize);
-            if (! feof($this->handle) && str_ends_with($block, "\r")) {
-                // Keep a CRLF pair in one block.
-                $block .= (string) fread($this->handle, 1);
-            }
+            $block = $pending.(string) fread($this->handle, self::$blockSize);
+            $pending = '';
             $final = feof($this->handle);
-            if ($first) {
-                // A UTF-8 byte-order mark (Excel writes one, even before a quoted header).
-                $block = $pending.$block;
-                if (strlen($block) < 3 && ! $final) {
+            if ($crOnly === null) {
+                if (strlen($block) < self::WINDOW && ! $final) {
                     $pending = $block;
 
                     continue;
                 }
+                // A UTF-8 byte-order mark (Excel writes one, even before a quoted header).
                 if ($line === 0 && str_starts_with($block, "\xEF\xBB\xBF")) {
                     $block = substr($block, 3);
                 }
-                $first = false;
+                // Old Mac files end lines in CR alone: the first window has CRs and no LF.
+                $crOnly = ! str_contains($block, "\n") && str_contains($block, "\r");
             }
-            // Old Mac files end lines in CR alone; the first line break says which.
-            if ($crOnly === null && strpbrk($block, "\r\n") !== false) {
-                $crOnly = ! str_contains($block, "\n");
+            if (! $final && str_ends_with($block, "\r")) {
+                $pending = "\r";
+                $block = substr($block, 0, -1);
             }
             $text = $carry.($crOnly ? str_replace("\r", "\n", $block) : str_replace("\r\n", "\n", $block));
             unset($block);
@@ -389,7 +409,7 @@ final class CsvSource implements Source
      * Without quotes, every line is a record and every delimiter separates
      * fields, so plain splitting gives the tokenizer's result.
      *
-     * @return Generator<int, list<?string>|null, mixed, array{bool, int, int, bool}>
+     * @return Generator<bool, list<?string>|null, mixed, array{bool, int, int, bool}>
      */
     private function fastRecords(string $text, int $line, bool $final): Generator
     {
@@ -408,11 +428,7 @@ final class CsvSource implements Source
         $last = array_key_last($lines);
         foreach ($lines as $i => $content) {
             $line++;
-            $fields = explode($o->delimiter, $content);
-            if ($trim) {
-                $fields = array_map(fn (string $f) => trim($f, " \t"), $fields);
-            }
-            yield $line => $this->record($content, $fields, $ended || $i !== $last);
+            yield $trim => $this->record($content, explode($o->delimiter, $content), $ended || $i !== $last);
         }
 
         return [false, $length, $line, true];
@@ -429,7 +445,7 @@ final class CsvSource implements Source
      * read, the line count, and that a record was seen. Unless $final, a
      * record that does not end in this text is left for the next.
      *
-     * @return Generator<int, list<?string>|null, mixed, array{bool, int, int, bool}>
+     * @return Generator<bool, list<?string>|null, mixed, array{bool, int, int, bool}>
      */
     private function quotedRecords(string $text, int $line, bool $final): Generator
     {
@@ -455,8 +471,8 @@ final class CsvSource implements Source
                                 if (! $final) {
                                     return [false, $start, $line - 1, true];
                                 }
-                                $fields[] = $this->trimmed($field.substr($text, $pos));
-                                yield $line => $this->record(substr($text, $start), $fields, false);
+                                $fields[] = $field.substr($text, $pos);
+                                yield $o->trimWs => $this->record(substr($text, $start), $fields, false);
 
                                 return [true, $length, $line, true];
                             }
@@ -493,7 +509,7 @@ final class CsvSource implements Source
                     $field = $this->unquoteTrimmed(substr($text, $pos, $run));
                     $pos += $run;
                 }
-                $fields[] = $this->trimmed($field);
+                $fields[] = $field;
                 if ($pos >= $length) {
                     $end = null;
 
@@ -514,7 +530,7 @@ final class CsvSource implements Source
                 return [false, $start, $line - 1, true];
             }
             $raw = substr($text, $start, $pos - $start);
-            yield $line => $this->record($raw, $fields, $end === "\n");
+            yield $o->trimWs => $this->record($raw, $fields, $end === "\n");
         }
 
         return [false, $length, $line, true];
@@ -536,12 +552,6 @@ final class CsvSource implements Source
         }
 
         return false;
-    }
-
-    /** A field with trimWs applied; the tokenizers trim, so rows need no second pass. */
-    private function trimmed(string $field): string
-    {
-        return $this->options->trimWs ? trim($field, " \t") : $field;
     }
 
     /**
@@ -595,7 +605,7 @@ final class CsvSource implements Source
      * Returns what quotedRecords() returns; $emitted carries whether a
      * record has been seen in an earlier block.
      *
-     * @return Generator<int, list<?string>|null, mixed, array{bool, int, int, bool}>
+     * @return Generator<bool, list<?string>|null, mixed, array{bool, int, int, bool}>
      */
     private function slowRecords(string $text, int $line, bool $final, bool $emitted): Generator
     {
@@ -692,7 +702,7 @@ final class CsvSource implements Source
                     break;
                 }
                 if ($c === $delim) {
-                    $fields[] = $this->trimmed($this->finishField($field, $quoted));
+                    $fields[] = $this->finishField($field, $quoted);
                     $field = '';
                     $quoted = false;
                     $pos++;
@@ -712,11 +722,11 @@ final class CsvSource implements Source
             if (! $terminated && ! $final) {
                 return [false, $start, $line - 1, $emitted];
             }
-            $fields[] = $this->trimmed($this->finishField($field, $quoted));
+            $fields[] = $this->finishField($field, $quoted);
             $raw = substr($text, $start, $pos - $start);
             $record = $this->record($raw, $fields, str_ends_with($raw, "\n"));
             $emitted = $emitted || $record !== null;
-            yield $line => $record;
+            yield $o->trimWs => $record;
             if ($inQuotes) {
                 return [true, $length, $line, $emitted];
             }

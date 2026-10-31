@@ -100,18 +100,22 @@ it('reads tab-separated files by the same quote rules', function () {
 });
 
 it('keeps records whole across read blocks', function (int $blockSize) {
-    $csv = "a,b\n\"one\ntwo\",1\n\"x \"\"q\"\" y\",2\r\nplain,3\n";
+    // CRLF endings, one of them after a stray CR, and quoted line breaks.
+    $csv = "a,b\r\n\"one\ntwo\",1\r\n\"x \"\"q\"\" y\",2\r\r\nplain,3\r\n";
+    $expected = withCsvFile($csv, fn ($path) => DataFrame::fromCsv($path))->toRows();
     $previous = CsvSource::$blockSize;
     CsvSource::$blockSize = $blockSize;
     try {
         $chunks = chunksOf($csv, 2);
-        $whole = withCsvFile($csv, fn ($path) => DataFrame::fromCsv($path));
+        $whole = withCsvFile($csv, fn ($path) => DataFrame::fromCsv($path))->toRows();
     } finally {
         CsvSource::$blockSize = $previous;
     }
 
-    expect($whole->column('a'))->toBe(["one\ntwo", 'x "q" y', 'plain'])
-        ->and(DataFrame::concat(array_values($chunks))->toRows())->toBe($whole->toRows());
+    expect(array_column($expected, 'a'))->toBe(["one\ntwo", 'x "q" y', 'plain'])
+        ->and(array_column($expected, 'b'))->toBe(['1', "2\r", '3'])
+        ->and($whole)->toBe($expected)
+        ->and(DataFrame::concat(array_values($chunks))->toRows())->toBe($expected);
 })->with([1, 2, 3, 5, 8]);
 
 it('yields no chunks for an empty or header-only file', function () {
@@ -122,3 +126,25 @@ it('yields no chunks for an empty or header-only file', function () {
 it('rejects a chunk size below one', function () {
     chunksOf("a\n1\n", 0);
 })->throws(InvalidArgumentException::class, 'The chunk size must be at least 1, got 0.');
+
+it('reads the same chunks with phit as in PHP', function () {
+    if (! Phibble\Io\NativeCsv::chunksAvailable()) {
+        test()->markTestSkipped('Phit\CsvReader is not available (phit 0.2.0 or later not loaded).');
+    }
+    $csv = "junk\nid,name,score,day,flag\n# note\n1, a ,1.5,2024-01-02,TRUE\n2,\"b \"\"q\"\"\",NA,2024-01-03,FALSE\n"
+        ."3,c,x,2024-01-04,TRUE\n4,d,2.5,2024-01-05\n5,e,3.5,2024-01-06,TRUE,extra\n6,\"multi\nline\",4,2024-01-07,FALSE\n";
+    $options = ['skip' => 1, 'comment' => '#', 'select' => ['score', 'id', 'name', 'day']];
+    $read = fn () => quietly(fn () => array_map(fn (DataFrame $c) => [$c->types(), $c->toRows()], chunksOf($csv, 2, ...$options)));
+
+    [$native, $nativeWarnings] = $read();
+    Phibble\Io\NativeCsv::enable(false);
+    try {
+        [$php, $phpWarnings] = $read();
+    } finally {
+        Phibble\Io\NativeCsv::enable(true);
+    }
+
+    expect(array_keys($native))->toBe([1, 3, 5])
+        ->and($native)->toEqual($php)
+        ->and($nativeWarnings)->toBe($phpWarnings);
+});
