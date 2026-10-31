@@ -78,8 +78,8 @@ results that differ from an in-memory run.
 ## With phplyr
 
 [phplyr](https://github.com/phpstats/phplyr) provides dplyr's verbs as
-functions for PHP 8.5's pipe operator and as a method chain on every supported
-PHP version. Its verbs call the same table methods, so a phplyr pipeline on
+functions for PHP 8.5's pipe operator and as a method chain on PHP 8.3, 8.4,
+and 8.5. Its verbs call the same table methods, so a phplyr pipeline on
 `phibble()` also runs in the database. phplyr's own `col()` and aggregates take
 camelCase options such as `naRm:`:
 

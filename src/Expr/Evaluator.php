@@ -290,7 +290,7 @@ final class Evaluator
             'min', 'max' => $present === [] ? ($fn === 'min' ? INF : -INF) : self::extreme($fn, $present),
             'sd', 'var' => self::variance(array_map(self::num(...), $present), $fn === 'sd'),
             'quantile' => self::quantile(array_map(self::num(...), $present), (float) $this->scalarArg($call->args[1])),
-            'iqr' => self::quantile(array_map(self::num(...), $present), 0.75) - self::quantile(array_map(self::num(...), $present), 0.25),
+            'iqr' => $present === [] ? null : self::quantile(array_map(self::num(...), $present), 0.75) - self::quantile(array_map(self::num(...), $present), 0.25),
             'any' => in_array(true, $present, false),
             'all' => ! in_array(false, $present, false),
         };

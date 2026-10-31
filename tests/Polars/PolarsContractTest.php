@@ -277,3 +277,10 @@ it('keeps list-columns that Polars stores exactly and refuses named arrays with 
 
     PolarsTable::fromTable(DataFrame::fromColumns(['id' => [1, 2], 'x' => [['a' => 1], ['b' => 2]]]));
 })->throws(InvalidArgumentException::class, "List-column `x` can't be stored in Polars");
+
+it('has summarize() as an alias of summarise()', function () {
+    $aggregates = ['n' => n(), 'mass' => mean(col('mass'))];
+    $t = penguinsPt()->groupBy(['species']);
+
+    expect($t->summarize($aggregates, 'drop')->toRows())->toBe($t->summarise($aggregates, 'drop')->toRows());
+});

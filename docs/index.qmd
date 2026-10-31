@@ -61,8 +61,8 @@ composer require phpstats/phibble
 
 Requirements:
 
-- PHP 8.3 or later. `composer.json` allows `^8.3`, and CI tests PHP 8.3, 8.4,
-  and 8.5.
+- PHP 8.3, 8.4, or 8.5. CI tests all three.
+- The mbstring extension.
 - The PDO extension.
 
 Optional:

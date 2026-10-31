@@ -42,7 +42,7 @@ $fast = polars($df);
 $summary = fn ($t) => $t
     ->filter(col('units')->gt(0))
     ->groupBy(['store'])
-    ->summarise(['n' => n(), 'avg' => mean(col('price'))]);
+    ->summarize(['n' => n(), 'avg' => mean(col('price'))]);
 
 $summary($df);
 $summary($sql)->collect();
@@ -50,9 +50,10 @@ $summary($fast)->collect();
 ```
 
 `$df` holds the data in memory, `$sql` reads it from the database, and
-`$fast` holds it in Polars. On `$sql`, the summary runs as one SQL query. The
-example uses `summarise()` because it is the `Table` method; `summarize()` is
-an alias on `DataFrame` and `SqlTable` only.
+`$fast` holds it in Polars. On `$sql`, the summary runs as one SQL query.
+All three classes have `summarize()` as an alias of the `Table` method
+`summarise()`. Code that accepts any `Table` implementation should call
+`summarise()`, since the interface declares only that name.
 
 `collect()` turns any table into a `DataFrame`. `PolarsTable::fromTable()` and
 `polars()` move a table into Polars; `tbl()` opens a database table or query.

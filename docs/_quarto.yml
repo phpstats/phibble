@@ -7,7 +7,7 @@ project:
     - data/*.csv
 
 website:
-  site-url: "https://phpstats.github.io/phibble/"
+  site-url: "https://phibble.phpstats.org/docs/"
   title: "phibble"
   repo-url: "https://github.com/phpstats/phibble"
   sidebar:

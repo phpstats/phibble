@@ -7,7 +7,27 @@ change the public API.
 
 ## [Unreleased]
 
+### Added
+
+- `PolarsTable::summarize()`, an alias of `summarise()`, as `DataFrame` and
+  `SqlTable` have.
+
+### Changed
+
+- `composer.json` allows PHP 8.3, 8.4, and 8.5 (`>=8.3 <8.6`), the versions
+  CI tests. It used to allow any later 8.x release.
+- `composer.json` requires the mbstring extension, which printing and the
+  string functions use.
+
 ### Fixed
+
+- A `summarize()` aggregate that is NA in every group has the type dplyr
+  gives it. `mean()`, `sd()`, `var()`, `quantile()`, and `iqr()` are
+  doubles. `sum()` of ints or bools is an int, and `median()` of ints is an
+  int. `first()`, `last()`, and `nth()` keep their column's type, and so do
+  `min()` and `max()`, except that they give ints for bools. These columns
+  were bool before.
+- `iqr(x, na_rm: true)` of no values is NA, as in R. It returned 0.
 
 - A row with more fields than columns, split on a space or tab delimiter,
   now has its joined last field trimmed, as readr does. 0.5.0 skipped the

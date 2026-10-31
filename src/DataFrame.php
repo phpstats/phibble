@@ -1194,7 +1194,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         }
         foreach ($results as $name => $values) {
             $data[(string) $name] = $this->factorResult($definitions[$name] ?? null, $values)
-                ?? Infer::column($values, null, (string) $name);
+                ?? Infer::column($values, array_all($values, fn ($v) => $v === null) ? $this->naAggregateType($definitions[$name] ?? null) : null, (string) $name);
         }
 
         $groups ??= $this->rowwise ? 'keep' : 'drop_last';
@@ -2216,6 +2216,40 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      *
      * @param list<mixed>|Column $values
      */
+    /**
+     * The type R gives an aggregate whose every value is NA, as in
+     * mean(NA_integer_) being double. Null when it depends on more than a
+     * column's type, and the values are then inferred as usual.
+     */
+    private function naAggregateType(mixed $definition): ?Type
+    {
+        if (! $definition instanceof Call) {
+            return null;
+        }
+        $arg = $definition->args[0] ?? null;
+        $input = $arg instanceof Col && isset($this->data[$arg->name]) ? $this->data[$arg->name]->type() : null;
+
+        return match ($definition->fn) {
+            'mean', 'sd', 'var', 'quantile', 'iqr' => Type::Float,
+            'sum' => match ($input) {
+                Type::Int, Type::Bool => Type::Int,
+                Type::Float => Type::Float,
+                default => null,
+            },
+            'median' => match ($input) {
+                Type::Int => Type::Int,
+                Type::Float => Type::Float,
+                default => null,
+            },
+            'min', 'max', 'first', 'last', 'nth' => match ($input) {
+                Type::Bool => in_array($definition->fn, ['min', 'max'], true) ? Type::Int : Type::Bool,
+                Type::Int, Type::Float, Type::String, Type::Date, Type::DateTime => $input,
+                default => null,
+            },
+            default => null,
+        };
+    }
+
     private function factorResult(mixed $definition, array|Column $values): ?FactorColumn
     {
         if (! $definition instanceof Expr || $values instanceof Column) {

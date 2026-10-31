@@ -17,9 +17,9 @@ Documentation: <https://phpstats.github.io/phibble/>
 composer require phpstats/phibble
 ```
 
-phibble requires PHP 8.3 or later (`^8.3` in `composer.json`) and the PDO
-extension. CI tests PHP 8.3, 8.4, and 8.5. On PHP 8.5, pipelines can also use
-the `|>` operator.
+phibble supports PHP 8.3, 8.4, and 8.5, and CI tests all three. It requires
+the mbstring and PDO extensions. On PHP 8.5, pipelines can also use the `|>`
+operator.
 
 ## Example
 

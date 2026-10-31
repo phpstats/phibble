@@ -17,7 +17,7 @@ echo $orders->summarize([
 2    NA     NA  
 3    35     38.5
 # A tibble: 1 × 2
-  mean  mean_known
-  <lgl>      <dbl>
-1 NA          27.5
+   mean mean_known
+  <dbl>      <dbl>
+1    NA       27.5
 ```

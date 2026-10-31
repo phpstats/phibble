@@ -583,6 +583,12 @@ final class PolarsTable implements Table
         }
     }
 
+    /** Alias of summarise(). */
+    public function summarize(array $aggregates, ?string $groups = null): static
+    {
+        return $this->summarise($aggregates, $groups);
+    }
+
     private function summariseNative(array $aggregates, ?string $groups): static
     {
         $closure = array_any($aggregates, fn ($v) => $v instanceof Closure);

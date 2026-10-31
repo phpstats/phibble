@@ -4,7 +4,8 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": ">=8.3 <8.6",
+        "ext-mbstring": "*",
         "ext-pdo": "*",
         "symfony/polyfill-php84": "^1.31"
     },
