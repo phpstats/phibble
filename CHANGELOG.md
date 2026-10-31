@@ -7,6 +7,8 @@ change the public API.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-31
+
 ### Added
 
 - `PolarsTable::summarize()`, an alias of `summarise()`, as `DataFrame` and
@@ -18,6 +20,8 @@ change the public API.
   CI tests. It used to allow any later 8.x release.
 - `composer.json` requires the mbstring extension, which printing and the
   string functions use.
+- The documentation is at https://phibble.phpstats.org/docs/.
+  https://phpstats.github.io/phibble/ redirects there.
 
 ### Fixed
 
@@ -28,7 +32,6 @@ change the public API.
   `min()` and `max()`, except that they give ints for bools. These columns
   were bool before.
 - `iqr(x, na_rm: true)` of no values is NA, as in R. It returned 0.
-
 - A row with more fields than columns, split on a space or tab delimiter,
   now has its joined last field trimmed, as readr does. 0.5.0 skipped the
   trim when no single field had a space or tab at its edge, so
@@ -231,7 +234,8 @@ and cmdstanphp.
   query builders and `->phibble()` for lazy SQL tables. Global scopes such as
   soft deletes apply.
 
-[Unreleased]: https://github.com/phpstats/phibble/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/phpstats/phibble/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/phpstats/phibble/releases/tag/v0.5.1
 [0.5.0]: https://github.com/phpstats/phibble/releases/tag/v0.5.0
 [0.4.1]: https://github.com/phpstats/phibble/releases/tag/v0.4.1
 [0.4.0]: https://github.com/phpstats/phibble/releases/tag/v0.4.0
