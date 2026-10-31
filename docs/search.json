@@ -169,7 +169,7 @@
     "href": "index.html",
     "title": "phibble",
     "section": "",
-    "text": "phibble is a data frame library for PHP. A DataFrame is a table of named, typed columns, such as the rows of a CSV file or a database query. phibble reads such tables, filters, sorts, groups, joins, and summarizes them, and writes them back out. Its design and names follow R’s tibble and readr packages, and its verbs follow dplyr.",
+    "text": "phibble is a data frame library for PHP. A DataFrame is a table of named, typed columns, such as the rows of a CSV file or a database query. phibble reads such tables, filters, sorts, groups, joins, and summarizes them, and writes them back out. Its design and names follow R’s tibble and readr packages, and its verbs follow dplyr.\nThis script reads the Palmer penguins data, penguins.csv, and summarizes it by species and sex. A first script gives the commands that install phibble and download the file.",
     "crumbs": [
       "phibble"
     ]
@@ -209,7 +209,7 @@
     "href": "index.html#install",
     "title": "phibble",
     "section": "Install",
-    "text": "Install\ncomposer require phpstats/phibble\nRequirements:\n\nPHP 8.3, 8.4, or 8.5. CI tests all three.\nThe mbstring extension.\nThe PDO extension.\n\nOptional:\n\nThe phit extension reads CSV natively. fromCsv() uses phit 0.1.1 or later, and the chunked readers use phit 0.2.0 or later.\nThe php_polars extension enables PolarsTable.\nilluminate/database enables the Laravel macros.\n\nPipelines can use PHP 8.5’s |&gt; operator. Method chains work on every supported version.",
+    "text": "Install\ncomposer require phpstats/phibble\nphibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions. The phit extension, the php_polars extension, and illuminate/database enable optional features. Installation lists what each one enables and the versions it needs.\nPipelines can use PHP 8.5’s |&gt; operator. Method chains work on PHP 8.3, 8.4, and 8.5.",
     "crumbs": [
       "phibble"
     ]
@@ -494,17 +494,37 @@
     "href": "getting-started.html",
     "title": "Getting started",
     "section": "",
-    "text": "Install phibble with Composer, and load Composer’s autoloader once at the top of a script. Frameworks such as Laravel load it already.\ncomposer require phpstats/phibble\nThe examples on this site import the DataFrame class and phibble’s functions like this:\nrequire __DIR__.'/vendor/autoload.php';\n\nuse Phibble\\DataFrame;\nuse function Phibble\\{tibble, tribble};\nuse function Phibble\\Expr\\{col, desc, mean, n};\nPhibble\\Expr has functions named min, max, sum, round, abs, log, floor, str_pad, str_split, str_replace, and a few others that share names with PHP built-ins. In a file that imports them, a bare round($x) calls phibble’s expression helper. Write \\round($x) for PHP’s function.",
+    "text": "composer require phpstats/phibble\nRequirements:\n\nPHP 8.3, 8.4, or 8.5.\nThe mbstring extension.\nThe PDO extension.\n\nOptional features:\n\nThe phit extension reads CSV natively. DataFrame::fromCsv() uses it with phit 0.1.1 or later, and DataFrame::fromCsvChunked() and DataFrame::csvChunks() use it with phit 0.2.0 or later. Without it, phibble reads CSV in PHP with the same results.\nThe php_polars extension from phpolars enables PolarsTable and polars(), described on the Backends page.\nilluminate/database enables the -&gt;toDataFrame() and -&gt;phibble() macros, described on the Laravel page. In a Laravel application it is already installed.",
     "crumbs": [
       "Getting started"
     ]
   },
   {
-    "objectID": "getting-started.html#loading-phibble",
-    "href": "getting-started.html#loading-phibble",
+    "objectID": "getting-started.html#installation",
+    "href": "getting-started.html#installation",
     "title": "Getting started",
     "section": "",
-    "text": "Install phibble with Composer, and load Composer’s autoloader once at the top of a script. Frameworks such as Laravel load it already.\ncomposer require phpstats/phibble\nThe examples on this site import the DataFrame class and phibble’s functions like this:\nrequire __DIR__.'/vendor/autoload.php';\n\nuse Phibble\\DataFrame;\nuse function Phibble\\{tibble, tribble};\nuse function Phibble\\Expr\\{col, desc, mean, n};\nPhibble\\Expr has functions named min, max, sum, round, abs, log, floor, str_pad, str_split, str_replace, and a few others that share names with PHP built-ins. In a file that imports them, a bare round($x) calls phibble’s expression helper. Write \\round($x) for PHP’s function.",
+    "text": "composer require phpstats/phibble\nRequirements:\n\nPHP 8.3, 8.4, or 8.5.\nThe mbstring extension.\nThe PDO extension.\n\nOptional features:\n\nThe phit extension reads CSV natively. DataFrame::fromCsv() uses it with phit 0.1.1 or later, and DataFrame::fromCsvChunked() and DataFrame::csvChunks() use it with phit 0.2.0 or later. Without it, phibble reads CSV in PHP with the same results.\nThe php_polars extension from phpolars enables PolarsTable and polars(), described on the Backends page.\nilluminate/database enables the -&gt;toDataFrame() and -&gt;phibble() macros, described on the Laravel page. In a Laravel application it is already installed.",
+    "crumbs": [
+      "Getting started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#a-first-script",
+    "href": "getting-started.html#a-first-script",
+    "title": "Getting started",
+    "section": "A first script",
+    "text": "A first script\nThe examples on this site use the Palmer penguins data, penguins.csv. In a new directory, install phibble and download the data:\ncomposer require phpstats/phibble\ncurl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv\nSave this script as summary.php in the same directory, and run it with php summary.php. It loads Composer’s autoloader, imports DataFrame and the expression functions it uses, reads the CSV, and prints the number of penguins, their mean body mass, and their median flipper length for each species and sex:\n&lt;?php\n\nrequire __DIR__.'/vendor/autoload.php';\n\nuse Phibble\\DataFrame;\n\nuse function Phibble\\Expr\\{col, mean, median, n};\n\n$penguins = DataFrame::fromCsv('penguins.csv');\n\n$summary = $penguins\n    -&gt;filter(col('body_mass')-&gt;isNa()-&gt;not())\n    -&gt;groupBy(['species', 'sex'])\n    -&gt;summarize([\n        'n' =&gt; n(),\n        'mass' =&gt; mean(col('body_mass')),\n        'flipper' =&gt; median(col('flipper_len')),\n    ]);\n\necho $summary, \"\\n\";\n# A tibble: 8 × 5\n# Groups:   species [3]\n  species   sex        n  mass flipper\n  &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;\n1 Adelie    female    73 3369.    188 \n2 Adelie    male      73 4043.    193 \n3 Adelie    &lt;NA&gt;       5 3540     186 \n4 Chinstrap female    34 3527.    192 \n5 Chinstrap male      34 3939.    200.\n6 Gentoo    female    58 4680.    212 \n7 Gentoo    male      61 5485.    221 \n8 Gentoo    &lt;NA&gt;       4 4588.    216",
+    "crumbs": [
+      "Getting started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#imports",
+    "href": "getting-started.html#imports",
+    "title": "Getting started",
+    "section": "Imports",
+    "text": "Imports\nThe other examples on this page run in the same directory, after these lines:\n&lt;?php\n\nrequire __DIR__.'/vendor/autoload.php';\n\nuse Phibble\\DataFrame;\n\nuse function Phibble\\{tibble, tribble};\nuse function Phibble\\Expr\\{col, desc, mean, median, n};\nPhibble\\Expr has functions named min, max, sum, round, abs, log, floor, str_pad, str_split, str_replace, and a few others that share names with PHP built-ins. In a file that imports them, a bare round($x) calls phibble’s expression helper. Write \\round($x) for PHP’s function.",
     "crumbs": [
       "Getting started"
     ]
@@ -564,7 +584,7 @@
     "href": "getting-started.html#groups",
     "title": "Getting started",
     "section": "Groups",
-    "text": "Groups\ngroupBy() records grouping columns on the data frame. summarize(), or its alias summarise(), returns one row per group, with groups in sorted order and NA last, as dplyr does. With several grouping columns, the result keeps all but the last.\n$penguins = DataFrame::fromCsv('penguins.csv');\n\n$summary = $penguins\n    -&gt;filter(col('body_mass')-&gt;isNa()-&gt;not())\n    -&gt;groupBy(['species', 'sex'])\n    -&gt;summarize([\n        'n' =&gt; n(),\n        'mass' =&gt; mean(col('body_mass')),\n        'flipper' =&gt; median(col('flipper_len')),\n    ]);\n\necho $summary;\n# A tibble: 8 × 5\n# Groups:   species [3]\n  species   sex        n  mass flipper\n  &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;\n1 Adelie    female    73 3369.    188 \n2 Adelie    male      73 4043.    193 \n3 Adelie    &lt;NA&gt;       5 3540     186 \n4 Chinstrap female    34 3527.    192 \n5 Chinstrap male      34 3939.    200.\n6 Gentoo    female    58 4680.    212 \n7 Gentoo    male      61 5485.    221 \n8 Gentoo    &lt;NA&gt;       4 4588.    216\nIn a grouped data frame, filter() and mutate() work within each group. An aggregate inside mutate() is computed per group and repeated for each of the group’s rows:\n$penguins = DataFrame::fromCsv('penguins.csv')-&gt;dropNa(['body_mass']);\n\n$centered = $penguins\n    -&gt;groupBy(['species'])\n    -&gt;mutate(['vs_species' =&gt; col('body_mass')-&gt;sub(mean(col('body_mass')))])\n    -&gt;select(['species', 'body_mass', 'vs_species'])\n    -&gt;head(4);\n\necho $centered;\n# A tibble: 4 × 3\n# Groups:   species [1]\n  species body_mass vs_species\n  &lt;chr&gt;       &lt;int&gt;      &lt;dbl&gt;\n1 Adelie       3750       49.3\n2 Adelie       3800       99.3\n3 Adelie       3250     -451. \n4 Adelie       3450     -251.\nA row closure receives the row’s group as its second argument: fn (Row $r, DataFrame $group) =&gt; ....\nBy default, groups are the combinations that occur in the data. With groupBy($names, drop: false), as with dplyr’s .drop = FALSE, a factor key also yields a group for each level that has no rows. Such a group has zero rows, so n() is 0 and sum() is 0.\n$penguins = DataFrame::fromCsv('penguins.csv')\n    -&gt;asFactor('species')\n    -&gt;filter(col('species')-&gt;ne('Chinstrap'));\n\necho $penguins-&gt;groupBy(['species'], drop: false)-&gt;summarize(['n' =&gt; n()]);\n# A tibble: 3 × 2\n  species       n\n  &lt;fct&gt;     &lt;int&gt;\n1 Adelie      152\n2 Chinstrap     0\n3 Gentoo      124",
+    "text": "Groups\ngroupBy() records grouping columns on the data frame. summarize(), or its alias summarise(), returns one row per group, with groups in sorted order and NA last, as dplyr does. With several grouping columns, the result keeps all but the last, so the first script’s summary stays grouped by species.\nIn a grouped data frame, filter() and mutate() work within each group. An aggregate inside mutate() is computed per group and repeated for each of the group’s rows:\n$penguins = DataFrame::fromCsv('penguins.csv')-&gt;dropNa(['body_mass']);\n\n$centered = $penguins\n    -&gt;groupBy(['species'])\n    -&gt;mutate(['vs_species' =&gt; col('body_mass')-&gt;sub(mean(col('body_mass')))])\n    -&gt;select(['species', 'body_mass', 'vs_species'])\n    -&gt;head(4);\n\necho $centered;\n# A tibble: 4 × 3\n# Groups:   species [1]\n  species body_mass vs_species\n  &lt;chr&gt;       &lt;int&gt;      &lt;dbl&gt;\n1 Adelie       3750       49.3\n2 Adelie       3800       99.3\n3 Adelie       3250     -451. \n4 Adelie       3450     -251.\nA row closure receives the row’s group as its second argument: fn (Row $r, DataFrame $group) =&gt; ....\nBy default, groups are the combinations that occur in the data. With groupBy($names, drop: false), as with dplyr’s .drop = FALSE, a factor key also yields a group for each level that has no rows. Such a group has zero rows, so n() is 0 and sum() is 0.\n$penguins = DataFrame::fromCsv('penguins.csv')\n    -&gt;asFactor('species')\n    -&gt;filter(col('species')-&gt;ne('Chinstrap'));\n\necho $penguins-&gt;groupBy(['species'], drop: false)-&gt;summarize(['n' =&gt; n()]);\n# A tibble: 3 × 2\n  species       n\n  &lt;fct&gt;     &lt;int&gt;\n1 Adelie      152\n2 Chinstrap     0\n3 Gentoo      124",
     "crumbs": [
       "Getting started"
     ]

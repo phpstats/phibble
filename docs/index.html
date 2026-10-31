@@ -286,18 +286,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>phibble is a data frame library for PHP. A <code>DataFrame</code> is a table of named, typed columns, such as the rows of a CSV file or a database query. phibble reads such tables, filters, sorts, groups, joins, and summarizes them, and writes them back out. Its design and names follow R’s tibble and readr packages, and its verbs follow dplyr.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)<span class="ot">;</span></span>
+<p>This script reads the Palmer penguins data, <a href="https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv"><code>penguins.csv</code></a>, and summarizes it by species and sex. <a href="./getting-started.html#a-first-script">A first script</a> gives the commands that install phibble and download the file.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;?php</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="va">$penguins</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'body_mass'</span>)-&gt;isNa()-&gt;not())</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'sex'</span>])</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'n'</span> =&gt; n()<span class="ot">,</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass'</span> =&gt; mean(col(<span class="st">'body_mass'</span>))<span class="ot">,</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'flipper'</span> =&gt; median(col(<span class="st">'flipper_len'</span>))<span class="ot">,</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    ])<span class="ot">;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="cn">__DIR__</span><span class="op">.</span><span class="st">'/vendor/autoload.php'</span><span class="ot">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\DataFrame<span class="ot">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> mean<span class="ot">,</span> median<span class="ot">,</span> n}<span class="ot">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)<span class="ot">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="va">$penguins</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'body_mass'</span>)-&gt;isNa()-&gt;not())</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'sex'</span>])</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">'n'</span> =&gt; n()<span class="ot">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass'</span> =&gt; mean(col(<span class="st">'body_mass'</span>))<span class="ot">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">'flipper'</span> =&gt; median(col(<span class="st">'flipper_len'</span>))<span class="ot">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    ])<span class="ot">;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 8 × 5
 # Groups:   species [3]
   species   sex        n  mass flipper
@@ -344,19 +353,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="install" class="level2">
 <h2 class="anchored" data-anchor-id="install">Install</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">composer</span> require phpstats/phibble</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Requirements:</p>
-<ul>
-<li>PHP 8.3, 8.4, or 8.5. CI tests all three.</li>
-<li>The mbstring extension.</li>
-<li>The PDO extension.</li>
-</ul>
-<p>Optional:</p>
-<ul>
-<li>The phit extension reads CSV natively. <code>fromCsv()</code> uses phit 0.1.1 or later, and the chunked readers use phit 0.2.0 or later.</li>
-<li>The php_polars extension enables <code>PolarsTable</code>.</li>
-<li><code>illuminate/database</code> enables the Laravel macros.</li>
-</ul>
-<p>Pipelines can use PHP 8.5’s <code>|&gt;</code> operator. Method chains work on every supported version.</p>
+<p>phibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions. The phit extension, the php_polars extension, and <code>illuminate/database</code> enable optional features. <a href="./getting-started.html#installation">Installation</a> lists what each one enables and the versions it needs.</p>
+<p>Pipelines can use PHP 8.5’s <code>|&gt;</code> operator. Method chains work on PHP 8.3, 8.4, and 8.5.</p>
 
 
 </section>
