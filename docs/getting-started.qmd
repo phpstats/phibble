@@ -2,12 +2,21 @@
 title: "Getting started"
 ---
 
-## Imports
+## Loading phibble
 
-The examples on this site import the `DataFrame` class and phibble's functions like
-this:
+Install phibble with Composer, and load Composer's autoloader once at the top
+of a script. Frameworks such as Laravel load it already.
+
+```bash
+composer require phpstats/phibble
+```
+
+The examples on this site import the `DataFrame` class and phibble's functions
+like this:
 
 ```php
+require __DIR__.'/vendor/autoload.php';
+
 use Phibble\DataFrame;
 use function Phibble\{tibble, tribble};
 use function Phibble\Expr\{col, desc, mean, n};
@@ -77,7 +86,7 @@ partially.
 ## Verbs
 
 DataFrames have the dplyr verbs as methods: `select()`, `filter()`, `mutate()`,
-`rename()`, `arrange()`, `groupBy()`, `summarise()`, `distinct()`, `slice()`,
+`rename()`, `arrange()`, `groupBy()`, `summarize()`, `distinct()`, `slice()`,
 `head()`, and `join()`. Each returns a new data frame.
 
 `filter()` and `mutate()` accept a row closure, which receives a `Row` and
@@ -93,7 +102,8 @@ form that SQL and Polars backends can translate.
 
 ## Groups
 
-`groupBy()` records grouping columns on the data frame. `summarise()` returns one
+`groupBy()` records grouping columns on the data frame. `summarize()`, or its
+alias `summarise()`, returns one
 row per group, with groups in sorted order and NA last, as dplyr does. With
 several grouping columns, the result keeps all but the last.
 
@@ -141,6 +151,14 @@ Methods never change the data frame they are called on:
 
 {{< include examples/_immutable.md >}}
 
+## Missing values
+
+PHP `null` is a missing value. Arithmetic with it gives `null`, and an
+aggregate over a column that holds it gives `null` unless `na_rm: true` is
+passed:
+
+{{< include examples/_missing.md >}}
+
 ## Method chains and the pipe operator
 
 Every verb returns a new table, so verbs chain as methods on any PHP version
@@ -150,13 +168,13 @@ provides verbs that return such callables, so a phplyr pipeline needs no arrow
 functions.
 
 ::: {.panel-tabset group="syntax"}
-## Method chain (PHP 8.3+)
-
-{{< include examples/_chain-code.md >}}
-
-## Pipe (PHP 8.5)
+## PHP 8.5+
 
 {{< include examples/_pipe-code.md >}}
+
+## PHP 8.3–8.4
+
+{{< include examples/_chain-code.md >}}
 :::
 
 {{< include examples/_chain-output.md >}}

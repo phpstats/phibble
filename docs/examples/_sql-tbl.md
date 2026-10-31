@@ -13,7 +13,7 @@ $penguins = tbl($pdo, 'penguins');
 $summary = $penguins
     ->filter(col('year')->eq(2008))
     ->groupBy(['species'])
-    ->summarise(['n' => n(), 'mass' => mean(col('body_mass'), na_rm: true)]);
+    ->summarize(['n' => n(), 'mass' => mean(col('body_mass'), na_rm: true)]);
 
 echo get_class($summary), "\n\n";
 echo $summary->showQuery(), "\n\n";

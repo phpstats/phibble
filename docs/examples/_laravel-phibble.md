@@ -4,7 +4,7 @@ $summary = Penguin::query()
     ->where('year', '>=', 2008)
     ->phibble()
     ->groupBy(['species', 'sex'])
-    ->summarise([
+    ->summarize([
         'n' => n(),
         'mass' => mean(col('body_mass')),
     ]);

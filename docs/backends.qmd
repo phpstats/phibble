@@ -11,11 +11,22 @@ of the `Phibble\Contracts\Table` interface, and three classes implement it:
 | SQL | `Phibble\Sql\SqlTable` | SQLite, PostgreSQL, or MySQL | Data that lives in a database |
 | Polars | `Phibble\Polars\PolarsTable` | Polars, through the php_polars extension | Large data in memory |
 
+All three classes are part of phibble. `PolarsTable` uses the php_polars
+extension, which [phpolars](https://github.com/phpstats/phpolars) provides.
+
 Code written against `Table`, including phplyr's verbs, runs on any of them. A
-pipeline gives the same result on each backend, because a backend that cannot
-run a step exactly (a PHP closure, or a function with no exact translation)
-hands that step to `DataFrame` and continues. The [Table contract](contract.qmd)
-page states the rules each backend follows.
+backend that cannot run a step exactly, such as a PHP closure or a function
+with no exact translation, hands that step to `DataFrame` and continues. The
+values then match `DataFrame` with these exceptions:
+
+- A database cannot represent some of R's values, such as `NaN` in MySQL. The
+  [SQL tables](sql.qmd#known-differences) page lists these cases.
+- Rows from a SQL join, and from a table without `arrange()`, come back in the
+  order the database returns them.
+- Floating-point results can differ in the last digits. The SQL and Polars
+  tests compare floats rounded to nine decimal places.
+
+The [Table contract](contract.qmd) page states the rules each backend follows.
 
 ## Choosing and switching
 
@@ -24,29 +35,33 @@ use Phibble\DataFrame;
 use function Phibble\{tbl, polars};
 use function Phibble\Expr\{col, mean, n};
 
-$df = DataFrame::fromCsv('sales.csv');      // in memory
-$sql = tbl($pdo, 'sales');                     // in the database
-$fast = polars($df);                        // in Polars
+$df = DataFrame::fromCsv('sales.csv');
+$sql = tbl($pdo, 'sales');
+$fast = polars($df);
 
 $summary = fn ($t) => $t
     ->filter(col('units')->gt(0))
     ->groupBy(['store'])
     ->summarise(['n' => n(), 'avg' => mean(col('price'))]);
 
-$summary($df);             // a DataFrame
-$summary($sql)->collect();    // runs as one SQL query
-$summary($fast)->collect();   // runs in Polars
+$summary($df);
+$summary($sql)->collect();
+$summary($fast)->collect();
 ```
+
+`$df` holds the data in memory, `$sql` reads it from the database, and
+`$fast` holds it in Polars. On `$sql`, the summary runs as one SQL query. The
+example uses `summarise()` because it is the `Table` method; `summarize()` is
+an alias on `DataFrame` and `SqlTable` only.
 
 `collect()` turns any table into a `DataFrame`. `PolarsTable::fromTable()` and
 `polars()` move a table into Polars; `tbl()` opens a database table or query.
 
 ## The Polars backend
 
-The Polars backend needs the php_polars extension from
-[phpolars](https://github.com/phpstats/phpolars). phibble does not require
-it: `composer.json` lists it as a suggestion, and the class is only loaded when
-used. Expressions, joins (including `join_by` comparisons and rolling joins),
+phibble's `Phibble\Polars\PolarsTable` needs the php_polars extension, which
+phpolars builds. phibble does not require it: `composer.json` lists it as a
+suggestion, and the class is only loaded when used. Expressions, joins (including `join_by` comparisons and rolling joins),
 pivots, and the lubridate and stringr functions run natively in Polars. Steps
 it cannot run, such as PHP closures and `str_to_title()`, run in `DataFrame`.
 `PolarsTable::$fallbacks` counts those steps. Set `PolarsTable::$strict = true`

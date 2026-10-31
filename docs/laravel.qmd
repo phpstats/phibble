@@ -9,11 +9,36 @@ registered by package discovery, and it adds two kinds of macro:
   an in-memory `DataFrame`.
 - `->phibble()` on query builders, Eloquent builders, and relations returns a
   lazy `SqlTable` on the query's connection. Verbs given expressions compile
-  to SQL, so grouping and summarising run in the database.
+  to SQL, so grouping and summarizing run in the database.
 
-Laravel is not a dependency. The examples on this page use Eloquent with an
-in-memory SQLite database that holds the `penguins` data, through a model with a
-`measured()` scope that keeps rows with a body mass.
+Laravel is not a dependency. `composer require phpstats/phibble` in a Laravel
+application is the whole setup.
+
+## The example data
+
+The examples on this page use Eloquent with an in-memory SQLite database that
+holds [`penguins.csv`](https://github.com/phpstats/phibble/blob/main/docs/data/penguins.csv).
+The model has a `measured()` scope that keeps rows with a body mass:
+
+```php
+use Illuminate\Database\Eloquent\Model;
+
+final class Penguin extends Model
+{
+    protected $table = 'penguins';
+
+    public $timestamps = false;
+
+    public function scopeMeasured($query)
+    {
+        return $query->whereNotNull('body_mass');
+    }
+}
+```
+
+[`docs/examples/support/laravel.php`](https://github.com/phpstats/phibble/blob/main/docs/examples/support/laravel.php)
+creates the table, loads the CSV, and registers the macros outside a Laravel
+application, so the examples run as plain PHP scripts.
 
 ## From a collection or query to a DataFrame
 
@@ -47,40 +72,41 @@ the group maximum compiles to a window function:
 
 Expressions that SQL cannot evaluate exactly as R does, and any PHP closure,
 make the table collect its rows and continue in memory. The result is then a
-`DataFrame`, and the values are the same as if the whole pipeline had run in
-memory. The [SQL tables](sql.qmd) page lists these cases.
+`DataFrame`. The [SQL tables](sql.qmd) page lists these cases and the few
+results that differ from an in-memory run.
 
 ## With phplyr
 
-[phplyr](https://github.com/phpstats/phplyr) provides dplyr's verbs as a
-method chain on any PHP version and as functions for PHP 8.5's pipe operator.
-Its verbs call the same table methods, so a phplyr pipeline on `phibble()` also
-runs in the database:
+[phplyr](https://github.com/phpstats/phplyr) provides dplyr's verbs as
+functions for PHP 8.5's pipe operator and as a method chain on every supported
+PHP version. Its verbs call the same table methods, so a phplyr pipeline on
+`phibble()` also runs in the database. phplyr's own `col()` and aggregates take
+camelCase options such as `naRm:`:
 
 ::: {.panel-tabset group="syntax"}
-## Method chain (PHP 8.3+)
+## PHP 8.5+
 
 ```php
-use function Phplyr\{phplyr, desc, n, mean};
+use function Phplyr\{arrange, col, desc, filter, group_by, mean, n, summarize};
+
+$summary = Penguin::query()->phibble() |>
+    filter(col('year')->ge(2008)) |>
+    group_by('species', 'sex') |>
+    summarize(n: n(), mass: mean(col('body_mass'), naRm: true)) |>
+    arrange(desc('mass'));
+```
+
+## PHP 8.3–8.4
+
+```php
+use function Phplyr\{col, desc, mean, n, phplyr};
 
 $summary = phplyr(Penguin::query()->phibble())
     ->filter(col('year')->ge(2008))
-    ->group_by('species', 'sex')
-    ->summarise(n: n(), mass: mean(col('body_mass'), na_rm: true))
+    ->groupBy('species', 'sex')
+    ->summarize(n: n(), mass: mean(col('body_mass'), naRm: true))
     ->arrange(desc('mass'))
     ->get();
-```
-
-## Pipe (PHP 8.5)
-
-```php
-use function Phplyr\{filter, group_by, summarise, arrange, desc, n, mean};
-
-$summary = Penguin::query()->phibble()
-    |> filter(col('year')->ge(2008))
-    |> group_by('species', 'sex')
-    |> summarise(n: n(), mass: mean(col('body_mass'), na_rm: true))
-    |> arrange(desc('mass'));
 ```
 :::
 

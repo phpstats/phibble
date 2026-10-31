@@ -3,18 +3,38 @@
     "title": "phibble",
     "tagline": "A typed, immutable data frame for PHP, with readr-style input and output.",
     "summary": [
-        "phibble is a port of R's tibble to PHP, with the readr-style input and output a data frame needs. A DataFrame holds typed columns, treats null as NA, and never changes in place: every operation returns a new table, so a pipeline cannot disturb the data it was handed.",
+        "phibble is a data frame library for PHP that follows R's tibble and readr. A DataFrame holds typed columns, treats null as NA, and never changes in place: every operation returns a new table.",
         "Columns are float, int, bool, string, factor, date, datetime, or list-columns. Types are guessed as a table loads and can be declared per column instead, and casts follow R's as.*() rules. Ordered factors and the forcats functions are included, and printing and glimpse() lay a table out the way tibble does.",
         "Tables load from CSV with readr's options and type guessing, from JSON, from PDO statements, and from Laravel, Eloquent, or Doctrine query builders, so an analysis can begin at the application's own database. phibble depends on neither Laravel nor Doctrine.",
-        "select, filter, mutate, arrange, groupBy, summarize, the joins, and tidyr's pivots follow dplyr 1.1 semantics, and Phibble\\Expr records each computation as an inspectable, serializable tree rather than a closure. Three backends implement one Table contract: DataFrame in memory, SqlTable compiling the same verbs to SQLite, PostgreSQL, or MySQL, and PolarsTable running them in Polars. phibble is the table type that phplyr, phit, phpolars, and CmdStanPHP pass between them."
+        "select, filter, mutate, arrange, groupBy, summarize, the joins, and tidyr's pivots follow dplyr 1.1 semantics, and Phibble\\Expr records each computation as an inspectable, serializable tree. Three backends implement one Table contract: DataFrame in memory, SqlTable compiling the same verbs to SQLite, PostgreSQL, or MySQL, and PolarsTable running them in Polars. All three are part of phibble, and PolarsTable uses the php_polars extension from phpolars. phibble is the table type that phplyr, phit, phiz, and CmdStanPHP read or return."
     ],
     "install": [
         "composer require phpstats/phibble"
     ],
+    "php": [
+        "8.3",
+        "8.4",
+        "8.5"
+    ],
     "requires": [
-        "PHP 8.3+",
         "PDO extension"
     ],
+    "optional": [
+        {
+            "name": "phit extension",
+            "for": "native CSV reading (0.1.1 or later) and chunked CSV reading (0.2.0 or later)"
+        },
+        {
+            "name": "php_polars extension",
+            "for": "the Polars backend (PolarsTable)"
+        },
+        {
+            "name": "illuminate/database",
+            "for": "the Laravel macros toDataFrame() and phibble()"
+        }
+    ],
+    "build": [],
+    "quickstart": "getting-started",
     "repository": "https://github.com/phpstats/phibble",
     "example": {
         "chain": "use function Phibble\\Expr\\{col, desc, mean, n, sum};\n\n$orders = \\Phibble\\DataFrame::fromCsv('orders.csv', types: [\n    'channel' => 'factor',\n    'coupon' => 'bool',\n    'returned' => 'bool',\n]);\n\necho $orders\n    ->filter(col('returned')->not())\n    ->mutate(['item_price' => col('total')->div(col('items'))])\n    ->groupBy(['channel'])\n    ->summarize([\n        'orders' => n(),\n        'revenue' => sum(col('total')),\n        'item_price' => mean(col('item_price')),\n        'coupons' => mean(col('coupon')),\n    ], groups: 'drop')\n    ->arrange([desc(col('revenue'))]);",
@@ -69,10 +89,5 @@
                 "path": "development.qmd"
             }
         ]
-    },
-    "optional": [
-        "illuminate/database",
-        "phit extension",
-        "php_polars extension"
-    ]
+    }
 }

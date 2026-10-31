@@ -3,7 +3,7 @@ $penguins = DataFrame::fromCsv('penguins.csv');
 
 echo $penguins
     ->groupBy(['island'])
-    ->summarise([
+    ->summarize([
         'n' => n(),
         'mass' => mean(col('body_mass')),
         'mass_rm' => mean(col('body_mass'), na_rm: true),

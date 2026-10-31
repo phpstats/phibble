@@ -69,7 +69,7 @@ dplyr and tidyr interface as pipe-able functions.
 | `filter`, `mutate`, `select`, `rename`, `arrange` | methods of the same names |
 | `rename(df, new = old)` | `$df->rename(['new' => 'old'])` |
 | `group_by`, `ungroup`, `rowwise` | `groupBy`, `ungroup`, `rowwise` |
-| `summarise(.groups = "drop")` | `$df->summarise([...], 'drop')` |
+| `summarise(.groups = "drop")` | `$df->summarize([...], 'drop')` or `$df->summarise([...], 'drop')` |
 | `left_join(x, y, by = "k")` | `$x->join($y, ['k'], 'left')` |
 | `left_join(x, y, by = c("a" = "b"))` | `$x->join($y, [['a', 'b']], 'left')` |
 | `bind_rows`, `bind_cols` | `DataFrame::concat([...])`, `DataFrame::bindCols([...])` |
@@ -85,9 +85,10 @@ phibble differs from R in these places:
   guesses int, which suits PHP. Pass `types: 'd'` to read a double.
 - **Positions are 0-based.** `addRow(before:)`, `addColumn(before:)`,
   `take()`, `slice()`, and `row()` count rows and columns from 0.
-- **String functions use fixed patterns.** `str_detect()`, `str_starts()`,
-  `str_ends()`, `str_replace()`, and `str_replace_all()` match literal text.
-  SQL backends have no portable regular expressions.
+- **Regular expressions are PCRE.** As in stringr, a text pattern is a
+  regular expression and `fixed()` matches literally. phibble uses PCRE where
+  stringr uses ICU. `SqlTable` runs most regular-expression patterns in
+  memory, as the [SQL tables](sql.qmd) page lists.
 - **There is no time-of-day type.** readr's `hms` columns and the `t` column
   type stay strings.
 - **JSON keeps null values.** jsonlite drops NA fields from records.

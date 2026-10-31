@@ -3,51 +3,74 @@ title: "phibble"
 subtitle: "A typed data frame for PHP"
 ---
 
-phibble is a port of R's tibble to PHP, with the readr-style input and output a
-data frame needs. A `DataFrame` holds typed columns, treats `null` as NA, and never
-changes in place: every operation returns a new one.
+phibble is a data frame library for PHP. A `DataFrame` is a table of named,
+typed columns, such as the rows of a CSV file or a database query. phibble
+reads such tables, filters, sorts, groups, joins, and summarizes them, and
+writes them back out. Its design and names follow R's tibble and readr
+packages, and its verbs follow dplyr.
 
 {{< include examples/_tour.md >}}
 
-phibble is the shared table type of a small family of packages for statistics
-in PHP. The other packages read and return phibble tables:
+## Tables
 
-- **[phplyr](https://github.com/phpstats/phplyr)** ports dplyr and tidyr as
-  pipe-able functions.
-- **[phit](https://github.com/phpstats/phit)** is a native
-  extension for statistical models and descriptive statistics. It reads model
-  data with `DataFrame::toModelData()`.
-- **phpolars** is an optional Polars-backed table.
-- **cmdstanphp** runs Stan models and will accept phibble data frames.
+- Every column has one type: float, int, bool, string, factor, date, datetime,
+  or list. Types are guessed as a table loads, or declared per column.
+- PHP `null` is a missing value (R's NA) in every type.
+- A `DataFrame` never changes in place. Every method returns a new table.
+- Tables load from CSV, JSON, PDO queries, Laravel and Doctrine query
+  builders, and Laravel collections, and write to CSV and JSON.
 
-The packages talk to each other through the `Table` contract. `DataFrame` is the
-in-memory implementation. `SqlTable` implements the same contract over a SQL
-query, so the verbs compile to SQL and run in the database.
+The [types guide](types.qmd) and [reading and writing data](io.qmd) cover
+these in detail.
+
+## Backends
+
+Three classes implement the `Phibble\Contracts\Table` interface, and all
+three are part of phibble:
+
+- `Phibble\DataFrame` holds the data in PHP arrays.
+- `Phibble\Sql\SqlTable` compiles the verbs to SQL for SQLite, PostgreSQL, and
+  MySQL.
+- `Phibble\Polars\PolarsTable` runs the verbs in Polars. It needs the
+  php_polars extension from [phpolars](https://github.com/phpstats/phpolars).
+
+A step that a backend cannot run itself, such as a PHP closure, runs in a
+`DataFrame`. The [backends page](backends.qmd) describes how results can
+still differ between backends.
+
+## Other packages
+
+The other PHPstats packages read and return phibble tables:
+
+- [phplyr](https://github.com/phpstats/phplyr) provides dplyr and tidyr as
+  PHP functions and method chains.
+- [phit](https://github.com/phpstats/phit) fits statistical models, reading
+  their data through `DataFrame::toModelData()`. Its extension also speeds up
+  phibble's CSV reader.
+- [phpolars](https://github.com/phpstats/phpolars) provides the Polars
+  extension that `PolarsTable` uses.
+- [phiz](https://github.com/phpstats/phiz) plots a `DataFrame` directly.
+- [CmdStanPHP](https://github.com/phpstats/CmdStanPHP) accepts a `DataFrame`
+  as model data and returns draws and summaries as tables.
 
 ## Install
-
-phibble needs PHP 8.3 or later. PHP 8.5 adds the `|>` pipe operator, which
-phibble and phplyr pipelines can use.
 
 ```bash
 composer require phpstats/phibble
 ```
 
-phibble has no required dependencies beyond PHP's PDO extension. It works with
-Laravel and Doctrine query builders without depending on either.
+Requirements:
 
-## Where to go next
+- PHP 8.3 or later. `composer.json` allows `^8.3`, and CI tests PHP 8.3, 8.4,
+  and 8.5.
+- The PDO extension.
 
-- [Getting started](getting-started.qmd) covers building data frames, printing, and
-  the verbs.
-- [Coming from tibble](coming-from-tibble.qmd) maps tibble, readr, and forcats
-  functions to phibble and lists the places where phibble differs.
-- [Types](types.qmd) explains type inference, casts, factors, dates, and
-  list-columns.
-- [Reading and writing data](io.qmd) covers CSV, JSON, databases, and Laravel
-  collections.
-- [Expressions](expr.qmd) documents `Phibble\Expr`, the inspectable expressions
-  that every backend evaluates the same way.
-- [SQL tables](sql.qmd) documents `SqlTable`, which runs verbs in SQLite,
-  PostgreSQL, or MySQL.
-- [The Table contract](contract.qmd) is for authors of new backends.
+Optional:
+
+- The phit extension reads CSV natively. `fromCsv()` uses phit 0.1.1 or
+  later, and the chunked readers use phit 0.2.0 or later.
+- The php_polars extension enables `PolarsTable`.
+- `illuminate/database` enables the Laravel macros.
+
+Pipelines can use PHP 8.5's `|>` operator. Method chains work on every
+supported version.

@@ -16,19 +16,21 @@ website:
     contents:
       - index.qmd
       - getting-started.qmd
-      - coming-from-tibble.qmd
       - section: "Guides"
         contents:
+          - coming-from-tibble.qmd
           - types.qmd
           - io.qmd
           - expr.qmd
           - sql.qmd
           - laravel.qmd
-      - section: "Backends"
-        contents:
           - backends.qmd
+      - section: "Reference"
+        contents:
           - contract.qmd
-      - development.qmd
+      - section: "Contributing"
+        contents:
+          - development.qmd
 
 format:
   html:

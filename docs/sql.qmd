@@ -31,7 +31,7 @@ simple. Database planners usually flatten the nesting.
 
 These verbs compile when their arguments are expressions or column names:
 `select()`, `rename()`, `filter()`, `mutate()`, `arrange()`, `groupBy()`,
-`summarise()`, `distinct()`, `slice()`, `head()`, and `join()`.
+`summarize()`, `distinct()`, `slice()`, `head()`, and `join()`.
 
 The compiled SQL keeps R's semantics:
 
@@ -42,13 +42,14 @@ The compiled SQL keeps R's semantics:
 - Ranks leave NA rows unranked.
 - `isIn()` never returns NA.
 - `/` returns a float, and division by zero gives NA.
-- Groups in `summarise()` output are sorted, with NA last.
+- Groups in `summarize()` output are sorted, with NA last.
 
 ## When the table falls back to memory
 
 Some arguments have no faithful SQL translation. A `SqlTable` then collects
-the rows and runs the verb in memory, and the verb returns a `DataFrame`. Results
-match `DataFrame` in either case. The fallbacks are:
+the rows and runs the verb in memory, and the verb returns a `DataFrame`. The
+values are then those `DataFrame` computes, apart from the
+[known differences](#known-differences) below. The fallbacks are:
 
 - any PHP closure,
 - `round()`, because SQL's `ROUND` does not round half to even,
@@ -75,7 +76,7 @@ match `DataFrame` in either case. The fallbacks are:
 - `sd()` and `var()` in SQLite, whose formula would lose precision,
 - `str_trim()`, because R removes all Unicode white space and SQL `TRIM`
   removes spaces,
-- nested aggregates such as `mean(x - mean(x))`, `summarise()` entries that
+- nested aggregates such as `mean(x - mean(x))`, `summarize()` entries that
   are not one value per group, and `slice()` with negative positions,
 - `median()` and `quantile()` outside PostgreSQL,
 - `quantile()` without `na_rm: true`,

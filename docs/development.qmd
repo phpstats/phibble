@@ -13,8 +13,13 @@ composer install
 php vendor/bin/pest
 ```
 
-The tests that fit models need the phit extension and are skipped
-without it. To run them, load the extension:
+CI runs the suite on Ubuntu with PHP 8.3, 8.4, and 8.5, against PostgreSQL 17
+and MySQL 8.0. A second job runs `tests/Polars` on PHP 8.5 with a prebuilt
+php_polars extension, and a third runs `composer lint`. CI does not load the
+phit extension.
+
+The tests that fit models or use the native CSV reader need the phit extension
+and are skipped without it. To run them, load the extension:
 
 ```bash
 php -d extension=/path/to/libphit.dylib vendor/bin/pest

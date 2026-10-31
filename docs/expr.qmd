@@ -4,9 +4,11 @@ title: "Expressions"
 
 `Phibble\Expr` describes a computation over columns as a tree of objects. The
 in-memory `DataFrame` evaluates the tree, `SqlTable` compiles it to SQL, and
-phpolars maps it to Polars expressions. An expression gives the same result on
-each backend because every backend implements the same list of functions with
-R's semantics.
+`PolarsTable` maps it to Polars expressions. Each backend implements the same
+list of functions with R's semantics, and runs a function in memory when it
+has no exact translation. Results can still differ where a database cannot
+represent R's value, as the [SQL tables](sql.qmd#known-differences) page
+lists.
 
 A PHP closure can only be run. An expression can also be inspected,
 translated, and serialized. phibble's verbs accept either, and a backend that
@@ -55,7 +57,7 @@ Each verb evaluates expressions per group:
 - `mutate()` adds a column with one value per row. An aggregate such as
   `mean()` gives one value per group, which is repeated for each row of the
   group.
-- `summarise()` needs one value per group. Anything else throws a
+- `summarize()` needs one value per group. Anything else throws a
   `LengthException`.
 - `arrange()` sorts by expressions over the whole table, ignoring groups. Wrap
   a key in `desc()` to sort it in descending order.
