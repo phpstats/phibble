@@ -65,7 +65,8 @@ working directory and writes its code and output to
 `docs/examples/_<name>.md`, which the pages include. Quarto never runs PHP.
 
 `bin/render-docs` refreshes the examples, renders the site, and copies the
-result into `docs/` for GitHub Pages:
+result into `docs/`. Commit the rendered HTML, because phpstats.org imports
+it from `docs/` and never runs Quarto:
 
 ```bash
 PHP=php85 bin/render-docs
@@ -73,3 +74,8 @@ PHP=php85 bin/render-docs
 
 `bin/docs-examples name` refreshes one example. Set `QUARTO` when the `quarto`
 command is not on the path.
+
+The documentation is published at <https://phibble.phpstats.org/docs>.
+GitHub Pages serves only redirects there: the `pages` workflow runs
+`bin/pages-redirects`, which writes one redirect page for each page in
+`docs/`.

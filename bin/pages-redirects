@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Write a redirect page to phibble.phpstats.org for each rendered page in
+# docs/, for GitHub Pages. Usage: bin/pages-redirects <output directory>
+set -euo pipefail
+cd "$(dirname "$0")/.."
+out="${1:?usage: bin/pages-redirects <output directory>}"
+base="https://phibble.phpstats.org/docs"
+mkdir -p "$out"
+
+stub() {
+    cat > "$1" <<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>phibble documentation has moved</title>
+<link rel="canonical" href="$2">
+<meta http-equiv="refresh" content="0; url=$2">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<p>The phibble documentation is at <a href="$2">$2</a>.</p>
+</body>
+</html>
+HTML
+}
+
+for page in docs/*.html; do
+    name="$(basename "$page" .html)"
+    if [ "$name" = index ]; then
+        stub "$out/index.html" "$base"
+    else
+        stub "$out/$name.html" "$base/$name"
+    fi
+done
+stub "$out/404.html" "$base"
+touch "$out/.nojekyll"

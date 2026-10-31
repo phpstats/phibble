@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Refresh example output, render the Quarto site, then publish a directly
-# browsable /docs tree for GitHub Pages (main:/docs).
+# Refresh example output, render the Quarto site, then copy it into docs/,
+# where phpstats.org imports the rendered pages.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 "${PHP:-php}" bin/docs-examples
