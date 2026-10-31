@@ -1,4 +1,12 @@
 ```php
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+
+use Phibble\DataFrame;
+
+use function Phibble\Expr\{col, mean, median, n};
+
 $penguins = DataFrame::fromCsv('penguins.csv');
 
 $summary = $penguins
@@ -10,7 +18,7 @@ $summary = $penguins
         'flipper' => median(col('flipper_len')),
     ]);
 
-echo $summary;
+echo $summary, "\n";
 ```
 
 ```{.text .output}

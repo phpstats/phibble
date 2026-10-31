@@ -2,31 +2,70 @@
 title: "Getting started"
 ---
 
-## Loading phibble
-
-Install phibble with Composer, and load Composer's autoloader once at the top
-of a script. Frameworks such as Laravel load it already.
+## Installation
 
 ```bash
 composer require phpstats/phibble
 ```
 
-The examples on this site import the `DataFrame` class and phibble's functions
-like this:
+Requirements:
+
+- PHP 8.3, 8.4, or 8.5.
+- The mbstring extension.
+- The PDO extension.
+
+Optional features:
+
+- The [phit](https://github.com/phpstats/phit) extension reads CSV natively.
+  `DataFrame::fromCsv()` uses it with phit 0.1.1 or later, and
+  `DataFrame::fromCsvChunked()` and `DataFrame::csvChunks()` use it with phit
+  0.2.0 or later. Without it, phibble reads CSV in PHP with the same results.
+- The php_polars extension from [phpolars](https://github.com/phpstats/phpolars)
+  enables `PolarsTable` and `polars()`, described on the
+  [Backends](backends.qmd) page.
+- `illuminate/database` enables the `->toDataFrame()` and `->phibble()`
+  macros, described on the [Laravel](laravel.qmd) page. In a Laravel
+  application it is already installed.
+
+## A first script
+
+The examples on this site use the Palmer penguins data,
+[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv).
+In a new directory, install phibble and download the data:
+
+```bash
+composer require phpstats/phibble
+curl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv
+```
+
+Save this script as `summary.php` in the same directory, and run it with
+`php summary.php`. It loads Composer's autoloader, imports `DataFrame` and the
+expression functions it uses, reads the CSV, and prints the number of
+penguins, their mean body mass, and their median flipper length for each
+species and sex:
+
+{{< include examples/_tour.md >}}
+
+## Imports
+
+The other examples on this page run in the same directory, after these
+lines:
 
 ```php
+<?php
+
 require __DIR__.'/vendor/autoload.php';
 
 use Phibble\DataFrame;
+
 use function Phibble\{tibble, tribble};
-use function Phibble\Expr\{col, desc, mean, n};
+use function Phibble\Expr\{col, desc, mean, median, n};
 ```
 
 `Phibble\Expr` has functions named `min`, `max`, `sum`, `round`, `abs`, `log`,
 `floor`, `str_pad`, `str_split`, `str_replace`, and a few others that share
-names with PHP built-ins. In a file that imports
-them, a bare `round($x)` calls phibble's expression helper. Write `\round($x)`
-for PHP's function.
+names with PHP built-ins. In a file that imports them, a bare `round($x)`
+calls phibble's expression helper. Write `\round($x)` for PHP's function.
 
 ## Building data frames
 
@@ -105,9 +144,8 @@ form that SQL and Polars backends can translate.
 `groupBy()` records grouping columns on the data frame. `summarize()`, or its
 alias `summarise()`, returns one
 row per group, with groups in sorted order and NA last, as dplyr does. With
-several grouping columns, the result keeps all but the last.
-
-{{< include examples/_tour.md >}}
+several grouping columns, the result keeps all but the last, so the
+[first script](#a-first-script)'s summary stays grouped by species.
 
 In a grouped data frame, `filter()` and `mutate()` work within each group. An
 aggregate inside `mutate()` is computed per group and repeated for each of the

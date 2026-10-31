@@ -9,6 +9,11 @@ reads such tables, filters, sorts, groups, joins, and summarizes them, and
 writes them back out. Its design and names follow R's tibble and readr
 packages, and its verbs follow dplyr.
 
+This script reads the Palmer penguins data,
+[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv),
+and summarizes it by species and sex. [A first script](getting-started.qmd#a-first-script)
+gives the commands that install phibble and download the file.
+
 {{< include examples/_tour.md >}}
 
 ## Tables
@@ -59,18 +64,10 @@ The other PHPstats packages read and return phibble tables:
 composer require phpstats/phibble
 ```
 
-Requirements:
+phibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions.
+The phit extension, the php_polars extension, and `illuminate/database` enable
+optional features. [Installation](getting-started.qmd#installation) lists what
+each one enables and the versions it needs.
 
-- PHP 8.3, 8.4, or 8.5. CI tests all three.
-- The mbstring extension.
-- The PDO extension.
-
-Optional:
-
-- The phit extension reads CSV natively. `fromCsv()` uses phit 0.1.1 or
-  later, and the chunked readers use phit 0.2.0 or later.
-- The php_polars extension enables `PolarsTable`.
-- `illuminate/database` enables the Laravel macros.
-
-Pipelines can use PHP 8.5's `|>` operator. Method chains work on every
-supported version.
+Pipelines can use PHP 8.5's `|>` operator. Method chains work on PHP 8.3,
+8.4, and 8.5.

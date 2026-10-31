@@ -8,6 +8,10 @@
  * imports DataFrame, Type, SqlTable, the Phibble\ functions (tibble, tribble,
  * as_tibble, enframe, deframe, tbl) and every Phibble\Expr\ helper.
  *
+ * An example that loads the autoloader itself, with
+ * "require __DIR__.'/vendor/autoload.php';", is a complete script: it runs
+ * without the prelude, with that line pointing at this repository's autoloader.
+ *
  * Code above a line "// ---" and below a line "// ===" runs but is left out
  * of the page. Output after
  * a line "<!--phiz-->" is HTML, such as a phiz chart, and is included as is.
@@ -52,7 +56,11 @@ foreach (glob($root.'/docs/examples/*.php') as $file) {
     }
     $code = trim((string) preg_replace('/^<\?php\s*(declare\(strict_types=1\);\s*)?/', '', file_get_contents($file)));
     $script = tempnam(sys_get_temp_dir(), 'phibble-doc').'.php';
-    file_put_contents($script, "<?php\n\ndeclare(strict_types=1);\n\nrequire ".var_export($root.'/vendor/autoload.php', true).";\n\n".$prelude."\n".$code."\n");
+    $autoload = 'require '.var_export($root.'/vendor/autoload.php', true).';';
+    $standalone = "require __DIR__.'/vendor/autoload.php';";
+    file_put_contents($script, str_contains($code, $standalone)
+        ? "<?php\n\ndeclare(strict_types=1);\n\n".str_replace($standalone, $autoload, $code)."\n"
+        : "<?php\n\ndeclare(strict_types=1);\n\n{$autoload}\n\n".$prelude."\n".$code."\n");
     $proc = proc_open([$php, $script], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $root.'/docs/data');
     $out = stream_get_contents($pipes[1]);
     $err = stream_get_contents($pipes[2]);
@@ -68,6 +76,10 @@ foreach (glob($root.'/docs/examples/*.php') as $file) {
     $shown = preg_match('~^// ---\s*$~m', $code) ? trim((string) preg_split('~^// ---\s*$~m', $code, 2)[1]) : $code;
     // Code below a "// ===" line runs but is not shown (output plumbing).
     $shown = preg_match('~^// ===\s*$~m', $shown) ? trim((string) preg_split('~^// ===\s*$~m', $shown, 2)[0]) : $shown;
+    // A complete script is shown with its opening tag, ready to save and run.
+    if (str_contains($code, $standalone)) {
+        $shown = "<?php\n\n{$shown}";
+    }
     $md = "```php\n{$shown}\n```\n\n";
     // Output after a "<!--phiz-->" line is HTML (a rendered chart), included as is.
     [$text, $html] = str_contains($out, "<!--phiz-->\n") ? explode("<!--phiz-->\n", $out, 2) : [$out, ''];

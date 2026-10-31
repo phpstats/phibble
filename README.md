@@ -23,8 +23,22 @@ operator.
 
 ## Example
 
+In a new directory, install phibble and download the Palmer penguins data:
+
+```bash
+composer require phpstats/phibble
+curl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv
+```
+
+Then save this script as `summary.php` and run `php summary.php`:
+
 ```php
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+
 use Phibble\DataFrame;
+
 use function Phibble\Expr\{col, mean, n};
 
 $penguins = DataFrame::fromCsv('penguins.csv');
@@ -32,7 +46,7 @@ $penguins = DataFrame::fromCsv('penguins.csv');
 echo $penguins
     ->filter(col('body_mass')->isNa()->not())
     ->groupBy(['species'])
-    ->summarize(['n' => n(), 'mass' => mean(col('body_mass'))]);
+    ->summarize(['n' => n(), 'mass' => mean(col('body_mass'))]), "\n";
 ```
 
 ```

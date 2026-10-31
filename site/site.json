@@ -23,19 +23,20 @@
     "optional": [
         {
             "name": "phit extension",
-            "for": "native CSV reading (0.1.1 or later) and chunked CSV reading (0.2.0 or later)"
+            "for": "native CSV reading"
         },
         {
             "name": "php_polars extension",
-            "for": "the Polars backend (PolarsTable)"
+            "for": "the Polars backend"
         },
         {
             "name": "illuminate/database",
-            "for": "the Laravel macros toDataFrame() and phibble()"
+            "for": "the Laravel macros"
         }
     ],
     "build": [],
     "quickstart": "getting-started",
+    "installation": "getting-started#installation",
     "repository": "https://github.com/phpstats/phibble",
     "example": {
         "chain": "use function Phibble\\Expr\\{col, desc, mean, n, sum};\n\n$orders = \\Phibble\\DataFrame::fromCsv('orders.csv', types: [\n    'channel' => 'factor',\n    'coupon' => 'bool',\n    'returned' => 'bool',\n]);\n\necho $orders\n    ->filter(col('returned')->not())\n    ->mutate(['item_price' => col('total')->div(col('items'))])\n    ->groupBy(['channel'])\n    ->summarize([\n        'orders' => n(),\n        'revenue' => sum(col('total')),\n        'item_price' => mean(col('item_price')),\n        'coupons' => mean(col('coupon')),\n    ], groups: 'drop')\n    ->arrange([desc(col('revenue'))]);",
