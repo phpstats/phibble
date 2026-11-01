@@ -393,12 +393,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mixed'</span> =&gt; [<span class="dv">1</span><span class="ot">,</span> <span class="fl">2.5</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'with_bool'</span> =&gt; [<span class="kw">true</span><span class="ot">,</span> <span class="dv">2</span><span class="ot">,</span> <span class="dv">3</span>]<span class="ot">,</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'text'</span> =&gt; [<span class="st">'a'</span><span class="ot">,</span> <span class="dv">1</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'when'</span> =&gt; [<span class="kw">new</span> <span class="bu">DateTimeImmutable</span>(<span class="st">'2024-03-01 09:30'</span>)<span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'nested'</span> =&gt; [[<span class="dv">1</span><span class="ot">,</span> <span class="dv">2</span>]<span class="ot">,</span> [<span class="dv">3</span>]<span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'empty'</span> =&gt; [<span class="kw">null</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;glimpse()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'when'</span> =&gt; [</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">new</span> <span class="bu">DateTimeImmutable</span>(<span class="st">'2024-03-01 09:30'</span>)<span class="ot">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    ]<span class="ot">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'nested'</span> =&gt; [[<span class="dv">1</span><span class="ot">,</span> <span class="dv">2</span>]<span class="ot">,</span> [<span class="dv">3</span>]<span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'empty'</span> =&gt; [<span class="kw">null</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;glimpse()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Rows: 3
 Columns: 8
 $ logical   &lt;lgl&gt; TRUE, FALSE, NA
@@ -413,12 +417,83 @@ $ empty     &lt;lgl&gt; NA, NA, NA</code></pre>
 </section>
 <section id="casts" class="level2">
 <h2 class="anchored" data-anchor-id="casts">Casts</h2>
-<p><code>cast()</code> converts columns to other types. Conversions follow R’s <code>as.*()</code> functions. A value that cannot be converted becomes NA, and phibble raises one <code>E_USER_WARNING</code> per column, as R does with “NAs introduced by coercion”.</p>
-<ul>
-<li>Floats convert to int by truncating toward zero.</li>
-<li><code>"TRUE"</code>, <code>"true"</code>, <code>"T"</code>, and <code>"True"</code> convert to true. <code>"yes"</code> and <code>"1"</code> do not.</li>
-<li>Floats convert to text with up to 15 significant digits, in fixed or scientific notation, whichever is shorter.</li>
-</ul>
+<p><code>cast()</code> converts columns to other types, following R’s <code>as.*()</code> functions. A value that cannot be converted becomes NA, and phibble raises one <code>E_USER_WARNING</code> per column, as R does with “NAs introduced by coercion”.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>From</th>
+<th>To</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>float</td>
+<td>int</td>
+<td>Truncated toward zero.</td>
+</tr>
+<tr class="even">
+<td>float</td>
+<td>string</td>
+<td>Up to 15 significant digits, in fixed or scientific notation, whichever is shorter.</td>
+</tr>
+<tr class="odd">
+<td>string</td>
+<td>bool</td>
+<td><code>"TRUE"</code>, <code>"true"</code>, <code>"T"</code>, and <code>"True"</code> are true. <code>"yes"</code> and <code>"1"</code> are NA.</td>
+</tr>
+<tr class="even">
+<td>factor</td>
+<td>int, float</td>
+<td>The 1-based level codes, as <code>as.integer(factor)</code>.</td>
+</tr>
+<tr class="odd">
+<td>factor</td>
+<td>string</td>
+<td>The labels.</td>
+</tr>
+<tr class="even">
+<td>date</td>
+<td>int, float</td>
+<td>Days since 1970-01-01.</td>
+</tr>
+<tr class="odd">
+<td>datetime</td>
+<td>int, float</td>
+<td>Seconds since the epoch.</td>
+</tr>
+<tr class="even">
+<td>time</td>
+<td>float</td>
+<td>Seconds.</td>
+</tr>
+<tr class="odd">
+<td>time</td>
+<td>string</td>
+<td>hms’s <code>as.character()</code>, such as <code>01:30:00</code>.</td>
+</tr>
+<tr class="even">
+<td>int, float</td>
+<td>time</td>
+<td>That many seconds.</td>
+</tr>
+<tr class="odd">
+<td>string</td>
+<td>time</td>
+<td>Parsed as <code>Time::parse()</code> reads it.</td>
+</tr>
+<tr class="even">
+<td>datetime</td>
+<td>time</td>
+<td>The time of day.</td>
+</tr>
+</tbody>
+</table>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_error_handler</span>(<span class="kw">function</span> (<span class="dt">int</span> <span class="va">$level</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$message</span>)<span class="ot">:</span> <span class="dt">bool</span> {</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"Warning: </span>{<span class="va">$message</span>}<span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -431,9 +506,13 @@ $ empty     &lt;lgl&gt; NA, NA, NA</code></pre>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'n'</span> =&gt; [<span class="fl">1.0</span><span class="ot">,</span> <span class="fl">0.1</span> <span class="op">+</span> <span class="fl">0.2</span><span class="ot">,</span> <span class="fl">1e5</span><span class="ot">,</span> <span class="dv">1</span> <span class="op">/</span> <span class="dv">3</span>]<span class="ot">,</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">$cast</span> <span class="op">=</span> <span class="va">$df</span>-&gt;cast([<span class="st">'x'</span> =&gt; <span class="st">'int'</span><span class="ot">,</span> <span class="st">'flag'</span> =&gt; <span class="st">'bool'</span><span class="ot">,</span> <span class="st">'n'</span> =&gt; <span class="st">'string'</span>])<span class="ot">;</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$cast</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">$cast</span> <span class="op">=</span> <span class="va">$df</span>-&gt;cast([</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x'</span> =&gt; <span class="st">'int'</span><span class="ot">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'flag'</span> =&gt; <span class="st">'bool'</span><span class="ot">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'n'</span> =&gt; <span class="st">'string'</span><span class="ot">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$cast</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Warning: NAs introduced by coercion to int in column 'x' (1 value).
 Warning: NAs introduced by coercion to bool in column 'flag' (2 values).
 # A tibble: 4 × 3
@@ -443,7 +522,6 @@ Warning: NAs introduced by coercion to bool in column 'flag' (2 values).
 2    -2 TRUE  0.3              
 3     3 NA    1e+05            
 4    NA NA    0.333333333333333</code></pre>
-<p>A factor converts to int or float as its 1-based level codes, as <code>as.integer(factor)</code> does in R. Converting it to text gives its labels. Dates convert to numbers as days since 1970-01-01, and datetimes as seconds since the epoch.</p>
 </section>
 <section id="factors" class="level2">
 <h2 class="anchored" data-anchor-id="factors">Factors</h2>
@@ -452,13 +530,14 @@ Warning: NAs introduced by coercion to bool in column 'flag' (2 values).
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)-&gt;asFactor(<span class="st">'species'</span>)<span class="ot">;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="va">$penguins</span>-&gt;levels(<span class="st">'species'</span>))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="fu">array_slice</span>(<span class="va">$penguins</span>-&gt;storage(<span class="st">'species'</span>)-&gt;codes()<span class="ot">,</span> <span class="dv">150</span><span class="ot">,</span> <span class="dv">5</span>))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="va">$sizes</span> <span class="op">=</span> tibble(size<span class="ot">:</span> [<span class="st">'small'</span><span class="ot">,</span> <span class="st">'large'</span><span class="ot">,</span> <span class="st">'medium'</span><span class="ot">,</span> <span class="st">'small'</span>])</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    -&gt;asOrdered(<span class="st">'size'</span><span class="ot">,</span> [<span class="st">'small'</span><span class="ot">,</span> <span class="st">'medium'</span><span class="ot">,</span> <span class="st">'large'</span>])<span class="ot">;</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$sizes</span>-&gt;arrange([<span class="st">'size'</span>])<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">var_dump</span>(<span class="va">$sizes</span>-&gt;isOrdered(<span class="st">'size'</span>))<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="va">$codes</span> <span class="op">=</span> <span class="va">$penguins</span>-&gt;storage(<span class="st">'species'</span>)-&gt;codes()<span class="ot">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="fu">array_slice</span>(<span class="va">$codes</span><span class="ot">,</span> <span class="dv">150</span><span class="ot">,</span> <span class="dv">5</span>))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">$sizes</span> <span class="op">=</span> tibble(size<span class="ot">:</span> [<span class="st">'small'</span><span class="ot">,</span> <span class="st">'large'</span><span class="ot">,</span> <span class="st">'medium'</span><span class="ot">,</span> <span class="st">'small'</span>])</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    -&gt;asOrdered(<span class="st">'size'</span><span class="ot">,</span> [<span class="st">'small'</span><span class="ot">,</span> <span class="st">'medium'</span><span class="ot">,</span> <span class="st">'large'</span>])<span class="ot">;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$sizes</span>-&gt;arrange([<span class="st">'size'</span>])<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">var_dump</span>(<span class="va">$sizes</span>-&gt;isOrdered(<span class="st">'size'</span>))<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>["Adelie","Chinstrap","Gentoo"]
 [0,0,2,2,2]
 # A tibble: 4 × 1
@@ -522,15 +601,26 @@ bool(true)</code></pre>
 </table>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)-&gt;asFactor(<span class="st">'species'</span>)<span class="ot">;</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span> <span class="op">=</span> <span class="kw">fn</span> (<span class="dt">string</span> <span class="va">$label</span><span class="ot">,</span> DataFrame <span class="va">$f</span>) =&gt; <span class="kw">print</span>(\<span class="fu">str_pad</span>(<span class="va">$label</span><span class="ot">,</span> <span class="dv">26</span>)<span class="op">.</span><span class="fu">json_encode</span>(<span class="va">$f</span>-&gt;levels(<span class="st">'species'</span>))<span class="op">.</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)<span class="ot">;</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span>(<span class="st">'sorted (default)'</span><span class="ot">,</span> <span class="va">$penguins</span>)<span class="ot">;</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span>(<span class="st">'fctRelevel Gentoo'</span><span class="ot">,</span> <span class="va">$penguins</span>-&gt;fctRelevel(<span class="st">'species'</span><span class="ot">,</span> [<span class="st">'Gentoo'</span>]))<span class="ot">;</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span>(<span class="st">'fctInfreq'</span><span class="ot">,</span> <span class="va">$penguins</span>-&gt;fctInfreq(<span class="st">'species'</span>))<span class="ot">;</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span>(<span class="st">'fctReorder by body_mass'</span><span class="ot">,</span> <span class="va">$penguins</span>-&gt;fctReorder(<span class="st">'species'</span><span class="ot">,</span> <span class="st">'body_mass'</span><span class="ot">,</span> <span class="kw">fn</span> (<span class="va">$xs</span>) =&gt; <span class="fu">array_sum</span>(<span class="fu">array_filter</span>(<span class="va">$xs</span>)) <span class="op">/</span> <span class="fu">count</span>(<span class="fu">array_filter</span>(<span class="va">$xs</span>))))<span class="ot">;</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span>(<span class="st">'fctRev'</span><span class="ot">,</span> <span class="va">$penguins</span>-&gt;fctRev(<span class="st">'species'</span>))<span class="ot">;</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span>(<span class="st">'fctRecode'</span><span class="ot">,</span> <span class="va">$penguins</span>-&gt;fctRecode(<span class="st">'species'</span><span class="ot">,</span> [<span class="st">'Chinstrap penguin'</span> =&gt; <span class="st">'Chinstrap'</span>]))<span class="ot">;</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="va">$show</span>(<span class="st">'fctCollapse'</span><span class="ot">,</span> <span class="va">$penguins</span>-&gt;fctCollapse(<span class="st">'species'</span><span class="ot">,</span> [<span class="st">'brush-tailed'</span> =&gt; [<span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'Gentoo'</span>]]))<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">$mean</span> <span class="op">=</span> <span class="kw">fn</span> (<span class="va">$xs</span>) =&gt; <span class="fu">array_sum</span>(<span class="fu">array_filter</span>(<span class="va">$xs</span>))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span> <span class="fu">count</span>(<span class="fu">array_filter</span>(<span class="va">$xs</span>))<span class="ot">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">$versions</span> <span class="op">=</span> [</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sorted (default)'</span> =&gt; <span class="va">$penguins</span><span class="ot">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fctRelevel Gentoo'</span> =&gt; <span class="va">$penguins</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        -&gt;fctRelevel(<span class="st">'species'</span><span class="ot">,</span> [<span class="st">'Gentoo'</span>])<span class="ot">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fctInfreq'</span> =&gt; <span class="va">$penguins</span>-&gt;fctInfreq(<span class="st">'species'</span>)<span class="ot">,</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fctReorder by body_mass'</span> =&gt; <span class="va">$penguins</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        -&gt;fctReorder(<span class="st">'species'</span><span class="ot">,</span> <span class="st">'body_mass'</span><span class="ot">,</span> <span class="va">$mean</span>)<span class="ot">,</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fctRev'</span> =&gt; <span class="va">$penguins</span>-&gt;fctRev(<span class="st">'species'</span>)<span class="ot">,</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fctRecode'</span> =&gt; <span class="va">$penguins</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        -&gt;fctRecode(<span class="st">'species'</span><span class="ot">,</span> [<span class="st">'Chinstrap penguin'</span> =&gt; <span class="st">'Chinstrap'</span>])<span class="ot">,</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fctCollapse'</span> =&gt; <span class="va">$penguins</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        -&gt;fctCollapse(<span class="st">'species'</span><span class="ot">,</span> [<span class="st">'brush-tailed'</span> =&gt; [<span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'Gentoo'</span>]])<span class="ot">,</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$versions</span> <span class="kw">as</span> <span class="va">$label</span> =&gt; <span class="va">$f</span>) {</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> \<span class="fu">str_pad</span>(<span class="va">$label</span><span class="ot">,</span> <span class="dv">26</span>)<span class="ot">,</span> <span class="fu">json_encode</span>(<span class="va">$f</span>-&gt;levels(<span class="st">'species'</span>))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>sorted (default)          ["Adelie","Chinstrap","Gentoo"]
 fctRelevel Gentoo         ["Gentoo","Adelie","Chinstrap"]
 fctInfreq                 ["Adelie","Gentoo","Chinstrap"]
@@ -564,16 +654,27 @@ fctCollapse               ["brush-tailed","Chinstrap"]</code></pre>
 <section id="times" class="level2">
 <h2 class="anchored" data-anchor-id="times">Times</h2>
 <p>A time column holds <code>Phibble\Time</code> values, as R’s hms package does. A time is a whole number of microseconds, which may be negative or longer than a day. <code>Time::of($hours, $minutes, $seconds)</code> and <code>Time::fromSeconds()</code> build one, and <code>Time::parse()</code> reads text such as <code>07:30</code>, <code>-01:00:00.5</code>, or <code>1:30 PM</code>. <code>seconds()</code> gives the number of seconds. <code>hour()</code>, <code>minute()</code>, and <code>second()</code> give the clock time, as lubridate does, so <code>25:00:00</code> has hour 1.</p>
-<p>A time prints as hms prints it. A column shows seconds only when a value has them, the fraction digits the column needs, and minutes and seconds as <code>MM'SS"</code> when no value has hours. A time converts to its number of seconds, and to text as hms’s <code>as.character()</code> gives it. A number converts to that many seconds, text is parsed, and a datetime gives its time of day.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$trains</span> <span class="op">=</span> DataFrame::fromCsvString(<span class="st">"train,departs</span><span class="sc">\n</span><span class="st">A,7:05 AM</span><span class="sc">\n</span><span class="st">B,12:40 PM</span><span class="sc">\n</span><span class="st">C,6:15 PM</span><span class="sc">\n</span><span class="st">D,NA</span><span class="sc">\n</span><span class="st">"</span>)<span class="ot">;</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$trains</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$trains</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'departs'</span>)-&gt;gt(<span class="st">'12:00'</span>))</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    -&gt;mutate([<span class="st">'hour'</span> =&gt; hour(col(<span class="st">'departs'</span>))<span class="ot">,</span> <span class="st">'later'</span> =&gt; col(<span class="st">'departs'</span>)-&gt;add(<span class="dv">90</span> <span class="op">*</span> <span class="dv">60</span>)])<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<p>A time column prints as hms prints it. It shows seconds only when a value has them, the fraction digits the column needs, and <code>MM'SS"</code> when no value has hours. <a href="#casts">Casts</a> lists its conversions.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$trains</span> <span class="op">=</span> DataFrame::fromCsvString(<span class="vs">&lt;&lt;&lt;'CSV'</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="st">    train,departs</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="st">    A,7:05 AM</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="st">    B,12:40 PM</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">    C,6:15 PM</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">    D,NA</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">    CSV);</span></span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">Time</span>::of(<span class="dv">1</span><span class="ot">,</span> <span class="dv">30</span>)<span class="ot">,</span> <span class="st">', '</span><span class="ot">,</span> <span class="fu">Time</span>::fromSeconds(<span class="op">-</span><span class="fl">90.5</span>)<span class="ot">,</span> <span class="st">', '</span><span class="ot">,</span> <span class="fu">Time</span>::parse(<span class="st">'25:00'</span>)<span class="ot">?</span>-&gt;seconds()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="st">echo $trains, "\n";</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="st">echo $trains</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;filter(col('departs')-&gt;gt('12:00'))</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;mutate([</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="st">        'hour' =&gt; hour(col('departs')),</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="st">        'later' =&gt; col('departs')-&gt;add(90 * 60),</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="st">    ]), "\n";</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="st">echo Time::of(1, 30), "\n";</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="st">echo Time::fromSeconds(-90.5), "\n";</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="st">echo Time::parse('25:00')?-&gt;seconds(), "\n";</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 4 × 2
   train departs
   &lt;chr&gt; &lt;time&gt; 
@@ -586,22 +687,73 @@ fctCollapse               ["brush-tailed","Chinstrap"]</code></pre>
   &lt;chr&gt; &lt;time&gt;  &lt;int&gt; &lt;time&gt;
 1 B     12:40      12 14:10 
 2 C     18:15      18 19:45 
-01:30:00, -00:01:30.5, 90000</code></pre>
+01:30:00
+-00:01:30.5
+90000</code></pre>
 <p>Comparing a time with text reads the text as a time, so <code>col('departs')-&gt;gt('12:00')</code> compares clock times. Adding or subtracting seconds or a time gives a time, and so does multiplying or dividing by a number.</p>
-<p>Summaries keep R’s types. The <code>median()</code> and <code>quantile()</code> of a time are times, as in R, and so are its <code>mean()</code>, <code>sum()</code>, <code>min()</code>, and <code>max()</code>, where R gives a difftime, which phibble does not have. The <code>mean()</code> and <code>median()</code> of a date are a date, rounded down to the day, and those of a datetime, and its <code>quantile()</code>, are datetimes. As in R, <code>sum()</code> of a date or datetime and <code>quantile()</code> of a date throw. <code>sd()</code>, <code>var()</code>, and <code>iqr()</code> are numbers: days for dates and seconds otherwise.</p>
+<p>Summaries keep R’s types, except that phibble returns a time where R gives a difftime, which phibble does not have:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Summary</th>
+<th>date</th>
+<th>datetime</th>
+<th>time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>min()</code>, <code>max()</code></td>
+<td>date</td>
+<td>datetime</td>
+<td>time</td>
+</tr>
+<tr class="even">
+<td><code>mean()</code>, <code>median()</code></td>
+<td>date, rounded down to the day</td>
+<td>datetime</td>
+<td>time</td>
+</tr>
+<tr class="odd">
+<td><code>quantile()</code></td>
+<td>throws, as in R</td>
+<td>datetime</td>
+<td>time</td>
+</tr>
+<tr class="even">
+<td><code>sum()</code></td>
+<td>throws, as in R</td>
+<td>throws, as in R</td>
+<td>time</td>
+</tr>
+<tr class="odd">
+<td><code>sd()</code>, <code>var()</code>, <code>iqr()</code></td>
+<td>number of days</td>
+<td>number of seconds</td>
+<td>number of seconds</td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="list-columns" class="level2">
 <h2 class="anchored" data-anchor-id="list-columns">List-columns</h2>
 <p>A list-column holds any PHP value in each row, such as arrays or other data frames. <code>nest()</code> collapses columns into a list-column of data frames, one row per unique combination of the remaining columns. <code>unnest()</code> expands it again.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)-&gt;select([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'island'</span><span class="ot">,</span> <span class="st">'body_mass'</span>])<span class="ot">;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="va">$nested</span> <span class="op">=</span> <span class="va">$penguins</span>-&gt;nest([<span class="st">'island'</span><span class="ot">,</span> <span class="st">'body_mass'</span>]<span class="ot">,</span> into<span class="ot">:</span> <span class="st">'data'</span>)<span class="ot">;</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$nested</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="va">$sizes</span> <span class="op">=</span> <span class="va">$nested</span>-&gt;mutate([<span class="st">'n'</span> =&gt; <span class="kw">fn</span> (<span class="va">$r</span>) =&gt; <span class="va">$r</span>-&gt;data-&gt;nrow()])<span class="ot">;</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$sizes</span>-&gt;select([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'n'</span>])<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$nested</span>-&gt;unnest(<span class="st">'data'</span>)-&gt;head(<span class="dv">3</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    -&gt;select([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'island'</span><span class="ot">,</span> <span class="st">'body_mass'</span>])<span class="ot">;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="va">$nested</span> <span class="op">=</span> <span class="va">$penguins</span>-&gt;nest([<span class="st">'island'</span><span class="ot">,</span> <span class="st">'body_mass'</span>]<span class="ot">,</span> into<span class="ot">:</span> <span class="st">'data'</span>)<span class="ot">;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$nested</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="va">$sizes</span> <span class="op">=</span> <span class="va">$nested</span>-&gt;mutate([<span class="st">'n'</span> =&gt; <span class="kw">fn</span> (<span class="va">$r</span>) =&gt; <span class="va">$r</span>-&gt;data-&gt;nrow()])<span class="ot">;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$sizes</span>-&gt;select([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'n'</span>])<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$nested</span>-&gt;unnest(<span class="st">'data'</span>)-&gt;head(<span class="dv">3</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 3 × 2
   species   data              
   &lt;chr&gt;     &lt;list&gt;            
@@ -623,7 +775,7 @@ fctCollapse               ["brush-tailed","Chinstrap"]</code></pre>
 </section>
 <section id="model-data" class="level2">
 <h2 class="anchored" data-anchor-id="model-data">Model data</h2>
-<p><code>toModelData()</code> returns columns in the form phit’s model functions read. Numbers, bools, and strings are plain lists. Dates and datetimes become days and seconds since the epoch. A factor becomes an array with its levels, its 0-based codes, and whether it is ordered, so a model keeps the data frame’s level order, including unused levels. A list-column throws.</p>
+<p><code>toModelData()</code> returns columns in the form phit’s model functions read. Numbers, bools, and strings are plain lists. Dates become days since the epoch, datetimes seconds since the epoch, and times seconds. A factor becomes an array with its levels, its 0-based codes, and whether it is ordered, so a model keeps the data frame’s level order, including unused levels. A list-column throws.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tibble(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    mass<span class="ot">:</span> [<span class="fl">3750.0</span><span class="ot">,</span> <span class="fl">3800.0</span><span class="ot">,</span> <span class="kw">null</span>]<span class="ot">,</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    male<span class="ot">:</span> [<span class="kw">true</span><span class="ot">,</span> <span class="kw">false</span><span class="ot">,</span> <span class="kw">true</span>]<span class="ot">,</span></span>

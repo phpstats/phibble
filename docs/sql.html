@@ -280,9 +280,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#opening-a-table" id="toc-opening-a-table" class="nav-link active" data-scroll-target="#opening-a-table">Opening a table</a></li>
   <li><a href="#what-compiles-to-sql" id="toc-what-compiles-to-sql" class="nav-link" data-scroll-target="#what-compiles-to-sql">What compiles to SQL</a></li>
-  <li><a href="#when-the-table-falls-back-to-memory" id="toc-when-the-table-falls-back-to-memory" class="nav-link" data-scroll-target="#when-the-table-falls-back-to-memory">When the table falls back to memory</a></li>
+  <li><a href="#when-the-table-falls-back-to-memory" id="toc-when-the-table-falls-back-to-memory" class="nav-link" data-scroll-target="#when-the-table-falls-back-to-memory">When the table falls back to memory</a>
+  <ul class="collapse">
+  <li><a href="#on-every-database" id="toc-on-every-database" class="nav-link" data-scroll-target="#on-every-database">On every database</a></li>
+  <li><a href="#by-database" id="toc-by-database" class="nav-link" data-scroll-target="#by-database">By database</a></li>
+  <li><a href="#sqlite-column-types" id="toc-sqlite-column-types" class="nav-link" data-scroll-target="#sqlite-column-types">SQLite column types</a></li>
+  </ul></li>
   <li><a href="#known-differences" id="toc-known-differences" class="nav-link" data-scroll-target="#known-differences">Known differences</a></li>
-  <li><a href="#window-functions" id="toc-window-functions" class="nav-link" data-scroll-target="#window-functions">Window functions</a></li>
+  <li><a href="#row-order-and-window-functions" id="toc-row-order-and-window-functions" class="nav-link" data-scroll-target="#row-order-and-window-functions">Row order and window functions</a></li>
   <li><a href="#joins" id="toc-joins" class="nav-link" data-scroll-target="#joins">Joins</a></li>
   <li><a href="#dialects" id="toc-dialects" class="nav-link" data-scroll-target="#dialects">Dialects</a></li>
   </ul>
@@ -310,32 +315,61 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>Phibble\Sql\SqlTable</code> is a table backed by a SQL query, like dbplyr’s <code>tbl()</code>. It implements the same <code>Table</code> contract as <code>DataFrame</code>. Verbs called with <a href="./expr.html">expressions</a> are compiled into SQL, and no query runs until the rows are needed. SQLite, PostgreSQL, and MySQL are supported.</p>
+<p><code>Phibble\Sql\SqlTable</code> is a table backed by a SQL query, like dbplyr’s <code>tbl()</code>. Verbs called with <a href="./expr.html">expressions</a> compile to SQL for SQLite, PostgreSQL, or MySQL, and the database runs the query when the rows are needed.</p>
 <section id="opening-a-table" class="level2">
 <h2 class="anchored" data-anchor-id="opening-a-table">Opening a table</h2>
-<p><code>tbl($pdo, 'name')</code> opens a table or view. <code>tbl($pdo, 'SELECT ...', $bindings)</code> starts from a query with positional (<code>?</code>) or named (<code>:name</code>) bindings. The same tables can be opened with <code>SqlTable::table()</code> and <code>SqlTable::query()</code>. <code>SqlTable::fromQuery($builder)</code> starts from a Laravel or Doctrine query builder, and <code>SqlTable::fromSource($pdoSource)</code> from a <code>PdoSource</code>.</p>
-<p>phibble reads the column names when the table is opened. It runs the query itself when the rows are needed: <code>collect()</code> returns a <code>DataFrame</code>, and <code>toRows()</code>, <code>nrow()</code>, iteration, and printing also run it.</p>
-<p><code>showQuery()</code> returns the SQL with <code>?</code> placeholders, and <code>bindings()</code> returns their values in order.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Load penguins.csv into an in-memory SQLite database.</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">'CREATE TABLE penguins (species TEXT, island TEXT, bill_len REAL, bill_dep REAL,</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">    flipper_len INTEGER, body_mass INTEGER, sex TEXT, year INTEGER)'</span>)<span class="ot">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="va">$insert</span> <span class="op">=</span> <span class="va">$pdo</span>-&gt;prepare(<span class="st">'INSERT INTO penguins VALUES (?, ?, ?, ?, ?, ?, ?, ?)'</span>)<span class="ot">;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)-&gt;toRows() <span class="kw">as</span> <span class="va">$row</span>) {</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="va">$insert</span>-&gt;execute(<span class="fu">array_values</span>(<span class="va">$row</span>))<span class="ot">;</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'penguins'</span>)<span class="ot">;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="va">$penguins</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'year'</span>)-&gt;eq(<span class="dv">2008</span>))</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'species'</span>])</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([<span class="st">'n'</span> =&gt; n()<span class="ot">,</span> <span class="st">'mass'</span> =&gt; mean(col(<span class="st">'body_mass'</span>)<span class="ot">,</span> na_rm<span class="ot">:</span> <span class="kw">true</span>)])<span class="ot">;</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">get_class</span>(<span class="va">$summary</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="va">$summary</span>-&gt;bindings())<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span>-&gt;collect()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Call</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>tbl($pdo, 'name')</code>, <code>SqlTable::table()</code></td>
+<td>A table or view.</td>
+</tr>
+<tr class="even">
+<td><code>tbl($pdo, 'SELECT ...', $bindings)</code>, <code>SqlTable::query()</code></td>
+<td>A query with positional (<code>?</code>) or named (<code>:name</code>) bindings.</td>
+</tr>
+<tr class="odd">
+<td><code>SqlTable::fromQuery($builder)</code></td>
+<td>A Laravel or Doctrine query builder.</td>
+</tr>
+<tr class="even">
+<td><code>SqlTable::fromSource($pdoSource)</code></td>
+<td>A <code>PdoSource</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Which calls query the database:</p>
+<ul>
+<li>Opening a table reads its column names with a <code>LIMIT 0</code> query. In SQLite, which declares no column types, it also reads the first 1,000 rows to guess date, datetime, and time columns.</li>
+<li><code>nrow()</code> and <code>count()</code> run a <code>COUNT(*)</code> query, and <code>types()</code> collects the first 1,000 rows.</li>
+<li><code>collect()</code>, <code>toRows()</code>, <code>column()</code>, iteration, and printing load the rows.</li>
+<li>Verbs and <code>showQuery()</code> run nothing. <code>showQuery()</code> returns the SQL with <code>?</code> placeholders, and <code>bindings()</code> returns their values in order.</li>
+</ul>
+<p>This example queries an in-memory SQLite table, <code>penguins</code>, loaded from <code>penguins.csv</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'penguins'</span>)<span class="ot">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="va">$penguins</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'year'</span>)-&gt;eq(<span class="dv">2008</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'species'</span>])</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'n'</span> =&gt; n()<span class="ot">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass'</span> =&gt; mean(col(<span class="st">'body_mass'</span>)<span class="ot">,</span> na_rm<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    ])<span class="ot">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">get_class</span>(<span class="va">$summary</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="va">$summary</span>-&gt;bindings())<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span>-&gt;collect()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Phibble\Sql\SqlTable
 
 SELECT "species", "n", "mass" FROM (SELECT "species", "n", "mass", ROW_NUMBER() OVER (ORDER BY ("species" IS NULL), "species") AS "__phibble_row" FROM (SELECT "species" AS "species", COUNT(*) AS "n", (CASE WHEN COUNT("body_mass") = 0 THEN NULL ELSE AVG(CAST("body_mass" AS REAL)) END) AS "mass" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "penguins") AS q1 WHERE ("year" = ?)) AS q2 GROUP BY "species") AS q3) AS q4 ORDER BY ("__phibble_row" IS NULL), "__phibble_row"
@@ -348,60 +382,39 @@ SELECT "species", "n", "mass" FROM (SELECT "species", "n", "mass", ROW_NUMBER() 
 1 Adelie       50 3742 
 2 Chinstrap    18 3800 
 3 Gentoo       46 5020.</code></pre>
-<p>Each verb wraps the previous query in a subquery, so each step’s SQL stays simple. Database planners usually flatten the nesting.</p>
+<p>Each verb wraps the previous query in a subquery.</p>
 </section>
 <section id="what-compiles-to-sql" class="level2">
 <h2 class="anchored" data-anchor-id="what-compiles-to-sql">What compiles to SQL</h2>
-<p>These verbs compile when their arguments are expressions or column names: <code>select()</code>, <code>rename()</code>, <code>filter()</code>, <code>mutate()</code>, <code>arrange()</code>, <code>groupBy()</code>, <code>summarize()</code>, <code>distinct()</code>, <code>slice()</code>, <code>head()</code>, and <code>join()</code>.</p>
-<p>The compiled SQL keeps R’s semantics:</p>
+<p><code>select()</code>, <code>rename()</code>, <code>filter()</code>, <code>mutate()</code>, <code>arrange()</code>, <code>groupBy()</code>, <code>summarize()</code>, <code>distinct()</code>, <code>slice()</code>, <code>head()</code>, and <code>join()</code> compile when their arguments are expressions or column names. The compiled SQL keeps R’s semantics:</p>
 <ul>
-<li>An aggregate returns NA when its group contains NA, unless <code>na_rm: true</code>. SQL aggregates skip NULL, so phibble adds a check on the count of non-NULL values.</li>
+<li>An aggregate returns NA when its group contains NA, unless <code>na_rm: true</code>. phibble adds a check on the count of non-NULL values, since SQL aggregates skip NULL.</li>
 <li>Cumulative functions return NA after the first NA.</li>
 <li>Ranks leave NA rows unranked.</li>
 <li><code>isIn()</code> never returns NA.</li>
 <li><code>/</code> returns a float, and division by zero gives NA.</li>
 <li>Groups in <code>summarize()</code> output are sorted, with NA last.</li>
+<li>Text compares in byte order and case-sensitively, through <code>COLLATE "C"</code> in PostgreSQL and <code>utf8mb4_0900_bin</code> in MySQL.</li>
 </ul>
 </section>
 <section id="when-the-table-falls-back-to-memory" class="level2">
 <h2 class="anchored" data-anchor-id="when-the-table-falls-back-to-memory">When the table falls back to memory</h2>
-<p>Some arguments have no faithful SQL translation. A <code>SqlTable</code> then collects the rows and runs the verb in memory, and the verb returns a <code>DataFrame</code>. The values are then those <code>DataFrame</code> computes, apart from the <a href="#known-differences">known differences</a> below. The fallbacks are:</p>
-<ul>
-<li>any PHP closure,</li>
-<li><code>round()</code>, because SQL’s <code>ROUND</code> does not round half to even,</li>
-<li><code>as_string()</code> and <code>as_bool()</code>,</li>
-<li><code>paste()</code> and <code>paste0()</code> with arguments other than text literals, because SQL formats numbers differently from R,</li>
-<li>regular-expression patterns, except <code>str_detect()</code> in MySQL (which uses ICU, as stringr does). Patterns wrapped in <code>fixed()</code>, and plain patterns without regular-expression characters, are translated everywhere,</li>
-<li><code>str_extract()</code>, <code>str_extract_all()</code>, <code>str_split()</code>, <code>str_split_i()</code>, <code>str_to_title()</code>, center <code>str_trunc()</code>, and <code>str_pad(side: 'both')</code>; <code>str_pad()</code> and <code>str_squish()</code> in SQLite; <code>str_to_upper()</code> and <code>str_to_lower()</code> in SQLite, whose <code>UPPER()</code> and <code>LOWER()</code> change only ASCII letters,</li>
-<li>parsing text to dates (<code>ymd()</code> and the others) on columns, <code>floor_date()</code>, <code>ceiling_date()</code>, <code>round_date()</code>, period arithmetic, <code>with_tz()</code>, and <code>force_tz()</code>, because the result type depends on the column type, which SQL tables do not track. Date parts (<code>year()</code> and the others), <code>wday()</code>, and <code>difftime()</code> are translated; a call on literals only, such as <code>ymd('2024-01-01')</code>, is evaluated once and passed as a value,</li>
-<li>functions of a PostgreSQL <code>time</code> or MySQL <code>TIME</code> column other than comparisons and <code>is_na()</code>, because SQL’s time functions differ from lubridate’s (MySQL’s <code>HOUR()</code> of <code>25:00:00</code> is 25),</li>
-<li>any use of SQLite text that holds times, such as <code>7:30:00</code>, because it sorts and compares as text. SQLite columns are guessed as dates, datetimes, or times from their first 1000 rows when the table is opened,</li>
-<li><code>sum()</code>, <code>mean()</code>, <code>median()</code>, <code>quantile()</code>, <code>sd()</code>, <code>var()</code>, and <code>iqr()</code> of date, datetime, and time columns, which keep R’s types in memory,</li>
-<li><code>first()</code>, <code>last()</code>, and <code>nth()</code> without a row order (from <code>arrange()</code> or <code>order_by:</code>), or with <code>default:</code> or <code>na_rm:</code>,</li>
-<li><code>iqr()</code> outside PostgreSQL, <code>cumprod()</code>, and <code>consecutive_id()</code>,</li>
-<li><code>sd()</code> and <code>var()</code> in SQLite, whose formula would lose precision,</li>
-<li><code>str_trim()</code>, because R removes all Unicode white space and SQL <code>TRIM</code> removes spaces,</li>
-<li>nested aggregates such as <code>mean(x - mean(x))</code>, <code>summarize()</code> entries that are not one value per group, and <code>slice()</code> with negative positions,</li>
-<li><code>median()</code> and <code>quantile()</code> outside PostgreSQL,</li>
-<li><code>quantile()</code> without <code>na_rm: true</code>,</li>
-<li><code>median()</code>, <code>quantile()</code>, and <code>n_distinct()</code> inside grouped <code>mutate()</code> or <code>filter()</code>, because SQL has no window form of them,</li>
-<li><code>take()</code>, <code>eachGroup()</code>, <code>rowwise()</code>, <code>mutateGroups()</code> with closures, and <code>filterGroups()</code>,</li>
-<li>joins with <code>multiple</code>, <code>relationship</code>, or <code>unmatched</code> set, joins between different connections, full joins in MySQL, and full joins with NA matching in PostgreSQL.</li>
-</ul>
+<p>When an argument has no faithful SQL translation, the <code>SqlTable</code> runs the query so far, collects its rows into PHP, and runs the verb in memory. The verb returns a <code>DataFrame</code>, so every later step also runs in memory, with <code>DataFrame</code>’s values apart from the <a href="#known-differences">known differences</a>. Here <code>mul()</code> compiles, and <code>round()</code> and a closure fall back:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">$t</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'SELECT 1 AS id, 2.5 AS x UNION ALL SELECT 2, 3.5'</span>)<span class="ot">;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Compiles to SQL.</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">get_class</span>(<span class="va">$t</span>-&gt;mutate([<span class="st">'y'</span> =&gt; col(<span class="st">'x'</span>)-&gt;mul(<span class="dv">2</span>)]))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">$t</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS id, 2.5 AS x</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 2, 3.5</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">// round() rounds half to even in R, which SQL ROUND does not, so the rows</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">// are collected and the expression runs in memory.</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">get_class</span>(<span class="va">$t</span>-&gt;mutate([<span class="st">'y'</span> =&gt; Phibble\Expr\<span class="fu">round</span>(col(<span class="st">'x'</span>))]))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="st">$doubled = $t-&gt;mutate(['y' =&gt; col('x')-&gt;mul(2)]);</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">$rounded = $t-&gt;mutate(['y' =&gt; Phibble\Expr\round(col('x'))]);</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">$closure = $t-&gt;filter(fn ($r) =&gt; $r-&gt;x &gt; 3);</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">// So does any closure.</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">get_class</span>(<span class="va">$t</span>-&gt;filter(<span class="kw">fn</span> (<span class="va">$r</span>) =&gt; <span class="va">$r</span>-&gt;x <span class="op">&gt;</span> <span class="dv">3</span>))<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$t</span>-&gt;mutate([<span class="st">'y'</span> =&gt; Phibble\Expr\<span class="fu">round</span>(col(<span class="st">'x'</span>))])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($doubled), "\n";</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($rounded), "\n";</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($closure), "\n";</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="st">echo $rounded;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Phibble\Sql\SqlTable
 Phibble\DataFrame
 Phibble\DataFrame
@@ -410,7 +423,155 @@ Phibble\DataFrame
   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
 1     1   2.5     2
 2     2   3.5     4</code></pre>
+<section id="on-every-database" class="level3">
+<h3 class="anchored" data-anchor-id="on-every-database">On every database</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Why it runs in memory</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Any PHP closure</td>
+<td>SQL cannot run PHP.</td>
+</tr>
+<tr class="even">
+<td><code>round()</code></td>
+<td>SQL’s <code>ROUND</code> does not round half to even.</td>
+</tr>
+<tr class="odd">
+<td><code>as_string()</code>, <code>as_bool()</code></td>
+<td>SQL formats numbers differently, and casts to bool vary by database.</td>
+</tr>
+<tr class="even">
+<td><code>paste()</code>, <code>paste0()</code> with arguments other than text literals</td>
+<td>SQL formats numbers differently from R.</td>
+</tr>
+<tr class="odd">
+<td>Regular-expression patterns (except <code>str_detect()</code> in MySQL)</td>
+<td>Database regex dialects differ from stringr’s. <code>fixed()</code> patterns and patterns without regex characters compile.</td>
+</tr>
+<tr class="even">
+<td><code>str_extract()</code>, <code>str_extract_all()</code>, <code>str_split()</code>, <code>str_split_i()</code>, <code>str_to_title()</code>, center <code>str_trunc()</code>, <code>str_pad(side: 'both')</code>, <code>str_trim()</code></td>
+<td>No equivalent SQL function. SQL <code>TRIM</code> removes only spaces.</td>
+</tr>
+<tr class="odd">
+<td><code>ymd()</code> and other parsers on columns, <code>floor_date()</code>, <code>ceiling_date()</code>, <code>round_date()</code>, period arithmetic, <code>with_tz()</code>, <code>force_tz()</code></td>
+<td>The result type depends on the column type, which SQL tables do not track. Parsers on literals, date parts, <code>wday()</code>, and <code>difftime()</code> compile.</td>
+</tr>
+<tr class="even">
+<td><code>sum()</code>, <code>mean()</code>, <code>median()</code>, <code>quantile()</code>, <code>sd()</code>, <code>var()</code>, <code>iqr()</code> of dates, datetimes, and times</td>
+<td>They keep R’s result types.</td>
+</tr>
+<tr class="odd">
+<td>Functions of time columns other than comparisons and <code>is_na()</code></td>
+<td>SQL time functions differ from lubridate. MySQL’s <code>HOUR()</code> of <code>25:00:00</code> is 25.</td>
+</tr>
+<tr class="even">
+<td><code>first()</code>, <code>last()</code>, <code>nth()</code> without a row order (from <code>arrange()</code> or <code>order_by:</code>), or with <code>default:</code> or <code>na_rm:</code></td>
+<td>No faithful SQL translation.</td>
+</tr>
+<tr class="odd">
+<td><code>cumprod()</code>, <code>consecutive_id()</code></td>
+<td>No SQL window form.</td>
+</tr>
+<tr class="even">
+<td><code>median()</code>, <code>quantile()</code>, <code>n_distinct()</code> in grouped <code>mutate()</code> or <code>filter()</code></td>
+<td>No SQL window form.</td>
+</tr>
+<tr class="odd">
+<td><code>quantile()</code> without <code>na_rm: true</code></td>
+<td>R raises an error.</td>
+</tr>
+<tr class="even">
+<td>Nested aggregates such as <code>mean(x - mean(x))</code>, multi-row <code>summarize()</code> entries, negative <code>slice()</code> positions</td>
+<td>No single-query translation.</td>
+</tr>
+<tr class="odd">
+<td><code>take()</code>, <code>eachGroup()</code>, <code>rowwise()</code>, <code>mutateGroups()</code> with closures, <code>filterGroups()</code></td>
+<td>They work on row positions or PHP closures.</td>
+</tr>
+<tr class="even">
+<td>Joins with <code>multiple</code>, <code>relationship</code>, or <code>unmatched</code>, joins across connections, and right or full joins with a <code>closest</code> condition</td>
+<td>No single-query translation.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="by-database" class="level3">
+<h3 class="anchored" data-anchor-id="by-database">By database</h3>
+<p>“SQL” means the operation compiles; “memory” means it falls back.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>SQLite</th>
+<th>PostgreSQL</th>
+<th>MySQL</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>median()</code>, <code>quantile()</code>, <code>iqr()</code></td>
+<td>memory</td>
+<td>SQL</td>
+<td>memory</td>
+</tr>
+<tr class="even">
+<td><code>sd()</code>, <code>var()</code></td>
+<td>memory</td>
+<td>SQL</td>
+<td>SQL</td>
+</tr>
+<tr class="odd">
+<td><code>str_detect()</code> with a regular expression</td>
+<td>memory</td>
+<td>memory</td>
+<td>SQL</td>
+</tr>
+<tr class="even">
+<td><code>str_pad()</code>, <code>str_squish()</code></td>
+<td>memory</td>
+<td>SQL</td>
+<td>SQL</td>
+</tr>
+<tr class="odd">
+<td><code>str_to_upper()</code>, <code>str_to_lower()</code></td>
+<td>memory</td>
+<td>SQL</td>
+<td>SQL</td>
+</tr>
+<tr class="even">
+<td>Full joins</td>
+<td>SQL</td>
+<td>memory, SQL with <code>naMatches: false</code></td>
+<td>memory</td>
+</tr>
+<tr class="odd">
+<td>Text columns that hold times, such as <code>7:30:00</code></td>
+<td>memory</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>SQLite’s <code>sd()</code> formula would lose precision, and its <code>UPPER()</code> and <code>LOWER()</code> change only ASCII letters.</li>
+<li>PostgreSQL runs <code>FULL JOIN</code> only on merge- or hash-joinable conditions, which NA-matching keys are not.</li>
+<li>MySQL’s <code>str_detect()</code> uses ICU, as stringr does.</li>
+<li>SQLite text times sort and compare as text, so any use of such a column runs in memory.</li>
+</ul>
+</section>
+<section id="sqlite-column-types" class="level3">
+<h3 class="anchored" data-anchor-id="sqlite-column-types">SQLite column types</h3>
 <p>SQLite compares by storage class, and it orders all text above all numbers. A column declared without a type stores bound values as text, so <code>col('x')-&gt;gt(0)</code> is true for every row of such a column. Declare column types (<code>INTEGER</code>, <code>REAL</code>, <code>TEXT</code>) when creating SQLite tables that phibble will query.</p>
+</section>
 </section>
 <section id="known-differences" class="level2">
 <h2 class="anchored" data-anchor-id="known-differences">Known differences</h2>
@@ -421,11 +582,17 @@ Phibble\DataFrame
 <li>Joins do not warn about unexpected many-to-many matches.</li>
 <li>Column names starting with <code>__phibble_</code> are reserved for the hidden columns that keep row order and window results.</li>
 </ul>
-<p>Text compares in byte order and case-sensitively, as R does: phibble applies <code>COLLATE "C"</code> in PostgreSQL and <code>utf8mb4_0900_bin</code> in MySQL to text columns wherever values are compared, sorted, grouped, or joined.</p>
 </section>
-<section id="window-functions" class="level2">
-<h2 class="anchored" data-anchor-id="window-functions">Window functions</h2>
-<p>Grouped <code>mutate()</code> and <code>filter()</code> compile aggregates and window functions to <code>OVER (PARTITION BY ...)</code>. Window functions such as <code>lag()</code> and <code>cumsum()</code> need a row order. SQL tables have none, so phibble numbers the rows of the source query when the table is opened and keeps that number through every step. Windows use the <code>order_by:</code> option where given, otherwise the order set by <code>arrange()</code>, and otherwise the source order. The same order decides the order of collected rows and breaks ties after <code>arrange()</code>, which is stable as in dplyr. The source order is the order in which the database returns the source query’s rows. For a stored table, add <code>arrange()</code> to make it explicit.</p>
+<section id="row-order-and-window-functions" class="level2">
+<h2 class="anchored" data-anchor-id="row-order-and-window-functions">Row order and window functions</h2>
+<p>SQL tables have no row order of their own. phibble numbers the rows of the source query when the table is opened and keeps that number through every step.</p>
+<ul>
+<li>Collected rows follow <code>arrange()</code>, and otherwise the source order. <code>arrange()</code> is stable, so ties keep the source order.</li>
+<li>The source order is the order in which the database returns the source query’s rows. A stored table does not fix it, so add <code>arrange()</code> when the order matters.</li>
+<li>Rows from a SQL join have no defined order.</li>
+<li>Window functions such as <code>lag()</code> and <code>cumsum()</code> use <code>order_by:</code> where given, then the <code>arrange()</code> order, then the source order.</li>
+<li>Grouped <code>mutate()</code> and <code>filter()</code> compile to <code>OVER (PARTITION BY ...)</code>.</li>
+</ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">$sales</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 'a' AS store, 1 AS week, 10 AS units</span></span>
@@ -438,11 +605,12 @@ Phibble\DataFrame
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;arrange(['store', 'week'])</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;mutate([</span></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st">        'running' =&gt; cumsum(col('units')),</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">        'of_best' =&gt; col('units')-&gt;div(max(col('units'), na_rm: true)),</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="st">    ]);</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;showQuery(), "\n\n";</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;collect();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">        'of_best' =&gt; col('units')</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="st">            -&gt;div(max(col('units'), na_rm: true)),</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="st">    ]);</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;showQuery(), "\n\n";</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;collect();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>SELECT "store", "week", "units", "running", "of_best" FROM (SELECT "store", "week", "units", "running", (CASE WHEN (CASE WHEN COUNT("units") OVER (PARTITION BY "store") = 0 THEN -9e999 ELSE MAX("units") OVER (PARTITION BY "store") END) = 0 THEN (CASE WHEN "units" &gt; 0 THEN 9e999 WHEN "units" &lt; 0 THEN -9e999 WHEN "units" = 0 THEN NULL END) ELSE CAST("units" AS REAL) / (CASE WHEN COUNT("units") OVER (PARTITION BY "store") = 0 THEN -9e999 ELSE MAX("units") OVER (PARTITION BY "store") END) END) AS "of_best", "__phibble_row" FROM (SELECT "store", "week", "units", (CASE WHEN COUNT(*) OVER (PARTITION BY "store" ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) &gt; COUNT("units") OVER (PARTITION BY "store" ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) THEN NULL ELSE SUM("units") OVER (PARTITION BY "store" ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) END) AS "running", "__phibble_row" FROM (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 'a' AS store, 1 AS week, 10 AS units
 UNION ALL SELECT 'a', 2, 14 UNION ALL SELECT 'a', 3, 9
 UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL) AS phibble_source) AS q1) AS q2) AS q3 ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row"
@@ -459,16 +627,27 @@ UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL) AS phibble_source) AS 
 </section>
 <section id="joins" class="level2">
 <h2 class="anchored" data-anchor-id="joins">Joins</h2>
-<p><code>join()</code> between two tables on the same PDO connection compiles to a SQL join. The output columns follow <code>DataFrame::join()</code>: x’s columns, then y’s other columns, with <code>.x</code> and <code>.y</code> suffixes on clashing names. NA keys match each other, as in dplyr, through <code>IS</code> in SQLite, <code>IS NOT DISTINCT FROM</code> in PostgreSQL, and <code>&lt;=&gt;</code> in MySQL. Pass <code>naMatches: false</code> for SQL’s usual equality. The order of rows from a SQL join is not defined, so call <code>arrange()</code> when it matters.</p>
+<p><code>join()</code> between two tables on the same PDO connection compiles to a SQL join. The output columns follow <code>DataFrame::join()</code>: x’s columns, then y’s other columns, with <code>.x</code> and <code>.y</code> suffixes on clashing names. NA keys match each other, as in dplyr, through <code>IS</code> in SQLite, <code>IS NOT DISTINCT FROM</code> in PostgreSQL, and <code>&lt;=&gt;</code> in MySQL. Pass <code>naMatches: false</code> for SQL’s usual equality.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">$visits</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">"SELECT 1 AS clinic_id, 120 AS bp UNION ALL SELECT 2, 135 UNION ALL SELECT NULL, 128"</span>)<span class="ot">;</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">$clinics</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">"SELECT 1 AS id, 'north' AS name UNION ALL SELECT NULL, 'unassigned'"</span>)<span class="ot">;</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">$joined</span> <span class="op">=</span> <span class="va">$visits</span>-&gt;<span class="fu">join</span>(<span class="va">$clinics</span><span class="ot">,</span> [[<span class="st">'clinic_id'</span><span class="ot">,</span> <span class="st">'id'</span>]]<span class="ot">,</span> <span class="st">'left'</span>)<span class="ot">;</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$joined</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$joined</span>-&gt;arrange([<span class="st">'bp'</span>])-&gt;collect()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre class="text output"><code>SELECT "clinic_id", "bp", "name" FROM (SELECT jq1x."clinic_id" AS "clinic_id", jq1x."bp" AS "bp", jq1y."name" AS "name", jq1x."__phibble_row" AS "__phibble_row", jq1y."__phibble_row" AS "__phibble_row_1" FROM (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS clinic_id, 120 AS bp UNION ALL SELECT 2, 135 UNION ALL SELECT NULL, 128) AS phibble_source) AS jq1x LEFT JOIN (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS id, 'north' AS name UNION ALL SELECT NULL, 'unassigned') AS phibble_source) AS jq1y ON (jq1x."clinic_id" IS jq1y."id")) AS q2 ORDER BY ("__phibble_row" IS NULL), "__phibble_row", ("__phibble_row_1" IS NULL), "__phibble_row_1"
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">$visits</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS clinic_id, 120 AS bp</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 2, 135</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT NULL, 128</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">$clinics = tbl($pdo, &lt;&lt;&lt;'SQL'</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS id, 'north' AS name</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT NULL, 'unassigned'</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="st">$joined = $visits</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;join($clinics, [['clinic_id', 'id']], 'left');</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="st">echo $joined-&gt;showQuery(), "\n\n";</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="st">echo $joined-&gt;arrange(['bp'])-&gt;collect();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text output"><code>SELECT "clinic_id", "bp", "name" FROM (SELECT jq1x."clinic_id" AS "clinic_id", jq1x."bp" AS "bp", jq1y."name" AS "name", jq1x."__phibble_row" AS "__phibble_row", jq1y."__phibble_row" AS "__phibble_row_1" FROM (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS clinic_id, 120 AS bp
+UNION ALL SELECT 2, 135
+UNION ALL SELECT NULL, 128) AS phibble_source) AS jq1x LEFT JOIN (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS id, 'north' AS name
+UNION ALL SELECT NULL, 'unassigned') AS phibble_source) AS jq1y ON (jq1x."clinic_id" IS jq1y."id")) AS q2 ORDER BY ("__phibble_row" IS NULL), "__phibble_row", ("__phibble_row_1" IS NULL), "__phibble_row_1"
 
 # A tibble: 3 × 3
   clinic_id    bp name      
@@ -492,17 +671,28 @@ UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL) AS phibble_source) AS 
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'in, with NA'</span> =&gt; col(<span class="st">'arm'</span>)-&gt;isIn([<span class="st">'a'</span><span class="ot">,</span> <span class="kw">null</span>])<span class="ot">,</span></span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> ([<span class="kw">new</span> SqliteDialect()<span class="ot">,</span> <span class="kw">new</span> PostgresDialect()<span class="ot">,</span> <span class="kw">new</span> MysqlDialect()] <span class="kw">as</span> <span class="va">$dialect</span>) {</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"-- </span>{<span class="va">$dialect</span>-&gt;name()}<span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="va">$compiler</span> <span class="op">=</span> <span class="kw">new</span> Compiler(<span class="va">$dialect</span><span class="ot">,</span> mode<span class="ot">:</span> <span class="st">'summary'</span>)<span class="ot">;</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">foreach</span> (<span class="va">$expressions</span> <span class="kw">as</span> <span class="va">$label</span> =&gt; <span class="va">$expr</span>) {</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">echo</span> \<span class="fu">str_pad</span>(<span class="va">$label</span><span class="ot">,</span> <span class="dv">16</span>)<span class="ot">,</span> <span class="va">$compiler</span>-&gt;compile(<span class="va">$expr</span>)-&gt;sql<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="va">$window</span> <span class="op">=</span> <span class="kw">new</span> Compiler(<span class="kw">new</span> PostgresDialect()<span class="ot">,</span> groups<span class="ot">:</span> [<span class="st">'clinic'</span>]<span class="ot">,</span> order<span class="ot">:</span> [[col(<span class="st">'visit'</span>)<span class="ot">,</span> <span class="kw">false</span>]])<span class="ot">;</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$window</span>-&gt;compile(cumsum(col(<span class="st">'bp'</span>)))-&gt;sql<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="va">$dialects</span> <span class="op">=</span> [</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> SqliteDialect()<span class="ot">,</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> PostgresDialect()<span class="ot">,</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> MysqlDialect()<span class="ot">,</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$dialects</span> <span class="kw">as</span> <span class="va">$dialect</span>) {</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"-- </span>{<span class="va">$dialect</span>-&gt;name()}<span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="va">$compiler</span> <span class="op">=</span> <span class="kw">new</span> Compiler(<span class="va">$dialect</span><span class="ot">,</span> mode<span class="ot">:</span> <span class="st">'summary'</span>)<span class="ot">;</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">foreach</span> (<span class="va">$expressions</span> <span class="kw">as</span> <span class="va">$label</span> =&gt; <span class="va">$expr</span>) {</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">$sql</span> <span class="op">=</span> <span class="va">$compiler</span>-&gt;compile(<span class="va">$expr</span>)-&gt;sql<span class="ot">;</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">echo</span> \<span class="fu">str_pad</span>(<span class="va">$label</span><span class="ot">,</span> <span class="dv">16</span>)<span class="ot">,</span> <span class="va">$sql</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="va">$window</span> <span class="op">=</span> <span class="kw">new</span> Compiler(</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> PostgresDialect()<span class="ot">,</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    groups<span class="ot">:</span> [<span class="st">'clinic'</span>]<span class="ot">,</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    order<span class="ot">:</span> [[col(<span class="st">'visit'</span>)<span class="ot">,</span> <span class="kw">false</span>]]<span class="ot">,</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$window</span>-&gt;compile(cumsum(col(<span class="st">'bp'</span>)))-&gt;sql<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>-- SQLite
 mean, NA aware  (CASE WHEN COUNT(*) &gt; COUNT("bp") THEN NULL ELSE (CASE WHEN COUNT("bp") = 0 THEN NULL ELSE AVG(CAST("bp" AS REAL)) END) END)
 ratio           (CASE WHEN "baseline" = 0 THEN (CASE WHEN "bp" &gt; 0 THEN 9e999 WHEN "bp" &lt; 0 THEN -9e999 WHEN "bp" = 0 THEN NULL END) ELSE CAST("bp" AS REAL) / "baseline" END)
@@ -522,7 +712,7 @@ contains        (LOCATE(?, `name`) &gt; 0)
 in, with NA     (COALESCE(`arm` IN (?), FALSE) OR `arm` IS NULL)
 
 (CASE WHEN COUNT(*) OVER (PARTITION BY "clinic" ORDER BY ("visit" IS NULL), "visit" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) &gt; COUNT("bp") OVER (PARTITION BY "clinic" ORDER BY ("visit" IS NULL), "visit" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) THEN NULL ELSE SUM("bp") OVER (PARTITION BY "clinic" ORDER BY ("visit" IS NULL), "visit" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) END)</code></pre>
-<p>The test suite runs the dplyr reference cases through <code>SqlTable</code> on SQLite, and on PostgreSQL and MySQL when their DSNs are set. See <a href="./development.html">Development</a>.</p>
+<p>The test suite runs the dplyr reference cases on SQLite, and on PostgreSQL and MySQL when their DSNs are set. See <a href="./development.html">Development</a>.</p>
 
 
 </section>

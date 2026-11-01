@@ -277,8 +277,7 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><code>Phibble\Contracts\Table</code> is the interface that every table backend implements. phplyr’s verbs call its methods, so a pipeline runs unchanged on any backend. phibble ships three implementations: <code>DataFrame</code>, which holds data in PHP arrays, <code>Phibble\Sql\SqlTable</code>, which compiles verbs to SQL, and <code>Phibble\Polars\PolarsTable</code>, which runs them in Polars through the php_polars extension from phpolars.</p>
-<p>This page is for authors of backends. It lists the rules that every implementation follows and the semantics of each method.</p>
+<p><code>Phibble\Contracts\Table</code> is the interface that every table backend implements: <code>DataFrame</code>, <code>Phibble\Sql\SqlTable</code>, and <code>Phibble\Polars\PolarsTable</code>. phplyr’s verbs call its methods, so a pipeline runs unchanged on any backend. This page lists the rules every implementation follows and the semantics of each method.</p>
 <section id="rules" class="level2">
 <h2 class="anchored" data-anchor-id="rules">Rules</h2>
 <ul>
@@ -286,7 +285,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Return types.</strong> Verbs are declared to return <code>Table</code>. A backend may return a different implementation. <code>SqlTable</code> returns a <code>DataFrame</code> when it falls back to memory for a closure. <code>DataFrame</code> declares <code>static</code>.</li>
 <li><strong>NA.</strong> PHP <code>null</code> is NA in every column type.</li>
 <li><strong>Grouping.</strong> <code>groupBy()</code> records grouping columns as metadata. <code>filter()</code>, <code>mutate()</code>, <code>mutateGroups()</code>, <code>filterGroups()</code>, <code>summarise()</code>, and <code>eachGroup()</code> work per group. The other verbs keep the grouping.</li>
-<li><strong>Group order.</strong> Groups are visited in sorted key order, as in dplyr: ascending, factors by level order, NA last, and strings in byte order. <code>filter()</code>, <code>mutate()</code>, and <code>arrange()</code> keep the input row order.</li>
+<li><strong>Group order.</strong> Groups are visited in sorted key order, as in dplyr: ascending, factors by level order, NA last, and strings in byte order.</li>
+<li><strong>Row order.</strong> <code>filter()</code> and <code>mutate()</code> keep the rows in their input order. <code>arrange()</code> sorts stably, so rows with equal keys keep their input order. A <code>SqlTable</code>’s input order is the order in which the database returns the source query’s rows, which a stored table does not fix. See <a href="./sql.html#row-order-and-window-functions">Row order and window functions</a>.</li>
 <li><strong>Rowwise tables.</strong> <code>rowwise()</code> makes every row its own group, in row order. <code>groups()</code> returns its id columns.</li>
 <li><strong>Row closures.</strong> A row closure receives <code>(Phibble\Row $row, Table $group)</code>. <code>$group</code> is the row’s group, or the whole table when ungrouped.</li>
 <li><strong>Expressions.</strong> Wherever a verb accepts a closure, it also accepts a <code>Phibble\Expr\Expr</code>, evaluated per group with the semantics in the <a href="./expr.html">expression reference</a>.</li>

@@ -305,14 +305,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>phibble separates what a pipeline does from where it runs. Every verb is part of the <code>Phibble\Contracts\Table</code> interface, and three classes implement it:</p>
+<p>Run the same pipeline in memory, in a database, or in Polars. Every verb is part of the <code>Phibble\Contracts\Table</code> interface, and three classes implement it:</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Backend</th>
@@ -337,45 +331,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="odd">
 <td>Polars</td>
 <td><code>Phibble\Polars\PolarsTable</code></td>
-<td>Polars, through the php_polars extension</td>
+<td>Polars, through the php_polars extension from <a href="https://github.com/phpstats/phpolars">phpolars</a></td>
 <td>Large data in memory</td>
 </tr>
 </tbody>
 </table>
-<p>All three classes are part of phibble. <code>PolarsTable</code> uses the php_polars extension, which <a href="https://github.com/phpstats/phpolars">phpolars</a> provides.</p>
-<p>Code written against <code>Table</code>, including phplyr’s verbs, runs on any of them. A backend that cannot run a step exactly, such as a PHP closure or a function with no exact translation, hands that step to <code>DataFrame</code> and continues. The values then match <code>DataFrame</code> with these exceptions:</p>
+<p>Code written against <code>Table</code>, including phplyr’s verbs, runs on any of them. A backend that cannot run a step exactly, such as a PHP closure or a function with no exact translation, loads its rows into PHP and runs the step in a <code>DataFrame</code>. Later steps also run in memory. Results match <code>DataFrame</code> with these exceptions:</p>
 <ul>
 <li>A database cannot represent some of R’s values, such as <code>NaN</code> in MySQL. The <a href="./sql.html#known-differences">SQL tables</a> page lists these cases.</li>
-<li>Rows from a SQL join, and from a table without <code>arrange()</code>, come back in the order the database returns them.</li>
+<li>Rows from a SQL join, and from a SQL table without <code>arrange()</code>, come back in the order the database returns them.</li>
 <li>Floating-point results can differ in the last digits. The SQL and Polars tests compare floats rounded to nine decimal places.</li>
 </ul>
 <p>The <a href="./contract.html">Table contract</a> page states the rules each backend follows.</p>
 <section id="choosing-and-switching" class="level2">
 <h2 class="anchored" data-anchor-id="choosing-and-switching">Choosing and switching</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\DataFrame<span class="ot">;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\{tbl<span class="ot">,</span> polars}<span class="ot">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> mean<span class="ot">,</span> n}<span class="ot">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'sales.csv'</span>)<span class="ot">;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">$sql</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'sales'</span>)<span class="ot">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="va">$fast</span> <span class="op">=</span> polars(<span class="va">$df</span>)<span class="ot">;</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="kw">fn</span> (<span class="va">$t</span>) =&gt; <span class="va">$t</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'units'</span>)-&gt;gt(<span class="dv">0</span>))</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'store'</span>])</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([<span class="st">'n'</span> =&gt; n()<span class="ot">,</span> <span class="st">'avg'</span> =&gt; mean(col(<span class="st">'price'</span>))])<span class="ot">;</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span>(<span class="va">$df</span>)<span class="ot">;</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span>(<span class="va">$sql</span>)-&gt;collect()<span class="ot">;</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span>(<span class="va">$fast</span>)-&gt;collect()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>$df</code> holds the data in memory, <code>$sql</code> reads it from the database, and <code>$fast</code> holds it in Polars. On <code>$sql</code>, the summary runs as one SQL query. All three classes have <code>summarize()</code> as an alias of the <code>Table</code> method <code>summarise()</code>. Code that accepts any <code>Table</code> implementation should call <code>summarise()</code>, since the interface declares only that name.</p>
-<p><code>collect()</code> turns any table into a <code>DataFrame</code>. <code>PolarsTable::fromTable()</code> and <code>polars()</code> move a table into Polars; <code>tbl()</code> opens a database table or query.</p>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\{tbl<span class="ot">,</span> polars}<span class="ot">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> mean<span class="ot">,</span> n}<span class="ot">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'sales.csv'</span>)<span class="ot">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="va">$sql</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'sales'</span>)<span class="ot">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="va">$fast</span> <span class="op">=</span> polars(<span class="va">$df</span>)<span class="ot">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> <span class="kw">fn</span> (<span class="va">$t</span>) =&gt; <span class="va">$t</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'units'</span>)-&gt;gt(<span class="dv">0</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'store'</span>])</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([<span class="st">'n'</span> =&gt; n()<span class="ot">,</span> <span class="st">'avg'</span> =&gt; mean(col(<span class="st">'price'</span>))])<span class="ot">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span>(<span class="va">$df</span>)<span class="ot">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span>(<span class="va">$sql</span>)-&gt;collect()<span class="ot">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span>(<span class="va">$fast</span>)-&gt;collect()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>On <code>$sql</code>, the summary runs as one SQL query.</li>
+<li><code>collect()</code> turns any table into a <code>DataFrame</code>. <code>polars()</code> and <code>PolarsTable::fromTable()</code> move a table into Polars, and <code>tbl()</code> opens a database table or query.</li>
+<li>The <code>Table</code> interface declares only <code>summarise()</code>. Code that accepts any <code>Table</code> should call it, although all three classes also have <code>summarize()</code>.</li>
+</ul>
 </section>
 <section id="the-polars-backend" class="level2">
 <h2 class="anchored" data-anchor-id="the-polars-backend">The Polars backend</h2>
-<p>phibble’s <code>Phibble\Polars\PolarsTable</code> needs the php_polars extension, which phpolars builds. phibble does not require it: <code>composer.json</code> lists it as a suggestion, and the class is only loaded when used. Expressions, joins (including <code>join_by</code> comparisons and rolling joins), pivots, and the lubridate and stringr functions run natively in Polars. Steps it cannot run, such as PHP closures and <code>str_to_title()</code>, run in <code>DataFrame</code>. <code>PolarsTable::$fallbacks</code> counts those steps. Set <code>PolarsTable::$strict = true</code> to throw <code>PolarsFallback</code> instead. The message names the verb and the reason.</p>
-<p>A time column is a Polars duration in microseconds, which, like an hms, can be negative or longer than a day. A Polars <code>Time</code> column reads as a time. Comparisons of times, <code>is_na()</code>, <code>min()</code>, <code>max()</code>, <code>first()</code>, and <code>last()</code> run in Polars, and other functions of a time run in a <code>DataFrame</code>, as do <code>sum()</code>, <code>mean()</code>, <code>median()</code>, <code>quantile()</code>, <code>sd()</code>, <code>var()</code>, and <code>iqr()</code> of dates and datetimes.</p>
-<p>Two kinds of list-column stay in <code>DataFrame</code>. Polars stores named arrays as structs, which have every key in every row, so <code>fromTable()</code> throws when a list-column holds named arrays with different keys. A list-column of <code>DataFrame</code>s cannot be stored in Polars either.</p>
+<p><code>PolarsTable</code> loads only when used, so phibble runs without the extension.</p>
+<ul>
+<li>Expressions, joins (including <code>join_by</code> comparisons and rolling joins), pivots, and the lubridate and stringr functions run in Polars.</li>
+<li>Steps it cannot run, such as PHP closures and <code>str_to_title()</code>, run in a <code>DataFrame</code>. <code>PolarsTable::$fallbacks</code> counts them.</li>
+<li><code>PolarsTable::$strict = true</code> throws <code>PolarsFallback</code> instead, naming the verb and the reason.</li>
+</ul>
+<p>Type mapping:</p>
+<ul>
+<li>A time column is a Polars duration in microseconds, which, like an hms, can be negative or longer than a day. A Polars <code>Time</code> column reads as a time.</li>
+<li>Comparisons of times, <code>is_na()</code>, <code>min()</code>, <code>max()</code>, <code>first()</code>, and <code>last()</code> run in Polars. Other functions of a time run in a <code>DataFrame</code>, as do <code>sum()</code>, <code>mean()</code>, <code>median()</code>, <code>quantile()</code>, <code>sd()</code>, <code>var()</code>, and <code>iqr()</code> of dates and datetimes.</li>
+<li><code>fromTable()</code> throws on a list-column of named arrays with different keys, since Polars structs have every key in every row, and on a list-column of <code>DataFrame</code>s.</li>
+</ul>
 <p>The Polars test suite runs phibble’s dplyr, tidyr, lubridate, and stringr reference cases on <code>PolarsTable</code> and skips when the extension is not loaded.</p>
 
 
