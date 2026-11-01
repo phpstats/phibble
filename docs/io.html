@@ -479,7 +479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><code>t</code></td>
-<td>string (phibble has no time-of-day type)</td>
+<td>time</td>
 </tr>
 <tr class="even">
 <td><code>?</code></td>
@@ -519,9 +519,11 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <li>float if every value is a number, including <code>Inf</code> and <code>NaN</code>,</li>
 <li>date if every value is an ISO 8601 date,</li>
 <li>datetime if every value is an ISO 8601 date and time,</li>
+<li>time if every value is a time of day as readr reads one: hours of one or two digits, a colon, two digits of minutes, and optionally seconds, a fraction, and <code>AM</code> or <code>PM</code>, such as <code>7:30</code>, <code>00:07:15</code>, or <code>1:30 PM</code>,</li>
 <li>string otherwise.</li>
 </ul>
 <p>Numbers with leading zeros such as <code>007</code> stay strings, as in readr.</p>
+<p>As in readr, a time’s minutes and seconds must be under 60, <code>12 AM</code> is hour 0, <code>PM</code> adds 12 hours to any hour but 12, and a fraction of a second is dropped. The phit extension has no time type, so phibble guesses times in the columns phit reads as text, from the same rows the PHP reader samples.</p>
 <p>When a value cannot be parsed as its column’s type, a row has the wrong number of fields, or a quoted field is never closed, phibble still returns the data. The value becomes NA, and the read raises one <code>E_USER_WARNING</code> that lists the problems. Rows are numbered as in <code>readr::problems()</code>: the first data row is row 2, and skipped, blank, and comment lines are not counted.</p>
 </section>
 <section id="quotes" class="level2">
@@ -581,7 +583,7 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 </section>
 <section id="writing-csv" class="level2">
 <h2 class="anchored" data-anchor-id="writing-csv">Writing CSV</h2>
-<p><code>writeCsv($path)</code> writes a file and <code>toCsv()</code> returns the text. The format follows readr’s <code>write_csv()</code>. Values are quoted only when needed, NA is written as <code>NA</code>, logicals as <code>TRUE</code> and <code>FALSE</code>, dates in ISO 8601, and datetimes in UTC with a <code>Z</code>. Factors are written as their labels, and list-columns throw.</p>
+<p><code>writeCsv($path)</code> writes a file and <code>toCsv()</code> returns the text. The format follows readr’s <code>write_csv()</code>. Values are quoted only when needed, NA is written as <code>NA</code>, logicals as <code>TRUE</code> and <code>FALSE</code>, dates in ISO 8601, and datetimes in UTC with a <code>Z</code>. Times are written as hms writes a column: one number of fraction digits for the column, and hours padded with spaces to one width. Factors are written as their labels, and list-columns throw.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tribble(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'name'</span><span class="ot">,</span> <span class="st">'note'</span><span class="ot">,</span> <span class="st">'score'</span><span class="ot">,</span> <span class="st">'seen'</span>]<span class="ot">,</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Ana'</span><span class="ot">,</span> <span class="st">'likes "quotes"'</span><span class="ot">,</span> <span class="fl">1e5</span><span class="ot">,</span> <span class="kw">true</span>]<span class="ot">,</span></span>
