@@ -10,41 +10,32 @@ use Phibble\Type;
 use function Phibble\Expr\{col, desc, lag, mean, n, sum};
 
 
-it('matches dplyr for mutate expressions in SQL', function (Closure $connect) {
-    $pdo = $connect();
-    $failures = [];
-    foreach (mutateCases() as $case => [$df, $expr]) {
-        if ($case === 'round') {
-            continue;
-        }
-        $table = sqlFrom($pdo, $df())->arrange(['i']);
-        $out = $table->mutate(['out' => $expr])->collect()->column('out');
-        if (normalise($out) !== expected($case)) {
-            $failures[$case] = ['got' => normalise($out), 'want' => expected($case), 'sql' => $table->mutate(['out' => $expr]) instanceof SqlTable];
-        }
-    }
+/** Case names as a dataset, each passing its own name. */
+function caseNames(array $names): array
+{
+    return array_combine($names, array_map(fn ($n) => [$n], $names));
+}
 
-    expect($failures)->toBe([]);
-})->with('connections');
+it('matches dplyr for mutate expressions in SQL', function (Closure $connect, string $case) {
+    [$df, $expr] = mutateCases()[$case];
+    $out = sqlFrom($connect(), $df())->arrange(['i'])->mutate(['out' => $expr])->collect()->column('out');
 
-it('matches dplyr for grouped mutate and summarise in SQL', function (Closure $connect) {
-    $pdo = $connect();
-    $grouped = sqlFrom($pdo, exprFrame())->groupBy(['g'])->arrange(['i']);
+    expect(normalise($out))->toBe(expected($case));
+})->with('connections')->with(fn () => caseNames(array_values(array_diff(array_keys(mutateCases()), ['round']))));
 
-    expect(normalise($grouped->mutate(['out' => col('x')->sub(mean(col('x'), na_rm: true))])->collect()->column('out')))->toBe(expected('grp_mean'))
-        ->and(normalise($grouped->mutate(['out' => lag(col('i'))])->collect()->column('out')))->toBe(expected('grp_lag'))
-        ->and(normalise($grouped->mutate(['out' => Phibble\Expr\row_number()])->collect()->column('out')))->toBe(expected('grp_row_number'))
-        ->and(normalise($grouped->mutate(['out' => Phibble\Expr\cumsum(col('i'))])->collect()->column('out')))->toBe(expected('grp_cumsum'));
+it('matches dplyr for grouped mutate expressions in SQL', function (Closure $connect, string $case) {
+    [$expr] = groupedCases()[$case];
+    $out = sqlFrom($connect(), exprFrame())->groupBy(['g'])->arrange(['i'])->mutate(['out' => $expr])->collect()->column('out');
 
-    $failures = [];
-    foreach (summariseCases() as [$case, $expr]) {
-        $out = sqlFrom($pdo, exprFrame())->groupBy(['g'])->summarise(['out' => $expr])->collect()->column('out');
-        if (normalise($out) !== expected($case)) {
-            $failures[$case] = ['got' => normalise($out), 'want' => expected($case)];
-        }
-    }
-    expect($failures)->toBe([]);
-})->with('connections');
+    expect(normalise($out))->toBe(expected($case));
+})->with('connections')->with(fn () => caseNames(array_keys(groupedCases())));
+
+it('matches dplyr for summarise expressions in SQL', function (Closure $connect, string $case) {
+    $expr = array_column(summariseCases(), 1, 0)[$case];
+    $out = sqlFrom($connect(), exprFrame())->groupBy(['g'])->summarise(['out' => $expr])->collect()->column('out');
+
+    expect(normalise($out))->toBe(expected($case));
+})->with('connections')->with(fn () => caseNames(array_column(summariseCases(), 0)));
 
 it('runs verbs lazily and matches DataFrame', function (Closure $connect) {
     $pdo = $connect();
@@ -154,28 +145,16 @@ it('keeps the row order when reading one column', function (Closure $connect) {
     expect($sql->column('g'))->toBe([null, 'b', 'a', 'b', 'a', 'b', 'a']);
 })->with('connections');
 
-it('matches dplyr join_by in SQL', function (Closure $connect) {
+it('matches dplyr join_by in SQL', function (Closure $connect, string $case) {
     $pdo = $connect();
-    $failures = [];
-    foreach (joinByCases() as $case => [$x, $y, $by, $type, $options]) {
-        $expected = joinByExpected($case);
-        $lazy = sqlFrom($pdo, $x())->join(sqlFrom($pdo, $y()), $by, $type, ...$options);
-        $out = $lazy->collect();
-        if ($out->columns() !== $expected['columns']) {
-            $failures[$case] = ['columns' => $out->columns(), 'want' => $expected['columns']];
+    [$x, $y, $by, $type, $options] = joinByCases()[$case];
+    $expected = joinByExpected($case);
+    $out = sqlFrom($pdo, $x())->join(sqlFrom($pdo, $y()), $by, $type, ...$options)->collect();
 
-            continue;
-        }
-        // SQL row order is unspecified; compare sorted rows.
-        $got = joinRows($expected['columns'], $out->toRows());
-        $want = joinRows($expected['columns'], $expected['rows']);
-        if ($got !== $want) {
-            $failures[$case] = ['got' => $got, 'want' => $want, 'native' => $lazy instanceof SqlTable];
-        }
-    }
-
-    expect($failures)->toBe([]);
-})->with('connections');
+    // SQL row order is unspecified; compare sorted rows.
+    expect($out->columns())->toBe($expected['columns'])
+        ->and(joinRows($expected['columns'], $out->toRows()))->toBe(joinRows($expected['columns'], $expected['rows']));
+})->with('connections')->with(fn () => caseNames(array_keys(joinByCases())));
 
 it('translates first, last, nth and str_replace to SQL', function (Closure $connect) {
     $pdo = $connect();
@@ -241,27 +220,27 @@ it('keeps row order through select and distinct after arrange', function (Closur
 
 // The lubridate and stringr reference cases through SQL: translated or
 // evaluated in memory, the results must match R.
-it('matches lubridate and stringr in SQL', function (Closure $connect) {
+it('matches lubridate and stringr in SQL', function (Closure $connect, string $case) {
+    [$df, $expr] = lubridateStringrCases()[$case];
+    $source = $df();
+    $lazy = sqlFrom($connect(), $source->mutate(['i' => range(1, $source->nrow())]))->arrange(['i'])->mutate(['out' => $expr]);
+    [$got] = quietly(fn () => $lazy->collect()->column('out'));
+
+    expect(lsFormat($got))->toBe(lsFormat(lsExpected($case)));
+})->with('connections')->with(fn () => caseNames(array_keys(lubridateStringrCases())));
+
+it('translates date parts and string functions to SQL', function (Closure $connect) {
     $pdo = $connect();
-    $failures = [];
     $native = [];
-    foreach (lubridateStringrCases() as $case => [$df, $expr]) {
+    foreach (['year', 'month', 'wday', 'difftime_hours', 'str_count_fixed', 'str_trunc'] as $case) {
+        [$df, $expr] = lubridateStringrCases()[$case];
         $source = $df();
-        if ($source->columns() === ['v'] || in_array($case, ['force_tz', 'with_tz', 'floor_week'], true)) {
-            continue; // text-to-date parsing and time zones are covered in memory
-        }
-        $lazy = sqlFrom($pdo, $source->mutate(['i' => range(1, $source->nrow())]))->arrange(['i'])->mutate(['out' => $expr]);
-        [$got] = quietly(fn () => $lazy->collect()->column('out'));
-        if ($lazy instanceof SqlTable) {
+        if (sqlFrom($pdo, $source->mutate(['i' => range(1, $source->nrow())]))->arrange(['i'])->mutate(['out' => $expr]) instanceof SqlTable) {
             $native[] = $case;
-        }
-        if (lsFormat($got) !== lsFormat(lsExpected($case))) {
-            $failures[$case] = ['got' => lsFormat($got), 'want' => lsExpected($case), 'native' => $lazy instanceof SqlTable];
         }
     }
 
-    expect($failures)->toBe([])
-        ->and($native)->toContain('year', 'month', 'wday', 'difftime_hours', 'str_count_fixed', 'str_trunc');
+    expect($native)->toBe(['year', 'month', 'wday', 'difftime_hours', 'str_count_fixed', 'str_trunc']);
 })->with('connections');
 
 // Stored tables use the physical row id (SQLite rowid, PostgreSQL ctid) as

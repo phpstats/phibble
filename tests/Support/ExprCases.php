@@ -102,6 +102,17 @@ function mutateCases(): array
     ];
 }
 
+/** Expressions in a mutate() grouped by g. */
+function groupedCases(): array
+{
+    return [
+        'grp_mean' => [col('x')->sub(mean(col('x'), na_rm: true))],
+        'grp_lag' => [lag(col('i'))],
+        'grp_row_number' => [row_number()],
+        'grp_cumsum' => [cumsum(col('i'))],
+    ];
+}
+
 function summariseCases(): array
 {
     return [

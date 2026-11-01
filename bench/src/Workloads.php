@@ -49,12 +49,36 @@ final class Workloads
         ];
     }
 
-    /** CSV reading, DataFrame only. @return array<string, Closure(string): int> */
+    /**
+     * CSV reading and writing, DataFrame only. Each entry gets the events
+     * CSV path, does any setup, and returns the timed work.
+     *
+     * @return array<string, Closure(string): Closure(): int>
+     */
     public static function csv(): array
     {
         return [
-            'csv_guess' => fn (string $path) => DataFrame::fromCsv($path)->nrow(),
-            'csv_typed' => fn (string $path) => DataFrame::fromCsv($path, types: 'iicdT')->nrow(),
+            'csv_guess' => fn (string $path) => fn () => DataFrame::fromCsv($path)->nrow(),
+            'csv_typed' => fn (string $path) => fn () => DataFrame::fromCsv($path, types: 'iicdT')->nrow(),
+            'csv_chunked' => fn (string $path) => function () use ($path) {
+                $rows = 0;
+                foreach (DataFrame::csvChunks($path, chunkSize: 100_000, types: 'iicdT') as $chunk) {
+                    $rows += $chunk->nrow();
+                }
+
+                return $rows;
+            },
+            'csv_write' => function (string $path) {
+                $df = DataFrame::fromCsv($path, types: 'iicdT');
+                $out = tempnam(sys_get_temp_dir(), 'phibble-bench');
+
+                return function () use ($df, $out) {
+                    $df->writeCsv($out);
+                    unlink($out);
+
+                    return $df->nrow();
+                };
+            },
         ];
     }
 }

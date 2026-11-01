@@ -230,26 +230,19 @@ it('binds columns and repairs clashing names like dplyr', function () {
         ->toThrow(InvalidArgumentException::class);
 });
 
-it('matches dplyr join_by for inequality, rolling and overlap joins', function () {
-    $failures = [];
-    foreach (joinByCases() as $case => [$x, $y, $by, $type, $options]) {
-        $expected = joinByExpected($case);
-        $out = $x()->join($y(), $by, $type, ...$options);
-        if ($out->columns() !== $expected['columns']) {
-            $failures[$case] = ['columns' => $out->columns(), 'want' => $expected['columns']];
+it('matches dplyr join_by for inequality, rolling and overlap joins', function (Closure $x, Closure $y, array $by, string $type, array $options) {
+    $case = $this->dataName();
+    $case = substr($case, strpos($case, '"') + 1, -1);
+    $expected = joinByExpected($case);
+    $out = $x()->join($y(), $by, $type, ...$options);
 
-            continue;
-        }
-        // Row order is x order with matches in y order; compare exactly.
-        $got = array_map(fn ($r) => array_values(array_map(fn ($v) => is_int($v) ? (float) $v : $v, $r)), $out->toRows());
-        $want = array_map(fn ($r) => array_map(fn ($c) => is_int($r[$c] ?? null) ? (float) $r[$c] : ($r[$c] ?? null), $expected['columns']), $expected['rows']);
-        if ($got !== $want) {
-            $failures[$case] = ['got' => $got, 'want' => $want];
-        }
-    }
+    // Row order is x order with matches in y order; compare exactly.
+    $got = array_map(fn ($r) => array_values(array_map(fn ($v) => is_int($v) ? (float) $v : $v, $r)), $out->toRows());
+    $want = array_map(fn ($r) => array_map(fn ($c) => is_int($r[$c] ?? null) ? (float) $r[$c] : ($r[$c] ?? null), $expected['columns']), $expected['rows']);
 
-    expect($failures)->toBe([]);
-});
+    expect($out->columns())->toBe($expected['columns'])
+        ->and($got)->toBe($want);
+})->with(joinByCases());
 
 it('rejects keep = false with inequality conditions', function () {
     joinByX()->join(joinByY(), [['t', '>=', 't']], 'left', keep: false);

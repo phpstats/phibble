@@ -36,18 +36,25 @@ function naAggregates(): array
     ];
 }
 
-it('types an aggregate that is NA in every group as dplyr does', function () {
-    $expected = json_decode((string) file_get_contents(__DIR__.'/fixtures/expr/types.json'), true);
-    $df = DataFrame::fromColumns(
+function naAggregateFrame(): DataFrame
+{
+    return DataFrame::fromColumns(
         ['g' => ['a', 'b', 'a', 'b'], 'x' => [null, null, null, null], 'i' => [null, null, null, null],
             'b' => [null, null, null, null], 's' => [null, null, null, null], 'd' => [null, null, null, null]],
         ['x' => 'float', 'i' => 'int', 'b' => 'bool', 's' => 'string', 'd' => 'date'],
     );
+}
 
-    $out = $df->groupBy(['g'])->summarize(naAggregates());
-    $types = array_map(fn ($t) => $t->abbreviation(), array_slice($out->types(), 1));
+it('covers every aggregate type in the dplyr fixture', function () {
+    $expected = json_decode((string) file_get_contents(__DIR__.'/fixtures/expr/types.json'), true);
 
-    expect(array_keys($expected))->toEqualCanonicalizing(array_keys($types))
-        ->and($types)->toEqual($expected)
-        ->and(array_unique(array_merge(...array_values(array_slice($out->toColumns(), 1)))))->toBe([null]);
+    expect(array_keys(naAggregates()))->toEqualCanonicalizing(array_keys($expected));
 });
+
+it('types an aggregate that is NA in every group as dplyr does', function (string $case) {
+    $expected = json_decode((string) file_get_contents(__DIR__.'/fixtures/expr/types.json'), true);
+    $out = naAggregateFrame()->groupBy(['g'])->summarize(['out' => naAggregates()[$case]]);
+
+    expect($out->type('out')->abbreviation())->toBe($expected[$case])
+        ->and($out->column('out'))->toBe([null, null]);
+})->with(fn () => array_combine(array_keys(naAggregates()), array_map(fn ($n) => [$n], array_keys(naAggregates()))));

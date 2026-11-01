@@ -1,0 +1,432 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Runs the test suite and writes the verification records in
+ * site/verifications/, in the format of phpstats.org's
+ * docs/evidence-records.md.
+ *
+ * Usage: bin/verify [--php="php85 -d extension=/path/to/libphit.so"]
+ *
+ * Each record case is one Pest test, read from the suite's JUnit and TeamCity
+ * logs, so every status is the suite's own. Optional parts run as the suite
+ * runs them: PostgreSQL and MySQL when PHIBBLE_TEST_PGSQL and
+ * PHIBBLE_TEST_MYSQL are set, Polars when php_polars is loaded, and the phit
+ * reader when phit is loaded. A test that does not run is recorded as skipped
+ * with the suite's reason.
+ */
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+chdir($root);
+
+$options = getopt('', ['php:']);
+$php = $options['php'] ?? (getenv('PHP') ?: escapeshellarg(PHP_BINARY));
+
+// ---------------------------------------------------------------------
+// Run the suite
+// ---------------------------------------------------------------------
+
+$logs = sys_get_temp_dir().'/phibble-verify-'.getmypid();
+@mkdir($logs);
+$junit = "{$logs}/junit.xml";
+$teamcity = "{$logs}/teamcity.txt";
+exec("{$php} vendor/bin/pest --colors=never --log-junit ".escapeshellarg($junit).' --log-teamcity '.escapeshellarg($teamcity).' 2>&1', $output, $code);
+$summary = array_values(array_filter($output, fn ($l) => str_contains($l, 'Tests:')));
+fwrite(STDERR, trim($summary[0] ?? 'The suite printed no summary.')."\n");
+if (! is_file($junit)) {
+    fwrite(STDERR, implode("\n", array_slice($output, -20))."\n");
+    exit(1);
+}
+
+$probe = <<<'PHP'
+    $os = match (PHP_OS_FAMILY) {
+        'Linux' => 'Linux, '.(parse_ini_file('/etc/os-release')['PRETTY_NAME'] ?? 'unknown').' ('.php_uname('m').')',
+        'Darwin' => 'macOS '.trim((string) shell_exec('sw_vers -productVersion')).' ('.php_uname('m').')',
+        default => PHP_OS_FAMILY.' ('.php_uname('m').')',
+    };
+    echo json_encode([
+        'PHP' => PHP_VERSION,
+        'phit' => phpversion('phit') ?: null,
+        'php_polars' => phpversion('php_polars') ?: null,
+        'SQLite' => (new PDO('sqlite::memory:'))->query('SELECT sqlite_version()')->fetchColumn(),
+        'os' => $os,
+    ]);
+    PHP;
+$runtime = json_decode((string) shell_exec("{$php} -r ".escapeshellarg($probe)), true);
+
+$databases = [];
+foreach (['pgsql' => ['PostgreSQL', 'SHOW server_version'], 'mysql' => ['MySQL', 'SELECT VERSION()']] as $driver => [$label, $sql]) {
+    $env = 'PHIBBLE_TEST_'.strtoupper($driver);
+    if (getenv($env)) {
+        $pdo = new PDO(getenv($env), getenv("{$env}_USER") ?: null, getenv("{$env}_PASSWORD") ?: null);
+        $databases[$label] = (string) $pdo->query($sql)->fetchColumn();
+    }
+}
+
+$commit = trim((string) shell_exec('git rev-parse --short HEAD'));
+if (trim((string) shell_exec('git status --porcelain -- src tests composer.lock')) !== '') {
+    $commit .= '-dirty';
+    fwrite(STDERR, "src or tests has uncommitted changes; the records name {$commit}.\n");
+}
+$environment = ['date' => gmdate('Y-m-d'), 'commit' => $commit, 'php' => $runtime['PHP'], 'os' => $runtime['os']];
+$r = json_decode((string) file_get_contents('tests/r/versions.json'), true);
+
+// ---------------------------------------------------------------------
+// Read the logs
+// ---------------------------------------------------------------------
+
+/** Letters and digits only, to match JUnit names with TeamCity's. */
+$key = fn (string $class, string $name) => $class.'|'.preg_replace('/[^A-Za-z0-9]+/', '', $name);
+
+$skipReasons = [];
+foreach (file($teamcity) ?: [] as $line) {
+    if (preg_match("/^##teamcity\\[testIgnored name='(.*?)' message='(.*?)'/", $line, $m)) {
+        $unescape = fn (string $s) => strtr($s, ["|'" => "'", '||' => '|', '|n' => "\n", '|r' => "\r", '|[' => '[', '|]' => ']']);
+        if (preg_match("/\\\\P\\\\Tests\\\\([A-Za-z0-9\\\\]+)::/", $line, $c)) {
+            $name = preg_replace('/^__pest_evaluable_/', '', $unescape($m[1]));
+            $skipReasons[$key('Tests\\'.$c[1], $name)] = $unescape($m[2]);
+        }
+    }
+}
+
+$tests = [];
+foreach (simplexml_load_file($junit)->xpath('//testcase') as $case) {
+    $name = (string) $case['name'];
+    $class = (string) $case['class'];
+    [$description, $data] = array_pad(explode(' with data set ', $name, 2), 2, null);
+    $labels = [];
+    if ($data !== null) {
+        foreach (explode(' / ', substr($data, 1, -1)) as $part) {
+            $labels[] = preg_match('/^dataset "(.*)"$/s', $part, $m) ? $m[1]
+                : (preg_match("/^\\('(.*)'\\)$/s", $part, $m) ? $m[1] : trim($part, '()'));
+        }
+    }
+    $failure = $case->failure ?? $case->error ?? null;
+    $status = match (true) {
+        isset($case->failure) || isset($case->error) => 'fail',
+        isset($case->skipped) => 'skipped',
+        default => 'pass',
+    };
+    $reason = match ($status) {
+        'fail' => trim(strtok(trim((string) ($case->failure ?? $case->error)), "\n") ?: 'The test failed.'),
+        'skipped' => $skipReasons[$key($class, $name)] ?? 'The suite skipped this test without a reason.',
+        default => null,
+    };
+    $tests[] = [
+        'file' => explode('::', (string) $case['file'])[0],
+        'test' => preg_replace('/^it /', '', $description),
+        'labels' => $labels,
+        'status' => $status,
+        'reason' => $reason,
+    ];
+}
+
+// ---------------------------------------------------------------------
+// Topics
+// ---------------------------------------------------------------------
+
+$json = fn (string $path) => json_decode((string) file_get_contents($path), true);
+$exprExpected = $json('tests/fixtures/expr/expected.json');
+$lsExpected = $json('tests/fixtures/expr/lubridate_stringr.json');
+$joinExpected = $json('tests/fixtures/joins/expected.json');
+$pivotCases = $json('tests/fixtures/pivot/cases.json');
+$typeExpected = $json('tests/fixtures/expr/types.json');
+$drivers = ['sqlite' => 'SQLite', 'pgsql' => 'PostgreSQL', 'mysql' => 'MySQL'];
+$readers = ['php' => 'PHP reader', 'native (emulated)' => 'native path, PHP emulation of Phit\\read_csv()', 'native (phit)' => 'native path, phit extension'];
+$rVersions = fn (string ...$names) => array_intersect_key($r['versions'], array_flip(['R', ...$names, 'jsonlite']));
+$regenerated = "The fixtures were regenerated with these R versions on {$r['checked']} and were byte-identical to the committed files.";
+$backendVersions = function () use ($runtime, $databases) {
+    return array_filter(['PHP' => $runtime['PHP'], 'SQLite' => $runtime['SQLite']] + $databases + ['php_polars' => $runtime['php_polars']]);
+};
+$backendOf = fn (array $t) => match (true) {
+    str_starts_with($t['file'], 'tests/Polars/') => 'Polars',
+    str_starts_with($t['file'], 'tests/Sql') => $drivers[$t['labels'][0]],
+    default => 'DataFrame',
+};
+$caseLabel = fn (array $t) => end($t['labels']);
+$suite = 'php vendor/bin/pest';
+$withDatabases = 'PHIBBLE_TEST_PGSQL="pgsql:host=127.0.0.1;port=5432;dbname=postgres" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL="mysql:host=127.0.0.1;port=3306" PHIBBLE_TEST_MYSQL_USER=root';
+$rounded = 'Numbers on both sides are rounded to 9 decimal places with PHP round(), then compared exactly. Inf, -Inf, and NaN count as NA, because the JSON fixtures cannot hold them. NA must be NA in the same positions.';
+
+$topics = [
+    'print-tibble' => [
+        'title' => 'Printing: agreement with tibble',
+        'label' => 'Printing',
+        'kind' => 'reference',
+        'checked' => 'The text of echo $df, format(), and glimpse() for 38 tables, including dates, factors, list-columns, grouped and rowwise tables, wide tables, and empty tables.',
+        'reference' => "tibble {$r['versions']['tibble']} and pillar {$r['versions']['pillar']} print() and glimpse(), on R {$r['versions']['R']}",
+        'versions' => $rVersions('tibble', 'pillar', 'dplyr') + ['PHP' => $runtime['PHP']],
+        'inputs' => [['name' => 'print cases', 'detail' => 'Tables built in tests/PrintTest.php and tests/r/print.R with the same values', 'url' => 'tests/r/print.R']],
+        'comparison' => [['id' => 'text', 'applies_to' => 'the printed text, byte for byte', 'kind' => 'exact']],
+        'data' => 'tests/fixtures/print',
+        'reproduce' => ['Rscript tests/r/print.R', "{$suite} tests/PrintTest.php"],
+        'match' => fn (array $t) => $t['file'] === 'tests/PrintTest.php' ? [
+            'name' => $t['labels'] === [] ? $t['test'] : $caseLabel($t),
+            'quantity' => match (true) {
+                str_starts_with($t['test'], 'glimpses') => 'glimpse()',
+                $t['labels'] !== [] => 'print',
+                default => null,
+            },
+            'rule' => 'text',
+        ] : null,
+    ],
+    'csv-readr' => [
+        'title' => 'CSV reading and writing: agreement with readr',
+        'label' => 'CSV and readr',
+        'kind' => 'reference',
+        'checked' => 'Column names, guessed and declared types, values, factor levels, and parsing problems for 39 CSV files read by each of phibble\'s three CSV readers, and the text written by toCsv() and CsvWriter::formatDouble().',
+        'reference' => "readr {$r['versions']['readr']} read_delim(), problems(), and format_csv(), on R {$r['versions']['R']}",
+        'versions' => $rVersions('readr', 'vroom') + array_filter(['phit' => $runtime['phit']]),
+        'inputs' => [
+            ['name' => 'CSV cases', 'detail' => '35 CSV files and the readr options for each', 'url' => 'tests/fixtures/io/cases.json'],
+            ['name' => 'readr results', 'detail' => 'One JSON file per case, written by tests/r/io.R', 'url' => 'tests/fixtures/io/expected'],
+        ],
+        'comparison' => [
+            ['id' => 'read', 'applies_to' => 'column names, types, factor levels, the presence of problems, and the rows readr::problems() names. Values compare exactly; doubles are parsed from readr\'s shortest round-trip text and compared with ===. NA must be NA in the same positions.', 'kind' => 'exact'],
+            ['id' => 'write', 'applies_to' => 'the CSV text, byte for byte', 'kind' => 'exact'],
+        ],
+        'known_differences' => [
+            'phibble guesses a column of whole numbers as int, where readr guesses double. These columns are compared as doubles.',
+            'In the empty_rows case, readr numbers an empty line\'s problem one lower than other rows, and phibble numbers it like any row. The problem row numbers are not compared for that case.',
+        ],
+        'data' => 'tests/fixtures/io',
+        'reproduce' => ['Rscript tests/r/io.R', "{$suite} tests/IoTest.php"],
+        'match' => fn (array $t) => match (true) {
+            $t['file'] !== 'tests/IoTest.php' => null,
+            $t['test'] === 'reads CSV like readr' => ['name' => $t['labels'][0], 'quantity' => $readers[$t['labels'][1]], 'rule' => 'read'],
+            in_array($t['test'], ['writes CSV like readr', 'formats doubles like write_csv'], true) => ['name' => $t['test'], 'rule' => 'write'],
+            default => null,
+        },
+    ],
+    'expressions-dplyr' => [
+        'title' => 'Expressions: agreement with dplyr',
+        'label' => 'Expressions',
+        'kind' => 'reference',
+        'checked' => 'The column each expression gives in mutate(), grouped mutate(), and grouped summarise(), on every backend: arithmetic, comparison and logic with NA, conditionals, rounding, strings, offsets, ranks, cumulative functions, and aggregates.',
+        'reference' => "dplyr {$r['versions']['dplyr']} and stringr {$r['versions']['stringr']}, on R {$r['versions']['R']}",
+        'versions' => $rVersions('dplyr', 'stringr') + $backendVersions(),
+        'inputs' => [['name' => 'expression cases', 'detail' => 'A 7-row table with NA in every column, defined in tests/Support/ExprCases.php and tests/r/expr.R', 'url' => 'tests/fixtures/expr/expected.json']],
+        'comparison' => [
+            ['id' => 'rounded', 'applies_to' => $rounded, 'kind' => 'exact'],
+            ['id' => 'rounded-native', 'applies_to' => $rounded.' The verb must also run in Polars, with no fallback to a DataFrame.', 'kind' => 'exact'],
+        ],
+        'exclusions' => ['The round case is not run on SQL databases. SQL ROUND does not round half to even, so SqlTable always evaluates round() in memory.'],
+        'data' => 'tests/fixtures/expr/expected.json',
+        'reproduce' => ['Rscript tests/r/expr.R', "{$withDatabases} {$suite} tests/ExprTest.php tests/SqlTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsExprTest.php"],
+        'match' => function (array $t) use ($backendOf, $caseLabel, $exprExpected) {
+            if (! preg_match('/^matches dplyr for (grouped )?(mutate|summarise) expressions/', $t['test'], $m)) {
+                return null;
+            }
+            $name = $caseLabel($t);
+
+            return [
+                'name' => $name,
+                'quantity' => $backendOf($t).': '.($m[1] !== '' ? 'grouped mutate' : $m[2]),
+                'rule' => $backendOf($t) === 'Polars' ? 'rounded-native' : 'rounded',
+                'n_compared' => isset($exprExpected[$name]) ? count($exprExpected[$name]) : null,
+            ];
+        },
+    ],
+    'aggregate-types' => [
+        'title' => 'Aggregate result types: agreement with dplyr',
+        'label' => 'Aggregate types',
+        'kind' => 'reference',
+        'checked' => 'The column type of each aggregate in a grouped summarise() when every group holds only NA, so the type cannot come from the values.',
+        'reference' => "dplyr {$r['versions']['dplyr']} summarise(), on R {$r['versions']['R']}",
+        'versions' => $rVersions('dplyr') + ['PHP' => $runtime['PHP']],
+        'inputs' => [['name' => 'all-NA table', 'detail' => '4 rows in 2 groups; NA double, integer, logical, character, and date columns', 'url' => 'tests/r/expr-types.R']],
+        'comparison' => [['id' => 'type', 'applies_to' => 'the result type abbreviation (dbl, int, lgl, chr, date), and that every value is NA', 'kind' => 'exact']],
+        'data' => 'tests/fixtures/expr/types.json',
+        'reproduce' => ['Rscript tests/r/expr-types.R', "{$suite} tests/AggregateTypeTest.php"],
+        'match' => fn (array $t) => $t['file'] === 'tests/AggregateTypeTest.php' && $t['labels'] !== [] ? [
+            'name' => $caseLabel($t),
+            'quantity' => 'result type',
+            'rule' => 'type',
+            'expected' => $typeExpected[$caseLabel($t)] ?? null,
+            'actual' => $t['status'] === 'pass' ? ($typeExpected[$caseLabel($t)] ?? null) : null,
+        ] : null,
+    ],
+    'lubridate-stringr' => [
+        'title' => 'Dates and strings: agreement with lubridate and stringr',
+        'label' => 'lubridate and stringr',
+        'kind' => 'reference',
+        'checked' => 'Date parsing, date parts, rounding, periods, time zones, and stringr pattern, padding, truncation, and case functions in mutate(), on every backend.',
+        'reference' => "lubridate {$r['versions']['lubridate']} and stringr {$r['versions']['stringr']}, on R {$r['versions']['R']}",
+        'versions' => $rVersions('lubridate', 'stringr') + $backendVersions(),
+        'inputs' => [['name' => 'date and string cases', 'detail' => 'A 5-row table of dates, datetimes, and text with NA, plus per-case vectors, defined in tests/Support/LubridateStringrCases.php and tests/r/lubridate_stringr.R', 'url' => 'tests/fixtures/expr/lubridate_stringr.json']],
+        'comparison' => [
+            ['id' => 'rounded', 'applies_to' => 'Dates compare as YYYY-MM-DD and datetimes as "YYYY-MM-DD HH:MM:SS +hhmm" in their time zone. Numbers are rounded to 9 decimal places with PHP round(), then compared exactly. NA must be NA in the same positions.', 'kind' => 'exact'],
+            ['id' => 'rounded-native', 'applies_to' => 'As rounded, and the verb must run in Polars with no fallback to a DataFrame, except str_to_title(), which needs ICU word breaks and runs on a DataFrame.', 'kind' => 'exact'],
+        ],
+        'known_differences' => ['On SQL databases, a function with no faithful SQL translation runs in memory after the query. Those cases are compared the same way.'],
+        'data' => 'tests/fixtures/expr/lubridate_stringr.json',
+        'reproduce' => ['Rscript tests/r/lubridate_stringr.R', "{$withDatabases} {$suite} tests/LubridateStringrTest.php tests/SqlTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsLubridateStringrTest.php"],
+        'match' => function (array $t) use ($backendOf, $caseLabel, $lsExpected) {
+            if (! str_starts_with($t['test'], 'matches lubridate and stringr')) {
+                return null;
+            }
+            $name = $caseLabel($t);
+
+            return [
+                'name' => $name,
+                'quantity' => $backendOf($t),
+                'rule' => $backendOf($t) === 'Polars' ? 'rounded-native' : 'rounded',
+                'n_compared' => isset($lsExpected[$name]) ? count($lsExpected[$name]) : null,
+            ];
+        },
+    ],
+    'join-by' => [
+        'title' => 'Inequality, rolling, and overlap joins: agreement with dplyr',
+        'label' => 'join_by joins',
+        'kind' => 'reference',
+        'checked' => 'Output columns and rows of joins with join_by() conditions: inequalities, closest() rolling joins, between, within, and overlaps, across join types and the keep and naMatches options, on every backend.',
+        'reference' => "dplyr {$r['versions']['dplyr']} join_by(), on R {$r['versions']['R']}",
+        'versions' => $rVersions('dplyr') + $backendVersions(),
+        'inputs' => [['name' => 'join cases', 'detail' => 'Two small tables with NA keys, and two interval tables, defined in tests/Support/JoinCases.php and tests/r/joins.R', 'url' => 'tests/fixtures/joins/expected.json']],
+        'comparison' => [
+            ['id' => 'ordered', 'applies_to' => 'column names, and rows in order, with numbers compared as doubles. NA must be NA in the same positions.', 'kind' => 'exact'],
+            ['id' => 'unordered', 'applies_to' => 'column names, and rows after sorting, with numbers compared as doubles, because SQL and Polars joins do not fix the row order. The Polars join must run with no fallback to a DataFrame.', 'kind' => 'exact'],
+        ],
+        'data' => 'tests/fixtures/joins/expected.json',
+        'reproduce' => ['Rscript tests/r/joins.R', "{$withDatabases} {$suite} tests/ContractV1Test.php tests/SqlTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsContractTest.php"],
+        'match' => function (array $t) use ($backendOf, $caseLabel, $joinExpected) {
+            if (! preg_match('/^matches dplyr join_by/', $t['test'])) {
+                return null;
+            }
+            $name = $caseLabel($t);
+            $expected = $joinExpected[$name] ?? null;
+
+            return [
+                'name' => $name,
+                'quantity' => $backendOf($t),
+                'rule' => $backendOf($t) === 'DataFrame' ? 'ordered' : 'unordered',
+                'n_compared' => $expected === null ? null : count($expected['columns']) * count($expected['rows']),
+            ];
+        },
+    ],
+    'pivot-tidyr' => [
+        'title' => 'Pivots: agreement with tidyr',
+        'label' => 'Pivots',
+        'kind' => 'reference',
+        'checked' => 'pivotLongerSpec() and pivotWiderSpec() output columns, rows, and warnings for spec-driven pivots, including NA dropping, names_sep-style specs, value types, and duplicate keys.',
+        'reference' => "tidyr {$r['versions']['tidyr']} pivot_longer_spec() and pivot_wider_spec(), on R {$r['versions']['R']}",
+        'versions' => $rVersions('tidyr', 'dplyr') + array_filter(['PHP' => $runtime['PHP'], 'php_polars' => $runtime['php_polars']]),
+        'inputs' => [['name' => 'pivot cases', 'detail' => 'Inputs and specs written with the expected output by tests/r/pivot.R', 'url' => 'tests/fixtures/pivot/cases.json']],
+        'comparison' => [['id' => 'rows', 'applies_to' => 'column names, rows in order, and the warning text. Numbers compare as doubles, and a list cell of length 1 compares as its value, as jsonlite writes it.', 'kind' => 'exact']],
+        'data' => 'tests/fixtures/pivot/cases.json',
+        'reproduce' => ['Rscript tests/r/pivot.R', "{$suite} tests/PivotTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsPivotTest.php"],
+        'match' => fn (array $t) => str_starts_with($t['test'], 'matches tidyr pivot specs') ? [
+            'name' => $caseLabel($t),
+            'quantity' => $backendOf($t),
+            'rule' => 'rows',
+            'n_compared' => isset($pivotCases[$caseLabel($t)]) ? count($pivotCases[$caseLabel($t)]['columns']) * count($pivotCases[$caseLabel($t)]['rows']) : null,
+        ] : null,
+    ],
+    'csv-conformance' => [
+        'title' => 'CSV conformance corpus: the contract with phit',
+        'label' => 'CSV corpus',
+        'kind' => 'contract',
+        'checked' => 'The PHP CSV reader\'s names, problems, and column values for every case in the committed corpus, read through the Phit\\read_csv() contract, and the same results at block sizes from 1 to 64 rows.',
+        'description' => 'The corpus records phibble\'s answers, and phit commits a byte-identical copy and checks its native reader against it. The answers themselves are checked against readr in the CSV reading record.',
+        'versions' => ['PHP' => $runtime['PHP']],
+        'inputs' => [['name' => 'CSV conformance corpus', 'detail' => '120 cases: delimiters, quoting, comments, blank lines, encodings, NA strings, type guessing, and declared types', 'url' => 'tests/fixtures/csv-conformance.json']],
+        'comparison' => [['id' => 'corpus', 'applies_to' => 'column names, problem counts, and every column\'s values and types', 'kind' => 'exact']],
+        'data' => 'tests/fixtures/csv-conformance.json',
+        'reproduce' => ['bin/generate-csv-conformance', "{$suite} tests/CsvConformanceTest.php"],
+        'match' => fn (array $t) => $t['file'] === 'tests/CsvConformanceTest.php' ? [
+            'name' => match (true) {
+                str_starts_with($t['test'], 'reads the corpus as') => $caseLabel($t),
+                str_starts_with($t['test'], 'reads the corpus the same') => "block size {$caseLabel($t)}",
+                default => $t['test'],
+            },
+            'quantity' => str_starts_with($t['test'], 'reads the corpus the same') ? 'all 120 cases' : null,
+            'rule' => 'corpus',
+        ] : null,
+    ],
+    'sql-parity' => [
+        'title' => 'SQL backends: parity with DataFrame',
+        'label' => 'SQL parity',
+        'kind' => 'integration',
+        'checked' => 'Pipelines run as SQL on SQLite, PostgreSQL, and MySQL, collected, and compared with the same pipeline on a DataFrame: verbs, row order, windows, joins, byte-order text, aggregates of booleans, edge-case arithmetic, and declared driver types.',
+        'versions' => array_diff_key($backendVersions(), ['php_polars' => true]),
+        'inputs' => 'Inline SELECT ... UNION ALL data defined in tests/SqlTest.php, tests/SqlReviewTest.php, and tests/DriverTypesTest.php. The tests create only temporary tables.',
+        'comparison' => [
+            ['id' => 'same', 'applies_to' => 'the rows, row order, types, generated SQL, or exception each test expects. Most tests compare the collected result with the same pipeline on a DataFrame, rounding doubles to 9 decimal places.', 'kind' => 'exact'],
+        ],
+        'known_differences' => [
+            'MySQL stores no Inf or NaN, and SQLite stores no NaN. Those values come back as NA, and the comparison maps them to NA on the DataFrame side.',
+            'Joins do not warn about unexpected many-to-many matches.',
+        ],
+        'reproduce' => "{$withDatabases} {$suite} tests/SqlTest.php tests/SqlReviewTest.php tests/DriverTypesTest.php",
+        'match' => fn (array $t) => in_array($t['file'], ['tests/SqlTest.php', 'tests/SqlReviewTest.php', 'tests/DriverTypesTest.php'], true) ? [
+            'name' => $t['test'].(count($t['labels']) > 1 ? ": {$t['labels'][0]}" : ''),
+            'quantity' => $drivers[end($t['labels']) ?: ''] ?? null,
+            'rule' => 'same',
+        ] : null,
+    ],
+    'polars-backend' => [
+        'title' => 'Polars backend: the Table contract and fallback',
+        'label' => 'Polars backend',
+        'kind' => 'contract',
+        'checked' => 'PolarsTable against phibble\'s Table contract: joins, grouping and group order, summarise .groups, factors, list-columns, type round trips, strict mode, and the fallback to a DataFrame for closures and rowwise work.',
+        'versions' => array_filter(['PHP' => $runtime['PHP'], 'php_polars' => $runtime['php_polars']]),
+        'inputs' => 'Small tables defined in tests/Polars/.',
+        'comparison' => [['id' => 'contract', 'applies_to' => 'the values, types, groups, and exceptions each test expects, which are the DataFrame results', 'kind' => 'exact']],
+        'reproduce' => "php -d extension=php_polars.so {$suite} tests/Polars",
+        'match' => fn (array $t) => str_starts_with($t['file'], 'tests/Polars/') ? [
+            'name' => $t['test'],
+            'quantity' => null,
+            'rule' => 'contract',
+        ] : null,
+    ],
+];
+
+// Reference topics claim their tests first; the integration and contract
+// topics take the rest of their files.
+$claimed = [];
+$records = [];
+foreach ($topics as $id => $topic) {
+    $cases = [];
+    foreach ($tests as $i => $t) {
+        if (isset($claimed[$i]) || ($case = $topic['match']($t)) === null) {
+            continue;
+        }
+        $claimed[$i] = true;
+        $row = ['name' => $case['name']];
+        foreach (['quantity', 'rule', 'n_compared', 'actual', 'expected'] as $field) {
+            if (($case[$field] ?? null) !== null) {
+                $row[$field] = $case[$field];
+            }
+        }
+        $row['status'] = $t['status'];
+        if ($t['reason'] !== null) {
+            $row['reason'] = $t['reason'];
+        }
+        $cases[] = $row;
+    }
+    unset($topic['match']);
+    if (count($topic['comparison']) === 1) {
+        $cases = array_map(function (array $c) {
+            unset($c['rule']);
+
+            return $c;
+        }, $cases);
+    }
+    if ($topic['kind'] === 'reference') {
+        $topic['description'] = trim(($topic['description'] ?? '').' '.$regenerated);
+    }
+    $records[$id] = $topic + ['cases' => $cases, 'environment' => $environment];
+}
+
+@mkdir('site/verifications');
+foreach ($records as $id => $record) {
+    file_put_contents("site/verifications/{$id}.json", json_encode($record, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n");
+    $counts = array_count_values(array_column($record['cases'], 'status'));
+    ksort($counts);
+    fwrite(STDERR, sprintf("%-20s %s\n", $id, implode(', ', array_map(fn ($s, $n) => "{$n} {$s}", array_keys($counts), $counts))));
+}
+
+array_map(unlink(...), glob("{$logs}/*") ?: []);
+@rmdir($logs);

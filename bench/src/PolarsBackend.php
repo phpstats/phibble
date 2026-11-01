@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Phibble\Bench;
 
-use Phibble\Bench\Backend;
 use Phibble\Contracts\Table;
 use Phibble\DataFrame;
+use Phibble\Polars\PolarsTable;
 
 /**
  * PolarsTable for phibble's shared benchmark runner (bin/bench). Data is

@@ -26,15 +26,13 @@ it('matches dplyr for mutate expressions in Polars', function (Closure $df, Expr
     expect(normalise($out))->toBe(expected($case));
 })->with('polars mutate');
 
-it('matches dplyr for grouped mutate expressions in Polars', function () {
-    $grouped = pt(exprFrame())->groupBy(['g']);
-    $run = fn (Expr $e) => normalise(native(fn () => $grouped->mutate(['out' => $e]))->column('out'));
+it('matches dplyr for grouped mutate expressions in Polars', function (Expr $expr) {
+    $case = $this->dataName();
+    $case = substr($case, strpos($case, '"') + 1, -1);
+    $out = native(fn () => pt(exprFrame())->groupBy(['g'])->mutate(['out' => $expr]))->column('out');
 
-    expect($run(col('x')->sub(mean(col('x'), na_rm: true))))->toBe(expected('grp_mean'))
-        ->and($run(lag(col('i'))))->toBe(expected('grp_lag'))
-        ->and($run(row_number()))->toBe(expected('grp_row_number'))
-        ->and($run(cumsum(col('i'))))->toBe(expected('grp_cumsum'));
-});
+    expect(normalise($out))->toBe(expected($case));
+})->with(groupedCases());
 
 it('matches dplyr for summarise expressions in Polars', function (string $case, Expr $expr) {
     $out = native(fn () => pt(exprFrame())->groupBy(['g'])->summarise(['out' => $expr]))->column('out');

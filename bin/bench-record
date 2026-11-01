@@ -1,0 +1,321 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Runs the benchmarks and writes the records in site/benchmarks/, in the
+ * format of phpstats.org's docs/evidence-records.md.
+ *
+ * Usage: bin/bench-record [--php="php -d extension=..."] [--rows=1000000]
+ *                         [--repeats=7] [--warmups=1] [--peakmem=peakmem]
+ *                         [--out=site/benchmarks] [record ...]
+ *
+ * Every run is a fresh process of bin/bench under peakmem, built from phit's
+ * bench/peakmem.c, which reports the peak anonymous memory and the peak
+ * resident set size. Each implementation runs the warm-ups first, then the
+ * implementations alternate for the repetitions in a rotated order. The PHP
+ * command must load phit and php_polars.
+ *
+ * Records are published from Linux runs only. Elsewhere, pass --out to write
+ * them to another folder, and --peakmem=/usr/bin/time on macOS.
+ */
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+chdir($root);
+
+$options = getopt('', ['php:', 'rows:', 'repeats:', 'warmups:', 'peakmem:', 'out:'], $rest);
+$php = $options['php'] ?? (getenv('PHP') ?: escapeshellarg(PHP_BINARY));
+$rows = (int) ($options['rows'] ?? 1_000_000);
+$repeats = (int) ($options['repeats'] ?? 7);
+$warmups = (int) ($options['warmups'] ?? 1);
+$peakmem = $options['peakmem'] ?? 'peakmem';
+$out = $options['out'] ?? 'site/benchmarks';
+$only = array_slice($argv, $rest);
+if (PHP_OS_FAMILY !== 'Linux' && ! isset($options['out'])) {
+    fwrite(STDERR, "Records are published from Linux runs only. Pass --out to write elsewhere.\n");
+    exit(1);
+}
+
+$shell = function (string $command): string {
+    exec($command.' 2>&1', $output, $code);
+    if ($code !== 0) {
+        fwrite(STDERR, "Failed: {$command}\n".implode("\n", $output)."\n");
+        exit(1);
+    }
+
+    return implode("\n", $output);
+};
+
+// ---------------------------------------------------------------------
+// Data and environment
+// ---------------------------------------------------------------------
+
+$events = 'bench/data/events.csv';
+$dims = 'bench/data/dims.csv';
+$lines = is_file($events) ? (int) trim($shell('wc -l < '.escapeshellarg($events))) : 0;
+if ($lines !== $rows + 1) {
+    fwrite(STDERR, $shell("{$php} bench/generate.php {$rows}")."\n");
+}
+// Build the SQLite file outside any measured run.
+$shell("{$php} bin/bench --backend=sqlite --runs=1 load");
+
+$probe = <<<'PHP'
+    echo json_encode([
+        'php' => PHP_VERSION,
+        'phit' => phpversion('phit') ?: null,
+        'php_polars' => phpversion('php_polars') ?: null,
+        'SQLite' => (new PDO('sqlite::memory:'))->query('SELECT sqlite_version()')->fetchColumn(),
+    ]);
+    PHP;
+$runtime = json_decode($shell("{$php} -r ".escapeshellarg($probe)), true);
+if ($runtime['phit'] === null || $runtime['php_polars'] === null) {
+    fwrite(STDERR, "The PHP command must load the phit and php_polars extensions.\n");
+    exit(1);
+}
+
+$cores = (int) trim($shell('getconf _NPROCESSORS_ONLN'));
+$cpu = PHP_OS_FAMILY === 'Linux'
+    ? trim(explode(':', (string) current(preg_grep('/^model name/', file('/proc/cpuinfo'))), 2)[1] ?? 'unknown')
+    : trim($shell('sysctl -n machdep.cpu.brand_string'));
+$memoryBytes = PHP_OS_FAMILY === 'Linux'
+    ? (int) preg_replace('/\D/', '', (string) current(preg_grep('/^MemTotal/', file('/proc/meminfo')))) * 1024
+    : (int) trim($shell('sysctl -n hw.memsize'));
+$os = PHP_OS_FAMILY === 'Linux'
+    ? 'Linux, '.(parse_ini_file('/etc/os-release')['PRETTY_NAME'] ?? 'unknown').' ('.php_uname('m').')'
+    : 'macOS '.trim($shell('sw_vers -productVersion')).' ('.php_uname('m').')';
+$commit = trim($shell('git rev-parse --short HEAD'));
+$describe = trim($shell('git describe --tags --always --dirty'));
+$dataset = fn (string $path) => [
+    'rows' => (int) trim($shell('wc -l < '.escapeshellarg($path))) - 1,
+    'bytes' => filesize($path),
+    'sha256' => hash_file('sha256', $path),
+];
+$environment = [
+    'cpu' => $cpu,
+    'cores' => $cores,
+    'memory_gb' => round($memoryBytes / 2 ** 30, 1),
+    'os' => $os,
+    'php' => $runtime['php'],
+    'versions' => ['phibble' => $describe, 'phit' => $runtime['phit'], 'php_polars' => $runtime['php_polars'], 'SQLite' => $runtime['SQLite']],
+    'threads' => [
+        'DataFrame' => 1,
+        'SqlTable' => 1,
+        'PolarsTable' => getenv('POLARS_MAX_THREADS')
+            ? 'POLARS_MAX_THREADS='.getenv('POLARS_MAX_THREADS')
+            : "Polars' default thread pool, one thread per core ({$cores} here)",
+        'PHP reader' => 1,
+        'phit reader' => 1,
+    ],
+    'cache' => 'warm',
+    'repeats' => $repeats,
+    'warmups' => $warmups,
+    'date' => gmdate('Y-m-d'),
+    'commit' => $commit,
+];
+
+// ---------------------------------------------------------------------
+// Records
+// ---------------------------------------------------------------------
+
+/** The source of a workload closure in bench/src/Workloads.php. */
+$source = function (string $workload): string {
+    $lines = file('bench/src/Workloads.php');
+    foreach ($lines as $i => $line) {
+        if (str_contains($line, "'{$workload}' => ")) {
+            $depth = 0;
+            $code = [];
+            for ($j = $i; $j < count($lines); $j++) {
+                $code[] = $lines[$j];
+                $depth += substr_count($lines[$j], '(') + substr_count($lines[$j], '{') + substr_count($lines[$j], '[')
+                    - substr_count($lines[$j], ')') - substr_count($lines[$j], '}') - substr_count($lines[$j], ']');
+                if ($depth <= 0 && str_ends_with(rtrim($lines[$j]), ',')) {
+                    break;
+                }
+            }
+            $indent = strlen($code[0]) - strlen(ltrim($code[0]));
+
+            return rtrim(implode('', array_map(fn ($l) => substr($l, min($indent, strlen($l) - strlen(ltrim($l)))), $code)), ",\n");
+        }
+    }
+
+    return '';
+};
+
+/** A table workload as a statement on $events and $dims. */
+$tableCode = function (string $workload) use ($source): string {
+    $code = preg_replace('/^\'\w+\' => fn \(Table \$e(, Table \$d)?\) => \$e/', '$rows = $events', $source($workload));
+
+    return preg_replace('/\$d\b/', '$dims', $code).';';
+};
+$csvCode = [
+    'csv_typed' => "\$rows = DataFrame::fromCsv('events.csv', types: 'iicdT')->nrow();",
+    'csv_chunked' => "\$rows = 0;\nforeach (DataFrame::csvChunks('events.csv', chunkSize: 100_000, types: 'iicdT') as \$chunk) {\n    \$rows += \$chunk->nrow();\n}",
+    'csv_write' => "\$events = DataFrame::fromCsv('events.csv', types: 'iicdT');\n\n\$events->writeCsv(\$out);",
+];
+
+$backends = [
+    'DataFrame' => ['backend' => 'dataframe', 'detail' => 'Phibble\\DataFrame: PHP arrays', 'load' => "\$events = DataFrame::fromCsv('events.csv');\n\$dims = DataFrame::fromCsv('dims.csv');"],
+    'SqlTable' => ['backend' => 'sqlite', 'detail' => "Phibble\\Sql\\SqlTable on a SQLite {$runtime['SQLite']} file, through PDO", 'load' => "\$pdo = new PDO('sqlite:bench.sqlite');\n\$events = SqlTable::table(\$pdo, 'events');\n\$dims = SqlTable::table(\$pdo, 'dims');"],
+    'PolarsTable' => ['backend' => 'polars', 'detail' => "Phibble\\Polars\\PolarsTable, php_polars {$runtime['php_polars']}", 'load' => "\$events = PolarsTable::fromTable(DataFrame::fromCsv('events.csv'));\n\$dims = PolarsTable::fromTable(DataFrame::fromCsv('dims.csv'));"],
+];
+$tableMethod = 'Each run is a fresh PHP process. The clock starts after the input tables are loaded and stops when the result has been collected into PHP and its rows counted, so lazy backends run their query inside the timing. Loading is measured separately in the Loading record. Process startup is excluded.';
+$memoryMethod = 'Peak anonymous memory is RssAnon from /proc/PID/status, sampled every millisecond by peakmem (phit\'s bench/peakmem.c), for the whole process, with the input tables loaded. peak_rss_mib is the kernel\'s peak resident set size from getrusage(), which also counts mapped file pages. php_peak_mib is memory_get_peak_usage(true) at the end of the run; it does not count memory that SQLite or Polars allocate outside PHP\'s allocator.';
+$readMethod = 'Each run is a fresh PHP process. The clock runs from the call to holding the whole table in PHP values. Process startup is excluded.';
+$tables = [
+    'tables-load' => ['load', 'Loading the input tables', 'Loading', 'Load events.csv and dims.csv into each backend. DataFrame reads both CSV files with the phit reader. SqlTable opens the stored tables in a SQLite file, which runs one LIMIT 0 query and reads a 1,000-row sample to type date columns. PolarsTable reads the CSV files into a DataFrame and copies them into Polars. The memory in this record is each backend\'s footprint with the inputs loaded, which every other table record includes.'],
+    'group-summarise' => ['group_summarise', 'Grouped summary', 'Grouped summary', 'Group the events by key (10,000 groups at 1,000,000 rows) and compute the count, mean, and sum of x with NA removed.'],
+    'group-summarise-closure' => ['group_summarise_closure', 'Grouped summary with PHP closures', 'Closure summary', 'The same grouped summary written as PHP closures over each group. SqlTable and PolarsTable cannot run PHP, so they collect the rows and run the summary in a DataFrame.'],
+    'grouped-window' => ['grouped_window', 'Grouped window functions', 'Window functions', 'Within each key, ordered by t, compute lag(x), a running sum of id, and the row number.'],
+    'filter' => ['filter_expr', 'Filter', 'Filter', 'Keep the rows where x is positive and g is one of three labels.'],
+    'mutate' => ['mutate_expr', 'Mutate', 'Mutate', 'Add a computed double and a logical column to every row.'],
+    'join' => ['join', 'Left join', 'Join', 'Left join the events to the dims table on key.'],
+    'arrange' => ['arrange', 'Sort', 'Sort', 'Sort the events by x descending, then id.'],
+];
+$csvImplementations = [
+    'PHP reader' => ['backend' => 'dataframe', 'csv_reader' => 'php', 'detail' => 'phibble\'s CSV reader in PHP'],
+    'phit reader' => ['backend' => 'dataframe', 'csv_reader' => 'native', 'detail' => "phibble with the phit {$runtime['phit']} extension's native reader"],
+];
+$csvLink = 'Reading with guessed types is measured in phit\'s CSV benchmark (https://github.com/phpstats/phit/blob/main/docs/benchmarks/csv-results.json) and is not repeated here.';
+$csv = [
+    'csv-typed' => ['csv_typed', 'Reading a CSV file with declared types', 'CSV with types', "Read events.csv into a DataFrame with the column types declared as 'iicdT'. {$csvLink}", $csvImplementations],
+    'csv-chunked' => ['csv_chunked', 'Reading a CSV file in chunks', 'CSV in chunks', 'Read events.csv in chunks of 100,000 rows with declared types, holding one chunk at a time.', $csvImplementations],
+    'csv-write' => ['csv_write', 'Writing a CSV file', 'CSV writing', 'Write the events table to a CSV file with writeCsv(). The table is read before the clock starts. Writing is plain PHP.', ['DataFrame' => ['backend' => 'dataframe', 'csv_reader' => 'native', 'detail' => 'DataFrame::writeCsv()']]],
+];
+
+$definitions = [];
+foreach ($tables as $id => [$workload, $title, $label, $description]) {
+    $implementations = [];
+    foreach ($backends as $name => $b) {
+        $implementations[$name] = ['backend' => $b['backend'], 'csv_reader' => 'native', 'detail' => $b['detail'], 'code' => $workload === 'load' ? $b['load'] : $b['load']."\n\n".$tableCode($workload)];
+    }
+    $definitions[$id] = [
+        'workload_name' => $workload, 'title' => $title, 'label' => $label, 'description' => $description, 'group' => 'Tables',
+        'implementations' => $implementations,
+        'method' => $workload === 'load' ? 'Each run is a fresh PHP process. The clock runs from the first load call to holding both tables. Process startup is excluded.' : $tableMethod,
+    ];
+}
+foreach ($csv as $id => [$workload, $title, $label, $description, $implementations]) {
+    foreach ($implementations as $name => $i) {
+        $implementations[$name]['code'] = ($i['csv_reader'] === 'php' ? "Phibble\\Io\\NativeCsv::enable(false);\n\n" : '').$csvCode[$workload];
+    }
+    $definitions[$id] = [
+        'workload_name' => $workload, 'title' => $title, 'label' => $label, 'description' => $description, 'group' => 'CSV',
+        'implementations' => $implementations,
+        'method' => $workload === 'csv_write' ? 'Each run is a fresh PHP process. The clock runs from the writeCsv() call until the file is written. Process startup and reading the input are excluded.' : $readMethod,
+    ];
+}
+if ($only !== []) {
+    $definitions = array_intersect_key($definitions, array_flip($only));
+}
+
+// ---------------------------------------------------------------------
+// Runs
+// ---------------------------------------------------------------------
+
+$run = function (array $implementation, string $workload) use ($php, $peakmem): array {
+    $command = "{$peakmem} -l {$php} bin/bench --backend={$implementation['backend']} --csv-reader={$implementation['csv_reader']} --runs=1 {$workload}";
+    $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    $stdout = stream_get_contents($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]);
+    if (proc_close($process) !== 0) {
+        fwrite(STDERR, "Failed: {$command}\n{$stdout}{$stderr}\n");
+        exit(1);
+    }
+    $result = json_decode(trim($stdout), true);
+    if ($result['csv_reader'] !== $implementation['csv_reader']) {
+        fwrite(STDERR, "{$command} used the {$result['csv_reader']} CSV reader.\n");
+        exit(1);
+    }
+    preg_match('/(\d+)\s+maximum resident set size/', $stderr, $rss);
+    preg_match('/(\d+)\s+peak memory footprint/', $stderr, $anon);
+
+    return [
+        'ms' => $result['seconds'][0] * 1000,
+        'rows' => $result['rows'],
+        'php_peak_mib' => $result['php_peak_mib'],
+        // macOS /usr/bin/time reports the maximum resident set size in bytes too.
+        'rss_mib' => isset($rss[1]) ? (int) $rss[1] / 2 ** 20 : null,
+        'anon_mib' => isset($anon[1]) ? (int) $anon[1] / 2 ** 20 : null,
+    ];
+};
+$median = function (array $values): ?float {
+    $values = array_values(array_filter($values, fn ($v) => $v !== null));
+    if ($values === []) {
+        return null;
+    }
+    sort($values);
+    $n = count($values);
+
+    return $n % 2 ? $values[intdiv($n, 2)] : ($values[$n / 2 - 1] + $values[$n / 2]) / 2;
+};
+$round = fn (?float $v, int $digits = 1) => $v === null ? null : round($v, $digits);
+
+@mkdir($out, 0777, true);
+$eventsData = $dataset($events);
+$dimsData = $dataset($dims);
+$case = number_format($eventsData['rows']).' rows';
+foreach ($definitions as $id => $d) {
+    $names = array_keys($d['implementations']);
+    $reps = array_fill_keys($names, []);
+    for ($pass = 0; $pass < $warmups + $repeats; $pass++) {
+        $order = array_merge(array_slice($names, $pass % count($names)), array_slice($names, 0, $pass % count($names)));
+        foreach ($order as $name) {
+            $result = $run($d['implementations'][$name], $d['workload_name']);
+            if ($pass >= $warmups) {
+                $reps[$name][] = $result;
+            }
+        }
+        fwrite(STDERR, sprintf("%-24s round %d of %d\n", $id, $pass + 1, $warmups + $repeats));
+    }
+
+    $resultRows = array_unique(array_merge(...array_map(fn ($r) => array_column($r, 'rows'), array_values($reps))));
+    $measured = [];
+    foreach ($names as $name) {
+        $r = $reps[$name];
+        $measured[] = [
+            'case' => $case,
+            'implementation' => $name,
+            'value' => $round($median(array_column($r, 'ms')), 3),
+            'reps' => array_map(fn ($v) => round($v, 3), array_column($r, 'ms')),
+            'peak_memory_mib' => $round($median(array_column($r, 'anon_mib'))),
+            'reps_peak_memory_mib' => array_map($round, array_column($r, 'anon_mib')),
+            'peak_rss_mib' => $round($median(array_column($r, 'rss_mib'))),
+            'reps_peak_rss_mib' => array_map($round, array_column($r, 'rss_mib')),
+            'php_peak_mib' => $round($median(array_column($r, 'php_peak_mib'))),
+        ];
+    }
+
+    $record = [
+        'title' => $d['title'],
+        'label' => $d['label'],
+        'group' => $d['group'],
+        'description' => $d['description'],
+        'workload' => $d['group'] === 'Tables'
+            ? "{$case} of events and ".number_format($dimsData['rows']).' rows of dims'
+            : "{$case}, 5 columns: id int, key int, g string, x double with about 2% NA, t datetime",
+        'dataset' => $eventsData + ['file' => 'events.csv', 'generator' => "php bench/generate.php {$rows}"] + ($d['group'] === 'Tables' ? ['dims' => $dimsData] : []),
+        'check' => count($resultRows) === 1
+            ? ['result_rows' => $resultRows[0], 'note' => 'Every implementation returned the same number of result rows in every run.']
+            : ['result_rows' => array_combine($names, array_map(fn ($n) => array_values(array_unique(array_column($reps[$n], 'rows'))), $names))],
+        'implementations' => array_map(fn ($i) => $i['detail'], $d['implementations']),
+        'measure' => 'Elapsed time',
+        'unit' => 'ms',
+        'statistic' => 'median',
+        'method' => $d['method'].' Each implementation runs '.($warmups === 1 ? 'one warm-up' : "{$warmups} warm-ups").", then the implementations alternate for {$repeats} rounds in a rotated order.",
+        'time_spent_in' => 'the PHP process, with SQLite and Polars running in it as linked libraries',
+        'memory_measure' => 'peak anonymous memory',
+        'memory_method' => $memoryMethod,
+        'environment' => ['threads' => array_intersect_key($environment['threads'], $d['implementations'])] + $environment,
+        'rows' => $measured,
+        'code' => array_map(fn ($i) => $i['code'], $d['implementations']),
+        'languages' => array_map(fn () => 'php', $d['implementations']),
+        'reproduce' => [
+            'cc -O2 -o ~/.local/bin/peakmem bench/peakmem.c  # in a phit checkout',
+            "bin/bench-record --php='php -d extension=phit.so -d extension=php_polars.so' {$id}",
+        ],
+        'source' => 'bench/src/Workloads.php',
+    ];
+    file_put_contents("{$out}/{$id}.json", json_encode($record, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n");
+    fwrite(STDERR, "Wrote {$out}/{$id}.json\n");
+}

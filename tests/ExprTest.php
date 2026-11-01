@@ -30,14 +30,12 @@ it('matches dplyr for mutate expressions', function (Closure $df, Expr $expr) {
     expect(normalise($out))->toBe(expected($case));
 })->with('mutate');
 
-it('matches dplyr for grouped mutate expressions', function () {
-    $grouped = exprFrame()->groupBy(['g']);
+it('matches dplyr for grouped mutate expressions', function (Expr $expr) {
+    $case = $this->dataName();
+    $case = substr($case, strpos($case, '"') + 1, -1);
 
-    expect(normalise($grouped->mutate(['out' => col('x')->sub(mean(col('x'), na_rm: true))])->column('out')))->toBe(expected('grp_mean'))
-        ->and(normalise($grouped->mutate(['out' => lag(col('i'))])->column('out')))->toBe(expected('grp_lag'))
-        ->and(normalise($grouped->mutate(['out' => row_number()])->column('out')))->toBe(expected('grp_row_number'))
-        ->and(normalise($grouped->mutate(['out' => cumsum(col('i'))])->column('out')))->toBe(expected('grp_cumsum'));
-});
+    expect(normalise(exprFrame()->groupBy(['g'])->mutate(['out' => $expr])->column('out')))->toBe(expected($case));
+})->with(groupedCases());
 
 it('matches dplyr for summarise expressions', function (string $case, Expr $expr) {
     $out = exprFrame()->groupBy(['g'])->summarise(['out' => $expr])->column('out');

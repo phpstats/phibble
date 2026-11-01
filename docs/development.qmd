@@ -35,11 +35,17 @@ operations in R and write the expected results to `tests/fixtures/`:
 | `tests/r/print.R` | Printing and `glimpse()` against tibble. |
 | `tests/r/io.R` | CSV reading and writing against readr. |
 | `tests/r/expr.R` | Expressions against dplyr. |
+| `tests/r/expr-types.R` | Aggregate result types against dplyr. |
+| `tests/r/lubridate_stringr.R` | Date and string functions against lubridate and stringr. |
+| `tests/r/joins.R` | `join_by()` joins against dplyr. |
+| `tests/r/pivot.R` | Pivots against tidyr. |
 
-The fixtures are committed, so the tests do not need R. After changing a
+The fixtures are committed, so the tests do not need R.
+`tests/r/versions.json` records the R and package versions that reproduce
+them byte for byte. After changing a
 script, regenerate its fixtures from the repository root, for example with
-`Rscript tests/r/expr.R`. The scripts need the tibble, readr, dplyr, stringr,
-and jsonlite packages.
+`Rscript tests/r/expr.R`. The scripts need the tibble, readr, dplyr, tidyr,
+stringr, lubridate, and jsonlite packages.
 
 ## Database tests
 
@@ -56,6 +62,30 @@ export PHIBBLE_TEST_MYSQL_USER=root
 `PHIBBLE_TEST_PGSQL_PASSWORD` and `PHIBBLE_TEST_MYSQL_PASSWORD` set
 passwords. The tests only run `SELECT` statements over inline data and create
 no tables.
+
+## Verification and benchmark records
+
+phpstats.org renders the JSON records in `site/verifications/` and
+`site/benchmarks/`. Scripts write both, and nothing is edited by hand.
+
+`bin/verify` runs the test suite and writes one verification record per
+topic. Each case is one test, with the suite's status and skip reason. Set the
+database variables above and load phit and php_polars to run every case:
+
+```bash
+bin/verify --php="php -d extension=phit.so -d extension=php_polars.so"
+```
+
+`bin/bench-record` runs the benchmarks in `bench/` and writes their records.
+Each run is a fresh process under `peakmem`, built from phit's
+`bench/peakmem.c`. Records come from the Linux benchmark machine only:
+
+```bash
+bin/bench-record --php="php -d extension=phit.so -d extension=php_polars.so"
+```
+
+`bin/bench` runs one backend in one process and prints its timings, for
+quick comparisons while working.
 
 ## Documentation
 

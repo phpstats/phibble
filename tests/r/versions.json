@@ -1,0 +1,16 @@
+{
+    "about": "The R stack that regenerates tests/fixtures. Every script in tests/r was rerun with these versions on the date below and wrote byte-identical fixtures.",
+    "checked": "2026-11-01",
+    "versions": {
+        "R": "4.6.1",
+        "tibble": "3.3.1",
+        "pillar": "1.11.1",
+        "readr": "2.2.0",
+        "vroom": "1.7.1",
+        "dplyr": "1.2.1",
+        "stringr": "1.6.0",
+        "lubridate": "1.9.5",
+        "tidyr": "1.3.2",
+        "jsonlite": "2.0.0"
+    }
+}
