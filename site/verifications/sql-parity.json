@@ -1,0 +1,523 @@
+{
+    "title": "SQL backends: parity with DataFrame",
+    "label": "SQL parity",
+    "kind": "integration",
+    "checked": "Pipelines run as SQL on SQLite, PostgreSQL, and MySQL, collected, and compared with the same pipeline on a DataFrame: verbs, row order, windows, joins, byte-order text, aggregates of booleans, edge-case arithmetic, and declared driver types.",
+    "versions": {
+        "PHP": "8.5.10",
+        "SQLite": "3.45.2",
+        "PostgreSQL": "17.0 (Laravel Herd)",
+        "MySQL": "8.0.46"
+    },
+    "inputs": "Inline SELECT ... UNION ALL data defined in tests/SqlTest.php, tests/SqlReviewTest.php, and tests/DriverTypesTest.php. The tests create only temporary tables.",
+    "comparison": [
+        {
+            "id": "same",
+            "applies_to": "the rows, row order, types, generated SQL, or exception each test expects. Most tests compare the collected result with the same pipeline on a DataFrame, rounding doubles to 9 decimal places.",
+            "kind": "exact"
+        }
+    ],
+    "known_differences": [
+        "MySQL stores no Inf or NaN, and SQLite stores no NaN. Those values come back as NA, and the comparison maps them to NA on the DataFrame side.",
+        "Joins do not warn about unexpected many-to-many matches."
+    ],
+    "reproduce": "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/SqlTest.php tests/SqlReviewTest.php tests/DriverTypesTest.php",
+    "cases": [
+        {
+            "name": "keeps PostgreSQL text as text and types the rest as declared",
+            "status": "pass"
+        },
+        {
+            "name": "reads PostgreSQL timestamptz with an hour-only offset",
+            "status": "pass"
+        },
+        {
+            "name": "reads decimals as doubles, whole-number decimals as integers, and keeps them exact on request",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "reads decimals as doubles, whole-number decimals as integers, and keeps them exact on request",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps MySQL text as text and types the rest as declared",
+            "status": "pass"
+        },
+        {
+            "name": "types empty results as declared",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "types empty results as declared",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "still guesses SQLite values, which carry no declared type",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: arrange twice keeps earlier order for ties",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: arrange twice keeps earlier order for ties",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: arrange twice keeps earlier order for ties",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: mutate overwriting a sort key keeps the row order",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: mutate overwriting a sort key keeps the row order",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: mutate overwriting a sort key keeps the row order",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: float literal against an integer column",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: float literal against an integer column",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: float literal against an integer column",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: near with a float tolerance",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: near with a float tolerance",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: near with a float tolerance",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: nested aggregate",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: nested aggregate",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: nested aggregate",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: sqrt and log outside the domain",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: sqrt and log outside the domain",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: sqrt and log outside the domain",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: exp overflow",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: exp overflow",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: exp overflow",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: division by zero",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: division by zero",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: division by zero",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: as_int truncates",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: as_int truncates",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: as_int truncates",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: slice with a negative offset",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: slice with a negative offset",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: slice with a negative offset",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: slice with a negative length",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: slice with a negative length",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: slice with a negative length",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: summarise of a non-aggregate",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: summarise of a non-aggregate",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: summarise of a non-aggregate",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: min, max and mean of no values",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: min, max and mean of no values",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: min, max and mean of no values",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: str_trim of tabs and newlines",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: str_trim of tabs and newlines",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: str_trim of tabs and newlines",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: brace in a column name",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: brace in a column name",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches DataFrame after the review fixes: brace in a column name",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "aggregates boolean columns",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "aggregates boolean columns",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "aggregates boolean columns",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps text with trailing spaces apart and picks closest text in byte order",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "keeps text with trailing spaces apart and picks closest text in byte order",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps text with trailing spaces apart and picks closest text in byte order",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "does not break a PostgreSQL transaction when opening a view",
+            "status": "pass"
+        },
+        {
+            "name": "parses named bindings around comments and MySQL escapes",
+            "status": "pass"
+        },
+        {
+            "name": "compares strictly in in() and trims Unicode spaces, as R does",
+            "status": "pass"
+        },
+        {
+            "name": "keeps microseconds when serialising datetime literals",
+            "status": "pass"
+        },
+        {
+            "name": "ranks and orders factors by level, as dplyr does",
+            "status": "pass"
+        },
+        {
+            "name": "divides to a double, as R does",
+            "status": "pass"
+        },
+        {
+            "name": "gives NA for empty fixed patterns, as stringr does",
+            "status": "pass"
+        },
+        {
+            "name": "runs verbs lazily and matches DataFrame",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "runs verbs lazily and matches DataFrame",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "runs verbs lazily and matches DataFrame",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "joins in SQL like DataFrame::join",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "joins in SQL like DataFrame::join",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "joins in SQL like DataFrame::join",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "falls back to memory for closures and untranslatable expressions",
+            "status": "pass"
+        },
+        {
+            "name": "shows the query and keeps bindings in order",
+            "status": "pass"
+        },
+        {
+            "name": "compiles dialect-specific SQL",
+            "status": "pass"
+        },
+        {
+            "name": "opens tables and queries with tbl()",
+            "status": "pass"
+        },
+        {
+            "name": "rejects bindings for a table name in tbl()",
+            "status": "pass"
+        },
+        {
+            "name": "uses every aggregate inside grouped mutate like DataFrame",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "uses every aggregate inside grouped mutate like DataFrame",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "uses every aggregate inside grouped mutate like DataFrame",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps the row order when reading one column",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "keeps the row order when reading one column",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps the row order when reading one column",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "translates first, last, nth and str_replace to SQL",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "translates first, last, nth and str_replace to SQL",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "translates first, last, nth and str_replace to SQL",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "runs windows in source row order without arrange",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "runs windows in source row order without arrange",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "runs windows in source row order without arrange",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps row order through select and distinct after arrange",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "keeps row order through select and distinct after arrange",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps row order through select and distinct after arrange",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "translates date parts and string functions to SQL",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "translates date parts and string functions to SQL",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "translates date parts and string functions to SQL",
+            "quantity": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps source order on stored tables with physical row ids",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "keeps source order on stored tables with physical row ids",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "keeps source order on stored tables with physical row ids",
+            "quantity": "MySQL",
+            "status": "skipped",
+            "reason": "The suite skipped this test without a reason."
+        },
+        {
+            "name": "compares, sorts, groups and joins text in byte order like R",
+            "quantity": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "compares, sorts, groups and joins text in byte order like R",
+            "quantity": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "compares, sorts, groups and joins text in byte order like R",
+            "quantity": "MySQL",
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

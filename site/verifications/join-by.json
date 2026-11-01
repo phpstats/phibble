@@ -1,0 +1,541 @@
+{
+    "title": "Inequality, rolling, and overlap joins: agreement with dplyr",
+    "label": "join_by joins",
+    "kind": "reference",
+    "checked": "Output columns and rows of joins with join_by() conditions: inequalities, closest() rolling joins, between, within, and overlaps, across join types and the keep and naMatches options, on every backend.",
+    "reference": "dplyr 1.2.1 join_by(), on R 4.6.1",
+    "versions": {
+        "R": "4.6.1",
+        "dplyr": "1.2.1",
+        "jsonlite": "2.0.0",
+        "PHP": "8.5.10",
+        "SQLite": "3.45.2",
+        "PostgreSQL": "17.0 (Laravel Herd)",
+        "MySQL": "8.0.46",
+        "php_polars": "0.1.0"
+    },
+    "inputs": [
+        {
+            "name": "join cases",
+            "detail": "Two small tables with NA keys, and two interval tables, defined in tests/Support/JoinCases.php and tests/r/joins.R",
+            "url": "tests/fixtures/joins/expected.json"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "ordered",
+            "applies_to": "column names, and rows in order, with numbers compared as doubles. NA must be NA in the same positions.",
+            "kind": "exact"
+        },
+        {
+            "id": "unordered",
+            "applies_to": "column names, and rows after sorting, with numbers compared as doubles, because SQL and Polars joins do not fix the row order. The Polars join must run with no fallback to a DataFrame.",
+            "kind": "exact"
+        }
+    ],
+    "data": "tests/fixtures/joins/expected.json",
+    "reproduce": [
+        "Rscript tests/r/joins.R",
+        "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/ContractV1Test.php tests/SqlTest.php",
+        "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsContractTest.php"
+    ],
+    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
+    "cases": [
+        {
+            "name": "ge_eq",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "closest_ge",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 30,
+            "status": "pass"
+        },
+        {
+            "name": "gt_only",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "closest_le",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 25,
+            "status": "pass"
+        },
+        {
+            "name": "semi_lt",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "anti_lt",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "full_closest",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 35,
+            "status": "pass"
+        },
+        {
+            "name": "right_ge",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "keep_true",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "na_never",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "between",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "within",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "overlaps",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 18,
+            "status": "pass"
+        },
+        {
+            "name": "closest_gt_inner",
+            "quantity": "DataFrame",
+            "rule": "ordered",
+            "n_compared": 24,
+            "status": "pass"
+        },
+        {
+            "name": "ge_eq",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "closest_ge",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 30,
+            "status": "pass"
+        },
+        {
+            "name": "gt_only",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "closest_le",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 25,
+            "status": "pass"
+        },
+        {
+            "name": "semi_lt",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "anti_lt",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "full_closest",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 35,
+            "status": "pass"
+        },
+        {
+            "name": "right_ge",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "keep_true",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "na_never",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "between",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "within",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "overlaps",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 18,
+            "status": "pass"
+        },
+        {
+            "name": "closest_gt_inner",
+            "quantity": "Polars",
+            "rule": "unordered",
+            "n_compared": 24,
+            "status": "pass"
+        },
+        {
+            "name": "ge_eq",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "closest_ge",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 30,
+            "status": "pass"
+        },
+        {
+            "name": "gt_only",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "closest_le",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 25,
+            "status": "pass"
+        },
+        {
+            "name": "semi_lt",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "anti_lt",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "full_closest",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 35,
+            "status": "pass"
+        },
+        {
+            "name": "right_ge",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "keep_true",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "na_never",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "between",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "within",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "overlaps",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 18,
+            "status": "pass"
+        },
+        {
+            "name": "closest_gt_inner",
+            "quantity": "SQLite",
+            "rule": "unordered",
+            "n_compared": 24,
+            "status": "pass"
+        },
+        {
+            "name": "ge_eq",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "closest_ge",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 30,
+            "status": "pass"
+        },
+        {
+            "name": "gt_only",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "closest_le",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 25,
+            "status": "pass"
+        },
+        {
+            "name": "semi_lt",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "anti_lt",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "full_closest",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 35,
+            "status": "pass"
+        },
+        {
+            "name": "right_ge",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "keep_true",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "na_never",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "between",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "within",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "overlaps",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 18,
+            "status": "pass"
+        },
+        {
+            "name": "closest_gt_inner",
+            "quantity": "PostgreSQL",
+            "rule": "unordered",
+            "n_compared": 24,
+            "status": "pass"
+        },
+        {
+            "name": "ge_eq",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "closest_ge",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 30,
+            "status": "pass"
+        },
+        {
+            "name": "gt_only",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "closest_le",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 25,
+            "status": "pass"
+        },
+        {
+            "name": "semi_lt",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "anti_lt",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "full_closest",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 35,
+            "status": "pass"
+        },
+        {
+            "name": "right_ge",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "keep_true",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 48,
+            "status": "pass"
+        },
+        {
+            "name": "na_never",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 40,
+            "status": "pass"
+        },
+        {
+            "name": "between",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "within",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 0,
+            "status": "pass"
+        },
+        {
+            "name": "overlaps",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 18,
+            "status": "pass"
+        },
+        {
+            "name": "closest_gt_inner",
+            "quantity": "MySQL",
+            "rule": "unordered",
+            "n_compared": 24,
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

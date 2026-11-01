@@ -1,0 +1,551 @@
+{
+    "title": "CSV conformance corpus: the contract with phit",
+    "label": "CSV corpus",
+    "kind": "contract",
+    "checked": "The PHP CSV reader's names, problems, and column values for every case in the committed corpus, read through the Phit\\read_csv() contract, and the same results at block sizes from 1 to 64 rows.",
+    "description": "The corpus records phibble's answers, and phit commits a byte-identical copy and checks its native reader against it. The answers themselves are checked against readr in the CSV reading record.",
+    "versions": {
+        "PHP": "8.5.10"
+    },
+    "inputs": [
+        {
+            "name": "CSV conformance corpus",
+            "detail": "120 cases: delimiters, quoting, comments, blank lines, encodings, NA strings, type guessing, and declared types",
+            "url": "tests/fixtures/csv-conformance.json"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "corpus",
+            "applies_to": "column names, problem counts, and every column's values and types",
+            "kind": "exact"
+        }
+    ],
+    "data": "tests/fixtures/csv-conformance.json",
+    "reproduce": [
+        "bin/generate-csv-conformance",
+        "php vendor/bin/pest tests/CsvConformanceTest.php"
+    ],
+    "cases": [
+        {
+            "name": "is generated from the cases the generator declares",
+            "status": "pass"
+        },
+        {
+            "name": "option/delimiter/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/delimiter/semicolon",
+            "status": "pass"
+        },
+        {
+            "name": "option/quote/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/quote/apostrophe",
+            "status": "pass"
+        },
+        {
+            "name": "option/escape_double/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/escape_double/off",
+            "status": "pass"
+        },
+        {
+            "name": "option/escape_backslash/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/escape_backslash/on",
+            "status": "pass"
+        },
+        {
+            "name": "option/trim_ws/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/trim_ws/off",
+            "status": "pass"
+        },
+        {
+            "name": "option/skip_empty_rows/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/skip_empty_rows/off",
+            "status": "pass"
+        },
+        {
+            "name": "option/col_names/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/col_names/off",
+            "status": "pass"
+        },
+        {
+            "name": "option/skip/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/skip/two",
+            "status": "pass"
+        },
+        {
+            "name": "option/guess_max/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/guess_max/two",
+            "status": "pass"
+        },
+        {
+            "name": "option/n_max/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/n_max/two",
+            "status": "pass"
+        },
+        {
+            "name": "option/comment/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/comment/hash",
+            "status": "pass"
+        },
+        {
+            "name": "option/decimal_mark/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/decimal_mark/comma",
+            "status": "pass"
+        },
+        {
+            "name": "option/grouping_mark/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/grouping_mark/none",
+            "status": "pass"
+        },
+        {
+            "name": "option/na/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/na/dash",
+            "status": "pass"
+        },
+        {
+            "name": "option/types/default",
+            "status": "pass"
+        },
+        {
+            "name": "option/types/string-and-int",
+            "status": "pass"
+        },
+        {
+            "name": "type/guess",
+            "status": "pass"
+        },
+        {
+            "name": "type/logical",
+            "status": "pass"
+        },
+        {
+            "name": "type/integer",
+            "status": "pass"
+        },
+        {
+            "name": "type/double",
+            "status": "pass"
+        },
+        {
+            "name": "type/character",
+            "status": "pass"
+        },
+        {
+            "name": "type/date",
+            "status": "pass"
+        },
+        {
+            "name": "type/datetime",
+            "status": "pass"
+        },
+        {
+            "name": "type/skip",
+            "status": "pass"
+        },
+        {
+            "name": "type/by-position",
+            "status": "pass"
+        },
+        {
+            "name": "type/past-the-end",
+            "status": "pass"
+        },
+        {
+            "name": "type/parse-failures",
+            "status": "pass"
+        },
+        {
+            "name": "structure/ragged-short",
+            "status": "pass"
+        },
+        {
+            "name": "structure/ragged-long",
+            "status": "pass"
+        },
+        {
+            "name": "structure/ragged-both-and-empty",
+            "status": "pass"
+        },
+        {
+            "name": "structure/bom",
+            "status": "pass"
+        },
+        {
+            "name": "structure/crlf",
+            "status": "pass"
+        },
+        {
+            "name": "structure/cr",
+            "status": "pass"
+        },
+        {
+            "name": "structure/no-trailing-newline",
+            "status": "pass"
+        },
+        {
+            "name": "structure/empty-file",
+            "status": "pass"
+        },
+        {
+            "name": "structure/only-empty-lines",
+            "status": "pass"
+        },
+        {
+            "name": "structure/embedded-newline",
+            "status": "pass"
+        },
+        {
+            "name": "structure/no-quote-character",
+            "status": "pass"
+        },
+        {
+            "name": "structure/duplicate-names",
+            "status": "pass"
+        },
+        {
+            "name": "structure/empty-name",
+            "status": "pass"
+        },
+        {
+            "name": "structure/single-cell",
+            "status": "pass"
+        },
+        {
+            "name": "structure/tab-delimited",
+            "status": "pass"
+        },
+        {
+            "name": "structure/skip-past-the-end",
+            "status": "pass"
+        },
+        {
+            "name": "structure/whitespace-only-fields",
+            "status": "pass"
+        },
+        {
+            "name": "structure/comment-line",
+            "status": "pass"
+        },
+        {
+            "name": "structure/value-then-comment",
+            "status": "pass"
+        },
+        {
+            "name": "structure/comment-in-header",
+            "status": "pass"
+        },
+        {
+            "name": "structure/invalid-utf8",
+            "status": "pass"
+        },
+        {
+            "name": "structure/unterminated-quote",
+            "status": "pass"
+        },
+        {
+            "name": "structure/unterminated-quote-only-field",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/backslash-quoted-word",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/stray-pair",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/stray-pair-hides-delimiter",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/backslash-before-delimiter",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/doubled",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/in-unquoted-field",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/text-after-closing-quote",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/doubled-then-stray",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/stray-newline-ends-record",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/space-before-quote",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/doubled-reopens",
+            "status": "pass"
+        },
+        {
+            "name": "quotes/escape-double-off",
+            "status": "pass"
+        },
+        {
+            "name": "zero-rows/header-only",
+            "status": "pass"
+        },
+        {
+            "name": "zero-rows/n-max-zero",
+            "status": "pass"
+        },
+        {
+            "name": "zero-rows/every-row-skipped",
+            "status": "pass"
+        },
+        {
+            "name": "zero-rows/every-row-empty",
+            "status": "pass"
+        },
+        {
+            "name": "zero-rows/header-only-typed",
+            "status": "pass"
+        },
+        {
+            "name": "zero-rows/all-na-with-a-data-row",
+            "status": "pass"
+        },
+        {
+            "name": "zero-rows/empty-rows-kept",
+            "status": "pass"
+        },
+        {
+            "name": "blank/quoted-empty-only-field",
+            "status": "pass"
+        },
+        {
+            "name": "blank/quoted-empty-then-value",
+            "status": "pass"
+        },
+        {
+            "name": "blank/quoted-empty-mid-file",
+            "status": "pass"
+        },
+        {
+            "name": "blank/quoted-empty-rows-kept",
+            "status": "pass"
+        },
+        {
+            "name": "blank/quoted-space-is-data",
+            "status": "pass"
+        },
+        {
+            "name": "blank/whitespace-only-line",
+            "status": "pass"
+        },
+        {
+            "name": "blank/whitespace-only-line-untrimmed",
+            "status": "pass"
+        },
+        {
+            "name": "blank/whitespace-only-line-kept",
+            "status": "pass"
+        },
+        {
+            "name": "blank/tab-only-line-untrimmed",
+            "status": "pass"
+        },
+        {
+            "name": "blank/whitespace-only-file",
+            "status": "pass"
+        },
+        {
+            "name": "blank/whitespace-only-file-unterminated",
+            "status": "pass"
+        },
+        {
+            "name": "blank/unterminated-whitespace-last-line",
+            "status": "pass"
+        },
+        {
+            "name": "blank/whitespace-is-the-delimiter",
+            "status": "pass"
+        },
+        {
+            "name": "blank/whitespace-is-the-delimiter-kept",
+            "status": "pass"
+        },
+        {
+            "name": "blank/crlf-whitespace-line",
+            "status": "pass"
+        },
+        {
+            "name": "blank/cr-whitespace-line",
+            "status": "pass"
+        },
+        {
+            "name": "blank/comment-after-whitespace-leading",
+            "status": "pass"
+        },
+        {
+            "name": "blank/comment-after-whitespace-mid-file",
+            "status": "pass"
+        },
+        {
+            "name": "values/bool-spellings",
+            "status": "pass"
+        },
+        {
+            "name": "values/int-and-float",
+            "status": "pass"
+        },
+        {
+            "name": "values/negative-zero-and-exponents",
+            "status": "pass"
+        },
+        {
+            "name": "values/inf-and-nan",
+            "status": "pass"
+        },
+        {
+            "name": "values/int64-edges",
+            "status": "pass"
+        },
+        {
+            "name": "values/int-overflow",
+            "status": "pass"
+        },
+        {
+            "name": "values/leading-zeroes-are-strings",
+            "status": "pass"
+        },
+        {
+            "name": "values/mixed-forces-string",
+            "status": "pass"
+        },
+        {
+            "name": "values/all-na-column",
+            "status": "pass"
+        },
+        {
+            "name": "values/dates",
+            "status": "pass"
+        },
+        {
+            "name": "values/datetimes",
+            "status": "pass"
+        },
+        {
+            "name": "values/datetime-offsets",
+            "status": "pass"
+        },
+        {
+            "name": "values/pre-epoch-temporals",
+            "status": "pass"
+        },
+        {
+            "name": "values/quoted-numbers-stay-numbers",
+            "status": "pass"
+        },
+        {
+            "name": "values/quote-inside-unquoted-field",
+            "status": "pass"
+        },
+        {
+            "name": "values/guess-max-sampling",
+            "status": "pass"
+        },
+        {
+            "name": "values/na-overrides-the-guess",
+            "status": "pass"
+        },
+        {
+            "name": "values/empty-na-list",
+            "status": "pass"
+        },
+        {
+            "name": "values/grouped-numbers",
+            "status": "pass"
+        },
+        {
+            "name": "block size 1",
+            "quantity": "all 120 cases",
+            "status": "pass"
+        },
+        {
+            "name": "block size 2",
+            "quantity": "all 120 cases",
+            "status": "pass"
+        },
+        {
+            "name": "block size 3",
+            "quantity": "all 120 cases",
+            "status": "pass"
+        },
+        {
+            "name": "block size 5",
+            "quantity": "all 120 cases",
+            "status": "pass"
+        },
+        {
+            "name": "block size 8",
+            "quantity": "all 120 cases",
+            "status": "pass"
+        },
+        {
+            "name": "block size 64",
+            "quantity": "all 120 cases",
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

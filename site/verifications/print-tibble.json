@@ -1,0 +1,230 @@
+{
+    "title": "Printing: agreement with tibble",
+    "label": "Printing",
+    "kind": "reference",
+    "checked": "The text of echo $df, format(), and glimpse() for 38 tables, including dates, factors, list-columns, grouped and rowwise tables, wide tables, and empty tables.",
+    "reference": "tibble 3.3.1 and pillar 1.11.1 print() and glimpse(), on R 4.6.1",
+    "versions": {
+        "R": "4.6.1",
+        "tibble": "3.3.1",
+        "pillar": "1.11.1",
+        "dplyr": "1.2.1",
+        "jsonlite": "2.0.0",
+        "PHP": "8.5.10"
+    },
+    "inputs": [
+        {
+            "name": "print cases",
+            "detail": "Tables built in tests/PrintTest.php and tests/r/print.R with the same values",
+            "url": "tests/r/print.R"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "text",
+            "applies_to": "the printed text, byte for byte",
+            "kind": "exact"
+        }
+    ],
+    "data": "tests/fixtures/print",
+    "reproduce": [
+        "Rscript tests/r/print.R",
+        "php vendor/bin/pest tests/PrintTest.php"
+    ],
+    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
+    "cases": [
+        {
+            "name": "basic",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "magnitudes",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "scientific",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "scientific_negative",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "rounding",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "specials",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "many_rows",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "twenty_rows",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "thousands",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "dates",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "factors",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "lists",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "empty",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "rows_no_cols",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "cols_no_rows",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "wide",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "very_wide",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "long_strings",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "ambiguous",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "nonsyntactic",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "long_names",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "grouped",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "grouped_two",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "negatives",
+            "quantity": "print",
+            "status": "pass"
+        },
+        {
+            "name": "prints the requested number of rows",
+            "status": "pass"
+        },
+        {
+            "name": "squeezes columns into a narrow width",
+            "status": "pass"
+        },
+        {
+            "name": "basic",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "magnitudes",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "dates",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "factors",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "lists",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "empty",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "cols_no_rows",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "wide",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "long_strings",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "nonsyntactic",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "grouped",
+            "quantity": "glimpse()",
+            "status": "pass"
+        },
+        {
+            "name": "prints rowwise tables like dplyr",
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

@@ -1,0 +1,2330 @@
+{
+    "title": "Dates and strings: agreement with lubridate and stringr",
+    "label": "lubridate and stringr",
+    "kind": "reference",
+    "checked": "Date parsing, date parts, rounding, periods, time zones, and stringr pattern, padding, truncation, and case functions in mutate(), on every backend.",
+    "reference": "lubridate 1.9.5 and stringr 1.6.0, on R 4.6.1",
+    "versions": {
+        "R": "4.6.1",
+        "stringr": "1.6.0",
+        "lubridate": "1.9.5",
+        "jsonlite": "2.0.0",
+        "PHP": "8.5.10",
+        "SQLite": "3.45.2",
+        "PostgreSQL": "17.0 (Laravel Herd)",
+        "MySQL": "8.0.46",
+        "php_polars": "0.1.0"
+    },
+    "inputs": [
+        {
+            "name": "date and string cases",
+            "detail": "A 5-row table of dates, datetimes, and text with NA, plus per-case vectors, defined in tests/Support/LubridateStringrCases.php and tests/r/lubridate_stringr.R",
+            "url": "tests/fixtures/expr/lubridate_stringr.json"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "rounded",
+            "applies_to": "Dates compare as YYYY-MM-DD and datetimes as \"YYYY-MM-DD HH:MM:SS +hhmm\" in their time zone. Numbers are rounded to 9 decimal places with PHP round(), then compared exactly. NA must be NA in the same positions.",
+            "kind": "exact"
+        },
+        {
+            "id": "rounded-native",
+            "applies_to": "As rounded, and the verb must run in Polars with no fallback to a DataFrame, except str_to_title(), which needs ICU word breaks and runs on a DataFrame.",
+            "kind": "exact"
+        }
+    ],
+    "known_differences": [
+        "On SQL databases, a function with no faithful SQL translation runs in memory after the query. Those cases are compared the same way."
+    ],
+    "data": "tests/fixtures/expr/lubridate_stringr.json",
+    "reproduce": [
+        "Rscript tests/r/lubridate_stringr.R",
+        "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/LubridateStringrTest.php tests/SqlTest.php",
+        "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsLubridateStringrTest.php"
+    ],
+    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
+    "cases": [
+        {
+            "name": "ymd",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd_hms",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "dmy",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "mdy",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "parse_dt",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "month",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "day",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday_mon",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "yday",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "quarter",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "hour",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minute",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "second",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year_t",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_hour",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_15min",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_week",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_month_d",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_quarter_d",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_year_d",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_month_d",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_hour",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_day",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_month_d",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_days",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_months",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_years",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minus_weeks",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_hours",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_minutes",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "diff_days",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_hours",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_weeks",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "with_tz",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "force_tz",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_fixed",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_ic",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_negate",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_starts",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_ends",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_fixed",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_class",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract_all",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i_neg",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all_fixed",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_na",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_right",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_both",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_left",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_center",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_title",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_upper",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_squish",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_length",
+            "quantity": "DataFrame",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd_hms",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "dmy",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "mdy",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "parse_dt",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "month",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "day",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday_mon",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "yday",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "quarter",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "hour",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minute",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "second",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year_t",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_hour",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_15min",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_week",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_month_d",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_quarter_d",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_year_d",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_month_d",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_hour",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_day",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_month_d",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_days",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_months",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_years",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minus_weeks",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_hours",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_minutes",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "diff_days",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_hours",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_weeks",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "with_tz",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "force_tz",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_fixed",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_ic",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_negate",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_starts",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_ends",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_fixed",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_class",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract_all",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i_neg",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all_fixed",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_na",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_right",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_both",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_left",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_center",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_title",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_upper",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_squish",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_length",
+            "quantity": "Polars",
+            "rule": "rounded-native",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd_hms",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "dmy",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "mdy",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "parse_dt",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "month",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "day",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday_mon",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "yday",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "quarter",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "hour",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minute",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "second",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year_t",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_hour",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_15min",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_week",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_month_d",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_quarter_d",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_year_d",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_month_d",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_hour",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_day",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_month_d",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_days",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_months",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_years",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minus_weeks",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_hours",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_minutes",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "diff_days",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_hours",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_weeks",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "with_tz",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "force_tz",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_fixed",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_ic",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_negate",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_starts",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_ends",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_fixed",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_class",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract_all",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i_neg",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all_fixed",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_na",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_right",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_both",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_left",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_center",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_title",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_upper",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_squish",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_length",
+            "quantity": "SQLite",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd_hms",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "dmy",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "mdy",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "parse_dt",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "month",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "day",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday_mon",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "yday",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "quarter",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "hour",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minute",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "second",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year_t",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_hour",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_15min",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_week",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_month_d",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_quarter_d",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_year_d",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_month_d",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_hour",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_day",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_month_d",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_days",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_months",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_years",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minus_weeks",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_hours",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_minutes",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "diff_days",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_hours",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_weeks",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "with_tz",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "force_tz",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_fixed",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_ic",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_negate",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_starts",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_ends",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_fixed",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_class",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract_all",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i_neg",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all_fixed",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_na",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_right",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_both",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_left",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_center",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_title",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_upper",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_squish",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_length",
+            "quantity": "PostgreSQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ymd_hms",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "dmy",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "mdy",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "parse_dt",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "month",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "day",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "wday_mon",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "yday",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "quarter",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "hour",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minute",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "second",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "year_t",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_hour",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_15min",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_week",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_month_d",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_quarter_d",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "floor_year_d",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_month_d",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "ceiling_hour",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_day",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "round_month_d",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_days",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_months",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_years",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "minus_weeks",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_hours",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "plus_minutes",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "diff_days",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_hours",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "difftime_weeks",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "with_tz",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "force_tz",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_fixed",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_ic",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_detect_negate",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_starts",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_ends",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_fixed",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_count_class",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_extract_all",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_split_i_neg",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_all_fixed",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_replace_na",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_right",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_pad_both",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_left",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_trunc_center",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_title",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_to_upper",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_squish",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        },
+        {
+            "name": "str_length",
+            "quantity": "MySQL",
+            "rule": "rounded",
+            "n_compared": 5,
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

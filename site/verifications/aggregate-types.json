@@ -1,0 +1,195 @@
+{
+    "title": "Aggregate result types: agreement with dplyr",
+    "label": "Aggregate types",
+    "kind": "reference",
+    "checked": "The column type of each aggregate in a grouped summarise() when every group holds only NA, so the type cannot come from the values.",
+    "reference": "dplyr 1.2.1 summarise(), on R 4.6.1",
+    "versions": {
+        "R": "4.6.1",
+        "dplyr": "1.2.1",
+        "jsonlite": "2.0.0",
+        "PHP": "8.5.10"
+    },
+    "inputs": [
+        {
+            "name": "all-NA table",
+            "detail": "4 rows in 2 groups; NA double, integer, logical, character, and date columns",
+            "url": "tests/r/expr-types.R"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "type",
+            "applies_to": "the result type abbreviation (dbl, int, lgl, chr, date), and that every value is NA",
+            "kind": "exact"
+        }
+    ],
+    "data": "tests/fixtures/expr/types.json",
+    "reproduce": [
+        "Rscript tests/r/expr-types.R",
+        "php vendor/bin/pest tests/AggregateTypeTest.php"
+    ],
+    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
+    "cases": [
+        {
+            "name": "sum_dbl",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "sum_int",
+            "quantity": "result type",
+            "actual": "int",
+            "expected": "int",
+            "status": "pass"
+        },
+        {
+            "name": "sum_lgl",
+            "quantity": "result type",
+            "actual": "int",
+            "expected": "int",
+            "status": "pass"
+        },
+        {
+            "name": "mean_dbl",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "mean_int",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "median_int",
+            "quantity": "result type",
+            "actual": "int",
+            "expected": "int",
+            "status": "pass"
+        },
+        {
+            "name": "sd_int",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "var_dbl",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "quantile_int",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "iqr_int",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "min_int",
+            "quantity": "result type",
+            "actual": "int",
+            "expected": "int",
+            "status": "pass"
+        },
+        {
+            "name": "max_dbl",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "min_lgl",
+            "quantity": "result type",
+            "actual": "int",
+            "expected": "int",
+            "status": "pass"
+        },
+        {
+            "name": "median_lgl",
+            "quantity": "result type",
+            "actual": "lgl",
+            "expected": "lgl",
+            "status": "pass"
+        },
+        {
+            "name": "first_lgl",
+            "quantity": "result type",
+            "actual": "lgl",
+            "expected": "lgl",
+            "status": "pass"
+        },
+        {
+            "name": "min_chr",
+            "quantity": "result type",
+            "actual": "chr",
+            "expected": "chr",
+            "status": "pass"
+        },
+        {
+            "name": "max_date",
+            "quantity": "result type",
+            "actual": "date",
+            "expected": "date",
+            "status": "pass"
+        },
+        {
+            "name": "first_int",
+            "quantity": "result type",
+            "actual": "int",
+            "expected": "int",
+            "status": "pass"
+        },
+        {
+            "name": "last_chr",
+            "quantity": "result type",
+            "actual": "chr",
+            "expected": "chr",
+            "status": "pass"
+        },
+        {
+            "name": "nth_dbl",
+            "quantity": "result type",
+            "actual": "dbl",
+            "expected": "dbl",
+            "status": "pass"
+        },
+        {
+            "name": "any_lgl",
+            "quantity": "result type",
+            "actual": "lgl",
+            "expected": "lgl",
+            "status": "pass"
+        },
+        {
+            "name": "all_lgl",
+            "quantity": "result type",
+            "actual": "lgl",
+            "expected": "lgl",
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

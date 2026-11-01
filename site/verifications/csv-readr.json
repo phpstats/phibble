@@ -1,0 +1,768 @@
+{
+    "title": "CSV reading and writing: agreement with readr",
+    "label": "CSV and readr",
+    "kind": "reference",
+    "checked": "Column names, guessed and declared types, values, factor levels, and parsing problems for 39 CSV files read by each of phibble's three CSV readers, and the text written by toCsv() and CsvWriter::formatDouble().",
+    "reference": "readr 2.2.0 read_delim(), problems(), and format_csv(), on R 4.6.1",
+    "versions": {
+        "R": "4.6.1",
+        "readr": "2.2.0",
+        "vroom": "1.7.1",
+        "jsonlite": "2.0.0",
+        "phit": "0.4.4"
+    },
+    "inputs": [
+        {
+            "name": "CSV cases",
+            "detail": "35 CSV files and the readr options for each",
+            "url": "tests/fixtures/io/cases.json"
+        },
+        {
+            "name": "readr results",
+            "detail": "One JSON file per case, written by tests/r/io.R",
+            "url": "tests/fixtures/io/expected"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "read",
+            "applies_to": "column names, types, factor levels, the presence of problems, and the rows readr::problems() names. Values compare exactly; doubles are parsed from readr's shortest round-trip text and compared with ===. NA must be NA in the same positions.",
+            "kind": "exact"
+        },
+        {
+            "id": "write",
+            "applies_to": "the CSV text, byte for byte",
+            "kind": "exact"
+        }
+    ],
+    "known_differences": [
+        "phibble guesses a column of whole numbers as int, where readr guesses double. These columns are compared as doubles.",
+        "In the empty_rows case, readr numbers an empty line's problem one lower than other rows, and phibble numbers it like any row. The problem row numbers are not compared for that case."
+    ],
+    "data": "tests/fixtures/io",
+    "reproduce": [
+        "Rscript tests/r/io.R",
+        "php vendor/bin/pest tests/IoTest.php"
+    ],
+    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
+    "cases": [
+        {
+            "name": "guess",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "guess",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "guess",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "na",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "na",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "na",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quoting",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quoting",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quoting",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "trim",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "trim",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "trim",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "comment",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "comment",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "comment",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "skip_nmax",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "skip_nmax",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "skip_nmax",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "nocolnames",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "nocolnames",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "nocolnames",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "colnames_given",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "colnames_given",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "colnames_given",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "dupnames",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "dupnames",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "dupnames",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "dupnames_universal",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "dupnames_universal",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "dupnames_universal",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "coltypes",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "coltypes",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "coltypes",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "coltypes_named",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "coltypes_named",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "coltypes_named",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "guessmax",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "guessmax",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "guessmax",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "trim_false",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "trim_false",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "trim_false",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "empty_rows",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "empty_rows",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "empty_rows",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "semicolon",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "semicolon",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "semicolon",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "select",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "select",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "select",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "write",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "write",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "write",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_empty",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_empty",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_empty",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_empty_only",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_empty_only",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_empty_only",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_line",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_line",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_line",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_kept",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_kept",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_kept",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_tab_line",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_tab_line",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_tab_line",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_unterminated",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_unterminated",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_unterminated",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_file",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_file",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_file",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_delimiter",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_delimiter",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_whitespace_delimiter",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_space",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_space",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_quoted_space",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_cr_line",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_cr_line",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_cr_line",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_leading_comment",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_leading_comment",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_leading_comment",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_comment_after_row",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_comment_after_row",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "blank_comment_after_row",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_stray",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_stray",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_stray",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_problems",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_problems",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_problems",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_unterminated",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_unterminated",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_unterminated",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_escape_double_off",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_escape_double_off",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "quotes_escape_double_off",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "problem_rows_skip_comment",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "problem_rows_skip_comment",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "problem_rows_skip_comment",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_trim",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_trim",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_trim",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_space",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_space",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_space",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_tab",
+            "quantity": "PHP reader",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_tab",
+            "quantity": "native path, PHP emulation of Phit\\read_csv()",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "ragged_tab",
+            "quantity": "native path, phit extension",
+            "rule": "read",
+            "status": "pass"
+        },
+        {
+            "name": "writes CSV like readr",
+            "rule": "write",
+            "status": "pass"
+        },
+        {
+            "name": "formats doubles like write_csv",
+            "rule": "write",
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

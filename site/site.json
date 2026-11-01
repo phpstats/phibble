@@ -116,5 +116,21 @@
                 "path": "development.qmd"
             }
         ]
+    },
+    "verifications": [
+        "site/verifications/print-tibble.json",
+        "site/verifications/csv-readr.json",
+        "site/verifications/expressions-dplyr.json",
+        "site/verifications/aggregate-types.json",
+        "site/verifications/lubridate-stringr.json",
+        "site/verifications/join-by.json",
+        "site/verifications/pivot-tidyr.json",
+        "site/verifications/csv-conformance.json",
+        "site/verifications/sql-parity.json",
+        "site/verifications/polars-backend.json"
+    ],
+    "evidence_gaps": {
+        "benchmarks": "No benchmark covers SqlTable on PostgreSQL or MySQL, or any run on macOS or Windows.",
+        "verification": "The SQL checks run on PostgreSQL 17 and MySQL 8.0 only, so MariaDB and other server versions are unchecked, and no check runs on Windows."
     }
 }

@@ -1,0 +1,155 @@
+{
+    "title": "Polars backend: the Table contract and fallback",
+    "label": "Polars backend",
+    "kind": "contract",
+    "checked": "PolarsTable against phibble's Table contract: joins, grouping and group order, summarise .groups, factors, list-columns, type round trips, strict mode, and the fallback to a DataFrame for closures and rowwise work.",
+    "versions": {
+        "PHP": "8.5.10",
+        "php_polars": "0.1.0"
+    },
+    "inputs": "Small tables defined in tests/Polars/.",
+    "comparison": [
+        {
+            "id": "contract",
+            "applies_to": "the values, types, groups, and exceptions each test expects, which are the DataFrame results",
+            "kind": "exact"
+        }
+    ],
+    "reproduce": "php -d extension=php_polars.so php vendor/bin/pest tests/Polars",
+    "cases": [
+        {
+            "name": "left joins like dplyr",
+            "status": "pass"
+        },
+        {
+            "name": "full and right joins append unmatched y rows with coalesced keys",
+            "status": "pass"
+        },
+        {
+            "name": "keeps both key sets with keep",
+            "status": "pass"
+        },
+        {
+            "name": "joins on differently named keys and suffixes clashes like dplyr",
+            "status": "pass"
+        },
+        {
+            "name": "warns on an unexpected many-to-many join",
+            "status": "pass"
+        },
+        {
+            "name": "enforces relationship and unmatched",
+            "status": "pass"
+        },
+        {
+            "name": "handles multiple, naMatches, semi, anti and cross",
+            "status": "pass"
+        },
+        {
+            "name": "matches 1 with 1.0 and factors with strings by label",
+            "status": "pass"
+        },
+        {
+            "name": "keeps x grouping through joins",
+            "status": "pass"
+        },
+        {
+            "name": "sorts groups like dplyr: NA last, factors by level",
+            "status": "pass"
+        },
+        {
+            "name": "iterates groups in sorted order with ungrouped tables",
+            "status": "pass"
+        },
+        {
+            "name": "runs closures by falling back to a DataFrame, keeping groups",
+            "status": "pass"
+        },
+        {
+            "name": "takes rows by index, with null giving an NA row",
+            "status": "pass"
+        },
+        {
+            "name": "works rowwise through the DataFrame fallback",
+            "status": "pass"
+        },
+        {
+            "name": "throws instead of falling back in strict mode",
+            "status": "pass"
+        },
+        {
+            "name": "keeps types and round-trips through collect",
+            "status": "pass"
+        },
+        {
+            "name": "selects, renames, distinct, slices and counts like the contract",
+            "status": "pass"
+        },
+        {
+            "name": "mutates with lists, scalars and later entries seeing earlier ones",
+            "status": "pass"
+        },
+        {
+            "name": "refuses keep: false with comparisons",
+            "status": "pass"
+        },
+        {
+            "name": "honours summarise .groups and groupBy(drop: false)",
+            "status": "pass"
+        },
+        {
+            "name": "lists group rows in group order",
+            "status": "pass"
+        },
+        {
+            "name": "ranks and orders factors by level, as phibble v0.1.0 does",
+            "status": "pass"
+        },
+        {
+            "name": "creates Polars tables with polars()",
+            "status": "pass"
+        },
+        {
+            "name": "keeps list-columns that Polars stores exactly and refuses named arrays with different keys",
+            "status": "pass"
+        },
+        {
+            "name": "has summarize() as an alias of summarise()",
+            "status": "pass"
+        },
+        {
+            "name": "filters with expressions per group in Polars, dropping NA",
+            "status": "pass"
+        },
+        {
+            "name": "arranges by expressions in Polars",
+            "status": "pass"
+        },
+        {
+            "name": "rejects summarise entries that are not size 1",
+            "status": "pass"
+        },
+        {
+            "name": "raises like R for quantile() over NA without na_rm",
+            "status": "pass"
+        },
+        {
+            "name": "keeps dates as dates through Polars expressions",
+            "status": "pass"
+        },
+        {
+            "name": "reads the clock through today() and now() in Polars",
+            "status": "pass"
+        },
+        {
+            "name": "rejects invalid regular expressions clearly in Polars",
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

@@ -1,0 +1,164 @@
+{
+    "title": "Pivots: agreement with tidyr",
+    "label": "Pivots",
+    "kind": "reference",
+    "checked": "pivotLongerSpec() and pivotWiderSpec() output columns, rows, and warnings for spec-driven pivots, including NA dropping, names_sep-style specs, value types, and duplicate keys.",
+    "reference": "tidyr 1.3.2 pivot_longer_spec() and pivot_wider_spec(), on R 4.6.1",
+    "versions": {
+        "R": "4.6.1",
+        "dplyr": "1.2.1",
+        "tidyr": "1.3.2",
+        "jsonlite": "2.0.0",
+        "PHP": "8.5.10",
+        "php_polars": "0.1.0"
+    },
+    "inputs": [
+        {
+            "name": "pivot cases",
+            "detail": "Inputs and specs written with the expected output by tests/r/pivot.R",
+            "url": "tests/fixtures/pivot/cases.json"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "rows",
+            "applies_to": "column names, rows in order, and the warning text. Numbers compare as doubles, and a list cell of length 1 compares as its value, as jsonlite writes it.",
+            "kind": "exact"
+        }
+    ],
+    "data": "tests/fixtures/pivot/cases.json",
+    "reproduce": [
+        "Rscript tests/r/pivot.R",
+        "php vendor/bin/pest tests/PivotTest.php",
+        "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsPivotTest.php"
+    ],
+    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
+    "cases": [
+        {
+            "name": "longer_simple",
+            "quantity": "DataFrame",
+            "n_compared": 18,
+            "status": "pass"
+        },
+        {
+            "name": "longer_drop_na",
+            "quantity": "DataFrame",
+            "n_compared": 15,
+            "status": "pass"
+        },
+        {
+            "name": "longer_value",
+            "quantity": "DataFrame",
+            "n_compared": 24,
+            "status": "pass"
+        },
+        {
+            "name": "longer_value_drop_na",
+            "quantity": "DataFrame",
+            "n_compared": 20,
+            "status": "pass"
+        },
+        {
+            "name": "longer_combine",
+            "quantity": "DataFrame",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_simple",
+            "quantity": "DataFrame",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_fill",
+            "quantity": "DataFrame",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_multi",
+            "quantity": "DataFrame",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_id_cols",
+            "quantity": "DataFrame",
+            "n_compared": 10,
+            "status": "pass"
+        },
+        {
+            "name": "wider_dupes",
+            "quantity": "DataFrame",
+            "n_compared": 6,
+            "status": "pass"
+        },
+        {
+            "name": "longer_simple",
+            "quantity": "Polars",
+            "n_compared": 18,
+            "status": "pass"
+        },
+        {
+            "name": "longer_drop_na",
+            "quantity": "Polars",
+            "n_compared": 15,
+            "status": "pass"
+        },
+        {
+            "name": "longer_value",
+            "quantity": "Polars",
+            "n_compared": 24,
+            "status": "pass"
+        },
+        {
+            "name": "longer_value_drop_na",
+            "quantity": "Polars",
+            "n_compared": 20,
+            "status": "pass"
+        },
+        {
+            "name": "longer_combine",
+            "quantity": "Polars",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_simple",
+            "quantity": "Polars",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_fill",
+            "quantity": "Polars",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_multi",
+            "quantity": "Polars",
+            "n_compared": 12,
+            "status": "pass"
+        },
+        {
+            "name": "wider_id_cols",
+            "quantity": "Polars",
+            "n_compared": 10,
+            "status": "pass"
+        },
+        {
+            "name": "wider_dupes",
+            "quantity": "Polars",
+            "n_compared": 6,
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "352fb7e",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}
