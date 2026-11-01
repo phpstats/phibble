@@ -1020,7 +1020,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="expr-isin"><code>Expr-&gt;isIn()</code></h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;isIn(<span class="dt">array</span> <span class="va">$values</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Whether each value is one of the given values.</p>
-<p>R’s %in% operator. NA matches only when the list holds null. The result is never NA.</p>
+<p>R’s %in% operator. Dates, datetimes, and times compare by value. NA matches only when the list holds null. The result is never NA.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -1041,13 +1041,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td><code>$values</code></td>
 <td><code>list&lt;mixed&gt;</code></td>
 <td></td>
-<td>The values to match, each null or a scalar.</td>
+<td>The values to match: null, scalars, or dates, datetimes, or times of one kind.</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
 <strong>Returns</strong> <code>Call</code><br>
-<strong>Throws</strong> <code>InvalidArgumentException</code>: when a value is not null or a scalar.<br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when a value is another type, or the list mixes scalars with temporal values or times with dates.<br>
 <strong>Examples</strong> <a href="../expr.html">Expressions</a>, <a href="../sql.html">SQL tables</a></p>
 </section>
 <section id="expr-between" class="level3">
@@ -1216,7 +1216,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="coalesce"><code>coalesce()</code></h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>coalesce(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>First value that is not NA among the arguments, row by row.</p>
-<p>NaN is a value here: it is not skipped.</p>
+<p>NaN counts as NA and is skipped, as in <code>is_na()</code> and R’s <code>coalesce()</code>.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -2400,7 +2400,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="row-number" class="level3">
 <h3 class="anchored" data-anchor-id="row-number"><code>row_number()</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>row_number(<span class="dt">mixed</span> ...<span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>row_number(<span class="dt">mixed</span> <span class="va">$x</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Row number within the group, or the rank of each value with ties broken by row order.</p>
 <p>With no argument, rows are numbered 1 to n in their order. With an argument, NA values get NA, and a factor column ranks by level order.</p>
 <table class="caption-top table">
@@ -2420,15 +2420,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>...$x</code></td>
+<td><code>$x</code></td>
 <td><code>mixed</code></td>
-<td></td>
-<td>Optionally one expression to rank by, or <code>desc()</code> of one.</td>
+<td><code>null</code></td>
+<td>An expression to rank by, or <code>desc()</code> of one. Omit it to number rows in order.</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Function</strong> in <code>Phibble\Expr</code><br>
-<strong>Returns</strong> <code>Call</code></p>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>ArgumentCountError</code>: when given more than one argument.</p>
 </section>
 <section id="min-rank" class="level3">
 <h3 class="anchored" data-anchor-id="min-rank"><code>min_rank()</code></h3>
@@ -2560,9 +2561,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="ntile" class="level3">
 <h3 class="anchored" data-anchor-id="ntile"><code>ntile()</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>ntile(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>ntile(<span class="dt">mixed</span> <span class="va">$x</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span> <span class="ot">?</span><span class="dt">int</span> <span class="va">$n</span> <span class="op">=</span> <span class="kw">null</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Bucket number from 1 to n, splitting the ordered values into n groups as evenly as possible.</p>
-<p>Earlier buckets take the extra rows when the sizes differ. NA values get NA. With no expression, rows are bucketed in row order.</p>
+<p>Earlier buckets take the extra rows when the sizes differ. NA values get NA. Without <code>$x</code>, rows are bucketed in row order.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -2580,16 +2581,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>...$args</code></td>
+<td><code>$x</code></td>
 <td><code>mixed</code></td>
-<td></td>
-<td>Optionally one expression to order by, or <code>desc()</code> of one, then named options: n (int, required) is the number of buckets.</td>
+<td><code>null</code></td>
+<td>An expression to order by, or <code>desc()</code> of one. Null or omitted buckets rows in order.</td>
+</tr>
+<tr class="even">
+<td><code>$n</code></td>
+<td><code>int|null</code></td>
+<td><code>null</code></td>
+<td>The number of buckets. Required.</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Function</strong> in <code>Phibble\Expr</code><br>
 <strong>Returns</strong> <code>Call</code><br>
-<strong>Throws</strong> <code>InvalidArgumentException</code>: when n is not given.</p>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when n is not given.<br>
+<strong>Throws</strong> <code>ArgumentCountError</code>: when given more than two arguments.</p>
 </section>
 <section id="cumsum" class="level3">
 <h3 class="anchored" data-anchor-id="cumsum"><code>cumsum()</code></h3>

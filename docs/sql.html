@@ -632,13 +632,26 @@ Phibble\DataFrame
 <td>—</td>
 <td>—</td>
 </tr>
+<tr class="even">
+<td><code>isIn()</code> with dates or datetimes</td>
+<td>memory</td>
+<td>SQL</td>
+<td>SQL</td>
+</tr>
+<tr class="odd">
+<td><code>coalesce()</code> of numbers</td>
+<td>SQL</td>
+<td>memory</td>
+<td>SQL</td>
+</tr>
 </tbody>
 </table>
 <ul>
 <li>SQLite’s <code>sd()</code> formula would lose precision, and its <code>UPPER()</code> and <code>LOWER()</code> change only ASCII letters.</li>
 <li>PostgreSQL runs <code>FULL JOIN</code> only on merge- or hash-joinable conditions, which NA-matching keys are not.</li>
 <li>MySQL’s <code>str_detect()</code> uses ICU, as stringr does.</li>
-<li>SQLite text times sort and compare as text, so any use of such a column runs in memory.</li>
+<li>SQLite text times sort and compare as text, so any use of such a column runs in memory. SQLite also stores dates and datetimes as text, so a list of them in <code>isIn()</code> runs in memory.</li>
+<li>PostgreSQL stores NaN, and its <code>COALESCE()</code> keeps NaN where R skips it.</li>
 </ul>
 </section>
 <section id="sqlite-column-types" class="level3">
