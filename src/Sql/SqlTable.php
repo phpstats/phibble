@@ -500,7 +500,7 @@ final readonly class SqlTable implements Table
         if (array_any($aggregates, fn (Expr $e) => ! self::isSummary($e))) {
             return $this->collect()->summarise($aggregates, $groups);
         }
-        $compiler = new Compiler($this->dialect, mode: 'summary', text: $this->text, bools: $this->bools(), times: $this->times(), temporal: $this->temporal());
+        $compiler = new Compiler($this->dialect, mode: 'summary', text: $this->text, bools: $this->bools(), times: $this->times(), temporal: $this->temporal(), datetimes: $this->datetimes());
         // Group keys compare in byte order (text) and keep their names.
         try {
             $keys = array_map(fn (string $g) => $compiler->compile(new Col($g)), $this->groups);
@@ -676,7 +676,7 @@ final readonly class SqlTable implements Table
 
     private function compiler(): Compiler
     {
-        return new Compiler($this->dialect, $this->groups, $this->rowOrder(), text: $this->text, bools: $this->bools(), times: $this->times(), temporal: $this->temporal());
+        return new Compiler($this->dialect, $this->groups, $this->rowOrder(), text: $this->text, bools: $this->bools(), times: $this->times(), temporal: $this->temporal(), datetimes: $this->datetimes());
     }
 
     /** Whether an expression gives one value per group: aggregates and literals, combined. */
@@ -703,6 +703,12 @@ final readonly class SqlTable implements Table
     private function temporal(): array
     {
         return array_map(strval(...), array_keys(array_filter($this->hints, fn (Type $t) => in_array($t, [Type::Date, Type::DateTime, Type::Time], true))));
+    }
+
+    /** @return list<string> Datetime columns, against which a midnight literal is a datetime. */
+    private function datetimes(): array
+    {
+        return array_map(strval(...), array_keys(array_filter($this->hints, fn (Type $t) => $t === Type::DateTime)));
     }
 
     /** @return list<string> Time columns, whose functions are evaluated in memory. */

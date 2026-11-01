@@ -297,3 +297,23 @@ it('compares, sorts, groups and joins text in byte order like R', function (Clos
         ->and($sql->join(sqlFrom($pdo, $other), ['s'], 'inner')->arrange(['v'])->collect()->column('v'))->toBe([2, 3])
         ->and($sql->groupBy(['s'])->mutate(['k' => n()])->arrange(['v'])->collect()->column('k'))->toBe([2, 1, 1, 1, 1, 2]);
 })->with('connections');
+
+// A midnight literal reads as a date; against a datetime column it must bind
+// as a datetime, or SQLite's text '2024-02-01 00:00:00' would not equal it.
+it('compares a datetime column with a midnight literal as DataFrame does', function (Closure $connect) {
+    $df = DataFrame::fromCsvString("i,t\n1,2024-02-01 00:00:00\n2,2024-01-01 10:00:00\n3,2024-02-01 12:00:00\n4,NA\n", types: 'iT');
+    $midnight = new DateTimeImmutable('2024-02-01', new DateTimeZone('UTC'));
+    $pipeline = fn ($t) => $t->arrange(['i'])->mutate([
+        'eq' => col('t')->eq($midnight),
+        'ne' => col('t')->ne($midnight),
+        'ge' => col('t')->ge($midnight),
+        'lt' => col('t')->lt($midnight),
+        'in' => col('t')->between($midnight, new DateTimeImmutable('2024-02-02', new DateTimeZone('UTC'))),
+    ]);
+    $sql = $pipeline(sqlFrom($connect(), $df));
+    $columns = ['i', 'eq', 'ne', 'ge', 'lt', 'in'];
+
+    expect($sql)->toBeInstanceOf(SqlTable::class)
+        ->and($sql->collect()->select($columns)->toRows())->toBe($pipeline($df)->select($columns)->toRows())
+        ->and($sql->filter(col('t')->eq($midnight))->collect()->column('i'))->toBe([1]);
+})->with('connections');

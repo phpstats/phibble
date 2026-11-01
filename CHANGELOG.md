@@ -29,6 +29,9 @@ change the public API.
   NaN, `coalesce()` of numbers runs in memory.
 - A date plus `hours()`, `minutes()`, or `seconds()` is a datetime, as in
   lubridate. It used to stay a date and drop the time.
+- On SQLite, comparing a datetime column with a datetime at midnight missed
+  rows stored as `2024-02-01 00:00:00`, because the literal was bound as a
+  date. It now binds as a datetime, as `DataFrame` compares it.
 
 ## [0.6.1] - 2026-11-01
 

@@ -46,6 +46,7 @@ final class Compiler
         private readonly array $bools = [],
         private readonly array $times = [],
         private readonly array $temporal = [],
+        private readonly array $datetimes = [],
     ) {}
 
     public function compile(Expr $expr): Fragment
@@ -189,6 +190,7 @@ final class Compiler
             throw new Untranslatable('Date arithmetic is evaluated in memory; use difftime() or date parts in SQL.');
         }
 
+        $call = $this->datetimeLiterals($call);
         $a = fn (int $i) => $this->compile($call->args[$i]);
         $args = fn () => array_map(fn (Expr $e) => $this->compile($e), $call->args);
         $float = $this->dialect->castType('float');
@@ -585,6 +587,25 @@ final class Compiler
             : Fragment::format('COALESCE({} IN ({}), FALSE)', [$x, $this->literal(new Lit($values, $set->dtype))]);
 
         return $hasNa ? Fragment::format('({} OR {} IS NULL)', [$member, $x]) : $member;
+    }
+
+    /**
+     * A midnight literal reads as a date. Compared with a datetime column it
+     * is a datetime, so it binds as '2024-02-01 00:00:00', which a SQLite
+     * text datetime equals, where '2024-02-01' does not.
+     */
+    private function datetimeLiterals(Call $call): Call
+    {
+        if (! in_array($call->fn, ['==', '!=', '<', '<=', '>', '>=', 'between'], true)
+            || ! array_any($call->args, fn (Expr $a) => $a instanceof Col && in_array($a->name, $this->datetimes, true))) {
+            return $call;
+        }
+        $args = array_map(
+            fn (Expr $a) => $a instanceof Lit && $a->dtype === 'date' && $a->value instanceof DateTimeInterface ? new Lit($a->value, 'datetime') : $a,
+            $call->args,
+        );
+
+        return new Call($call->fn, $args, $call->named);
     }
 
     /**
