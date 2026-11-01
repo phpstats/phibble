@@ -177,7 +177,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "9147f43",
+        "commit": "84bf041",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

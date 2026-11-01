@@ -1,0 +1,160 @@
+{
+    "title": "Expression edge cases",
+    "label": "Expression edge cases",
+    "kind": "reference",
+    "checked": "Argument rules of row_number() and ntile(); isIn() with dates, datetimes, and times; NaN in coalesce(); one-character pads in str_pad(); parse_date_time() orders without a year; fractional periods; and dates plus clock periods. Results and error conditions on DataFrame, the SQL databases, and Polars.",
+    "description": "tests/r/edge_cases.R prints R's result or error for each case. The tests hold those results as expected values and check that phibble gives the same value, or raises where R raises. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
+    "reference": "R 4.6.1 with dplyr 1.2.1, stringr 1.6.0, and lubridate 1.9.5",
+    "versions": {
+        "R": "4.6.1",
+        "dplyr": "1.2.1",
+        "stringr": "1.6.0",
+        "lubridate": "1.9.5",
+        "jsonlite": "2.0.0",
+        "PHP": "8.5.10",
+        "SQLite": "3.45.2",
+        "PostgreSQL": "17.0 (Laravel Herd)",
+        "MySQL": "8.0.46",
+        "php_polars": "0.1.0"
+    },
+    "inputs": [
+        {
+            "name": "edge cases",
+            "detail": "Literal vectors in tests/ExprRTest.php and tests/Polars/PolarsExprRTest.php",
+            "url": "tests/r/edge_cases.R"
+        }
+    ],
+    "comparison": [
+        {
+            "id": "value",
+            "applies_to": "Values and result types; NA in identical positions, datetimes to the microsecond",
+            "kind": "exact"
+        }
+    ],
+    "known_differences": [
+        "parse_date_time() with an order that has a day but no month: lubridate returns NA with a warning; phibble raises an error.",
+        "Errors where R errors: phibble raises an exception with its own message."
+    ],
+    "exclusions": [
+        "isIn() with temporal lists on SQLite and coalesce() of numbers on PostgreSQL run in memory; the results are compared the same way."
+    ],
+    "data": "tests/r/edge_cases.R",
+    "reproduce": [
+        "Rscript tests/r/edge_cases.R",
+        "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/ExprRTest.php",
+        "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsExprRTest.php"
+    ],
+    "cases": [
+        {
+            "name": "takes at most one argument in row_number(), as dplyr does",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "takes x and a required n in ntile(), as dplyr does",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "matches dates, datetimes, and times by value in isIn()",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "serializes temporal isIn() lists",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "matches dates and datetimes by value in isIn()",
+            "implementation": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "matches dates and datetimes by value in isIn()",
+            "implementation": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "matches dates and datetimes by value in isIn()",
+            "implementation": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "skips NaN in coalesce(), as is_na() does",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "skips NaN in coalesce()",
+            "implementation": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "skips NaN in coalesce()",
+            "implementation": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "skips NaN in coalesce()",
+            "implementation": "MySQL",
+            "status": "pass"
+        },
+        {
+            "name": "requires a one-character pad in str_pad(), as stringr does",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "parses orders without a year into year 0, as lubridate does",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "rejects a parse_date_time() order with a day but no month",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "keeps fractional seconds and rejects other fractional periods, as lubridate does",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "gives a datetime for a date plus hours, minutes, or seconds, as lubridate does",
+            "implementation": "DataFrame",
+            "status": "pass"
+        },
+        {
+            "name": "matches dates and datetimes by value in isIn()",
+            "implementation": "Polars",
+            "status": "pass"
+        },
+        {
+            "name": "skips NaN in coalesce()",
+            "implementation": "Polars",
+            "status": "pass"
+        },
+        {
+            "name": "buckets with ntile(x, n)",
+            "implementation": "Polars",
+            "status": "pass"
+        },
+        {
+            "name": "parses orders without a year into year 0, and rejects a day without a month",
+            "implementation": "Polars",
+            "status": "pass"
+        },
+        {
+            "name": "keeps fractional seconds and gives a datetime for a date plus hours",
+            "implementation": "Polars",
+            "status": "pass"
+        }
+    ],
+    "environment": {
+        "date": "2026-11-01",
+        "commit": "84bf041",
+        "php": "8.5.10",
+        "os": "macOS 27.0.1 (arm64)"
+    }
+}

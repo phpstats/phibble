@@ -513,11 +513,26 @@
             "name": "compares, sorts, groups and joins text in byte order like R",
             "implementation": "MySQL",
             "status": "pass"
+        },
+        {
+            "name": "compares a datetime column with a midnight literal as DataFrame does",
+            "implementation": "SQLite",
+            "status": "pass"
+        },
+        {
+            "name": "compares a datetime column with a midnight literal as DataFrame does",
+            "implementation": "PostgreSQL",
+            "status": "pass"
+        },
+        {
+            "name": "compares a datetime column with a midnight literal as DataFrame does",
+            "implementation": "MySQL",
+            "status": "pass"
         }
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "9147f43",
+        "commit": "84bf041",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
