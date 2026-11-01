@@ -1,6 +1,5 @@
 <?php
 
-// Each order gets the latest price set on or before its date.
 $orders = tribble(
     ['order', 'item', 'day'],
     [1, 'tea', 3],
@@ -15,4 +14,8 @@ $prices = tribble(
     ['coffee', 6, 4.5],
 );
 
-echo $orders->join($prices, ['item', ['closest', 'day', '>=', 'from_day']], 'left');
+echo $orders->join(
+    $prices,
+    ['item', ['closest', 'day', '>=', 'from_day']],
+    'left',
+);

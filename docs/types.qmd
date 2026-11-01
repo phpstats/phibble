@@ -42,22 +42,26 @@ Text read from CSV files and databases is guessed differently. The
 
 ## Casts
 
-`cast()` converts columns to other types. Conversions follow R's `as.*()`
-functions. A value that cannot be converted becomes NA, and phibble raises one
+`cast()` converts columns to other types, following R's `as.*()` functions.
+A value that cannot be converted becomes NA, and phibble raises one
 `E_USER_WARNING` per column, as R does with "NAs introduced by coercion".
 
-- Floats convert to int by truncating toward zero.
-- `"TRUE"`, `"true"`, `"T"`, and `"True"` convert to true. `"yes"` and `"1"` do
-  not.
-- Floats convert to text with up to 15 significant digits, in fixed or
-  scientific notation, whichever is shorter.
+| From | To | Result |
+| --- | --- | --- |
+| float | int | Truncated toward zero. |
+| float | string | Up to 15 significant digits, in fixed or scientific notation, whichever is shorter. |
+| string | bool | `"TRUE"`, `"true"`, `"T"`, and `"True"` are true. `"yes"` and `"1"` are NA. |
+| factor | int, float | The 1-based level codes, as `as.integer(factor)`. |
+| factor | string | The labels. |
+| date | int, float | Days since 1970-01-01. |
+| datetime | int, float | Seconds since the epoch. |
+| time | float | Seconds. |
+| time | string | hms's `as.character()`, such as `01:30:00`. |
+| int, float | time | That many seconds. |
+| string | time | Parsed as `Time::parse()` reads it. |
+| datetime | time | The time of day. |
 
 {{< include examples/_casts.md >}}
-
-A factor converts to int or float as its 1-based level codes, as
-`as.integer(factor)` does in R. Converting it to text gives its labels. Dates
-convert to numbers as days since 1970-01-01, and datetimes as seconds since the
-epoch.
 
 ## Factors
 
@@ -106,11 +110,9 @@ one, and `Time::parse()` reads text such as `07:30`, `-01:00:00.5`, or
 `1:30 PM`. `seconds()` gives the number of seconds. `hour()`, `minute()`, and
 `second()` give the clock time, as lubridate does, so `25:00:00` has hour 1.
 
-A time prints as hms prints it. A column shows seconds only when a value has
-them, the fraction digits the column needs, and minutes and seconds as
-`MM'SS"` when no value has hours. A time converts to its number of seconds,
-and to text as hms's `as.character()` gives it. A number converts to that
-many seconds, text is parsed, and a datetime gives its time of day.
+A time column prints as hms prints it. It shows seconds only when a value
+has them, the fraction digits the column needs, and `MM'SS"` when no value
+has hours. [Casts](#casts) lists its conversions.
 
 {{< include examples/_times.md >}}
 
@@ -119,13 +121,16 @@ Comparing a time with text reads the text as a time, so
 seconds or a time gives a time, and so does multiplying or dividing by a
 number.
 
-Summaries keep R's types. The `median()` and `quantile()` of a time are times,
-as in R, and so are its `mean()`, `sum()`, `min()`, and `max()`, where R gives
-a difftime, which phibble does not have. The `mean()` and `median()` of a date
-are a date, rounded down to the day, and those of a datetime, and its
-`quantile()`, are datetimes. As in R, `sum()` of a date or datetime and
-`quantile()` of a date throw. `sd()`, `var()`, and `iqr()` are numbers: days
-for dates and seconds otherwise.
+Summaries keep R's types, except that phibble returns a time where R gives
+a difftime, which phibble does not have:
+
+| Summary | date | datetime | time |
+| --- | --- | --- | --- |
+| `min()`, `max()` | date | datetime | time |
+| `mean()`, `median()` | date, rounded down to the day | datetime | time |
+| `quantile()` | throws, as in R | datetime | time |
+| `sum()` | throws, as in R | throws, as in R | time |
+| `sd()`, `var()`, `iqr()` | number of days | number of seconds | number of seconds |
 
 ## List-columns
 
@@ -138,8 +143,8 @@ combination of the remaining columns. `unnest()` expands it again.
 ## Model data
 
 `toModelData()` returns columns in the form phit's model functions read.
-Numbers, bools, and strings are plain lists. Dates and datetimes become days
-and seconds since the epoch. A factor becomes an array with its levels, its
+Numbers, bools, and strings are plain lists. Dates become days since the
+epoch, datetimes seconds since the epoch, and times seconds. A factor becomes an array with its levels, its
 0-based codes, and whether it is ordered, so a model keeps the data frame's level
 order, including unused levels. A list-column throws.
 

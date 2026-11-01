@@ -8,54 +8,26 @@ title: "Getting started"
 composer require phpstats/phibble
 ```
 
-Requirements:
+phibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions.
+These are optional:
 
-- PHP 8.3, 8.4, or 8.5.
-- The mbstring extension.
-- The PDO extension.
+| Optional | Enables |
+| --- | --- |
+| The [phit](https://github.com/phpstats/phit) extension | Native CSV reading: `fromCsv()` with phit 0.1.1 or later, and `fromCsvChunked()` and `csvChunks()` with 0.2.0 or later. Results match the PHP reader. |
+| The php_polars extension from [phpolars](https://github.com/phpstats/phpolars) | `PolarsTable` and `polars()`, described in [Backends](backends.qmd). |
+| `illuminate/database` | The `->toDataFrame()` and `->phibble()` macros, described in [Laravel](laravel.qmd). Laravel applications already have it. |
 
-Optional features:
-
-- The [phit](https://github.com/phpstats/phit) extension reads CSV natively.
-  `DataFrame::fromCsv()` uses it with phit 0.1.1 or later, and
-  `DataFrame::fromCsvChunked()` and `DataFrame::csvChunks()` use it with phit
-  0.2.0 or later. Without it, phibble reads CSV in PHP with the same results.
-- The php_polars extension from [phpolars](https://github.com/phpstats/phpolars)
-  enables `PolarsTable` and `polars()`, described on the
-  [Backends](backends.qmd) page.
-- `illuminate/database` enables the `->toDataFrame()` and `->phibble()`
-  macros, described on the [Laravel](laravel.qmd) page. In a Laravel
-  application it is already installed.
-
-## A first script
-
-The examples on this site use the Palmer penguins data,
-[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv).
-In a new directory, install phibble and download the data:
+The examples use the Palmer penguins data:
 
 ```bash
-composer require phpstats/phibble
 curl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv
 ```
 
-Save this script as `summary.php` in the same directory, and run it with
-`php summary.php`. It loads Composer's autoloader, imports `DataFrame` and the
-expression functions it uses, reads the CSV, and prints the number of
-penguins, their mean body mass, and their median flipper length for each
-species and sex:
-
-{{< include examples/_tour.md >}}
-
 ## Imports
 
-The other examples on this page run in the same directory, after these
-lines:
+The examples on this page use these imports:
 
 ```php
-<?php
-
-require __DIR__.'/vendor/autoload.php';
-
 use Phibble\DataFrame;
 
 use function Phibble\{tibble, tribble};
@@ -67,143 +39,135 @@ use function Phibble\Expr\{col, desc, mean, median, n};
 names with PHP built-ins. In a file that imports them, a bare `round($x)`
 calls phibble's expression helper. Write `\round($x)` for PHP's function.
 
-## Building data frames
+## Load
 
-`tibble()` builds a data frame column by column. Each named argument is a column.
-A list gives one value per row, and a single value is repeated for every row.
-A closure receives the data frame built so far, so a column can be computed from
-earlier ones.
-
-{{< include examples/_tibble.md >}}
-
-`tribble()` takes the column names first and then one list per row, which is
-easier to read for small literal tables:
-
-{{< include examples/_tribble.md >}}
-
-`DataFrame::fromRows()` takes a list of associative arrays. Keys missing from a row
-are NA. `DataFrame::fromColumns()` takes an array of columns and accepts explicit
-types.
-
-{{< include examples/_from-rows.md >}}
-
-`DataFrame::fromCsv()` reads a CSV file and guesses each column's type. The
-[input and output guide](io.qmd) covers its options.
-
-## Printing
-
-`echo $df` prints the data frame the way tibble does. The header gives the size,
-each column shows its type, and data frames with more than 20 rows show the first
-10. Numbers show three significant digits and NA prints as `NA` (or `<NA>` in
-text columns).
+`DataFrame::fromCsv()` reads a CSV file and guesses each column's type.
+[Reading and writing data](io.qmd) covers its options, JSON, and databases.
 
 {{< include examples/_read-csv.md >}}
 
-`glimpse()` returns one line per column, which suits wide data frames:
+`tibble()` builds a data frame column by column:
+
+- A list gives one value per row, and a single value is repeated.
+- A closure receives the columns built so far.
+
+{{< include examples/_tibble.md >}}
+
+`tribble()` takes the column names first, then one list per row:
+
+{{< include examples/_tribble.md >}}
+
+`DataFrame::fromRows()` takes a list of associative arrays, and keys missing
+from a row are NA. `DataFrame::fromColumns()` takes an array of columns and
+accepts explicit types.
+
+{{< include examples/_from-rows.md >}}
+
+## Inspect
+
+`echo $df` prints a data frame as tibble does:
+
+- The header gives the size, and each column shows its type.
+- More than 20 rows print the first 10.
+- Numbers show three significant digits.
+- NA prints as `NA`, or `<NA>` in text columns.
+
+`format(n: 30, width: 120)` prints more rows or a wider table. `glimpse()`
+gives one line per column, which suits wide data frames:
 
 {{< include examples/_glimpse.md >}}
 
-`format(n: 30, width: 120)` prints more rows or a wider table.
+Each column has one type from the `Phibble\Type` enum, inferred from the
+values, and PHP `null` is NA in every type. [Types](types.qmd) covers
+inference, casts, and factors.
 
-## Types and NA
+Read values:
 
-Each column has one type from the `Phibble\Type` enum: `Float`, `Int`, `Bool`,
-`String`, `Factor`, `Date`, `DateTime`, `Time`, or `List`. Types are inferred from the
-values, and PHP `null` is NA in every type. The [types guide](types.qmd)
-describes inference, casts, and factors.
-
-## Reading values
-
-A column reads as a PHP list with `$df->name`, `$df['name']`, or
-`$df->column('name')`. Rows are `Phibble\Row` objects, which read values as
-properties or array keys. Iterating a data frame yields its rows. An unknown column
-name throws `Phibble\Exception\ColumnNotFound`; names are never matched
-partially.
+- `$df->name`, `$df['name']`, and `$df->column('name')` return a column as a
+  PHP list.
+- Rows are `Phibble\Row` objects, which read values as properties or array
+  keys. Iterating a data frame yields its rows.
+- An unknown column name throws `Phibble\Exception\ColumnNotFound`. Names are
+  never matched partially.
 
 {{< include examples/_access.md >}}
 
-## Verbs
+## Transform
 
-DataFrames have the dplyr verbs as methods: `select()`, `filter()`, `mutate()`,
-`rename()`, `arrange()`, `groupBy()`, `summarize()`, `distinct()`, `slice()`,
-`head()`, and `join()`. Each returns a new data frame.
-
-`filter()` and `mutate()` accept a row closure, which receives a `Row` and
-returns a value. `arrange()` takes column names, or `[name, 'desc']` pairs.
-
-{{< include examples/_verbs.md >}}
-
-The same verbs accept [expressions](expr.qmd) built with `col()` and the helper
-functions. Expressions are evaluated a whole column at a time, and they are the
-form that SQL and Polars backends can translate.
-
-{{< include examples/_verbs-expr.md >}}
-
-## Groups
-
-`groupBy()` records grouping columns on the data frame. `summarize()`, or its
-alias `summarise()`, returns one
-row per group, with groups in sorted order and NA last, as dplyr does. With
-several grouping columns, the result keeps all but the last, so the
-[first script](#a-first-script)'s summary stays grouped by species.
-
-In a grouped data frame, `filter()` and `mutate()` work within each group. An
-aggregate inside `mutate()` is computed per group and repeated for each of the
-group's rows:
-
-{{< include examples/_grouped.md >}}
-
-A row closure receives the row's group as its second argument:
-`fn (Row $r, DataFrame $group) => ...`.
-
-By default, groups are the combinations that occur in the data. With
-`groupBy($names, drop: false)`, as with dplyr's `.drop = FALSE`, a factor key
-also yields a group for each level that has no rows. Such a group has zero
-rows, so `n()` is 0 and `sum()` is 0.
-
-{{< include examples/_group-drop.md >}}
-
-## Distinct rows and joins
-
-`distinct()` keeps the first row of each combination of the given columns.
-`join()` takes the other table, the key columns, and the join type: `inner`,
-`left`, `right`, `full`, `semi`, `anti`, or `cross`. Joins follow dplyr 1.1,
-including its column naming and the rule that NA keys match each other.
-
-{{< include examples/_join.md >}}
-
-Besides equality keys, a join condition can compare columns, as dplyr's
-`join_by()` does. `[$left, $op, $right]` with `>=`, `>`, `<=`, or `<` keeps the
-pairs that satisfy the comparison, and all conditions must hold. One
-`['closest', $left, $op, $right]` condition keeps, for each row of x, only the
-y rows with the nearest value: the largest for `>=` and `>`, the smallest for
-`<=` and `<`. dplyr's `between()`, `within()`, and `overlaps()` are pairs of
-comparisons. In a rolling join, the columns used in comparisons are kept from
-both tables:
-
-{{< include examples/_join-by.md >}}
-
-## Immutability
-
-Methods never change the data frame they are called on:
+Data frames have the dplyr verbs as methods: `select()`, `filter()`,
+`mutate()`, `rename()`, `arrange()`, `groupBy()`, `summarize()`, `distinct()`,
+`slice()`, `head()`, and `join()`. Each returns a new data frame, and the
+original never changes:
 
 {{< include examples/_immutable.md >}}
 
-## Missing values
+`filter()` and `mutate()` accept a row closure, which receives a `Row`.
+`arrange()` takes column names, or `[name, 'desc']` pairs.
+
+{{< include examples/_verbs.md >}}
+
+The same verbs accept [expressions](expr.qmd) built with `col()` and the
+helper functions. Expressions run a whole column at a time, and SQL and Polars
+tables can translate them.
+
+{{< include examples/_verbs-expr.md >}}
 
 PHP `null` is a missing value. Arithmetic with it gives `null`, and an
-aggregate over a column that holds it gives `null` unless `na_rm: true` is
-passed:
+aggregate over a column that holds it gives `null` unless `na_rm: true`:
 
 {{< include examples/_missing.md >}}
 
+## Summarize
+
+`groupBy()` records grouping columns, and `summarize()` (or `summarise()`)
+returns one row per group:
+
+- Groups are sorted, with NA last, as in dplyr.
+- With several grouping columns, the result keeps all but the last.
+- In a grouped data frame, `filter()` and `mutate()` work within each group,
+  and an aggregate in `mutate()` repeats for each row of its group.
+- A row closure receives the row's group as its second argument:
+  `fn (Row $r, DataFrame $group) => ...`.
+
+{{< include examples/_grouped.md >}}
+
+Groups are the combinations that occur in the data. `groupBy($names, drop:
+false)`, like dplyr's `.drop = FALSE`, also gives a factor's empty levels a
+group, where `n()` and `sum()` are 0:
+
+{{< include examples/_group-drop.md >}}
+
+## Combine
+
+`distinct()` keeps the first row of each combination of the given columns.
+`join()` takes the other table, the keys, and the type: `inner`, `left`,
+`right`, `full`, `semi`, `anti`, or `cross`. Joins follow dplyr 1.1, and NA
+keys match each other.
+
+{{< include examples/_join.md >}}
+
+A condition can also compare columns, as in dplyr's `join_by()`. Here each
+order gets the latest price set on or before its day:
+
+{{< include examples/_join-by.md >}}
+
+[The Table contract](contract.qmd#joins) lists the join conditions and
+options.
+
+## Output
+
+- `toRows()` returns a list of associative arrays, and `toColumns()` an array
+  of columns.
+- `writeCsv($path)` and `toCsv()` write CSV as readr's `write_csv()` does.
+- `toJson()` writes records, or columns with `toJson('columns')`.
+
+[Reading and writing data](io.qmd) covers the formats.
+
 ## Method chains and the pipe operator
 
-Every verb returns a new table, so verbs chain as methods on PHP 8.3, 8.4,
-and 8.5. PHP 8.5's `|>` passes a value to a callable, and arrow functions let
-the same pipeline use it. [phplyr](https://github.com/phpstats/phplyr)
-provides verbs that return such callables, so a phplyr pipeline needs no arrow
-functions.
+Verbs chain as methods on PHP 8.3, 8.4, and 8.5. On PHP 8.5, `|>` with arrow
+functions runs the same pipeline. [phplyr](https://github.com/phpstats/phplyr)
+provides verbs that work with `|>` without arrow functions.
 
 ::: {.panel-tabset group="syntax"}
 ## PHP 8.5+

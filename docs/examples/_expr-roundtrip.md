@@ -1,5 +1,10 @@
 ```php
-$expr = lag(col('score'), n: 2, default: 0, order_by: col('week'));
+$expr = lag(
+    col('score'),
+    n: 2,
+    default: 0,
+    order_by: col('week'),
+);
 $json = json_encode($expr->toArray());
 
 echo $json, "\n";

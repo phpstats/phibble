@@ -1,12 +1,20 @@
 <?php
 
 $totals = [];
-DataFrame::fromCsvChunked('penguins.csv', function (DataFrame $chunk) use (&$totals) {
-    $counts = $chunk->groupBy(['species'])->summarize(['n' => n()]);
+$count = function (DataFrame $chunk) use (&$totals) {
+    $counts = $chunk
+        ->groupBy(['species'])
+        ->summarize(['n' => n()]);
     foreach ($counts as $row) {
-        $totals[$row->species] = ($totals[$row->species] ?? 0) + $row->n;
+        $totals[$row->species] ??= 0;
+        $totals[$row->species] += $row->n;
     }
-}, chunkSize: 100);
+};
+
+DataFrame::fromCsvChunked('penguins.csv', $count, chunkSize: 100);
 ksort($totals);
 
-echo tibble(species: array_keys($totals), n: array_values($totals));
+echo tibble(
+    species: array_keys($totals),
+    n: array_values($totals),
+);

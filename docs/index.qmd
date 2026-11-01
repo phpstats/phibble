@@ -3,71 +3,53 @@ title: "phibble"
 subtitle: "A typed data frame for PHP"
 ---
 
-phibble is a data frame library for PHP. A `DataFrame` is a table of named,
-typed columns, such as the rows of a CSV file or a database query. phibble
-reads such tables, filters, sorts, groups, joins, and summarizes them, and
-writes them back out. Its design and names follow R's tibble and readr
-packages, and its verbs follow dplyr.
+Load, transform, and summarize typed data frames in PHP. Tables are
+immutable, and `null` represents missing data. Names and semantics follow R's
+tibble, readr, and dplyr.
 
-This script reads the Palmer penguins data,
-[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv),
-and summarizes it by species and sex. [A first script](getting-started.qmd#a-first-script)
-gives the commands that install phibble and download the file.
+This summary reads the Palmer penguins data,
+[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv):
 
 {{< include examples/_tour.md >}}
-
-## Tables
-
-- Every column has one type: float, int, bool, string, factor, date, datetime,
-  time, or list. Types are guessed as a table loads, or declared per column.
-- PHP `null` is a missing value (R's NA) in every type.
-- A `DataFrame` never changes in place. Every method returns a new table.
-- Tables load from CSV, JSON, PDO queries, Laravel and Doctrine query
-  builders, and Laravel collections, and write to CSV and JSON.
-
-The [types guide](types.qmd) and [reading and writing data](io.qmd) cover
-these in detail.
-
-## Backends
-
-Three classes implement the `Phibble\Contracts\Table` interface, and all
-three are part of phibble:
-
-- `Phibble\DataFrame` holds the data in PHP arrays.
-- `Phibble\Sql\SqlTable` compiles the verbs to SQL for SQLite, PostgreSQL, and
-  MySQL.
-- `Phibble\Polars\PolarsTable` runs the verbs in Polars. It needs the
-  php_polars extension from [phpolars](https://github.com/phpstats/phpolars).
-
-A step that a backend cannot run itself, such as a PHP closure, runs in a
-`DataFrame`. The [backends page](backends.qmd) describes how results can
-still differ between backends.
-
-## Other packages
-
-The other PHPstats packages read and return phibble tables:
-
-- [phplyr](https://github.com/phpstats/phplyr) provides dplyr and tidyr as
-  PHP functions and method chains.
-- [phit](https://github.com/phpstats/phit) fits statistical models, reading
-  their data through `DataFrame::toModelData()`. Its extension also speeds up
-  phibble's CSV reader.
-- [phpolars](https://github.com/phpstats/phpolars) provides the Polars
-  extension that `PolarsTable` uses.
-- [phiz](https://github.com/phpstats/phiz) plots a `DataFrame` directly.
-- [CmdStanPHP](https://github.com/phpstats/CmdStanPHP) accepts a `DataFrame`
-  as model data and returns draws and summaries as tables.
-
-## Install
 
 ```bash
 composer require phpstats/phibble
 ```
 
 phibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions.
-The phit extension, the php_polars extension, and `illuminate/database` enable
-optional features. [Installation](getting-started.qmd#installation) lists what
-each one enables and the versions it needs.
+[Installation](getting-started.qmd#installation) lists the optional
+extensions.
 
-Pipelines can use PHP 8.5's `|>` operator. Method chains work on PHP 8.3,
-8.4, and 8.5.
+## Guides
+
+- **Start:** [Getting started](getting-started.qmd) ·
+  [Coming from tibble](coming-from-tibble.qmd) · [Examples](examples/read-a-csv.qmd)
+- **Data:** [Types](types.qmd) · [Reading and writing data](io.qmd) ·
+  [Expressions](expr.qmd)
+- **Backends:** [Backends](backends.qmd) · [SQL tables](sql.qmd) ·
+  [Laravel](laravel.qmd)
+- **Contributors:** [The Table contract](contract.qmd) ·
+  [Development](development.qmd)
+
+## Backends
+
+| Class | Runs in | Needs |
+| --- | --- | --- |
+| `Phibble\DataFrame` | PHP arrays | — |
+| `Phibble\Sql\SqlTable` | SQLite, PostgreSQL, or MySQL | PDO |
+| `Phibble\Polars\PolarsTable` | Polars | the php_polars extension from [phpolars](https://github.com/phpstats/phpolars) |
+
+A step that a backend cannot run, such as a PHP closure, runs in a
+`DataFrame`. [Backends](backends.qmd) lists where results can differ.
+
+## Other packages
+
+These PHPstats packages read or return phibble tables:
+
+- [phplyr](https://github.com/phpstats/phplyr): dplyr and tidyr as PHP
+  functions and method chains.
+- [phit](https://github.com/phpstats/phit): statistical models, through
+  `DataFrame::toModelData()`. Its extension also reads CSV natively.
+- [phiz](https://github.com/phpstats/phiz): plots of a `DataFrame`.
+- [CmdStanPHP](https://github.com/phpstats/CmdStanPHP): a `DataFrame` as model
+  data, and draws and summaries as tables.

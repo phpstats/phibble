@@ -6,7 +6,11 @@ $df = DataFrame::fromColumns([
     'mixed' => [1, 2.5, null],
     'with_bool' => [true, 2, 3],
     'text' => ['a', 1, null],
-    'when' => [new DateTimeImmutable('2024-03-01 09:30'), null, null],
+    'when' => [
+        new DateTimeImmutable('2024-03-01 09:30'),
+        null,
+        null,
+    ],
     'nested' => [[1, 2], [3], null],
     'empty' => [null, null, null],
 ]);

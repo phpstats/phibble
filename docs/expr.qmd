@@ -2,30 +2,21 @@
 title: "Expressions"
 ---
 
-`Phibble\Expr` describes a computation over columns as a tree of objects. The
-in-memory `DataFrame` evaluates the tree, `SqlTable` compiles it to SQL, and
-`PolarsTable` maps it to Polars expressions. Each backend implements the same
-list of functions with R's semantics, and runs a function in memory when it
-has no exact translation. Results can still differ where a database cannot
-represent R's value, as the [SQL tables](sql.qmd#known-differences) page
-lists.
+Build column computations with `col()` and the functions in `Phibble\Expr`,
+and pass them to verbs. An expression runs on every backend: `DataFrame`
+evaluates it, `SqlTable` compiles it to SQL, and `PolarsTable` maps it to
+Polars. Each backend follows R's semantics and runs a function in memory when
+it has no exact translation. Results can still differ where a database cannot
+represent R's value, as [SQL tables](sql.qmd#known-differences) lists.
 
-A PHP closure can only be run. An expression can also be inspected,
-translated, and serialized. phibble's verbs accept either, and a backend that
-cannot run a closure itself loads the rows and runs it in memory.
+Verbs also accept PHP closures. A closure can only run in PHP, so a SQL or
+Polars table loads its rows to run one.
 
 ## Building expressions
 
-An expression has four kinds of nodes:
-
-- `Col` reads a column: `col('price')`.
-- `Lit` holds a literal value: `lit(3)`, `lit('north')`, a date, or a list of
-  values for `in`.
-- `Call` applies a registered function to arguments.
-- `Desc` marks a sort key or ranking as descending.
-
-Methods on any expression build operator calls. Arguments that are not
-expressions are wrapped in `lit()`.
+`col('price')` reads a column. Methods on any expression build operator
+calls, and arguments that are not expressions become literals, as with
+`lit(3)`:
 
 | Method | Operator |
 | --- | --- |
@@ -38,16 +29,13 @@ expressions are wrapped in `lit()`.
 | `between($low, $high)` | `between()` |
 | `desc()` | `desc()` |
 
-Functions in the `Phibble\Expr` namespace build the other calls. Options are
-named arguments, as in `mean(col('x'), na_rm: true)` or
-`lag(col('x'), n: 2, default: 0)`. `var_()` stands for `var()`, which is a
-reserved word in PHP. `call('name', ...)` builds a call to any registered
-function by name.
+Functions in the `Phibble\Expr` namespace build the other calls:
 
-`columns()` lists the columns an expression reads, and `toArray()` returns the
-tree as plain arrays:
-
-{{< include examples/_expr-build.md >}}
+- Options are named arguments, as in `mean(col('x'), na_rm: true)` or
+  `lag(col('x'), n: 2, default: 0)`.
+- `var_()` stands for `var()`, which is a reserved word in PHP.
+- A function outside the [list below](#functions) throws when the expression
+  is built.
 
 ## Using expressions with verbs
 
@@ -67,10 +55,6 @@ Each verb evaluates expressions per group:
 {{< include examples/_expr-summarise.md >}}
 
 ## Functions
-
-The registry in `Phibble\Expr\Functions::REGISTRY` lists every function an
-expression may call, with its arguments and options. Calling anything else
-throws when the expression is built.
 
 ### Scalar functions
 
@@ -180,15 +164,37 @@ Expressions follow R's rules for missing values and arithmetic:
 
 {{< include examples/_expr-na.md >}}
 
-## Serialization
+## Expression trees
+
+This section is for code that inspects, stores, or translates expressions.
+An expression is a tree of four kinds of node:
+
+- `Col` reads a column.
+- `Lit` holds a literal value: a number, text, a date, or a list of values for
+  `isIn()`.
+- `Call` applies a registered function to arguments. `call('name', ...)`
+  builds one by name.
+- `Desc` marks a sort key or ranking as descending.
+
+`columns()` lists the columns an expression reads, and `toArray()` returns the
+tree as plain arrays:
+
+{{< include examples/_expr-build.md >}}
+
+`Phibble\Expr\Functions::REGISTRY` lists every function a `Call` may name,
+with its arguments and options.
+
+### Serialization
 
 `toArray()` returns a JSON-friendly array, and `Expr::fromArray()` rebuilds the
 expression. Each node has a `type` key: `col`, `lit`, `call`, or `desc`. A call
 lists its positional arguments under `args` and its options under `named`. A
-date literal carries `dtype` (`date` or `datetime`).
+date literal carries `dtype` (`date`, `datetime`, or `time`).
 
 {{< include examples/_expr-roundtrip.md >}}
 
-The test suite checks the in-memory evaluator against dplyr. The script
-`tests/r/expr.R` evaluates the same expressions in R and stores the results in
-`tests/fixtures/expr/expected.json`, which other backends can reuse.
+### Reference tests
+
+`tests/r/expr.R` evaluates the test expressions in dplyr and stores the
+results in `tests/fixtures/expr/expected.json`. The test suite checks
+`DataFrame`, `SqlTable`, and `PolarsTable` against them.

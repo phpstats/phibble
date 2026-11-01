@@ -1,16 +1,17 @@
 <?php
 
 $pdo = new PDO('sqlite::memory:');
-$t = tbl($pdo, 'SELECT 1 AS id, 2.5 AS x UNION ALL SELECT 2, 3.5');
+$t = tbl($pdo, <<<'SQL'
+    SELECT 1 AS id, 2.5 AS x
+    UNION ALL SELECT 2, 3.5
+    SQL);
 
-// Compiles to SQL.
-echo get_class($t->mutate(['y' => col('x')->mul(2)])), "\n";
+$doubled = $t->mutate(['y' => col('x')->mul(2)]);
+$rounded = $t->mutate(['y' => Phibble\Expr\round(col('x'))]);
+$closure = $t->filter(fn ($r) => $r->x > 3);
 
-// round() rounds half to even in R, which SQL ROUND does not, so the rows
-// are collected and the expression runs in memory.
-echo get_class($t->mutate(['y' => Phibble\Expr\round(col('x'))])), "\n";
+echo get_class($doubled), "\n";
+echo get_class($rounded), "\n";
+echo get_class($closure), "\n";
 
-// So does any closure.
-echo get_class($t->filter(fn ($r) => $r->x > 3)), "\n";
-
-echo $t->mutate(['y' => Phibble\Expr\round(col('x'))]);
+echo $rounded;

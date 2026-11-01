@@ -12,6 +12,10 @@ $df = DataFrame::fromColumns([
     'n' => [1.0, 0.1 + 0.2, 1e5, 1 / 3],
 ]);
 
-$cast = $df->cast(['x' => 'int', 'flag' => 'bool', 'n' => 'string']);
+$cast = $df->cast([
+    'x' => 'int',
+    'flag' => 'bool',
+    'n' => 'string',
+]);
 
 echo $cast;

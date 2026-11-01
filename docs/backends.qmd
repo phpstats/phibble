@@ -2,27 +2,26 @@
 title: "Backends"
 ---
 
-phibble separates what a pipeline does from where it runs. Every verb is part
-of the `Phibble\Contracts\Table` interface, and three classes implement it:
+Run the same pipeline in memory, in a database, or in Polars. Every verb is
+part of the `Phibble\Contracts\Table` interface, and three classes implement
+it:
 
 | Backend | Class | Runs | Use it for |
 | --- | --- | --- | --- |
 | In memory | `Phibble\DataFrame` | PHP arrays | Small and medium data, closures, anything |
 | SQL | `Phibble\Sql\SqlTable` | SQLite, PostgreSQL, or MySQL | Data that lives in a database |
-| Polars | `Phibble\Polars\PolarsTable` | Polars, through the php_polars extension | Large data in memory |
+| Polars | `Phibble\Polars\PolarsTable` | Polars, through the php_polars extension from [phpolars](https://github.com/phpstats/phpolars) | Large data in memory |
 
-All three classes are part of phibble. `PolarsTable` uses the php_polars
-extension, which [phpolars](https://github.com/phpstats/phpolars) provides.
-
-Code written against `Table`, including phplyr's verbs, runs on any of them. A
-backend that cannot run a step exactly, such as a PHP closure or a function
-with no exact translation, hands that step to `DataFrame` and continues. The
-values then match `DataFrame` with these exceptions:
+Code written against `Table`, including phplyr's verbs, runs on any of them.
+A backend that cannot run a step exactly, such as a PHP closure or a function
+with no exact translation, loads its rows into PHP and runs the step in a
+`DataFrame`. Later steps also run in memory. Results match `DataFrame` with
+these exceptions:
 
 - A database cannot represent some of R's values, such as `NaN` in MySQL. The
   [SQL tables](sql.qmd#known-differences) page lists these cases.
-- Rows from a SQL join, and from a table without `arrange()`, come back in the
-  order the database returns them.
+- Rows from a SQL join, and from a SQL table without `arrange()`, come back
+  in the order the database returns them.
 - Floating-point results can differ in the last digits. The SQL and Polars
   tests compare floats rounded to nine decimal places.
 
@@ -32,6 +31,7 @@ The [Table contract](contract.qmd) page states the rules each backend follows.
 
 ```php
 use Phibble\DataFrame;
+
 use function Phibble\{tbl, polars};
 use function Phibble\Expr\{col, mean, n};
 
@@ -49,36 +49,35 @@ $summary($sql)->collect();
 $summary($fast)->collect();
 ```
 
-`$df` holds the data in memory, `$sql` reads it from the database, and
-`$fast` holds it in Polars. On `$sql`, the summary runs as one SQL query.
-All three classes have `summarize()` as an alias of the `Table` method
-`summarise()`. Code that accepts any `Table` implementation should call
-`summarise()`, since the interface declares only that name.
-
-`collect()` turns any table into a `DataFrame`. `PolarsTable::fromTable()` and
-`polars()` move a table into Polars; `tbl()` opens a database table or query.
+- On `$sql`, the summary runs as one SQL query.
+- `collect()` turns any table into a `DataFrame`. `polars()` and
+  `PolarsTable::fromTable()` move a table into Polars, and `tbl()` opens a
+  database table or query.
+- The `Table` interface declares only `summarise()`. Code that accepts any
+  `Table` should call it, although all three classes also have `summarize()`.
 
 ## The Polars backend
 
-phibble's `Phibble\Polars\PolarsTable` needs the php_polars extension, which
-phpolars builds. phibble does not require it: `composer.json` lists it as a
-suggestion, and the class is only loaded when used. Expressions, joins (including `join_by` comparisons and rolling joins),
-pivots, and the lubridate and stringr functions run natively in Polars. Steps
-it cannot run, such as PHP closures and `str_to_title()`, run in `DataFrame`.
-`PolarsTable::$fallbacks` counts those steps. Set `PolarsTable::$strict = true`
-to throw `PolarsFallback` instead. The message names the verb and the reason.
+`PolarsTable` loads only when used, so phibble runs without the extension.
 
-A time column is a Polars duration in microseconds, which, like an hms, can
-be negative or longer than a day. A Polars `Time` column reads as a time.
-Comparisons of times, `is_na()`, `min()`, `max()`, `first()`, and `last()` run
-in Polars, and other functions of a time run in a `DataFrame`, as do
-`sum()`, `mean()`, `median()`, `quantile()`, `sd()`, `var()`, and `iqr()` of
-dates and datetimes.
+- Expressions, joins (including `join_by` comparisons and rolling joins),
+  pivots, and the lubridate and stringr functions run in Polars.
+- Steps it cannot run, such as PHP closures and `str_to_title()`, run in a
+  `DataFrame`. `PolarsTable::$fallbacks` counts them.
+- `PolarsTable::$strict = true` throws `PolarsFallback` instead, naming the
+  verb and the reason.
 
-Two kinds of list-column stay in `DataFrame`. Polars stores named arrays as
-structs, which have every key in every row, so `fromTable()` throws when a
-list-column holds named arrays with different keys. A list-column of
-`DataFrame`s cannot be stored in Polars either.
+Type mapping:
+
+- A time column is a Polars duration in microseconds, which, like an hms, can
+  be negative or longer than a day. A Polars `Time` column reads as a time.
+- Comparisons of times, `is_na()`, `min()`, `max()`, `first()`, and `last()`
+  run in Polars. Other functions of a time run in a `DataFrame`, as do
+  `sum()`, `mean()`, `median()`, `quantile()`, `sd()`, `var()`, and `iqr()` of
+  dates and datetimes.
+- `fromTable()` throws on a list-column of named arrays with different keys,
+  since Polars structs have every key in every row, and on a list-column of
+  `DataFrame`s.
 
 The Polars test suite runs phibble's dplyr, tidyr, lubridate, and stringr
 reference cases on `PolarsTable` and skips when the extension is not loaded.

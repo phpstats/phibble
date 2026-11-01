@@ -11,7 +11,8 @@ $out = $sales
     ->arrange(['store', 'week'])
     ->mutate([
         'running' => cumsum(col('units')),
-        'of_best' => col('units')->div(max(col('units'), na_rm: true)),
+        'of_best' => col('units')
+            ->div(max(col('units'), na_rm: true)),
     ]);
 
 echo $out->showQuery(), "\n\n";

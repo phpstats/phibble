@@ -2,21 +2,27 @@
 title: "Reading and writing data"
 ---
 
+Read and write CSV and JSON, and load query results from databases.
+
 ## CSV files
 
 `DataFrame::fromCsv()` reads delimited text the way readr's `read_csv()` and
-`read_delim()` do. It takes a path (files ending in `.gz` are decompressed), an
-`http://` or `https://` URL, or an open stream. `DataFrame::fromCsvString()`
-reads from a string.
+`read_delim()` do. `DataFrame::fromCsvString()` reads from a string.
+`fromCsv()` takes:
 
-A URL is downloaded to a temporary file, which is read as a local file and
-then deleted. A URL whose path ends in `.gz` is decompressed. Reading a URL
-needs PHP's `allow_url_fopen` setting, and phibble names the URL and the
-reason when the download fails:
+- a path, decompressing files that end in `.gz`,
+- an `http://` or `https://` URL, which needs PHP's `allow_url_fopen`. The
+  file is downloaded to a temporary file, read, and deleted, and a failed
+  download throws with the URL and the reason,
+- an open stream.
 
 ```php
-$mroz = DataFrame::fromCsv('https://vincentarelbundock.github.io/Rdatasets/csv/carData/Mroz.csv');
+$url = 'https://vincentarelbundock.github.io/Rdatasets'
+    .'/csv/carData/Mroz.csv';
+$mroz = DataFrame::fromCsv($url);
 ```
+
+### Options
 
 readr's options are named arguments in camelCase:
 
@@ -39,7 +45,7 @@ readr's options are named arguments in camelCase:
 
 {{< include examples/_csv-options.md >}}
 
-## Column types
+### Column types
 
 `types` accepts readr's compact string, with one letter per column:
 
@@ -63,14 +69,14 @@ column not named.
 
 {{< include examples/_col-types.md >}}
 
-## Guessing
+### Guessing
 
 Without explicit types, phibble guesses each column from up to `guessMax` rows,
 sampled the way readr 2 samples them. A column is:
 
 - bool if every value is `T`, `F`, `TRUE`, `FALSE`, `True`, `False`, `true`, or
   `false`,
-- int if every value is a whole number (readr guesses double here),
+- int if every value is a whole number (readr guesses double),
 - float if every value is a number, including `Inf` and `NaN`,
 - date if every value is an ISO 8601 date,
 - datetime if every value is an ISO 8601 date and time,
@@ -86,13 +92,15 @@ As in readr, a time's minutes and seconds must be under 60, `12 AM` is hour
 dropped. The phit extension has no time type, so phibble guesses times in the
 columns phit reads as text, from the same rows the PHP reader samples.
 
+### Parse problems
+
 When a value cannot be parsed as its column's type, a row has the wrong number
 of fields, or a quoted field is never closed, phibble still returns the data.
 The value becomes NA, and the read raises one `E_USER_WARNING` that lists the
 problems. Rows are numbered as in `readr::problems()`: the first data row is
 row 2, and skipped, blank, and comment lines are not counted.
 
-## Quotes
+### Quotes
 
 Quoted fields follow readr 2's rules. A field is quoted when its first
 character is the quote character. Inside a quoted field, a doubled quote is a
@@ -108,7 +116,9 @@ neither does phibble unless `escapeBackslash: true` is passed.
 
 {{< include examples/_csv-problems.md >}}
 
-## Reading in chunks
+## Large CSV files
+
+### Reading in chunks
 
 `DataFrame::fromCsvChunked()` reads a file a chunk of rows at a time, as
 readr's `read_delim_chunked()` does. It passes each chunk to a callback with
@@ -118,8 +128,15 @@ by that index. Memory depends on the chunk size, so a file larger than the
 memory limit can be filtered down as it is read:
 
 ```php
+$chunks = DataFrame::csvChunks(
+    'feed.tsv',
+    chunkSize: 10_000,
+    delimiter: "\t",
+    types: ['.default' => 'c'],
+);
+
 $kept = [];
-foreach (DataFrame::csvChunks('feed.tsv', chunkSize: 10_000, delimiter: "\t", types: ['.default' => 'c']) as $chunk) {
+foreach ($chunks as $chunk) {
     $kept[] = $chunk->filter(col('category')->eq('Running'));
 }
 $running = DataFrame::concat($kept);
@@ -134,34 +151,25 @@ levels from each chunk.
 Every other option works as it does in `fromCsv()`. Each chunk's problems
 raise their own warning, with rows numbered from the start of the file.
 
-When the [phit](https://github.com/phpstats/phit) extension is loaded (0.2.0 or
-later), the chunks are read natively with `Phit\CsvReader`, about three times
-faster on a wide tab-separated file. The results are the same as the PHP
-reader's, which is used otherwise.
+With the [phit](https://github.com/phpstats/phit) extension 0.2.0 or later
+loaded, chunks are read natively with `Phit\CsvReader`, with the same results
+as the PHP reader.
 
-## Large files
+### Memory
 
-A whole-file read holds every value as an element of a PHP array. With
-phibble 0.5.2, `fromCsv()` of a 1 GB file of 20 million orders in seven
-columns holds 3.5 GiB of PHP heap. With phit 0.4.1 or later loaded, the
-native reader holds the same.
-
-`fromCsvChunked()` holds one chunk at a time, so its memory follows the chunk
-size. An aggregate that can be combined, such as a count or a sum, can be
+A whole-file read holds every value as an element of a PHP array, with either
+reader, so its memory grows with the file. `fromCsvChunked()` holds one chunk
+at a time, so its memory follows the chunk size. An aggregate that can be combined, such as a count or a sum, can be
 computed for each chunk and the results added up. This script counts the
 penguins of each species, 100 rows at a time:
 
 {{< include examples/_chunk-totals.md >}}
 
-For a file too large to hold as PHP arrays, use
-[phpolars](https://github.com/phpstats/phpolars). The data stays in Polars,
-and only the result comes back to PHP. phpolars' own API works on Polars
-directly, and `PolarsTable` keeps phibble's and phplyr's API. `PolarsTable`
-needs the php_polars extension, which phpolars provides. phpolars'
+For a file too large to hold as PHP arrays, keep the data in Polars, and
+only the result comes back to PHP. `PolarsTable` keeps phibble's and phplyr's
+API, as the [Backends](backends.qmd) page describes. phpolars'
 [lazy CSV example](https://phpolars.phpstats.org/docs/examples/lazy-csv)
-queries a large file without loading it, and its
-[phibble and phplyr guide](https://phpolars.phpstats.org/docs/phibble) shows
-`PolarsTable`.
+queries a large file with Polars' own API.
 
 ## Writing CSV
 
@@ -169,14 +177,15 @@ queries a large file without loading it, and its
 follows readr's `write_csv()`. Values are quoted only when needed, NA is written
 as `NA`, logicals as `TRUE` and `FALSE`, dates in ISO 8601, and datetimes in
 UTC with a `Z`. Times are written as hms writes a column: one number of
-fraction digits for the column, and hours padded with spaces to one width. Factors are written as their labels, and list-columns throw.
+fraction digits for the column, and hours padded with spaces to one width.
+Factors are written as their labels, and list-columns throw.
 
 {{< include examples/_write-csv.md >}}
 
 The options are `delimiter`, `na`, `append`, `colNames`, `quote` (`'needed'`,
 `'all'`, or `'none'`), `escape`, and `eol`.
 
-## JSON
+## Writing and reading JSON
 
 `toJson()` writes a list of records, and `toJson('columns')` writes an object of
 columns. NA is written as `null` and kept in every record. `DataFrame::fromJson()`
@@ -186,19 +195,22 @@ reads either shape and detects which one it has.
 
 ## Databases
 
+### Query results
+
 `DataFrame::fromPdo()` runs a query with positional or named bindings and loads the
 result. PostgreSQL and MySQL report each column's declared type, and phibble
 uses it:
 
 | Declared type | Column type |
 | --- | --- |
-| Text types, JSON, UUID, `TIME`, intervals, arrays, and enums | string |
+| Text types, JSON, UUID, `TIMETZ`, intervals, arrays, and enums | string |
 | `BOOLEAN` (PostgreSQL) | bool |
 | Integer types and MySQL's `YEAR` | int |
 | `REAL`, `DOUBLE PRECISION`, `FLOAT`, and `DOUBLE` | float |
 | `NUMERIC` and `DECIMAL` | float, or int when every value is a whole number |
 | `DATE` | date |
 | `TIMESTAMP`, `TIMESTAMPTZ`, and `DATETIME` | datetime |
+| `TIME` | time |
 
 A text column stays text, so `'TRUE'` and `'2024-01-02'` in a `TEXT` column
 are strings. Only values without a declared type are guessed with the CSV
@@ -206,12 +218,20 @@ rules. SQLite stores values without a column type, so its results are always
 guessed, and so are results from other drivers.
 
 `NUMERIC` and `DECIMAL` values become doubles, as RPostgres and RMariaDB read
-them. A double holds about 15 significant digits, so
-`12345678901234567.89` loses its last digits. Prices such as `NUMERIC(10,2)`
-fit. Pass a `string` type to keep a decimal exact:
+them:
+
+- A value of up to 15 significant digits, such as a `NUMERIC(10,2)` price,
+  reads back as the same decimal. Arithmetic on it is floating-point.
+- A longer value is rounded: `12345678901234567.89` reads as
+  `12345678901234568.0`.
+- A `string` type keeps the database's exact decimal text.
 
 ```php
-DataFrame::fromPdo($pdo, 'SELECT id, balance FROM accounts', types: ['balance' => 'string']);
+$accounts = DataFrame::fromPdo(
+    $pdo,
+    'SELECT id, balance FROM accounts',
+    types: ['balance' => 'string'],
+);
 ```
 
 Explicit types always take precedence over declared ones. `fromQuery()`, the
@@ -219,6 +239,8 @@ Laravel `->toDataFrame()` macro, and `SqlTable::collect()` follow the same
 rules.
 
 {{< include examples/_pdo.md >}}
+
+### Query builders
 
 `DataFrame::fromQuery()` loads a query builder without depending on its library:
 

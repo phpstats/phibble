@@ -3,14 +3,10 @@ title: "The Table contract"
 ---
 
 `Phibble\Contracts\Table` is the interface that every table backend
-implements. phplyr's verbs call its methods, so a pipeline runs unchanged on
-any backend. phibble ships three implementations: `DataFrame`, which holds data
-in PHP arrays, `Phibble\Sql\SqlTable`, which compiles verbs to SQL, and
-`Phibble\Polars\PolarsTable`, which runs them in Polars through the
-php_polars extension from phpolars.
-
-This page is for authors of backends. It lists the rules that every
-implementation follows and the semantics of each method.
+implements: `DataFrame`, `Phibble\Sql\SqlTable`, and
+`Phibble\Polars\PolarsTable`. phplyr's verbs call its methods, so a pipeline
+runs unchanged on any backend. This page lists the rules every implementation
+follows and the semantics of each method.
 
 ## Rules
 
@@ -25,7 +21,11 @@ implementation follows and the semantics of each method.
   `eachGroup()` work per group. The other verbs keep the grouping.
 - **Group order.** Groups are visited in sorted key order, as in dplyr:
   ascending, factors by level order, NA last, and strings in byte order.
-  `filter()`, `mutate()`, and `arrange()` keep the input row order.
+- **Row order.** `filter()` and `mutate()` keep the rows in their input
+  order. `arrange()` sorts stably, so rows with equal keys keep their input
+  order. A `SqlTable`'s input order is the order in which the database returns
+  the source query's rows, which a stored table does not fix. See
+  [Row order and window functions](sql.qmd#row-order-and-window-functions).
 - **Rowwise tables.** `rowwise()` makes every row its own group, in row order.
   `groups()` returns its id columns.
 - **Row closures.** A row closure receives `(Phibble\Row $row, Table $group)`.

@@ -3,100 +3,109 @@ title: "SQL tables"
 ---
 
 `Phibble\Sql\SqlTable` is a table backed by a SQL query, like dbplyr's `tbl()`.
-It implements the same `Table` contract as `DataFrame`. Verbs called with
-[expressions](expr.qmd) are compiled into SQL, and no query runs until the
-rows are needed. SQLite, PostgreSQL, and MySQL are supported.
+Verbs called with [expressions](expr.qmd) compile to SQL for SQLite,
+PostgreSQL, or MySQL, and the database runs the query when the rows are
+needed.
 
 ## Opening a table
 
-`tbl($pdo, 'name')` opens a table or view. `tbl($pdo, 'SELECT ...', $bindings)`
-starts from a query with positional (`?`) or named (`:name`) bindings. The
-same tables can be opened with `SqlTable::table()` and `SqlTable::query()`.
-`SqlTable::fromQuery($builder)` starts from a Laravel or Doctrine query builder,
-and `SqlTable::fromSource($pdoSource)` from a `PdoSource`.
+| Call | Source |
+| --- | --- |
+| `tbl($pdo, 'name')`, `SqlTable::table()` | A table or view. |
+| `tbl($pdo, 'SELECT ...', $bindings)`, `SqlTable::query()` | A query with positional (`?`) or named (`:name`) bindings. |
+| `SqlTable::fromQuery($builder)` | A Laravel or Doctrine query builder. |
+| `SqlTable::fromSource($pdoSource)` | A `PdoSource`. |
 
-phibble reads the column names when the table is opened. It runs the query
-itself when the rows are needed: `collect()` returns a `DataFrame`, and `toRows()`,
-`nrow()`, iteration, and printing also run it.
+Which calls query the database:
 
-`showQuery()` returns the SQL with `?` placeholders, and `bindings()` returns
-their values in order.
+- Opening a table reads its column names with a `LIMIT 0` query. In SQLite,
+  which declares no column types, it also reads the first 1,000 rows to
+  guess date, datetime, and time columns.
+- `nrow()` and `count()` run a `COUNT(*)` query, and `types()` collects the
+  first 1,000 rows.
+- `collect()`, `toRows()`, `column()`, iteration, and printing load the rows.
+- Verbs and `showQuery()` run nothing. `showQuery()` returns the SQL with `?`
+  placeholders, and `bindings()` returns their values in order.
+
+This example queries an in-memory SQLite table, `penguins`, loaded from
+`penguins.csv`:
 
 {{< include examples/_sql-tbl.md >}}
 
-Each verb wraps the previous query in a subquery, so each step's SQL stays
-simple. Database planners usually flatten the nesting.
+Each verb wraps the previous query in a subquery.
 
 ## What compiles to SQL
 
-These verbs compile when their arguments are expressions or column names:
 `select()`, `rename()`, `filter()`, `mutate()`, `arrange()`, `groupBy()`,
-`summarize()`, `distinct()`, `slice()`, `head()`, and `join()`.
-
-The compiled SQL keeps R's semantics:
+`summarize()`, `distinct()`, `slice()`, `head()`, and `join()` compile when
+their arguments are expressions or column names. The compiled SQL keeps R's
+semantics:
 
 - An aggregate returns NA when its group contains NA, unless `na_rm: true`.
-  SQL aggregates skip NULL, so phibble adds a check on the count of non-NULL
-  values.
+  phibble adds a check on the count of non-NULL values, since SQL aggregates
+  skip NULL.
 - Cumulative functions return NA after the first NA.
 - Ranks leave NA rows unranked.
 - `isIn()` never returns NA.
 - `/` returns a float, and division by zero gives NA.
 - Groups in `summarize()` output are sorted, with NA last.
+- Text compares in byte order and case-sensitively, through `COLLATE "C"` in
+  PostgreSQL and `utf8mb4_0900_bin` in MySQL.
 
 ## When the table falls back to memory
 
-Some arguments have no faithful SQL translation. A `SqlTable` then collects
-the rows and runs the verb in memory, and the verb returns a `DataFrame`. The
-values are then those `DataFrame` computes, apart from the
-[known differences](#known-differences) below. The fallbacks are:
-
-- any PHP closure,
-- `round()`, because SQL's `ROUND` does not round half to even,
-- `as_string()` and `as_bool()`,
-- `paste()` and `paste0()` with arguments other than text literals, because SQL
-  formats numbers differently from R,
-- regular-expression patterns, except `str_detect()` in MySQL (which uses ICU,
-  as stringr does). Patterns wrapped in `fixed()`, and plain patterns without
-  regular-expression characters, are translated everywhere,
-- `str_extract()`, `str_extract_all()`, `str_split()`, `str_split_i()`,
-  `str_to_title()`, center `str_trunc()`, and `str_pad(side: 'both')`;
-  `str_pad()` and `str_squish()` in SQLite; `str_to_upper()` and
-  `str_to_lower()` in SQLite, whose `UPPER()` and `LOWER()` change only ASCII
-  letters,
-- parsing text to dates (`ymd()` and the others) on columns, `floor_date()`,
-  `ceiling_date()`, `round_date()`, period arithmetic, `with_tz()`, and
-  `force_tz()`, because the result type depends on the column type, which SQL
-  tables do not track. Date parts (`year()` and the others), `wday()`, and
-  `difftime()` are translated; a call on literals only, such as
-  `ymd('2024-01-01')`, is evaluated once and passed as a value,
-- functions of a PostgreSQL `time` or MySQL `TIME` column other than
-  comparisons and `is_na()`, because SQL's time functions differ from
-  lubridate's (MySQL's `HOUR()` of `25:00:00` is 25),
-- any use of SQLite text that holds times, such as `7:30:00`, because it
-  sorts and compares as text. SQLite columns are guessed as dates,
-  datetimes, or times from their first 1000 rows when the table is opened,
-- `sum()`, `mean()`, `median()`, `quantile()`, `sd()`, `var()`, and `iqr()`
-  of date, datetime, and time columns, which keep R's types in memory,
-- `first()`, `last()`, and `nth()` without a row order (from `arrange()` or
-  `order_by:`), or with `default:` or `na_rm:`,
-- `iqr()` outside PostgreSQL, `cumprod()`, and `consecutive_id()`,
-- `sd()` and `var()` in SQLite, whose formula would lose precision,
-- `str_trim()`, because R removes all Unicode white space and SQL `TRIM`
-  removes spaces,
-- nested aggregates such as `mean(x - mean(x))`, `summarize()` entries that
-  are not one value per group, and `slice()` with negative positions,
-- `median()` and `quantile()` outside PostgreSQL,
-- `quantile()` without `na_rm: true`,
-- `median()`, `quantile()`, and `n_distinct()` inside grouped `mutate()` or
-  `filter()`, because SQL has no window form of them,
-- `take()`, `eachGroup()`, `rowwise()`, `mutateGroups()` with closures, and
-  `filterGroups()`,
-- joins with `multiple`, `relationship`, or `unmatched` set, joins between
-  different connections, full joins in MySQL, and full joins with NA matching in
-  PostgreSQL.
+When an argument has no faithful SQL translation, the `SqlTable` runs the
+query so far, collects its rows into PHP, and runs the verb in memory. The
+verb returns a `DataFrame`, so every later step also runs in memory, with
+`DataFrame`'s values apart from the [known differences](#known-differences).
+Here `mul()` compiles, and `round()` and a closure fall back:
 
 {{< include examples/_sql-fallback.md >}}
+
+### On every database
+
+| Operation | Why it runs in memory |
+| --- | --- |
+| Any PHP closure | SQL cannot run PHP. |
+| `round()` | SQL's `ROUND` does not round half to even. |
+| `as_string()`, `as_bool()` | SQL formats numbers differently, and casts to bool vary by database. |
+| `paste()`, `paste0()` with arguments other than text literals | SQL formats numbers differently from R. |
+| Regular-expression patterns (except `str_detect()` in MySQL) | Database regex dialects differ from stringr's. `fixed()` patterns and patterns without regex characters compile. |
+| `str_extract()`, `str_extract_all()`, `str_split()`, `str_split_i()`, `str_to_title()`, center `str_trunc()`, `str_pad(side: 'both')`, `str_trim()` | No equivalent SQL function. SQL `TRIM` removes only spaces. |
+| `ymd()` and other parsers on columns, `floor_date()`, `ceiling_date()`, `round_date()`, period arithmetic, `with_tz()`, `force_tz()` | The result type depends on the column type, which SQL tables do not track. Parsers on literals, date parts, `wday()`, and `difftime()` compile. |
+| `sum()`, `mean()`, `median()`, `quantile()`, `sd()`, `var()`, `iqr()` of dates, datetimes, and times | They keep R's result types. |
+| Functions of time columns other than comparisons and `is_na()` | SQL time functions differ from lubridate. MySQL's `HOUR()` of `25:00:00` is 25. |
+| `first()`, `last()`, `nth()` without a row order (from `arrange()` or `order_by:`), or with `default:` or `na_rm:` | No faithful SQL translation. |
+| `cumprod()`, `consecutive_id()` | No SQL window form. |
+| `median()`, `quantile()`, `n_distinct()` in grouped `mutate()` or `filter()` | No SQL window form. |
+| `quantile()` without `na_rm: true` | R raises an error. |
+| Nested aggregates such as `mean(x - mean(x))`, multi-row `summarize()` entries, negative `slice()` positions | No single-query translation. |
+| `take()`, `eachGroup()`, `rowwise()`, `mutateGroups()` with closures, `filterGroups()` | They work on row positions or PHP closures. |
+| Joins with `multiple`, `relationship`, or `unmatched`, joins across connections, and right or full joins with a `closest` condition | No single-query translation. |
+
+### By database
+
+"SQL" means the operation compiles; "memory" means it falls back.
+
+| Operation | SQLite | PostgreSQL | MySQL |
+| --- | --- | --- | --- |
+| `median()`, `quantile()`, `iqr()` | memory | SQL | memory |
+| `sd()`, `var()` | memory | SQL | SQL |
+| `str_detect()` with a regular expression | memory | memory | SQL |
+| `str_pad()`, `str_squish()` | memory | SQL | SQL |
+| `str_to_upper()`, `str_to_lower()` | memory | SQL | SQL |
+| Full joins | SQL | memory, SQL with `naMatches: false` | memory |
+| Text columns that hold times, such as `7:30:00` | memory | — | — |
+
+- SQLite's `sd()` formula would lose precision, and its `UPPER()` and
+  `LOWER()` change only ASCII letters.
+- PostgreSQL runs `FULL JOIN` only on merge- or hash-joinable conditions, which
+  NA-matching keys are not.
+- MySQL's `str_detect()` uses ICU, as stringr does.
+- SQLite text times sort and compare as text, so any use of such a column
+  runs in memory.
+
+### SQLite column types
 
 SQLite compares by storage class, and it orders all text above all numbers.
 A column declared without a type stores bound values as text, so
@@ -117,32 +126,32 @@ R's result:
 - Column names starting with `__phibble_` are reserved for the hidden columns
   that keep row order and window results.
 
-Text compares in byte order and case-sensitively, as R does: phibble applies
-`COLLATE "C"` in PostgreSQL and `utf8mb4_0900_bin` in MySQL to text columns
-wherever values are compared, sorted, grouped, or joined.
+## Row order and window functions
 
-## Window functions
+SQL tables have no row order of their own. phibble numbers the rows of the
+source query when the table is opened and keeps that number through every
+step.
 
-Grouped `mutate()` and `filter()` compile aggregates and window functions to
-`OVER (PARTITION BY ...)`. Window functions such as `lag()` and `cumsum()` need
-a row order. SQL tables have none, so phibble numbers the rows of the source
-query when the table is opened and keeps that number through every step.
-Windows use the `order_by:` option where given, otherwise the order set by
-`arrange()`, and otherwise the source order. The same order decides the order
-of collected rows and breaks ties after `arrange()`, which is stable as in
-dplyr. The source order is the order in which the database returns the
-source query's rows. For a stored table, add `arrange()` to make it explicit.
+- Collected rows follow `arrange()`, and otherwise the source order.
+  `arrange()` is stable, so ties keep the source order.
+- The source order is the order in which the database returns the source
+  query's rows. A stored table does not fix it, so add `arrange()` when the
+  order matters.
+- Rows from a SQL join have no defined order.
+- Window functions such as `lag()` and `cumsum()` use `order_by:` where
+  given, then the `arrange()` order, then the source order.
+- Grouped `mutate()` and `filter()` compile to `OVER (PARTITION BY ...)`.
 
 {{< include examples/_sql-window.md >}}
 
 ## Joins
 
 `join()` between two tables on the same PDO connection compiles to a SQL join.
-The output columns follow `DataFrame::join()`: x's columns, then y's other columns,
-with `.x` and `.y` suffixes on clashing names. NA keys match each other, as in
-dplyr, through `IS` in SQLite, `IS NOT DISTINCT FROM` in PostgreSQL, and `<=>`
-in MySQL. Pass `naMatches: false` for SQL's usual equality. The order of rows
-from a SQL join is not defined, so call `arrange()` when it matters.
+The output columns follow `DataFrame::join()`: x's columns, then y's other
+columns, with `.x` and `.y` suffixes on clashing names. NA keys match each
+other, as in dplyr, through `IS` in SQLite, `IS NOT DISTINCT FROM` in
+PostgreSQL, and `<=>` in MySQL. Pass `naMatches: false` for SQL's usual
+equality.
 
 {{< include examples/_sql-join.md >}}
 
@@ -154,6 +163,5 @@ equality. The SQL for one expression in each dialect:
 
 {{< include examples/_sql-dialects.md >}}
 
-The test suite runs the dplyr reference cases through `SqlTable` on SQLite, and
-on PostgreSQL and MySQL when their DSNs are set. See
-[Development](development.qmd).
+The test suite runs the dplyr reference cases on SQLite, and on PostgreSQL
+and MySQL when their DSNs are set. See [Development](development.qmd).

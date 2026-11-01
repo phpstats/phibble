@@ -11,16 +11,27 @@ $expressions = [
     'in, with NA' => col('arm')->isIn(['a', null]),
 ];
 
-foreach ([new SqliteDialect(), new PostgresDialect(), new MysqlDialect()] as $dialect) {
+$dialects = [
+    new SqliteDialect(),
+    new PostgresDialect(),
+    new MysqlDialect(),
+];
+
+foreach ($dialects as $dialect) {
     echo "-- {$dialect->name()}\n";
     $compiler = new Compiler($dialect, mode: 'summary');
     foreach ($expressions as $label => $expr) {
-        echo \str_pad($label, 16), $compiler->compile($expr)->sql, "\n";
+        $sql = $compiler->compile($expr)->sql;
+        echo \str_pad($label, 16), $sql, "\n";
     }
     echo "\n";
 }
 
-$window = new Compiler(new PostgresDialect(), groups: ['clinic'], order: [[col('visit'), false]]);
+$window = new Compiler(
+    new PostgresDialect(),
+    groups: ['clinic'],
+    order: [[col('visit'), false]],
+);
 echo $window->compile(cumsum(col('bp')))->sql, "\n";
 ```
 

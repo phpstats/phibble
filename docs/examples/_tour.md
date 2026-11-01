@@ -1,8 +1,4 @@
 ```php
-<?php
-
-require __DIR__.'/vendor/autoload.php';
-
 use Phibble\DataFrame;
 
 use function Phibble\Expr\{col, mean, median, n};
