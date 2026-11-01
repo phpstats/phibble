@@ -7,6 +7,8 @@ change the public API.
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-01
+
 ### Changed
 
 - The PHP CSV reader packs a column whose values are mostly distinct into
@@ -251,7 +253,8 @@ and cmdstanphp.
   query builders and `->phibble()` for lazy SQL tables. Global scopes such as
   soft deletes apply.
 
-[Unreleased]: https://github.com/phpstats/phibble/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/phpstats/phibble/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/phpstats/phibble/releases/tag/v0.5.2
 [0.5.1]: https://github.com/phpstats/phibble/releases/tag/v0.5.1
 [0.5.0]: https://github.com/phpstats/phibble/releases/tag/v0.5.0
 [0.4.1]: https://github.com/phpstats/phibble/releases/tag/v0.4.1
