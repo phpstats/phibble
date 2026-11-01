@@ -2,6 +2,8 @@
 
 require __DIR__.'/vendor/autoload.php';
 
+// ---
+
 use Phibble\Sql\SqlTable;
 
 use function Phibble\tbl;

@@ -11,11 +11,13 @@
  * An example that loads the autoloader itself, with
  * "require __DIR__.'/vendor/autoload.php';", is a complete script: it runs
  * without the prelude, with that line pointing at this repository's autoloader.
+ * It is shown with "<?php" and that line, unless they sit above "// ---".
  *
  * Code above a line "// ---" and below a line "// ===" runs but is left out
  * of the page. Output after
  * a line "<!--phiz-->" is HTML, such as a phiz chart, and is included as is.
- * _<name>-code.md and _<name>-output.md hold the code and the output alone.
+ * _<name>-code.md and _<name>-output.md hold the code and the output alone,
+ * and _<name>-output-1.md and on hold each blank-line-separated part of it.
  *
  * Usage: bin/docs-examples [name ...]
  * Environment: PHP (the PHP 8.5 binary, default: this one).
@@ -76,8 +78,9 @@ foreach (glob($root.'/docs/examples/*.php') as $file) {
     $shown = preg_match('~^// ---\s*$~m', $code) ? trim((string) preg_split('~^// ---\s*$~m', $code, 2)[1]) : $code;
     // Code below a "// ===" line runs but is not shown (output plumbing).
     $shown = preg_match('~^// ===\s*$~m', $shown) ? trim((string) preg_split('~^// ===\s*$~m', $shown, 2)[0]) : $shown;
-    // A complete script is shown with its opening tag, ready to save and run.
-    if (str_contains($code, $standalone)) {
+    // A complete script is shown with its opening tag, ready to save and run,
+    // unless its bootstrap sits above "// ---".
+    if (str_contains($shown, $standalone)) {
         $shown = "<?php\n\n{$shown}";
     }
     $md = "```php\n{$shown}\n```\n\n";
@@ -95,6 +98,13 @@ foreach (glob($root.'/docs/examples/*.php') as $file) {
     if ($split($name)) {
         file_put_contents($root."/docs/examples/_{$name}-code.md", "```php\n{$shown}\n```\n");
         file_put_contents($root."/docs/examples/_{$name}-output.md", substr($md, strlen("```php\n{$shown}\n```\n\n")));
+    }
+    // Each blank-line-separated part of the text output alone, as
+    // _<name>-output-1.md and on, for a page that shows them apart.
+    if (str_contains($pages, "_{$name}-output-1.md")) {
+        foreach (preg_split('/\n\s*\n/', trim($text)) as $i => $part) {
+            file_put_contents($root."/docs/examples/_{$name}-output-".($i + 1).'.md', "```{.text .output}\n".rtrim($part)."\n```\n");
+        }
     }
     echo "{$name}: ok\n";
 }

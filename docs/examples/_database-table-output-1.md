@@ -1,0 +1,3 @@
+```{.text .output}
+SELECT "region", "orders", "revenue" FROM (SELECT "region", "orders", "revenue", ROW_NUMBER() OVER (ORDER BY ("region" IS NULL), "region") AS "__phibble_row" FROM (SELECT "region" AS "region", COUNT(*) AS "orders", (CASE WHEN COUNT(*) > COUNT("revenue") THEN NULL ELSE COALESCE(SUM("revenue"), 0) END) AS "revenue" FROM (SELECT "region", "product", "units", "price", ("units" * "price") AS "revenue", "__phibble_row" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "orders") AS q1 WHERE ("units" > ?)) AS q2) AS q3 GROUP BY "region") AS q4) AS q5 ORDER BY ("revenue" IS NULL), "revenue" DESC, ("__phibble_row" IS NULL), "__phibble_row"
+```

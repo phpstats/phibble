@@ -46,12 +46,12 @@
         {
             "path": "examples/read-a-csv",
             "title": "Read a CSV file into a typed table",
-            "description": "Reads a small CSV file of weather readings, guessing each column's type and declaring one as a factor."
+            "description": "Guesses each column's type from its values, declares one column a factor, and reads NA as missing."
         },
         {
             "path": "examples/database-table",
             "title": "Query a database table",
-            "description": "Summarizes an SQLite table with phibble's verbs, which compile to one SQL query.",
+            "description": "Compiles a filtered, grouped summary of an SQLite table to one SQL query, shows the SQL, and collects the result.",
             "also": [
                 "phplyr"
             ]

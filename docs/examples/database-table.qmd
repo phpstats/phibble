@@ -2,16 +2,9 @@
 title: "Query a database table"
 ---
 
-This example summarizes a database table with phibble's verbs, which compile
-to one SQL query that the database runs.
-
-It needs phibble and the pdo_sqlite extension. phibble is installed as
-described in [Installation](../getting-started.qmd#installation).
-
-The script creates an in-memory SQLite database with an `orders` table of
-eight rows. It opens the table with `tbl()`, keeps the orders with at least
-one unit, computes each order's revenue, and totals the orders and revenue
-for each region:
+Total the orders and revenue for each region of an SQLite `orders` table,
+with phibble's verbs compiled to one SQL query that the database runs. The
+script needs the pdo_sqlite extension.
 
 ::: {.panel-tabset group="syntax"}
 ## PHP 8.5+
@@ -23,18 +16,26 @@ for each region:
 {{< include _database-table-chain-code.md >}}
 :::
 
-{{< include _database-table-output.md >}}
+<details>
+<summary>The SQL from <code>showQuery()</code></summary>
 
-`tbl($pdo, 'orders')` returns a `SqlTable`. Each verb adds to its query, and
-nothing runs until the rows are needed. `showQuery()` returns the SQL, with
-`?` in place of the bound value 0. `collect()` runs the query and returns a
-`DataFrame`.
+{{< include _database-table-output-1.md >}}
 
-Each verb wraps the previous query in a subquery. The extra conditions keep
-dplyr's results: the sum is NA when a group holds a missing value, the groups
-are sorted, and ties keep the table's row order.
+</details>
 
-The same code runs against PostgreSQL and MySQL with a different PDO
-connection. [SQL tables](../sql.qmd) lists the verbs and functions that
-compile to SQL, and what runs in memory instead. [phplyr](https://github.com/phpstats/phplyr)
-runs its dplyr functions on the same `SqlTable`.
+{{< include _database-table-output-2.md >}}
+
+- `tbl($pdo, 'orders')` returns a `SqlTable`. Each verb adds to its query,
+  and nothing runs on the database until the rows are needed.
+- `showQuery()` returns the SQL with `?` placeholders, and `bindings()`
+  returns their values, here `[0]`.
+- `collect()` runs the query and returns a `DataFrame`.
+- The same code runs on PostgreSQL and MySQL with their PDO connections.
+- [phplyr](https://github.com/phpstats/phplyr) runs its dplyr functions on the
+  same `SqlTable`.
+
+The runnable scripts for [PHP 8.5+](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table.php)
+and [PHP 8.3–8.4](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table-chain.php)
+load Composer's autoloader.
+
+Reference: [SQL tables](../sql.qmd).
