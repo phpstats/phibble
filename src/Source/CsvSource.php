@@ -26,17 +26,36 @@ use RuntimeException;
  */
 final class CsvSource implements Source
 {
-    /** @param resource $handle */
+    /**
+     * @param resource $handle
+     * @param ?string $download A downloaded copy of a URL, deleted with this source.
+     */
     private function __construct(
         private readonly mixed $handle,
         private readonly CsvOptions $options,
         private readonly bool $close,
         private readonly ?string $path = null,
+        private readonly ?string $download = null,
     ) {}
 
-    /** Read a file; ".gz" files are decompressed. */
+    public function __destruct()
+    {
+        $this->finish();
+        if ($this->download !== null && is_file($this->download)) {
+            unlink($this->download);
+        }
+    }
+
+    /**
+     * Read a file; ".gz" files are decompressed. An http:// or https:// URL
+     * is downloaded to a temporary file first, as readr does, and read as a
+     * file; a URL whose path ends in ".gz" is decompressed.
+     */
     public static function file(string $path, CsvOptions $options = new CsvOptions()): self
     {
+        if (preg_match('~^https?://~i', $path)) {
+            return self::url($path, $options);
+        }
         if (! is_file($path) || ! is_readable($path)) {
             throw new InvalidArgumentException("Cannot read CSV file '{$path}'.");
         }
@@ -44,6 +63,48 @@ final class CsvSource implements Source
         $handle = fopen($target, 'r') ?: throw new RuntimeException("Cannot open CSV file '{$path}'.");
 
         return new self($handle, $options, true, $path);
+    }
+
+    private static function url(string $url, CsvOptions $options): self
+    {
+        if (! filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOL)) {
+            throw new RuntimeException("Cannot read CSV URL '{$url}': PHP's allow_url_fopen setting is off.");
+        }
+        $gz = str_ends_with(strtolower((string) parse_url($url, PHP_URL_PATH)), '.gz');
+        $base = tempnam(sys_get_temp_dir(), 'phibble-url') ?: throw new RuntimeException('Cannot create a temporary file.');
+        $copy = $base.($gz ? '.csv.gz' : '.csv');
+        rename($base, $copy);
+        try {
+            $reason = 'the request failed';
+            set_error_handler(function (int $level, string $message) use (&$reason): bool {
+                $reason = (string) preg_replace('/^fopen\([^)]*\): /', '', $message);
+
+                return true;
+            });
+            try {
+                $remote = fopen($url, 'r');
+            } finally {
+                restore_error_handler();
+            }
+            if ($remote === false) {
+                throw new RuntimeException("Cannot read CSV URL '{$url}': {$reason}");
+            }
+            $local = fopen($copy, 'w') ?: throw new RuntimeException('Cannot write a temporary file.');
+            $copied = stream_copy_to_stream($remote, $local);
+            fclose($remote);
+            fclose($local);
+            if ($copied === false) {
+                throw new RuntimeException("Cannot read CSV URL '{$url}'.");
+            }
+            $target = $gz ? 'compress.zlib://'.$copy : $copy;
+            $handle = fopen($target, 'r') ?: throw new RuntimeException("Cannot open the download of '{$url}'.");
+        } catch (\Throwable $e) {
+            unlink($copy);
+
+            throw $e;
+        }
+
+        return new self($handle, $options, true, $copy, $copy);
     }
 
     public static function string(string $csv, CsvOptions $options = new CsvOptions()): self
@@ -101,8 +162,12 @@ final class CsvSource implements Source
         }
         if ($this->path !== null && NativeCsv::chunksAvailable() && NativeCsv::supports($this->path, $this->options)) {
             $this->finish();
+            $chunks = NativeCsv::chunks($this->path, $this->options, $size);
 
-            return NativeCsv::chunks($this->path, $this->options, $size);
+            // The source deletes a downloaded file, so it lives as long as the chunks.
+            return $this->download === null ? $chunks : (function () use ($chunks) {
+                yield from $chunks;
+            })();
         }
 
         return $this->batches($size);

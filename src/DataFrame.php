@@ -105,7 +105,8 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
 
     /**
      * Read delimited text like readr::read_csv(): a path (".gz" is
-     * decompressed) or an open stream. Types are guessed from up to
+     * decompressed), an http:// or https:// URL (downloaded to a temporary
+     * file first), or an open stream. Types are guessed from up to
      * guessMax rows; "" and "NA" are NA. More readr options go as named
      * arguments; see Phibble\Io\CsvOptions (colNames, select, skip,
      * nMax, quote, comment, trimWs, skipEmptyRows, guessMax, nameRepair,
@@ -136,8 +137,9 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      * types. Give types, for example ['.default' => 'c'], to skip guessing.
      * Factors without levels take their levels from each chunk. Each
      * chunk's problems raise their own warning, with rows numbered from the
-     * start of the file. Options are those of fromCsv(). With phit 0.2.0 or
-     * later loaded, the chunks are read natively by Phit\CsvReader.
+     * start of the file. Options are those of fromCsv(), and $file may be a
+     * URL as there. With phit 0.2.0 or later loaded, the chunks are read
+     * natively by Phit\CsvReader.
      *
      * @param string|resource $file
      * @param callable(self, int): (bool|null|void) $callback

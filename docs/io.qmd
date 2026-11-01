@@ -5,8 +5,18 @@ title: "Reading and writing data"
 ## CSV files
 
 `DataFrame::fromCsv()` reads delimited text the way readr's `read_csv()` and
-`read_delim()` do. It takes a path (files ending in `.gz` are decompressed) or
-an open stream. `DataFrame::fromCsvString()` reads from a string.
+`read_delim()` do. It takes a path (files ending in `.gz` are decompressed), an
+`http://` or `https://` URL, or an open stream. `DataFrame::fromCsvString()`
+reads from a string.
+
+A URL is downloaded to a temporary file, which is read as a local file and
+then deleted. A URL whose path ends in `.gz` is decompressed. Reading a URL
+needs PHP's `allow_url_fopen` setting, and phibble names the URL and the
+reason when the download fails:
+
+```php
+$mroz = DataFrame::fromCsv('https://vincentarelbundock.github.io/Rdatasets/csv/carData/Mroz.csv');
+```
 
 readr's options are named arguments in camelCase:
 

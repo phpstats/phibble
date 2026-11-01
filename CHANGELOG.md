@@ -7,6 +7,14 @@ change the public API.
 
 ## [Unreleased]
 
+### Added
+
+- `fromCsv()`, `fromCsvChunked()`, and `csvChunks()` read `http://` and
+  `https://` URLs, as readr does. The file is downloaded to a temporary file,
+  read as a local file by the PHP or phit reader, and deleted. A URL whose
+  path ends in `.gz` is decompressed. Reading a URL needs `allow_url_fopen`,
+  and a failed download names the URL and the reason.
+
 ## [0.5.2] - 2026-11-01
 
 ### Changed
