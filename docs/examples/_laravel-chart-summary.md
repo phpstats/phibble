@@ -1,7 +1,8 @@
 ```php
 use Phiz\Plot;
 
-// The grouping and the means run in the database.
+use function Phibble\Expr\{col, mean};
+
 $byYear = Penguin::query()
     ->measured()
     ->phibble()
@@ -15,7 +16,11 @@ $plot = Plot::of($byYear)
     ->aes(x: 'year:O', y: 'mass', color: 'species')
     ->line()
     ->point()
-    ->labs(title: 'Mean body mass by year', x: 'Year', y: 'Mean body mass (g)');
+    ->labs(
+        title: 'Mean body mass by year',
+        x: 'Year',
+        y: 'Mean body mass (g)',
+    );
 ```
 
 ```{.text .output}

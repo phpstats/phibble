@@ -11,7 +11,11 @@ $plot = Plot::of($penguins)
     ->aes(x: 'flipper_len', y: 'body_mass', color: 'species')
     ->point(alpha: 0.5)
     ->smooth(method: 'lm')
-    ->labs(title: 'Body mass by flipper length', x: 'Flipper length (mm)', y: 'Body mass (g)');
+    ->labs(
+        title: 'Body mass by flipper length',
+        x: 'Flipper length (mm)',
+        y: 'Body mass (g)',
+    );
 ```
 
 

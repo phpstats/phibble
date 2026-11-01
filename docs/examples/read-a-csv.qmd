@@ -17,14 +17,13 @@ date,station,temp_c,rain_mm,wind_kmh,windy
 
 {{< include _read-a-csv.md >}}
 
-- Each column's type is guessed from its values, as readr's `read_csv()`
-  guesses it. The guess uses up to 1,000 sampled rows (`guessMax`).
-- Whole numbers are read as int, where readr reads double.
-- `types: ['station' => 'factor']` overrides the guess, which reads `station`
-  as a string.
-- `NA` and empty fields are missing values, which phibble stores as `null`.
+- Types are guessed from up to 1,000 sampled rows. Declare a type when
+  those rows could mislead the guess.
+- Whole numbers become int, where readr's `read_csv()` gives double.
+- `types` overrides a guess. Without it, `station` would be a string.
+- `NA` and empty fields become `null`.
 
-The [runnable script](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/read-a-csv.php)
-loads Composer's autoloader and reads `readings.csv` from the working directory.
+Runnable script: [read-a-csv.php](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/read-a-csv.php).
+Run it from the directory that holds `readings.csv`.
 
 Reference: [Reading and writing data](../io.qmd) · [Types](../types.qmd).

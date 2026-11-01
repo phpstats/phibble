@@ -25,17 +25,14 @@ script needs the pdo_sqlite extension.
 
 {{< include _database-table-output-2.md >}}
 
-- `tbl($pdo, 'orders')` returns a `SqlTable`. Each verb adds to its query,
-  and nothing runs on the database until the rows are needed.
-- `showQuery()` returns the SQL with `?` placeholders, and `bindings()`
-  returns their values, here `[0]`.
+- Verbs only build the query. Nothing runs on the database until the rows
+  are needed.
+- `showQuery()` shows the SQL with `?` placeholders, and `bindings()` gives
+  their values.
 - `collect()` runs the query and returns a `DataFrame`.
-- The same code runs on PostgreSQL and MySQL with their PDO connections.
-- [phplyr](https://github.com/phpstats/phplyr) runs its dplyr functions on the
-  same `SqlTable`.
+- The same code runs on PostgreSQL and MySQL.
 
-The runnable scripts for [PHP 8.5+](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table.php)
-and [PHP 8.3–8.4](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table-chain.php)
-load Composer's autoloader.
+Runnable scripts: [PHP 8.5+](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table.php)
+· [PHP 8.3–8.4](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table-chain.php).
 
-Reference: [SQL tables](../sql.qmd).
+Reference: [SQL tables](../sql.qmd) · [phplyr](https://github.com/phpstats/phplyr).

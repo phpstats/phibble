@@ -1,7 +1,10 @@
 ```php
 use Phibble\DataFrame;
 
-$readings = DataFrame::fromCsv('readings.csv', types: ['station' => 'factor']);
+$readings = DataFrame::fromCsv(
+    'readings.csv',
+    types: ['station' => 'factor'],
+);
 
 echo $readings, "\n";
 ```

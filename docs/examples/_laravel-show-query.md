@@ -1,4 +1,6 @@
 ```php
+use function Phibble\Expr\{col, max};
+
 $heaviest = Penguin::query()
     ->measured()
     ->phibble()

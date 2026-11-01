@@ -46,12 +46,12 @@
         {
             "path": "examples/read-a-csv",
             "title": "Read a CSV file into a typed table",
-            "description": "Guesses each column's type from its values, declares one column a factor, and reads NA as missing."
+            "description": "Infer column types, declare a factor, and read missing values."
         },
         {
             "path": "examples/database-table",
             "title": "Query a database table",
-            "description": "Compiles a filtered, grouped summary of an SQLite table to one SQL query, shows the SQL, and collects the result.",
+            "description": "Build a grouped summary in SQL, inspect the query, and collect the result.",
             "also": [
                 "phplyr"
             ]

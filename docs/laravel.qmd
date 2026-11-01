@@ -2,23 +2,19 @@
 title: "phibble for Laravel developers"
 ---
 
-phibble works with Laravel without configuration. Its service provider is
-registered by package discovery, and it adds two kinds of macro:
+Analyze Eloquent query results with phibble, either collected into a
+`DataFrame` or summarized in the database. `composer require phpstats/phibble`
+is the whole setup, since package discovery registers two macros:
 
-- `->toDataFrame()` on collections and query builders runs the query and returns
-  an in-memory `DataFrame`.
+- `->toDataFrame()` on collections and query builders returns an in-memory
+  `DataFrame`.
 - `->phibble()` on query builders, Eloquent builders, and relations returns a
-  lazy `SqlTable` on the query's connection. Verbs given expressions compile
-  to SQL, so grouping and summarizing run in the database.
-
-Laravel is not a dependency. `composer require phpstats/phibble` in a Laravel
-application is the whole setup.
+  lazy `SqlTable` that compiles verbs to SQL.
 
 ## The example data
 
-The examples on this page use Eloquent with an in-memory SQLite database that
-holds [`penguins.csv`](https://github.com/phpstats/phibble/blob/main/docs/data/penguins.csv).
-The model has a `measured()` scope that keeps rows with a body mass:
+Each example on this page queries this model, over a `penguins` table loaded
+from [`penguins.csv`](https://github.com/phpstats/phibble/blob/main/docs/data/penguins.csv):
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -36,63 +32,64 @@ final class Penguin extends Model
 }
 ```
 
-[`docs/examples/support/laravel.php`](https://github.com/phpstats/phibble/blob/main/docs/examples/support/laravel.php)
-creates the table, loads the CSV, and registers the macros outside a Laravel
-application, so the examples run as plain PHP scripts.
-
 ## From a collection or query to a DataFrame
-
-`toDataFrame()` builds a data frame from the rows of a collection or a query. Column
-types are inferred from the values, as for `DataFrame::fromRows()`.
 
 {{< include examples/_laravel-to-dataframe.md >}}
 
-A collection of models becomes rows of their attributes. Eloquent casts and
-accessors apply only when the models are loaded first, as in the example
-above; `Penguin::query()->toDataFrame()` reads the rows directly.
+- Column types are inferred from the values, as in `DataFrame::fromRows()`.
+- Eloquent casts and accessors apply only to loaded models, as after `get()`
+  here. `Penguin::query()->toDataFrame()` reads the raw rows.
 
 ## Queries that stay in the database
 
-`phibble()` turns a builder into a lazy table. The builder's SQL, bindings,
-and scopes become the table's source, and phibble's verbs add to that query.
-Nothing runs until the rows are needed, for example with `collect()`, printing,
-or `nrow()`.
-
 {{< include examples/_laravel-phibble.md >}}
 
-Global scopes such as `SoftDeletes` apply, because phibble reads the query
-through Eloquent's `toBase()`. Attribute casts and accessors do not apply,
-because the rows come from SQL.
+- The builder's SQL, bindings, and scopes become the table's source, and
+  phibble's verbs add to that query.
+- Nothing runs until the rows are needed, as with `collect()`, printing, or
+  `nrow()`.
+- Global scopes such as `SoftDeletes` apply. Attribute casts and accessors do
+  not, because the rows come from SQL.
 
-`showQuery()` returns the SQL that `collect()` would run. In this example a
-grouped filter keeps the heaviest penguin on each island. The comparison with
-the group maximum compiles to a window function:
+This grouped filter keeps the heaviest penguin on each island.
 
-{{< include examples/_laravel-show-query.md >}}
+{{< include examples/_laravel-show-query-code.md >}}
 
-Expressions that SQL cannot evaluate exactly as R does, and any PHP closure,
-make the table collect its rows and continue in memory. The result is then a
-`DataFrame`. The [SQL tables](sql.qmd) page lists these cases and the few
-results that differ from an in-memory run.
+<details>
+<summary>The SQL from <code>showQuery()</code></summary>
+
+{{< include examples/_laravel-show-query-output-1.md >}}
+
+</details>
+
+{{< include examples/_laravel-show-query-output-2.md >}}
+
+- The comparison with the group maximum compiles to a window function.
+- A PHP closure, or an expression that SQL cannot evaluate as R does, makes
+  the table collect its rows and continue in memory as a `DataFrame`.
+
+Reference: [SQL tables](sql.qmd).
 
 ## With phplyr
 
-[phplyr](https://github.com/phpstats/phplyr) provides dplyr's verbs as
-functions for PHP 8.5's pipe operator and as a method chain on PHP 8.3, 8.4,
-and 8.5. Its verbs call the same table methods, so a phplyr pipeline on
-`phibble()` also runs in the database. phplyr's own `col()` and aggregates take
-camelCase options such as `naRm:`:
+[phplyr](https://github.com/phpstats/phplyr) runs dplyr's verbs on the same
+lazy table, so this pipeline also runs in the database.
 
 ::: {.panel-tabset group="syntax"}
 ## PHP 8.5+
 
 ```php
-use function Phplyr\{arrange, col, desc, filter, group_by, mean, n, summarize};
+use function Phplyr\{
+    arrange, col, desc, filter, group_by, mean, n, summarize,
+};
 
 $summary = Penguin::query()->phibble() |>
     filter(col('year')->ge(2008)) |>
     group_by('species', 'sex') |>
-    summarize(n: n(), mass: mean(col('body_mass'), naRm: true)) |>
+    summarize(
+        n: n(),
+        mass: mean(col('body_mass'), naRm: true),
+    ) |>
     arrange(desc('mass'));
 ```
 
@@ -104,28 +101,31 @@ use function Phplyr\{col, desc, mean, n, phplyr};
 $summary = phplyr(Penguin::query()->phibble())
     ->filter(col('year')->ge(2008))
     ->groupBy('species', 'sex')
-    ->summarize(n: n(), mass: mean(col('body_mass'), naRm: true))
+    ->summarize(
+        n: n(),
+        mass: mean(col('body_mass'), naRm: true),
+    )
     ->arrange(desc('mass'))
     ->get();
 ```
 :::
 
+- phplyr's `col()` and aggregates take camelCase options, as in `naRm`.
+
 ## Charts with phiz
 
-[phiz](https://phpstats.github.io/phiz/) is a grammar of graphics in the
-style of ggplot2 that produces Vega-Lite specifications. `Plot::of()` accepts
-a phibble DataFrame directly. A query can select the needed columns in the
-database, collect them, and plot them:
+[phiz](https://phpstats.github.io/phiz/) builds Vega-Lite charts in the style
+of ggplot2, and `Plot::of()` accepts a `DataFrame`.
 
 {{< include examples/_laravel-chart.md >}}
 
-For a summary, the grouping and aggregation can also run in the database, so
-only the summary rows reach PHP:
+For a summary, group and aggregate in the database, so only the summary rows
+reach PHP:
 
 {{< include examples/_laravel-chart-summary.md >}}
 
-In a Laravel view, phiz's Blade component renders a plot, and `@phizScripts`
-loads the Vega libraries once per page:
+In a Blade view, phiz's component renders a plot, and `@phizScripts` loads
+the Vega libraries once per page:
 
 ```blade
 <x-phiz :plot="$plot" />
@@ -133,18 +133,19 @@ loads the Vega libraries once per page:
 @phizScripts
 ```
 
-phiz also has helpers that plot phit model results, such as
-`coefplot($fit)` and `effect_plot($fit, $data, 'x', by: 'g')`. Its
-documentation covers them.
-
 ## Using the result
 
-A collected data frame can be returned from a controller or passed to a view:
-
-- `$df->toRows()` gives a list of associative arrays, for JSON responses
-  and Blade loops.
-- `$df->toJson()` gives the same rows as a JSON string, or the columns with
-  `toJson('columns')`.
+- `$df->toRows()` gives a list of associative arrays, for JSON responses and
+  Blade loops.
+- `$df->toJson()` gives the rows as a JSON string, and `toJson('columns')`
+  gives the columns.
 - `$df->toCollection()` returns a Laravel collection of rows.
-- `$df->toModelData()` gives the columns in the form phit's model
-  functions accept.
+- `$df->toModelData()` gives the columns in the form phit's model functions
+  accept.
+
+## Running the examples
+
+The example scripts run outside a Laravel application.
+[`support/laravel.php`](https://github.com/phpstats/phibble/blob/main/docs/examples/support/laravel.php)
+creates an in-memory SQLite connection, loads the CSV, registers the macros,
+and defines `Penguin`.
