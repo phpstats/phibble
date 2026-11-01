@@ -121,6 +121,27 @@ later), the chunks are read natively with `Phit\CsvReader`, about three times
 faster on a wide tab-separated file. The results are the same as the PHP
 reader's, which is used otherwise.
 
+## Large files
+
+A whole-file read holds every value as an element of a PHP array. With
+phibble 0.5.2, `fromCsv()` of a 1 GB file of 20 million orders in seven
+columns holds 3.5 GiB of PHP heap. With phit 0.4.1 or later loaded, the
+native reader holds the same.
+
+`fromCsvChunked()` holds one chunk at a time, so its memory follows the chunk
+size. An aggregate that can be combined, such as a count or a sum, can be
+computed for each chunk and the results added up. This script counts the
+penguins of each species, 100 rows at a time:
+
+{{< include examples/_chunk-totals.md >}}
+
+For a file too large to hold as PHP arrays, keep the data in Polars. A
+`PolarsTable`, or phpolars on its own, runs the pipeline in Polars, and only
+the result comes back to PHP. phpolars' [lazy CSV example](https://phpolars.phpstats.org/docs/examples/lazy-csv)
+queries a large file without loading it, and its
+[phibble and phplyr guide](https://phpolars.phpstats.org/docs/phibble)
+shows `PolarsTable`.
+
 ## Writing CSV
 
 `writeCsv($path)` writes a file and `toCsv()` returns the text. The format
