@@ -134,7 +134,7 @@ $joinExpected = $json('tests/fixtures/joins/expected.json');
 $pivotCases = $json('tests/fixtures/pivot/cases.json');
 $typeExpected = $json('tests/fixtures/expr/types.json');
 $drivers = ['sqlite' => 'SQLite', 'pgsql' => 'PostgreSQL', 'mysql' => 'MySQL'];
-$readers = ['php' => 'PHP reader', 'native (emulated)' => 'native path, PHP emulation of Phit\\read_csv()', 'native (phit)' => 'native path, phit extension'];
+$readers = ['php' => 'PHP reader', 'native (emulated)' => 'phit reader, emulated in PHP', 'native (phit)' => 'phit reader'];
 $rVersions = fn (string ...$names) => array_intersect_key($r['versions'], array_flip(['R', ...$names, 'jsonlite']));
 $regenerated = "The fixtures were regenerated with these R versions on {$r['checked']} and were byte-identical to the committed files.";
 $backendVersions = function () use ($runtime, $databases) {
@@ -195,8 +195,8 @@ $topics = [
         'reproduce' => ['Rscript tests/r/io.R', "{$suite} tests/IoTest.php"],
         'match' => fn (array $t) => match (true) {
             $t['file'] !== 'tests/IoTest.php' => null,
-            $t['test'] === 'reads CSV like readr' => ['name' => $t['labels'][0], 'quantity' => $readers[$t['labels'][1]], 'rule' => 'read'],
-            in_array($t['test'], ['writes CSV like readr', 'formats doubles like write_csv'], true) => ['name' => $t['test'], 'rule' => 'write'],
+            $t['test'] === 'reads CSV like readr' => ['name' => $t['labels'][0], 'implementation' => $readers[$t['labels'][1]], 'quantity' => 'read', 'rule' => 'read'],
+            in_array($t['test'], ['writes CSV like readr', 'formats doubles like write_csv'], true) => ['name' => $t['test'], 'quantity' => 'write', 'rule' => 'write'],
             default => null,
         },
     ],
@@ -223,7 +223,8 @@ $topics = [
 
             return [
                 'name' => $name,
-                'quantity' => $backendOf($t).': '.($m[1] !== '' ? 'grouped mutate' : $m[2]),
+                'implementation' => $backendOf($t),
+                'quantity' => $m[1] !== '' ? 'grouped mutate' : $m[2],
                 'rule' => $backendOf($t) === 'Polars' ? 'rounded-native' : 'rounded',
                 'n_compared' => isset($exprExpected[$name]) ? count($exprExpected[$name]) : null,
             ];
@@ -271,7 +272,8 @@ $topics = [
 
             return [
                 'name' => $name,
-                'quantity' => $backendOf($t),
+                'implementation' => $backendOf($t),
+                'quantity' => 'mutate',
                 'rule' => $backendOf($t) === 'Polars' ? 'rounded-native' : 'rounded',
                 'n_compared' => isset($lsExpected[$name]) ? count($lsExpected[$name]) : null,
             ];
@@ -300,7 +302,8 @@ $topics = [
 
             return [
                 'name' => $name,
-                'quantity' => $backendOf($t),
+                'implementation' => $backendOf($t),
+                'quantity' => 'join',
                 'rule' => $backendOf($t) === 'DataFrame' ? 'ordered' : 'unordered',
                 'n_compared' => $expected === null ? null : count($expected['columns']) * count($expected['rows']),
             ];
@@ -319,7 +322,8 @@ $topics = [
         'reproduce' => ['Rscript tests/r/pivot.R', "{$suite} tests/PivotTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsPivotTest.php"],
         'match' => fn (array $t) => str_starts_with($t['test'], 'matches tidyr pivot specs') ? [
             'name' => $caseLabel($t),
-            'quantity' => $backendOf($t),
+            'implementation' => $backendOf($t),
+            'quantity' => $pivotCases[$caseLabel($t)]['kind'] === 'longer' ? 'pivot longer' : 'pivot wider',
             'rule' => 'rows',
             'n_compared' => isset($pivotCases[$caseLabel($t)]) ? count($pivotCases[$caseLabel($t)]['columns']) * count($pivotCases[$caseLabel($t)]['rows']) : null,
         ] : null,
@@ -362,7 +366,7 @@ $topics = [
         'reproduce' => "{$withDatabases} {$suite} tests/SqlTest.php tests/SqlReviewTest.php tests/DriverTypesTest.php",
         'match' => fn (array $t) => in_array($t['file'], ['tests/SqlTest.php', 'tests/SqlReviewTest.php', 'tests/DriverTypesTest.php'], true) ? [
             'name' => $t['test'].(count($t['labels']) > 1 ? ": {$t['labels'][0]}" : ''),
-            'quantity' => $drivers[end($t['labels']) ?: ''] ?? null,
+            'implementation' => $drivers[end($t['labels']) ?: ''] ?? null,
             'rule' => 'same',
         ] : null,
     ],
@@ -395,7 +399,7 @@ foreach ($topics as $id => $topic) {
         }
         $claimed[$i] = true;
         $row = ['name' => $case['name']];
-        foreach (['quantity', 'rule', 'n_compared', 'actual', 'expected'] as $field) {
+        foreach (['implementation', 'quantity', 'rule', 'n_compared', 'actual', 'expected'] as $field) {
             if (($case[$field] ?? null) !== null) {
                 $row[$field] = $case[$field];
             }
