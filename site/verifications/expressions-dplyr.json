@@ -47,2323 +47,2660 @@
     "cases": [
         {
             "name": "arith",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "div",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "mod",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "pow",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cmp",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "and",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "or",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "not",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "is_na",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "if_else",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "case_when",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "coalesce",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "in_",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "between",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "na_if",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "round",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "log",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_lower",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_length",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_trim",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub_neg",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_detect",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace_all",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste0",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "as_string",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lead2",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag_order",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number_desc",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "min_rank",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "dense_rank",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "percent_rank",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cume_dist",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile_x",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum_int",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummean",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummax",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumall",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumany",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "consecutive_id",
-            "quantity": "DataFrame: mutate",
+            "implementation": "DataFrame",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_mean",
-            "quantity": "DataFrame: grouped mutate",
+            "implementation": "DataFrame",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_lag",
-            "quantity": "DataFrame: grouped mutate",
+            "implementation": "DataFrame",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_row_number",
-            "quantity": "DataFrame: grouped mutate",
+            "implementation": "DataFrame",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_cumsum",
-            "quantity": "DataFrame: grouped mutate",
+            "implementation": "DataFrame",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "'sm_n', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_sum', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_sum_rm', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_mean', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_median', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_sd', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_var', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_min', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_max_s', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_quantile', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_iqr', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_n_distinct', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_n_distinct_rm', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_first', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_last_order', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_nth', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_any', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "'sm_all', Phibble\\Expr\\Call",
-            "quantity": "DataFrame: summarise",
+            "implementation": "DataFrame",
+            "quantity": "summarise",
             "rule": "rounded",
             "status": "pass"
         },
         {
             "name": "arith",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "div",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "mod",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "pow",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cmp",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "and",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "or",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "not",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "is_na",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "if_else",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "case_when",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "coalesce",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "in_",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "between",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "na_if",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "round",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "log",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_lower",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_length",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_trim",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub_neg",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_detect",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace_all",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste0",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "as_string",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lead2",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag_order",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number_desc",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "min_rank",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "dense_rank",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "percent_rank",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cume_dist",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile_x",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum_int",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummean",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummax",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumall",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumany",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "consecutive_id",
-            "quantity": "Polars: mutate",
+            "implementation": "Polars",
+            "quantity": "mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_mean",
-            "quantity": "Polars: grouped mutate",
+            "implementation": "Polars",
+            "quantity": "grouped mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_lag",
-            "quantity": "Polars: grouped mutate",
+            "implementation": "Polars",
+            "quantity": "grouped mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_row_number",
-            "quantity": "Polars: grouped mutate",
+            "implementation": "Polars",
+            "quantity": "grouped mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_cumsum",
-            "quantity": "Polars: grouped mutate",
+            "implementation": "Polars",
+            "quantity": "grouped mutate",
             "rule": "rounded-native",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "'sm_n', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_sum', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_sum_rm', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_mean', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_median', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_sd', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_var', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_min', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_max_s', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_quantile', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_iqr', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_n_distinct', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_n_distinct_rm', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_first', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_last_order', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_nth', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_any', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "'sm_all', Phibble\\Expr\\Call",
-            "quantity": "Polars: summarise",
+            "implementation": "Polars",
+            "quantity": "summarise",
             "rule": "rounded-native",
             "status": "pass"
         },
         {
             "name": "arith",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "div",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "mod",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "pow",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cmp",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "and",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "or",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "not",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "is_na",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "if_else",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "case_when",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "coalesce",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "in_",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "between",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "na_if",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "log",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_lower",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_length",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_trim",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub_neg",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_detect",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace_all",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste0",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "as_string",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lead2",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag_order",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number_desc",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "min_rank",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "dense_rank",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "percent_rank",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cume_dist",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile_x",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum_int",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummean",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummax",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumall",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumany",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "consecutive_id",
-            "quantity": "SQLite: mutate",
+            "implementation": "SQLite",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "arith",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "div",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "mod",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "pow",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cmp",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "and",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "or",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "not",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "is_na",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "if_else",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "case_when",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "coalesce",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "in_",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "between",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "na_if",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "log",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_lower",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_length",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_trim",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub_neg",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_detect",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace_all",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste0",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "as_string",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lead2",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag_order",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number_desc",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "min_rank",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "dense_rank",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "percent_rank",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cume_dist",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile_x",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum_int",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummean",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummax",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumall",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumany",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "consecutive_id",
-            "quantity": "PostgreSQL: mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "arith",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "div",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "mod",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "pow",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cmp",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "and",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "or",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "not",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "is_na",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "if_else",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "case_when",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "coalesce",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "in_",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "between",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "na_if",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "log",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_lower",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_length",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_trim",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_sub_neg",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_detect",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "str_replace_all",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste0",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "paste",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "as_string",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lead2",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "lag_order",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "row_number_desc",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "min_rank",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "dense_rank",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "percent_rank",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cume_dist",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "ntile_x",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumsum_int",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummean",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cummax",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumall",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "cumany",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "consecutive_id",
-            "quantity": "MySQL: mutate",
+            "implementation": "MySQL",
+            "quantity": "mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_mean",
-            "quantity": "SQLite: grouped mutate",
+            "implementation": "SQLite",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_lag",
-            "quantity": "SQLite: grouped mutate",
+            "implementation": "SQLite",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_row_number",
-            "quantity": "SQLite: grouped mutate",
+            "implementation": "SQLite",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_cumsum",
-            "quantity": "SQLite: grouped mutate",
+            "implementation": "SQLite",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_mean",
-            "quantity": "PostgreSQL: grouped mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_lag",
-            "quantity": "PostgreSQL: grouped mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_row_number",
-            "quantity": "PostgreSQL: grouped mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_cumsum",
-            "quantity": "PostgreSQL: grouped mutate",
+            "implementation": "PostgreSQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_mean",
-            "quantity": "MySQL: grouped mutate",
+            "implementation": "MySQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_lag",
-            "quantity": "MySQL: grouped mutate",
+            "implementation": "MySQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_row_number",
-            "quantity": "MySQL: grouped mutate",
+            "implementation": "MySQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "grp_cumsum",
-            "quantity": "MySQL: grouped mutate",
+            "implementation": "MySQL",
+            "quantity": "grouped mutate",
             "rule": "rounded",
             "n_compared": 7,
             "status": "pass"
         },
         {
             "name": "sm_n",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sum",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sum_rm",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_mean",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_median",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sd",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_var",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_min",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_max_s",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_quantile",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_iqr",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n_distinct",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n_distinct_rm",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_first",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_last_order",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_nth",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_any",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_all",
-            "quantity": "SQLite: summarise",
+            "implementation": "SQLite",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sum",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sum_rm",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_mean",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_median",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sd",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_var",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_min",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_max_s",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_quantile",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_iqr",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n_distinct",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n_distinct_rm",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_first",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_last_order",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_nth",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_any",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_all",
-            "quantity": "PostgreSQL: summarise",
+            "implementation": "PostgreSQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sum",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sum_rm",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_mean",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_median",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_sd",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_var",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_min",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_max_s",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_quantile",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_iqr",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n_distinct",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_n_distinct_rm",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_first",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_last_order",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_nth",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_any",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
         },
         {
             "name": "sm_all",
-            "quantity": "MySQL: summarise",
+            "implementation": "MySQL",
+            "quantity": "summarise",
             "rule": "rounded",
             "n_compared": 3,
             "status": "pass"
@@ -2371,7 +2708,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "352fb7e",
+        "commit": "2c8879d",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

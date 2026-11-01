@@ -36,128 +36,148 @@
     "cases": [
         {
             "name": "longer_simple",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot longer",
             "n_compared": 18,
             "status": "pass"
         },
         {
             "name": "longer_drop_na",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot longer",
             "n_compared": 15,
             "status": "pass"
         },
         {
             "name": "longer_value",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot longer",
             "n_compared": 24,
             "status": "pass"
         },
         {
             "name": "longer_value_drop_na",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot longer",
             "n_compared": 20,
             "status": "pass"
         },
         {
             "name": "longer_combine",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot longer",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_simple",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot wider",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_fill",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot wider",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_multi",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot wider",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_id_cols",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot wider",
             "n_compared": 10,
             "status": "pass"
         },
         {
             "name": "wider_dupes",
-            "quantity": "DataFrame",
+            "implementation": "DataFrame",
+            "quantity": "pivot wider",
             "n_compared": 6,
             "status": "pass"
         },
         {
             "name": "longer_simple",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot longer",
             "n_compared": 18,
             "status": "pass"
         },
         {
             "name": "longer_drop_na",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot longer",
             "n_compared": 15,
             "status": "pass"
         },
         {
             "name": "longer_value",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot longer",
             "n_compared": 24,
             "status": "pass"
         },
         {
             "name": "longer_value_drop_na",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot longer",
             "n_compared": 20,
             "status": "pass"
         },
         {
             "name": "longer_combine",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot longer",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_simple",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot wider",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_fill",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot wider",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_multi",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot wider",
             "n_compared": 12,
             "status": "pass"
         },
         {
             "name": "wider_id_cols",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot wider",
             "n_compared": 10,
             "status": "pass"
         },
         {
             "name": "wider_dupes",
-            "quantity": "Polars",
+            "implementation": "Polars",
+            "quantity": "pivot wider",
             "n_compared": 6,
             "status": "pass"
         }
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "352fb7e",
+        "commit": "2c8879d",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
