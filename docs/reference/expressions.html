@@ -1,0 +1,3309 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Expression functions – phibble</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bb62276ab45c84d9efd712f51ff97b5a.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f3d0b6f838474b91d97a23e0a7eb39d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/expressions.html">Expression functions</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">phibble</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../coming-from-tibble.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Coming from tibble</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guides</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reading and writing data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../expr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../laravel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble for Laravel developers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Functions and methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functions and methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/creating.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Creating and loading tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/rows-and-columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rows and columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grouping and summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/combining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joins and reshaping</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/expressions.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Expression functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/strings-and-dates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">String and date functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types and conversion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Output</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SqlTable, PolarsTable, and Laravel</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Examples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/read-a-csv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Read a CSV file into a typed table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/database-table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query a database table</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Contributing</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../contract.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Table contract</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../development.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Development</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#columns-and-literals" id="toc-columns-and-literals" class="nav-link active" data-scroll-target="#columns-and-literals">Columns and literals</a>
+  <ul class="collapse">
+  <li><a href="#col" id="toc-col" class="nav-link" data-scroll-target="#col"><code>col()</code></a></li>
+  <li><a href="#lit" id="toc-lit" class="nav-link" data-scroll-target="#lit"><code>lit()</code></a></li>
+  <li><a href="#call" id="toc-call" class="nav-link" data-scroll-target="#call"><code>call()</code></a></li>
+  <li><a href="#desc" id="toc-desc" class="nav-link" data-scroll-target="#desc"><code>desc()</code></a></li>
+  </ul></li>
+  <li><a href="#operators" id="toc-operators" class="nav-link" data-scroll-target="#operators">Operators</a>
+  <ul class="collapse">
+  <li><a href="#expr-add" id="toc-expr-add" class="nav-link" data-scroll-target="#expr-add"><code>Expr-&gt;add()</code></a></li>
+  <li><a href="#expr-sub" id="toc-expr-sub" class="nav-link" data-scroll-target="#expr-sub"><code>Expr-&gt;sub()</code></a></li>
+  <li><a href="#expr-mul" id="toc-expr-mul" class="nav-link" data-scroll-target="#expr-mul"><code>Expr-&gt;mul()</code></a></li>
+  <li><a href="#expr-div" id="toc-expr-div" class="nav-link" data-scroll-target="#expr-div"><code>Expr-&gt;div()</code></a></li>
+  <li><a href="#expr-mod" id="toc-expr-mod" class="nav-link" data-scroll-target="#expr-mod"><code>Expr-&gt;mod()</code></a></li>
+  <li><a href="#expr-pow" id="toc-expr-pow" class="nav-link" data-scroll-target="#expr-pow"><code>Expr-&gt;pow()</code></a></li>
+  <li><a href="#expr-neg" id="toc-expr-neg" class="nav-link" data-scroll-target="#expr-neg"><code>Expr-&gt;neg()</code></a></li>
+  <li><a href="#expr-eq" id="toc-expr-eq" class="nav-link" data-scroll-target="#expr-eq"><code>Expr-&gt;eq()</code></a></li>
+  <li><a href="#expr-ne" id="toc-expr-ne" class="nav-link" data-scroll-target="#expr-ne"><code>Expr-&gt;ne()</code></a></li>
+  <li><a href="#expr-lt" id="toc-expr-lt" class="nav-link" data-scroll-target="#expr-lt"><code>Expr-&gt;lt()</code></a></li>
+  <li><a href="#expr-le" id="toc-expr-le" class="nav-link" data-scroll-target="#expr-le"><code>Expr-&gt;le()</code></a></li>
+  <li><a href="#expr-gt" id="toc-expr-gt" class="nav-link" data-scroll-target="#expr-gt"><code>Expr-&gt;gt()</code></a></li>
+  <li><a href="#expr-ge" id="toc-expr-ge" class="nav-link" data-scroll-target="#expr-ge"><code>Expr-&gt;ge()</code></a></li>
+  <li><a href="#expr-and" id="toc-expr-and" class="nav-link" data-scroll-target="#expr-and"><code>Expr-&gt;and()</code></a></li>
+  <li><a href="#expr-or" id="toc-expr-or" class="nav-link" data-scroll-target="#expr-or"><code>Expr-&gt;or()</code></a></li>
+  <li><a href="#expr-not" id="toc-expr-not" class="nav-link" data-scroll-target="#expr-not"><code>Expr-&gt;not()</code></a></li>
+  <li><a href="#expr-isna" id="toc-expr-isna" class="nav-link" data-scroll-target="#expr-isna"><code>Expr-&gt;isNa()</code></a></li>
+  <li><a href="#expr-isin" id="toc-expr-isin" class="nav-link" data-scroll-target="#expr-isin"><code>Expr-&gt;isIn()</code></a></li>
+  <li><a href="#expr-between" id="toc-expr-between" class="nav-link" data-scroll-target="#expr-between"><code>Expr-&gt;between()</code></a></li>
+  <li><a href="#expr-desc" id="toc-expr-desc" class="nav-link" data-scroll-target="#expr-desc"><code>Expr-&gt;desc()</code></a></li>
+  </ul></li>
+  <li><a href="#conditionals-and-missing-values" id="toc-conditionals-and-missing-values" class="nav-link" data-scroll-target="#conditionals-and-missing-values">Conditionals and missing values</a>
+  <ul class="collapse">
+  <li><a href="#is-na" id="toc-is-na" class="nav-link" data-scroll-target="#is-na"><code>is_na()</code></a></li>
+  <li><a href="#if-else" id="toc-if-else" class="nav-link" data-scroll-target="#if-else"><code>if_else()</code></a></li>
+  <li><a href="#case-when" id="toc-case-when" class="nav-link" data-scroll-target="#case-when"><code>case_when()</code></a></li>
+  <li><a href="#coalesce" id="toc-coalesce" class="nav-link" data-scroll-target="#coalesce"><code>coalesce()</code></a></li>
+  <li><a href="#between" id="toc-between" class="nav-link" data-scroll-target="#between"><code>between()</code></a></li>
+  <li><a href="#na-if" id="toc-na-if" class="nav-link" data-scroll-target="#na-if"><code>na_if()</code></a></li>
+  <li><a href="#near" id="toc-near" class="nav-link" data-scroll-target="#near"><code>near()</code></a></li>
+  </ul></li>
+  <li><a href="#math" id="toc-math" class="nav-link" data-scroll-target="#math">Math</a>
+  <ul class="collapse">
+  <li><a href="#abs" id="toc-abs" class="nav-link" data-scroll-target="#abs"><code>abs()</code></a></li>
+  <li><a href="#sqrt" id="toc-sqrt" class="nav-link" data-scroll-target="#sqrt"><code>sqrt()</code></a></li>
+  <li><a href="#exp" id="toc-exp" class="nav-link" data-scroll-target="#exp"><code>exp()</code></a></li>
+  <li><a href="#log" id="toc-log" class="nav-link" data-scroll-target="#log"><code>log()</code></a></li>
+  <li><a href="#log10" id="toc-log10" class="nav-link" data-scroll-target="#log10"><code>log10()</code></a></li>
+  <li><a href="#round" id="toc-round" class="nav-link" data-scroll-target="#round"><code>round()</code></a></li>
+  <li><a href="#floor" id="toc-floor" class="nav-link" data-scroll-target="#floor"><code>floor()</code></a></li>
+  <li><a href="#ceiling" id="toc-ceiling" class="nav-link" data-scroll-target="#ceiling"><code>ceiling()</code></a></li>
+  </ul></li>
+  <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion</a>
+  <ul class="collapse">
+  <li><a href="#as-int" id="toc-as-int" class="nav-link" data-scroll-target="#as-int"><code>as_int()</code></a></li>
+  <li><a href="#as-float" id="toc-as-float" class="nav-link" data-scroll-target="#as-float"><code>as_float()</code></a></li>
+  <li><a href="#as-string" id="toc-as-string" class="nav-link" data-scroll-target="#as-string"><code>as_string()</code></a></li>
+  <li><a href="#as-bool" id="toc-as-bool" class="nav-link" data-scroll-target="#as-bool"><code>as_bool()</code></a></li>
+  </ul></li>
+  <li><a href="#aggregates" id="toc-aggregates" class="nav-link" data-scroll-target="#aggregates">Aggregates</a>
+  <ul class="collapse">
+  <li><a href="#n" id="toc-n" class="nav-link" data-scroll-target="#n"><code>n()</code></a></li>
+  <li><a href="#sum" id="toc-sum" class="nav-link" data-scroll-target="#sum"><code>sum()</code></a></li>
+  <li><a href="#mean" id="toc-mean" class="nav-link" data-scroll-target="#mean"><code>mean()</code></a></li>
+  <li><a href="#median" id="toc-median" class="nav-link" data-scroll-target="#median"><code>median()</code></a></li>
+  <li><a href="#min" id="toc-min" class="nav-link" data-scroll-target="#min"><code>min()</code></a></li>
+  <li><a href="#max" id="toc-max" class="nav-link" data-scroll-target="#max"><code>max()</code></a></li>
+  <li><a href="#sd" id="toc-sd" class="nav-link" data-scroll-target="#sd"><code>sd()</code></a></li>
+  <li><a href="#var-" id="toc-var-" class="nav-link" data-scroll-target="#var-"><code>var_()</code></a></li>
+  <li><a href="#quantile" id="toc-quantile" class="nav-link" data-scroll-target="#quantile"><code>quantile()</code></a></li>
+  <li><a href="#iqr" id="toc-iqr" class="nav-link" data-scroll-target="#iqr"><code>iqr()</code></a></li>
+  <li><a href="#n-distinct" id="toc-n-distinct" class="nav-link" data-scroll-target="#n-distinct"><code>n_distinct()</code></a></li>
+  <li><a href="#first" id="toc-first" class="nav-link" data-scroll-target="#first"><code>first()</code></a></li>
+  <li><a href="#last" id="toc-last" class="nav-link" data-scroll-target="#last"><code>last()</code></a></li>
+  <li><a href="#nth" id="toc-nth" class="nav-link" data-scroll-target="#nth"><code>nth()</code></a></li>
+  <li><a href="#any" id="toc-any" class="nav-link" data-scroll-target="#any"><code>any()</code></a></li>
+  <li><a href="#all" id="toc-all" class="nav-link" data-scroll-target="#all"><code>all()</code></a></li>
+  </ul></li>
+  <li><a href="#window-functions" id="toc-window-functions" class="nav-link" data-scroll-target="#window-functions">Window functions</a>
+  <ul class="collapse">
+  <li><a href="#lag" id="toc-lag" class="nav-link" data-scroll-target="#lag"><code>lag()</code></a></li>
+  <li><a href="#lead" id="toc-lead" class="nav-link" data-scroll-target="#lead"><code>lead()</code></a></li>
+  <li><a href="#row-number" id="toc-row-number" class="nav-link" data-scroll-target="#row-number"><code>row_number()</code></a></li>
+  <li><a href="#min-rank" id="toc-min-rank" class="nav-link" data-scroll-target="#min-rank"><code>min_rank()</code></a></li>
+  <li><a href="#dense-rank" id="toc-dense-rank" class="nav-link" data-scroll-target="#dense-rank"><code>dense_rank()</code></a></li>
+  <li><a href="#percent-rank" id="toc-percent-rank" class="nav-link" data-scroll-target="#percent-rank"><code>percent_rank()</code></a></li>
+  <li><a href="#cume-dist" id="toc-cume-dist" class="nav-link" data-scroll-target="#cume-dist"><code>cume_dist()</code></a></li>
+  <li><a href="#ntile" id="toc-ntile" class="nav-link" data-scroll-target="#ntile"><code>ntile()</code></a></li>
+  <li><a href="#cumsum" id="toc-cumsum" class="nav-link" data-scroll-target="#cumsum"><code>cumsum()</code></a></li>
+  <li><a href="#cumprod" id="toc-cumprod" class="nav-link" data-scroll-target="#cumprod"><code>cumprod()</code></a></li>
+  <li><a href="#cummean" id="toc-cummean" class="nav-link" data-scroll-target="#cummean"><code>cummean()</code></a></li>
+  <li><a href="#cummin" id="toc-cummin" class="nav-link" data-scroll-target="#cummin"><code>cummin()</code></a></li>
+  <li><a href="#cummax" id="toc-cummax" class="nav-link" data-scroll-target="#cummax"><code>cummax()</code></a></li>
+  <li><a href="#cumall" id="toc-cumall" class="nav-link" data-scroll-target="#cumall"><code>cumall()</code></a></li>
+  <li><a href="#cumany" id="toc-cumany" class="nav-link" data-scroll-target="#cumany"><code>cumany()</code></a></li>
+  <li><a href="#consecutive-id" id="toc-consecutive-id" class="nav-link" data-scroll-target="#consecutive-id"><code>consecutive_id()</code></a></li>
+  </ul></li>
+  <li><a href="#expression-objects" id="toc-expression-objects" class="nav-link" data-scroll-target="#expression-objects">Expression objects</a>
+  <ul class="collapse">
+  <li><a href="#expr-of" id="toc-expr-of" class="nav-link" data-scroll-target="#expr-of"><code>Expr::of()</code></a></li>
+  <li><a href="#expr-fromarray" id="toc-expr-fromarray" class="nav-link" data-scroll-target="#expr-fromarray"><code>Expr::fromArray()</code></a></li>
+  <li><a href="#expr-toarray" id="toc-expr-toarray" class="nav-link" data-scroll-target="#expr-toarray"><code>Expr-&gt;toArray()</code></a></li>
+  <li><a href="#expr-columns" id="toc-expr-columns" class="nav-link" data-scroll-target="#expr-columns"><code>Expr-&gt;columns()</code></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/expressions.html">Expression functions</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Expression functions</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Functions in <code>Phibble\Expr</code> that build expressions for <code>filter()</code>, <code>mutate()</code>, <code>arrange()</code>, and <code>summarise()</code>, and the methods of Expr objects.</p>
+<section id="columns-and-literals" class="level2">
+<h2 class="anchored" data-anchor-id="columns-and-literals">Columns and literals</h2>
+<section id="col" class="level3">
+<h3 class="anchored" data-anchor-id="col"><code>col()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>col(<span class="dt">string</span> <span class="va">$name</span>)<span class="ot">:</span> Col</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Reference to the column with the given name.</p>
+<p>A plain PHP string passed to a helper is a literal; <code>col()</code> is how an expression reads a column.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$name</code></td>
+<td><code>string</code></td>
+<td></td>
+<td>The column name.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Col</code><br>
+<strong>Examples</strong> <a href="../laravel.html">phibble for Laravel developers</a>, <a href="../index.html">phibble</a></p>
+</section>
+<section id="lit" class="level3">
+<h3 class="anchored" data-anchor-id="lit"><code>lit()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>lit(<span class="dt">mixed</span> <span class="va">$value</span>)<span class="ot">:</span> Lit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Literal value as an expression.</p>
+<p>A date or datetime literal is typed as a date when its time of day is midnight, and as a datetime otherwise.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$value</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Null, a bool, int, float, or string, a DateTimeInterface, a <code>Phibble\Time</code>, or a list of scalars.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Lit</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when the value is of another type, or a list holds a value that is not a scalar.</p>
+</section>
+<section id="call" class="level3">
+<h3 class="anchored" data-anchor-id="call"><code>call()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>call(<span class="dt">string</span> <span class="va">$fn</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Call to any registered function by name, such as call(‘str_sub’, <code>col('s')</code>, 1, 3).</p>
+<p>String keys in <code>$args</code> become named options; other arguments are positional. Values that are not expressions are wrapped as literals.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$fn</code></td>
+<td><code>string</code></td>
+<td></td>
+<td>The registered function name, as listed in Functions::REGISTRY.</td>
+</tr>
+<tr class="even">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Positional arguments, then named options.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when the function is not registered, the number of positional arguments is out of range, or a named option is not allowed.</p>
+</section>
+<section id="desc" class="level3">
+<h3 class="anchored" data-anchor-id="desc"><code>desc()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>desc(Expr<span class="op">|</span><span class="dt">string</span> <span class="va">$expr</span>)<span class="ot">:</span> Desc</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Descending sort key for <code>arrange()</code>, the first argument of a ranking function, or order_by.</p>
+<p><code>desc()</code> is rejected anywhere else in an expression.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$expr</code></td>
+<td><code>Expr|string</code></td>
+<td></td>
+<td>An expression, or a column name.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Desc</code></p>
+</section>
+</section>
+<section id="operators" class="level2">
+<h2 class="anchored" data-anchor-id="operators">Operators</h2>
+<section id="expr-add" class="level3">
+<h3 class="anchored" data-anchor-id="expr-add"><code>Expr-&gt;add()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;add(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sum of this expression and <code>$other</code>.</p>
+<p>NA gives NA. Adding a period such as <code>days(1)</code> to a date or datetime uses clock arithmetic, and adding seconds or a time to a time gives a time.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a>, <a href="../types.html">Types</a></p>
+</section>
+<section id="expr-sub" class="level3">
+<h3 class="anchored" data-anchor-id="expr-sub"><code>Expr-&gt;sub()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;sub(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Difference of this expression and <code>$other</code>.</p>
+<p>NA gives NA. Subtracting a date from a date gives days, a datetime from a datetime gives seconds, and a period from a date or datetime uses clock arithmetic.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a>, <a href="../getting-started.html">Getting started</a></p>
+</section>
+<section id="expr-mul" class="level3">
+<h3 class="anchored" data-anchor-id="expr-mul"><code>Expr-&gt;mul()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;mul(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Product of this expression and <code>$other</code>.</p>
+<p>NA gives NA. A period or time multiplied by a number is scaled.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../getting-started.html">Getting started</a>, <a href="../sql.html">SQL tables</a></p>
+</section>
+<section id="expr-div" class="level3">
+<h3 class="anchored" data-anchor-id="expr-div"><code>Expr-&gt;div()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;div(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Quotient of this expression and <code>$other</code>, always a float.</p>
+<p>NA gives NA. Division by zero gives Inf or -Inf, and 0 / 0 gives NaN, as in R.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a>, <a href="../sql.html">SQL tables</a>, <a href="../getting-started.html">Getting started</a></p>
+</section>
+<section id="expr-mod" class="level3">
+<h3 class="anchored" data-anchor-id="expr-mod"><code>Expr-&gt;mod()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;mod(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Remainder of this expression divided by <code>$other</code>, with the sign of <code>$other</code>.</p>
+<p>R’s %% operator: the remainder after floored division. NA gives NA. An integer remainder by zero is NA, and a float remainder by zero NaN.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="expr-pow" class="level3">
+<h3 class="anchored" data-anchor-id="expr-pow"><code>Expr-&gt;pow()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;<span class="fu">pow</span>(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This expression raised to the power <code>$other</code>, as a float.</p>
+<p>R’s ^ operator. NA gives NA.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="expr-neg" class="level3">
+<h3 class="anchored" data-anchor-id="expr-neg"><code>Expr-&gt;neg()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;neg()<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Negation of this expression.</p>
+<p>NA gives NA.</p>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="expr-eq" class="level3">
+<h3 class="anchored" data-anchor-id="expr-eq"><code>Expr-&gt;eq()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;eq(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether this expression equals <code>$other</code>.</p>
+<p>R’s == operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../laravel.html">phibble for Laravel developers</a>, <a href="../sql.html">SQL tables</a></p>
+</section>
+<section id="expr-ne" class="level3">
+<h3 class="anchored" data-anchor-id="expr-ne"><code>Expr-&gt;ne()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;ne(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether this expression differs from <code>$other</code>.</p>
+<p>R’s != operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../getting-started.html">Getting started</a></p>
+</section>
+<section id="expr-lt" class="level3">
+<h3 class="anchored" data-anchor-id="expr-lt"><code>Expr-&gt;lt()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;lt(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether this expression is less than <code>$other</code>.</p>
+<p>R’s &lt; operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="expr-le" class="level3">
+<h3 class="anchored" data-anchor-id="expr-le"><code>Expr-&gt;le()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;le(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether this expression is less than or equal to <code>$other</code>.</p>
+<p>R’s &lt;= operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="expr-gt" class="level3">
+<h3 class="anchored" data-anchor-id="expr-gt"><code>Expr-&gt;gt()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;gt(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether this expression is greater than <code>$other</code>.</p>
+<p>R’s &gt; operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a>, <a href="../types.html">Types</a>, <a href="../getting-started.html">Getting started</a></p>
+</section>
+<section id="expr-ge" class="level3">
+<h3 class="anchored" data-anchor-id="expr-ge"><code>Expr-&gt;ge()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;ge(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether this expression is greater than or equal to <code>$other</code>.</p>
+<p>R’s &gt;= operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="expr-and" class="level3">
+<h3 class="anchored" data-anchor-id="expr-and"><code>Expr-&gt;and()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;<span class="op">and</span>(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Logical AND of this expression and <code>$other</code>.</p>
+<p>R’s &amp; operator, with three-valued logic: false wins over NA, and NA with true gives NA.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A logical expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="expr-or" class="level3">
+<h3 class="anchored" data-anchor-id="expr-or"><code>Expr-&gt;or()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;<span class="op">or</span>(<span class="dt">mixed</span> <span class="va">$other</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Logical OR of this expression and <code>$other</code>.</p>
+<p>R’s | operator, with three-valued logic: true wins over NA, and NA with false gives NA.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$other</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A logical expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="expr-not" class="level3">
+<h3 class="anchored" data-anchor-id="expr-not"><code>Expr-&gt;not()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;not()<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Logical negation of this expression.</p>
+<p>R’s ! operator. NA gives NA.</p>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a>, <a href="../index.html">phibble</a></p>
+</section>
+<section id="expr-isna" class="level3">
+<h3 class="anchored" data-anchor-id="expr-isna"><code>Expr-&gt;isNa()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;isNa()<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether each value is NA.</p>
+<p>NaN counts as NA. Equivalent to <code>is_na()</code>.</p>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../index.html">phibble</a></p>
+</section>
+<section id="expr-isin" class="level3">
+<h3 class="anchored" data-anchor-id="expr-isin"><code>Expr-&gt;isIn()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;isIn(<span class="dt">array</span> <span class="va">$values</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether each value is one of the given values.</p>
+<p>R’s %in% operator. NA matches only when the list holds null. The result is never NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$values</code></td>
+<td><code>list&lt;mixed&gt;</code></td>
+<td></td>
+<td>The values to match, each null or a scalar.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when a value is not null or a scalar.<br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a>, <a href="../sql.html">SQL tables</a></p>
+</section>
+<section id="expr-between" class="level3">
+<h3 class="anchored" data-anchor-id="expr-between"><code>Expr-&gt;between()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;between(<span class="dt">mixed</span> <span class="va">$low</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$high</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether each value lies between <code>$low</code> and <code>$high</code>, inclusive.</p>
+<p>NA in the value or either bound gives NA. Equivalent to <code>between()</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$low</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The lower bound.</td>
+</tr>
+<tr class="even">
+<td><code>$high</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The upper bound.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="expr-desc" class="level3">
+<h3 class="anchored" data-anchor-id="expr-desc"><code>Expr-&gt;desc()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;desc()<span class="ot">:</span> Desc</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Descending sort key on this expression, for <code>arrange()</code>, the first argument of a ranking function, or order_by.</p>
+<p>Equivalent to <code>desc()</code>.</p>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Desc</code></p>
+</section>
+</section>
+<section id="conditionals-and-missing-values" class="level2">
+<h2 class="anchored" data-anchor-id="conditionals-and-missing-values">Conditionals and missing values</h2>
+<section id="is-na" class="level3">
+<h3 class="anchored" data-anchor-id="is-na"><code>is_na()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>is_na(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether each value is NA.</p>
+<p>NaN counts as NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="if-else" class="level3">
+<h3 class="anchored" data-anchor-id="if-else"><code>if_else()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>if_else(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> <span class="va">$condition</span><span class="ot">,</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> <span class="va">$true</span><span class="ot">,</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> <span class="va">$false</span><span class="ot">,</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Value of <code>$true</code> where the condition holds and of <code>$false</code> where it does not.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$condition</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A logical expression.</td>
+</tr>
+<tr class="even">
+<td><code>$true</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The value where the condition is true.</td>
+</tr>
+<tr class="odd">
+<td><code>$false</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The value where the condition is false.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: missing (mixed, default NA) is the value where the condition is NA.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="case-when" class="level3">
+<h3 class="anchored" data-anchor-id="case-when"><code>case_when()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>case_when(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Value paired with the first condition that holds, as <code>case_when(cond1, value1, cond2, value2, ..., default: value)</code>.</p>
+<p>Conditions are tested in order per row; an NA condition does not match.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Condition and value pairs, then named options: default (mixed, default NA) is the value where no condition holds.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when the positional arguments do not form condition and value pairs.</p>
+</section>
+<section id="coalesce" class="level3">
+<h3 class="anchored" data-anchor-id="coalesce"><code>coalesce()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>coalesce(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>First value that is not NA among the arguments, row by row.</p>
+<p>NaN is a value here: it is not skipped.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>One or more expressions or literals.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="between" class="level3">
+<h3 class="anchored" data-anchor-id="between"><code>between()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>between(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$low</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$high</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether each value lies between <code>$low</code> and <code>$high</code>, inclusive.</p>
+<p>The result is NA where <code>$x</code>, <code>$low</code>, or <code>$high</code> is NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>$low</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The lower bound.</td>
+</tr>
+<tr class="odd">
+<td><code>$high</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The upper bound.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="na-if" class="level3">
+<h3 class="anchored" data-anchor-id="na-if"><code>na_if()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>na_if(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$y</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Values of <code>$x</code>, with NA where <code>$x</code> equals <code>$y</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>$y</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The value to replace with NA.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="near" class="level3">
+<h3 class="anchored" data-anchor-id="near"><code>near()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>near(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$y</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether <code>$x</code> and <code>$y</code> are equal within a tolerance.</p>
+<p>The result is NA where either value is NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$y</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tol (float, default <code>sqrt(PHP_FLOAT_EPSILON)</code>, about 1.5e-8) is the tolerance; an absolute difference below it counts as equal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="math" class="level2">
+<h2 class="anchored" data-anchor-id="math">Math</h2>
+<section id="abs" class="level3">
+<h3 class="anchored" data-anchor-id="abs"><code>abs()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">abs</span>(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Absolute value.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="sqrt" class="level3">
+<h3 class="anchored" data-anchor-id="sqrt"><code>sqrt()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Square root.</p>
+<p>The square root of a negative number is NaN.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="exp" class="level3">
+<h3 class="anchored" data-anchor-id="exp"><code>exp()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Exponential function, e raised to the power <code>$x</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="log" class="level3">
+<h3 class="anchored" data-anchor-id="log"><code>log()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Logarithm, natural by default.</p>
+<p>The logarithm of 0 is -Inf, and of a negative number NaN.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: base (float, default e) is the base of the logarithm.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="log10" class="level3">
+<h3 class="anchored" data-anchor-id="log10"><code>log10()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log10</span>(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Base-10 logarithm.</p>
+<p>The logarithm of 0 is -Inf, and of a negative number NaN.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="round" class="level3">
+<h3 class="anchored" data-anchor-id="round"><code>round()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Value rounded to a number of decimal digits.</p>
+<p>Rounding follows R 4.0 and later: the candidate nearer the stored double wins, and exact ties go to the even digit, so <code>round(2.675, digits: 2)</code> is 2.67. Integers are returned unchanged when digits is 0 or more. SQL backends evaluate it in memory.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: digits (int, default 0) is the number of decimal places; a negative value rounds to tens, hundreds, and so on.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="floor" class="level3">
+<h3 class="anchored" data-anchor-id="floor"><code>floor()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">floor</span>(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Largest whole number not greater than the value, as a float.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="ceiling" class="level3">
+<h3 class="anchored" data-anchor-id="ceiling"><code>ceiling()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>ceiling(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Smallest whole number not less than the value, as a float.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="conversion" class="level2">
+<h2 class="anchored" data-anchor-id="conversion">Conversion</h2>
+<section id="as-int" class="level3">
+<h3 class="anchored" data-anchor-id="as-int"><code>as_int()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>as_int(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Values converted to integers.</p>
+<p>R’s as.<code>integer()</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="as-float" class="level3">
+<h3 class="anchored" data-anchor-id="as-float"><code>as_float()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>as_float(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Values converted to floats.</p>
+<p>R’s as.<code>double()</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="as-string" class="level3">
+<h3 class="anchored" data-anchor-id="as-string"><code>as_string()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>as_string(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Values converted to strings.</p>
+<p>R’s as.<code>character()</code>. SQL backends evaluate it in memory.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="as-bool" class="level3">
+<h3 class="anchored" data-anchor-id="as-bool"><code>as_bool()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>as_bool(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Values converted to logicals.</p>
+<p>R’s as.<code>logical()</code>. SQL backends evaluate it in memory.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="aggregates" class="level2">
+<h2 class="anchored" data-anchor-id="aggregates">Aggregates</h2>
+<section id="n" class="level3">
+<h3 class="anchored" data-anchor-id="n"><code>n()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>n()<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Number of rows in the group.</p>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../laravel.html">phibble for Laravel developers</a>, <a href="../index.html">phibble</a></p>
+</section>
+<section id="sum" class="level3">
+<h3 class="anchored" data-anchor-id="sum"><code>sum()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>sum(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sum of the values.</p>
+<p>The result is NA when a value is NA, unless na_rm is true. The sum is an integer when every value is an integer or logical, and 0 for no values. The sum of times is a time.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when the values are dates or datetimes.</p>
+</section>
+<section id="mean" class="level3">
+<h3 class="anchored" data-anchor-id="mean"><code>mean()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>mean(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Mean of the values.</p>
+<p>The result is NA when a value is NA, unless na_rm is true, and NaN for no values. The mean of dates is a date, of datetimes a datetime, and of times a time.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric or temporal expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../laravel.html">phibble for Laravel developers</a>, <a href="../index.html">phibble</a></p>
+</section>
+<section id="median" class="level3">
+<h3 class="anchored" data-anchor-id="median"><code>median()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>median(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Median of the values.</p>
+<p>The result is NA when a value is NA, unless na_rm is true, and NA for no values. The median of dates is a date, of datetimes a datetime, and of times a time.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric or temporal expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../index.html">phibble</a></p>
+</section>
+<section id="min" class="level3">
+<h3 class="anchored" data-anchor-id="min"><code>min()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">min</span>(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Smallest of the values.</p>
+<p>The result is NA when a value is NA, unless na_rm is true, NaN when a value is NaN, and Inf for no values. Strings compare byte by byte.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="max" class="level3">
+<h3 class="anchored" data-anchor-id="max"><code>max()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Largest of the values.</p>
+<p>The result is NA when a value is NA, unless na_rm is true, NaN when a value is NaN, and -Inf for no values. Strings compare byte by byte.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Examples</strong> <a href="../laravel.html">phibble for Laravel developers</a></p>
+</section>
+<section id="sd" class="level3">
+<h3 class="anchored" data-anchor-id="sd"><code>sd()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>sd(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sample standard deviation of the values.</p>
+<p>The divisor is n - 1, and the result is NA for fewer than two values. The result is NA when a value is NA, unless na_rm is true. Dates are measured in days, and datetimes and times in seconds.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric or temporal expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="var-" class="level3">
+<h3 class="anchored" data-anchor-id="var-"><code>var_()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>var_(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sample variance of the values.</p>
+<p>R’s <code>var()</code>; the trailing underscore avoids PHP’s reserved word. The divisor is n - 1, and the result is NA for fewer than two values. The result is NA when a value is NA, unless na_rm is true. Dates are measured in days, and datetimes and times in seconds.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric or temporal expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="quantile" class="level3">
+<h3 class="anchored" data-anchor-id="quantile"><code>quantile()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>quantile(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$p</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sample quantile of the values at probability <code>$p</code>.</p>
+<p>Uses R’s default method (type 7), interpolating between order statistics. The quantile of datetimes is a datetime, and of times a time.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric or temporal expression.</td>
+</tr>
+<tr class="even">
+<td><code>$p</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The probability, from 0 to 1.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is NA and na_rm is false, or when the values are dates.</p>
+</section>
+<section id="iqr" class="level3">
+<h3 class="anchored" data-anchor-id="iqr"><code>iqr()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>iqr(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Interquartile range of the values: the 0.75 quantile minus the 0.25 quantile.</p>
+<p>R’s IQR(). Quantiles use R’s default method (type 7). The result is NA for no values. Dates are measured in days, and datetimes and times in seconds.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric or temporal expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is NA and na_rm is false.</p>
+</section>
+<section id="n-distinct" class="level3">
+<h3 class="anchored" data-anchor-id="n-distinct"><code>n_distinct()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>n_distinct(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Number of distinct values, or of distinct combinations across several arguments.</p>
+<p>NA counts as a distinct value unless na_rm is true.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>One or more expressions, then named options: na_rm (bool, default false) skips rows where any argument is NA.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="first" class="level3">
+<h3 class="anchored" data-anchor-id="first"><code>first()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>first(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>First value in the group.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: default (mixed, default NA) is returned when the group has no values; order_by (expression, default row order) sorts the values first, NA last, and accepts <code>desc()</code>; na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="last" class="level3">
+<h3 class="anchored" data-anchor-id="last"><code>last()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>last(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Last value in the group.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: default (mixed, default NA) is returned when the group has no values; order_by (expression, default row order) sorts the values first, NA last, and accepts <code>desc()</code>; na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="nth" class="level3">
+<h3 class="anchored" data-anchor-id="nth"><code>nth()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>nth(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$n</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Value at position <code>$n</code> in the group.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The 1-based position; a negative position counts from the end.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: default (mixed, default NA) is returned when the position is 0 or out of range; order_by (expression, default row order) sorts the values first, NA last, and accepts <code>desc()</code>; na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="any" class="level3">
+<h3 class="anchored" data-anchor-id="any"><code>any()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>any(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether any value is true.</p>
+<p>With NA present and na_rm false, the result is true when some value is true, and NA otherwise. The result is false for no values.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A logical expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="all" class="level3">
+<h3 class="anchored" data-anchor-id="all"><code>all()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>all(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether every value is true.</p>
+<p>With NA present and na_rm false, the result is false when some value is false, and NA otherwise. The result is true for no values.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A logical expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: na_rm (bool, default false) drops NA first.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="window-functions" class="level2">
+<h2 class="anchored" data-anchor-id="window-functions">Window functions</h2>
+<section id="lag" class="level3">
+<h3 class="anchored" data-anchor-id="lag"><code>lag()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>lag(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Value from n rows earlier in the group.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: n (int, default 1) is the offset; default (mixed, default NA) fills rows with no earlier row; order_by (expression, default row order) sets the order, NA last, and accepts <code>desc()</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="lead" class="level3">
+<h3 class="anchored" data-anchor-id="lead"><code>lead()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>lead(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Value from n rows later in the group.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: n (int, default 1) is the offset; default (mixed, default NA) fills rows with no later row; order_by (expression, default row order) sets the order, NA last, and accepts <code>desc()</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="row-number" class="level3">
+<h3 class="anchored" data-anchor-id="row-number"><code>row_number()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>row_number(<span class="dt">mixed</span> ...<span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Row number within the group, or the rank of each value with ties broken by row order.</p>
+<p>With no argument, rows are numbered 1 to n in their order. With an argument, NA values get NA, and a factor column ranks by level order.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Optionally one expression to rank by, or <code>desc()</code> of one.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="min-rank" class="level3">
+<h3 class="anchored" data-anchor-id="min-rank"><code>min_rank()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>min_rank(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Rank of each value, ties sharing the lowest rank, with gaps after ties.</p>
+<p>NA values get NA. A factor column ranks by level order.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression to rank by, or <code>desc()</code> of one.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="dense-rank" class="level3">
+<h3 class="anchored" data-anchor-id="dense-rank"><code>dense_rank()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>dense_rank(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Rank of each value, ties sharing a rank, with no gaps after ties.</p>
+<p>NA values get NA. A factor column ranks by level order.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression to rank by, or <code>desc()</code> of one.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="percent-rank" class="level3">
+<h3 class="anchored" data-anchor-id="percent-rank"><code>percent_rank()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>percent_rank(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Minimum rank rescaled to the range 0 to 1: (min_rank - 1) / (m - 1), where m is the number of non-NA values.</p>
+<p>NA values get NA. With one non-NA value, the result is NaN.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression to rank by, or <code>desc()</code> of one.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="cume-dist" class="level3">
+<h3 class="anchored" data-anchor-id="cume-dist"><code>cume_dist()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb66"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>cume_dist(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cumulative distribution: the share of non-NA values less than or equal to each value.</p>
+<p>NA values get NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression to rank by, or <code>desc()</code> of one.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="ntile" class="level3">
+<h3 class="anchored" data-anchor-id="ntile"><code>ntile()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>ntile(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Bucket number from 1 to n, splitting the ordered values into n groups as evenly as possible.</p>
+<p>Earlier buckets take the extra rows when the sizes differ. NA values get NA. With no expression, rows are bucketed in row order.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Optionally one expression to order by, or <code>desc()</code> of one, then named options: n (int, required) is the number of buckets.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when n is not given.</p>
+</section>
+<section id="cumsum" class="level3">
+<h3 class="anchored" data-anchor-id="cumsum"><code>cumsum()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb68"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>cumsum(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cumulative sum in row order.</p>
+<p>Once a value is NA, every later result is NA.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="cumprod" class="level3">
+<h3 class="anchored" data-anchor-id="cumprod"><code>cumprod()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>cumprod(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cumulative product in row order.</p>
+<p>Once a value is NA, every later result is NA. SQL backends evaluate it in memory.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="cummean" class="level3">
+<h3 class="anchored" data-anchor-id="cummean"><code>cummean()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>cummean(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cumulative mean in row order.</p>
+<p>Once a value is NA, every later result is NA.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A numeric expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="cummin" class="level3">
+<h3 class="anchored" data-anchor-id="cummin"><code>cummin()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>cummin(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cumulative minimum in row order.</p>
+<p>Once a value is NA, every later result is NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="cummax" class="level3">
+<h3 class="anchored" data-anchor-id="cummax"><code>cummax()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb72"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>cummax(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cumulative maximum in row order.</p>
+<p>Once a value is NA, every later result is NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A column expression, such as <code>col('x')</code>, or a literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="cumall" class="level3">
+<h3 class="anchored" data-anchor-id="cumall"><code>cumall()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>cumall(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether every value so far, in row order, is true.</p>
+<p>Once a value is false, every later result is false. After an NA, results are NA until a false value appears.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A logical expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="cumany" class="level3">
+<h3 class="anchored" data-anchor-id="cumany"><code>cumany()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb74"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>cumany(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether any value so far, in row order, is true.</p>
+<p>Once a value is true, every later result is true. After an NA, results are NA until a true value appears.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A logical expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="consecutive-id" class="level3">
+<h3 class="anchored" data-anchor-id="consecutive-id"><code>consecutive_id()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>consecutive_id(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Run identifier that starts at 1 and increases each time the value, or combination of values, changes from the previous row.</p>
+<p>SQL backends evaluate it in memory.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>One or more expressions.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="expression-objects" class="level2">
+<h2 class="anchored" data-anchor-id="expression-objects">Expression objects</h2>
+<section id="expr-of" class="level3">
+<h3 class="anchored" data-anchor-id="expr-of"><code>Expr::of()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb76"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>Expr::of(<span class="dt">mixed</span> <span class="va">$value</span>)<span class="ot">:</span> Expr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>PHP value wrapped as a literal expression; an expression is returned unchanged.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$value</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>An expression, or a value <code>lit()</code> accepts.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Expr</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when the value is not one <code>lit()</code> accepts.</p>
+</section>
+<section id="expr-fromarray" class="level3">
+<h3 class="anchored" data-anchor-id="expr-fromarray"><code>Expr::fromArray()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>Expr::fromArray(<span class="dt">array</span> <span class="va">$node</span>)<span class="ot">:</span> Expr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Expression rebuilt from the array form that <code>toArray()</code> returns.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$node</code></td>
+<td><code>array&lt;string, mixed&gt;</code></td>
+<td></td>
+<td>A node as <code>toArray()</code> gives it.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>Expr</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when a node has an unknown type, a literal is invalid, or a call does not fit the function registry.<br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="expr-toarray" class="level3">
+<h3 class="anchored" data-anchor-id="expr-toarray"><code>Expr-&gt;toArray()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;toArray()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>JSON-friendly description of the expression tree.</p>
+<p><code>Expr::fromArray()</code> rebuilds the expression from it.</p>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>array&lt;string, mixed&gt;</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="expr-columns" class="level3">
+<h3 class="anchored" data-anchor-id="expr-columns"><code>Expr-&gt;columns()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span>-&gt;columns()<span class="ot">:</span> <span class="dt">array</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Names of the columns the expression reads, in order of first use.</p>
+<p><strong>Method</strong> of <code>Phibble\Expr\Expr</code><br>
+<strong>Returns</strong> <code>list&lt;string&gt;</code><br>
+<strong>Examples</strong> <a href="../expr.html">Expressions</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/phibble\.phpstats\.org\/docs\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

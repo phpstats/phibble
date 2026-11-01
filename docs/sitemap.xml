@@ -5,36 +5,56 @@
     <lastmod>2026-11-01T19:00:53.186Z</lastmod>
   </url>
   <url>
+    <loc>https://phibble.phpstats.org/docs/reference/types.html</loc>
+    <lastmod>2026-11-01T23:14:56.682Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/rows-and-columns.html</loc>
+    <lastmod>2026-11-01T23:14:56.681Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/index.html</loc>
+    <lastmod>2026-11-01T23:14:56.682Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/expressions.html</loc>
+    <lastmod>2026-11-01T23:14:56.682Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/combining.html</loc>
+    <lastmod>2026-11-01T23:14:56.681Z</lastmod>
+  </url>
+  <url>
     <loc>https://phibble.phpstats.org/docs/laravel.html</loc>
-    <lastmod>2026-11-01T18:12:14.611Z</lastmod>
+    <lastmod>2026-11-01T23:11:57.870Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/index.html</loc>
-    <lastmod>2026-11-01T19:19:29.711Z</lastmod>
+    <lastmod>2026-11-01T23:12:21.288Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/expr.html</loc>
-    <lastmod>2026-11-01T18:59:11.980Z</lastmod>
+    <lastmod>2026-11-01T23:11:57.870Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/examples/database-table.html</loc>
-    <lastmod>2026-11-01T18:12:22.787Z</lastmod>
+    <lastmod>2026-11-01T23:11:57.871Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/contract.html</loc>
-    <lastmod>2026-11-01T18:58:48.038Z</lastmod>
+    <lastmod>2026-11-01T23:12:02.456Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/backends.html</loc>
-    <lastmod>2026-11-01T18:59:37.828Z</lastmod>
+    <lastmod>2026-11-01T23:11:57.869Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/coming-from-tibble.html</loc>
-    <lastmod>2026-11-01T14:33:17.466Z</lastmod>
+    <lastmod>2026-11-01T23:11:57.870Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/development.html</loc>
-    <lastmod>2026-11-01T21:26:24.722Z</lastmod>
+    <lastmod>2026-11-01T23:15:01.992Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/examples/read-a-csv.html</loc>
@@ -42,14 +62,34 @@
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/getting-started.html</loc>
-    <lastmod>2026-11-01T19:19:29.735Z</lastmod>
+    <lastmod>2026-11-01T23:12:28.933Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/io.html</loc>
-    <lastmod>2026-11-01T19:19:29.735Z</lastmod>
+    <lastmod>2026-11-01T23:11:57.870Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/backends.html</loc>
+    <lastmod>2026-11-01T23:14:56.682Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/creating.html</loc>
+    <lastmod>2026-11-01T23:14:56.681Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/grouping.html</loc>
+    <lastmod>2026-11-01T23:14:56.681Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/output.html</loc>
+    <lastmod>2026-11-01T23:14:56.682Z</lastmod>
+  </url>
+  <url>
+    <loc>https://phibble.phpstats.org/docs/reference/strings-and-dates.html</loc>
+    <lastmod>2026-11-01T23:14:56.682Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/sql.html</loc>
-    <lastmod>2026-11-01T19:19:42.307Z</lastmod>
+    <lastmod>2026-11-01T23:11:57.871Z</lastmod>
   </url>
 </urlset>

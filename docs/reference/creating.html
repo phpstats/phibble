@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Creating and loading tables – phibble</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bb62276ab45c84d9efd712f51ff97b5a.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f3d0b6f838474b91d97a23e0a7eb39d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/creating.html">Creating and loading tables</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">phibble</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../coming-from-tibble.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Coming from tibble</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guides</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reading and writing data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../expr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../laravel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble for Laravel developers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Functions and methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functions and methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/creating.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Creating and loading tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/rows-and-columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rows and columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grouping and summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/combining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joins and reshaping</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/expressions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expression functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/strings-and-dates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">String and date functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types and conversion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Output</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SqlTable, PolarsTable, and Laravel</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Examples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/read-a-csv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Read a CSV file into a typed table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/database-table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query a database table</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Contributing</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../contract.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Table contract</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../development.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Development</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a>
+  <ul class="collapse">
+  <li><a href="#fn-tibble" id="toc-fn-tibble" class="nav-link" data-scroll-target="#fn-tibble"><code>tibble()</code></a></li>
+  <li><a href="#fn-tribble" id="toc-fn-tribble" class="nav-link" data-scroll-target="#fn-tribble"><code>tribble()</code></a></li>
+  <li><a href="#fn-as_tibble" id="toc-fn-as_tibble" class="nav-link" data-scroll-target="#fn-as_tibble"><code>as_tibble()</code></a></li>
+  <li><a href="#fn-enframe" id="toc-fn-enframe" class="nav-link" data-scroll-target="#fn-enframe"><code>enframe()</code></a></li>
+  <li><a href="#fn-tbl" id="toc-fn-tbl" class="nav-link" data-scroll-target="#fn-tbl"><code>tbl()</code></a></li>
+  <li><a href="#fn-polars" id="toc-fn-polars" class="nav-link" data-scroll-target="#fn-polars"><code>polars()</code></a></li>
+  </ul></li>
+  <li><a href="#dataframe" id="toc-dataframe" class="nav-link" data-scroll-target="#dataframe">DataFrame</a>
+  <ul class="collapse">
+  <li><a href="#dataframe-fromrows" id="toc-dataframe-fromrows" class="nav-link" data-scroll-target="#dataframe-fromrows"><code>DataFrame::fromRows()</code></a></li>
+  <li><a href="#dataframe-fromcolumns" id="toc-dataframe-fromcolumns" class="nav-link" data-scroll-target="#dataframe-fromcolumns"><code>DataFrame::fromColumns()</code></a></li>
+  <li><a href="#dataframe-fromcsv" id="toc-dataframe-fromcsv" class="nav-link" data-scroll-target="#dataframe-fromcsv"><code>DataFrame::fromCsv()</code></a></li>
+  <li><a href="#dataframe-fromcsvstring" id="toc-dataframe-fromcsvstring" class="nav-link" data-scroll-target="#dataframe-fromcsvstring"><code>DataFrame::fromCsvString()</code></a></li>
+  <li><a href="#dataframe-fromcsvchunked" id="toc-dataframe-fromcsvchunked" class="nav-link" data-scroll-target="#dataframe-fromcsvchunked"><code>DataFrame::fromCsvChunked()</code></a></li>
+  <li><a href="#dataframe-csvchunks" id="toc-dataframe-csvchunks" class="nav-link" data-scroll-target="#dataframe-csvchunks"><code>DataFrame::csvChunks()</code></a></li>
+  <li><a href="#dataframe-fromjson" id="toc-dataframe-fromjson" class="nav-link" data-scroll-target="#dataframe-fromjson"><code>DataFrame::fromJson()</code></a></li>
+  <li><a href="#dataframe-frompdo" id="toc-dataframe-frompdo" class="nav-link" data-scroll-target="#dataframe-frompdo"><code>DataFrame::fromPdo()</code></a></li>
+  <li><a href="#dataframe-fromquery" id="toc-dataframe-fromquery" class="nav-link" data-scroll-target="#dataframe-fromquery"><code>DataFrame::fromQuery()</code></a></li>
+  <li><a href="#dataframe-fromcollection" id="toc-dataframe-fromcollection" class="nav-link" data-scroll-target="#dataframe-fromcollection"><code>DataFrame::fromCollection()</code></a></li>
+  <li><a href="#dataframe-fromsource" id="toc-dataframe-fromsource" class="nav-link" data-scroll-target="#dataframe-fromsource"><code>DataFrame::fromSource()</code></a></li>
+  <li><a href="#dataframe-tibble" id="toc-dataframe-tibble" class="nav-link" data-scroll-target="#dataframe-tibble"><code>DataFrame::tibble()</code></a></li>
+  <li><a href="#dataframe-tribble" id="toc-dataframe-tribble" class="nav-link" data-scroll-target="#dataframe-tribble"><code>DataFrame::tribble()</code></a></li>
+  <li><a href="#dataframe-astibble" id="toc-dataframe-astibble" class="nav-link" data-scroll-target="#dataframe-astibble"><code>DataFrame::asTibble()</code></a></li>
+  <li><a href="#dataframe-enframe" id="toc-dataframe-enframe" class="nav-link" data-scroll-target="#dataframe-enframe"><code>DataFrame::enframe()</code></a></li>
+  </ul></li>
+  <li><a href="#sqltable" id="toc-sqltable" class="nav-link" data-scroll-target="#sqltable">SqlTable</a>
+  <ul class="collapse">
+  <li><a href="#sqltable-table" id="toc-sqltable-table" class="nav-link" data-scroll-target="#sqltable-table"><code>SqlTable::table()</code></a></li>
+  <li><a href="#sqltable-query" id="toc-sqltable-query" class="nav-link" data-scroll-target="#sqltable-query"><code>SqlTable::query()</code></a></li>
+  <li><a href="#sqltable-fromquery" id="toc-sqltable-fromquery" class="nav-link" data-scroll-target="#sqltable-fromquery"><code>SqlTable::fromQuery()</code></a></li>
+  <li><a href="#sqltable-fromsource" id="toc-sqltable-fromsource" class="nav-link" data-scroll-target="#sqltable-fromsource"><code>SqlTable::fromSource()</code></a></li>
+  </ul></li>
+  <li><a href="#polarstable" id="toc-polarstable" class="nav-link" data-scroll-target="#polarstable">PolarsTable</a>
+  <ul class="collapse">
+  <li><a href="#polarstable-fromtable" id="toc-polarstable-fromtable" class="nav-link" data-scroll-target="#polarstable-fromtable"><code>PolarsTable::fromTable()</code></a></li>
+  <li><a href="#polarstable-frompolars" id="toc-polarstable-frompolars" class="nav-link" data-scroll-target="#polarstable-frompolars"><code>PolarsTable::fromPolars()</code></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/creating.html">Creating and loading tables</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Creating and loading tables</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Functions and static methods that create a table from PHP values, files, queries, or other tables.</p>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<section id="fn-tibble" class="level3">
+<h3 class="anchored" data-anchor-id="fn-tibble"><code>tibble()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tibble(<span class="dt">mixed</span> ...<span class="va">$columns</span>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Build a DataFrame from named arguments, one per column, as tibble’s <code>tibble()</code>. Same rules as <code>DataFrame::tibble()</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$columns</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="fn-tribble" class="level3">
+<h3 class="anchored" data-anchor-id="fn-tribble"><code>tribble()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tribble(<span class="dt">array</span> <span class="va">$names</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$cells</span>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Build a DataFrame from column names, then rows, as tibble’s <code>tribble()</code>. Same rules as <code>DataFrame::tribble()</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$names</code></td>
+<td><code>array</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>...$cells</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="fn-as_tibble" class="level3">
+<h3 class="anchored" data-anchor-id="fn-as_tibble"><code>as_tibble()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>as_tibble(<span class="dt">mixed</span> <span class="va">$data</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$nameRepair</span> <span class="op">=</span> <span class="st">'check_unique'</span>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Convert tables, rows, columns, or collections into a DataFrame, as tibble’s <code>as_tibble()</code>. Same rules as <code>DataFrame::asTibble()</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$data</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$nameRepair</code></td>
+<td><code>string</code></td>
+<td><code>‘check_unique’</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="fn-enframe" class="level3">
+<h3 class="anchored" data-anchor-id="fn-enframe"><code>enframe()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>enframe(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$values</span><span class="ot">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$name</span> <span class="op">=</span> <span class="st">'name'</span><span class="ot">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$value</span> <span class="op">=</span> <span class="st">'value'</span><span class="ot">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An array as a two-column DataFrame of names and values, as tibble’s <code>enframe()</code>. Same rules as <code>DataFrame::enframe()</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$values</code></td>
+<td><code>array</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$name</code></td>
+<td><code>?string</code></td>
+<td><code>‘name’</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$value</code></td>
+<td><code>string</code></td>
+<td><code>‘value’</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="fn-tbl" class="level3">
+<h3 class="anchored" data-anchor-id="fn-tbl"><code>tbl()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tbl(<span class="bu">PDO</span> <span class="va">$pdo</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$from</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$bindings</span> <span class="op">=</span> [])<span class="ot">:</span> SqlTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A lazy SqlTable, as dbplyr’s <code>tbl()</code>. Pass a table name, or a SELECT or WITH query with bindings.</p>
+<p>tbl(<code>$pdo</code>, ‘visits’); tbl(<code>$pdo</code>, ‘SELECT * FROM visits WHERE year = ?’, [2024]);</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$pdo</code></td>
+<td><code>PDO</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$from</code></td>
+<td><code>string</code></td>
+<td></td>
+<td>A table or view name, or a SELECT or WITH query.</td>
+</tr>
+<tr class="odd">
+<td><code>$bindings</code></td>
+<td><code>array&lt;int|string, mixed&gt;</code></td>
+<td><code>[]</code></td>
+<td>Positional (?) or named (:name) bindings, for a query only.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble</code><br>
+<strong>Returns</strong> <code>SqlTable</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when bindings come with a table name.</p>
+</section>
+<section id="fn-polars" class="level3">
+<h3 class="anchored" data-anchor-id="fn-polars"><code>polars()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>polars(<span class="dt">mixed</span> <span class="va">$data</span>)<span class="ot">:</span> PolarsTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A PolarsTable from any Table, or from anything <code>as_tibble()</code> accepts. Requires the php_polars extension.</p>
+<p>polars(<code>DataFrame::fromCsv('sales.csv')</code>)-&gt;filter(<code>col('units')``-&gt;gt(0)</code>);</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$data</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble</code><br>
+<strong>Returns</strong> <code>PolarsTable</code><br>
+<strong>Throws</strong> <code>RuntimeException</code>: when the php_polars extension is not loaded.</p>
+</section>
+</section>
+<section id="dataframe" class="level2">
+<h2 class="anchored" data-anchor-id="dataframe">DataFrame</h2>
+<section id="dataframe-fromrows" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromrows"><code>DataFrame::fromRows()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromRows(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">iterable</span> <span class="va">$rows</span><span class="ot">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> <span class="va">$parseStrings</span> <span class="op">=</span> <span class="kw">false</span><span class="ot">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Build a DataFrame from rows. Column order follows first appearance; keys missing from a row are NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$rows</code></td>
+<td><code>iterable&lt;array&lt;string, mixed&gt;|object&gt;</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>array&lt;string, Type|string&gt;</code></td>
+<td><code>[]</code></td>
+<td>Explicit types by column name.</td>
+</tr>
+<tr class="odd">
+<td><code>$parseStrings</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>Parse all-string columns as text (as fromCsv does).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Examples</strong> <a href="../getting-started.html">Getting started</a></p>
+</section>
+<section id="dataframe-fromcolumns" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromcolumns"><code>DataFrame::fromColumns()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromColumns(<span class="dt">array</span> <span class="va">$columns</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> [])<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Build a DataFrame from columns: name =&gt; list of values, or name =&gt; Column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$columns</code></td>
+<td><code>array&lt;string, list&lt;mixed&gt;|Column&gt;</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>array&lt;string, Type|string&gt;</code></td>
+<td><code>[]</code></td>
+<td>Explicit types by column name.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Examples</strong> <a href="../types.html">Types</a>, <a href="../getting-started.html">Getting started</a></p>
+</section>
+<section id="dataframe-fromcsv" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromcsv"><code>DataFrame::fromCsv()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromCsv(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> <span class="va">$file</span><span class="ot">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$delimiter</span> <span class="op">=</span> <span class="st">','</span><span class="ot">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$na</span> <span class="op">=</span> [<span class="st">''</span><span class="ot">,</span> <span class="st">'NA'</span>]<span class="ot">,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read delimited text like <code>readr::read_csv()</code>: a path (“.gz” is decompressed), an http:// or https:// URL (downloaded to a temporary file first), or an open stream. Types are guessed from up to guessMax rows; “” and “NA” are NA. More readr options go as named arguments; see <code>Phibble\Io\CsvOptions</code> (colNames, select, skip, nMax, quote, comment, trimWs, skipEmptyRows, guessMax, nameRepair, decimalMark, groupingMark, escapeDouble, escapeBackslash).</p>
+<p>Problems (unparseable values, ragged rows) raise one E_USER_WARNING; the data is still returned, with NA where values failed.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$file</code></td>
+<td><code>string|resource</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>string|array&lt;int|string, mixed&gt;</code></td>
+<td><code>[]</code></td>
+<td>readr col_types: “icdlDTfn_?” or name =&gt; spec.</td>
+</tr>
+<tr class="odd">
+<td><code>$delimiter</code></td>
+<td><code>string</code></td>
+<td><code>‘,’</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$na</code></td>
+<td><code>list&lt;string&gt;</code></td>
+<td><code>[’‘, ’NA’]</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Examples</strong> <a href="../getting-started.html">Getting started</a>, <a href="../io.html">Reading and writing data</a>, <a href="../expr.html">Expressions</a></p>
+</section>
+<section id="dataframe-fromcsvstring" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromcsvstring"><code>DataFrame::fromCsvString()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromCsvString(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$csv</span><span class="ot">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$delimiter</span> <span class="op">=</span> <span class="st">','</span><span class="ot">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$na</span> <span class="op">=</span> [<span class="st">''</span><span class="ot">,</span> <span class="st">'NA'</span>]<span class="ot">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read delimited text from a string; options as <code>fromCsv()</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$csv</code></td>
+<td><code>string</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>string|array&lt;int|string, mixed&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$delimiter</code></td>
+<td><code>string</code></td>
+<td><code>‘,’</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$na</code></td>
+<td><code>list&lt;string&gt;</code></td>
+<td><code>[’‘, ’NA’]</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Examples</strong> <a href="../io.html">Reading and writing data</a>, <a href="../types.html">Types</a></p>
+</section>
+<section id="dataframe-fromcsvchunked" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromcsvchunked"><code>DataFrame::fromCsvChunked()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromCsvChunked(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> <span class="va">$file</span><span class="ot">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">callable</span> <span class="va">$callback</span><span class="ot">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">$chunkSize</span> <span class="op">=</span> <span class="dv">10000</span><span class="ot">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$delimiter</span> <span class="op">=</span> <span class="st">','</span><span class="ot">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$na</span> <span class="op">=</span> [<span class="st">''</span><span class="ot">,</span> <span class="st">'NA'</span>]<span class="ot">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read delimited text in chunks, as <code>readr::read_delim_chunked()</code>: each chunk of at most <code>$chunkSize</code> rows is passed to <code>$callback</code> with the 1-based index of its first row. Returning false from the callback stops reading. Memory follows the chunk size, not the file’s.</p>
+<p>Types not given are guessed from the first chunk (guessMax defaults to the chunk size, as in readr) and every later chunk is parsed as those types. Give types, for example [‘.default’ =&gt; ‘c’], to skip guessing. Factors without levels take their levels from each chunk. Each chunk’s problems raise their own warning, with rows numbered from the start of the file. Options are those of <code>fromCsv()</code>, and <code>$file</code> may be a URL as there. With phit 0.2.0 or later loaded, the chunks are read natively by <code>Phit\CsvReader</code>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$file</code></td>
+<td><code>string|resource</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$callback</code></td>
+<td><code>callable(DataFrame, int): (bool|null|void)</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$chunkSize</code></td>
+<td><code>int</code></td>
+<td><code>10000</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>string|array&lt;int|string, mixed&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$delimiter</code></td>
+<td><code>string</code></td>
+<td><code>‘,’</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$na</code></td>
+<td><code>list&lt;string&gt;</code></td>
+<td><code>[’‘, ’NA’]</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Examples</strong> <a href="../io.html">Reading and writing data</a></p>
+</section>
+<section id="dataframe-csvchunks" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-csvchunks"><code>DataFrame::csvChunks()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>DataFrame::csvChunks(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> <span class="va">$file</span><span class="ot">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">$chunkSize</span> <span class="op">=</span> <span class="dv">10000</span><span class="ot">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span><span class="op">|</span><span class="dt">string</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$delimiter</span> <span class="op">=</span> <span class="st">','</span><span class="ot">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$na</span> <span class="op">=</span> [<span class="st">''</span><span class="ot">,</span> <span class="st">'NA'</span>]<span class="ot">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> ...<span class="va">$options</span><span class="ot">,</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> <span class="bu">Generator</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The chunks <code>fromCsvChunked()</code> reads, as a generator keyed by the 1-based index of each chunk’s first row.</p>
+<p><code>$kept</code> = []; foreach (<code>DataFrame::csvChunks('feed.tsv', delimiter: "\t", types: ['.default' =&gt; 'c'])</code> as <code>$chunk</code>) { <code>$kept[]</code> = <code>$chunk</code>-&gt;filter(<code>col('category')``-&gt;eq('running')</code>); } <code>$shoes</code> = DataFrame::concat(<code>$kept</code>);</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$file</code></td>
+<td><code>string|resource</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$chunkSize</code></td>
+<td><code>int</code></td>
+<td><code>10000</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$types</code></td>
+<td><code>string|array&lt;int|string, mixed&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$delimiter</code></td>
+<td><code>string</code></td>
+<td><code>‘,’</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$na</code></td>
+<td><code>list&lt;string&gt;</code></td>
+<td><code>[’‘, ’NA’]</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>Generator&lt;int, DataFrame&gt;</code></p>
+</section>
+<section id="dataframe-fromjson" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromjson"><code>DataFrame::fromJson()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromJson(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$json</span><span class="ot">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$orient</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read JSON: a list of records ([{“a”: 1}, …]) or an object of columns ({“a”: [1, 2]}). The shape is detected unless <code>$orient</code> is ‘records’ or ‘columns’. Missing keys and nulls are NA; nested arrays and objects become list-columns.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$json</code></td>
+<td><code>string</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>array&lt;string, Type|string&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$orient</code></td>
+<td><code>?string</code></td>
+<td><code>null</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Examples</strong> <a href="../io.html">Reading and writing data</a></p>
+</section>
+<section id="dataframe-frompdo" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-frompdo"><code>DataFrame::fromPdo()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromPdo(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">PDO</span> <span class="va">$pdo</span><span class="ot">,</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$sql</span><span class="ot">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$bindings</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Run a query and load the result.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$pdo</code></td>
+<td><code>PDO</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$sql</code></td>
+<td><code>string</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$bindings</code></td>
+<td><code>array&lt;int|string, mixed&gt;</code></td>
+<td><code>[]</code></td>
+<td>Positional or named.</td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>array&lt;string, Type|string&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Examples</strong> <a href="../io.html">Reading and writing data</a></p>
+</section>
+<section id="dataframe-fromquery" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromquery"><code>DataFrame::fromQuery()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromQuery(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span> <span class="va">$builder</span><span class="ot">,</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">object</span> <span class="va">$connection</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Load the result of a Laravel query builder (query or Eloquent) or a Doctrine DBAL QueryBuilder. Neither library is required.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$builder</code></td>
+<td><code>object</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$connection</code></td>
+<td><code>?object</code></td>
+<td><code>null</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$types</code></td>
+<td><code>array&lt;string, Type|string&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="dataframe-fromcollection" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromcollection"><code>DataFrame::fromCollection()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromCollection(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Traversable</span><span class="op">|</span><span class="dt">object</span><span class="op">|</span><span class="dt">array</span> <span class="va">$collection</span><span class="ot">,</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Build a DataFrame from a Laravel Collection (or anything with <code>all()</code> or <code>toArray()</code>, or any iterable). Items may be arrays, Eloquent models or other objects with <code>toArray()</code>, or plain objects. Laravel is not needed.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$collection</code></td>
+<td><code>iterable&lt;mixed&gt;|object</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$types</code></td>
+<td><code>array&lt;string, Type|string&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Examples</strong> <a href="../io.html">Reading and writing data</a></p>
+</section>
+<section id="dataframe-fromsource" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-fromsource"><code>DataFrame::fromSource()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromSource(Source <span class="va">$source</span>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Read a <code>Phibble\Source\Source</code>, such as a CsvSource or PdoSource, into a DataFrame.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$source</code></td>
+<td><code>Source</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="dataframe-tibble" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-tibble"><code>DataFrame::tibble()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>DataFrame::tibble(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$columns</span><span class="ot">,</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$nameRepair</span> <span class="op">=</span> <span class="st">'check_unique'</span><span class="ot">,</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Build a DataFrame column by column, as tibble’s <code>tibble()</code>.</p>
+<ul>
+<li>A list is a column; a scalar (or null) is repeated to the common length. Only length-1 values are recycled.</li>
+<li>A closure receives the DataFrame built so far and returns a list or a scalar, so columns can be computed from earlier ones.</li>
+<li>A Table under an integer key is spliced in column by column.</li>
+</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$columns</code></td>
+<td><code>array&lt;string|int, mixed&gt;</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$nameRepair</code></td>
+<td><code>string</code></td>
+<td><code>‘check_unique’</code></td>
+<td>check_unique, unique, universal or minimal</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="dataframe-tribble" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-tribble"><code>DataFrame::tribble()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>DataFrame::tribble(<span class="dt">array</span> <span class="va">$names</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$cells</span>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Build a DataFrame row by row, as tibble’s <code>tribble()</code>. Pass the column names, then either one list per row or the cells in row order.</p>
+<p><code>DataFrame::tribble(['x', 'y'], [1, 'a'], [2, 'b'])</code>;</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$names</code></td>
+<td><code>list&lt;string&gt;</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>...$cells</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="dataframe-astibble" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-astibble"><code>DataFrame::asTibble()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>DataFrame::asTibble(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mixed</span> <span class="va">$data</span><span class="ot">,</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$nameRepair</span> <span class="op">=</span> <span class="st">'check_unique'</span><span class="ot">,</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Convert tables, rows, columns, collections, or other iterables into a DataFrame, as tibble’s <code>as_tibble()</code>.</p>
+<ul>
+<li>A Table is collected.</li>
+<li>A list of associative arrays (or objects) is rows.</li>
+<li>An associative array of lists is columns.</li>
+<li>An object with <code>all()</code> or <code>toArray()</code> (a Laravel Collection) is unwrapped.</li>
+</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$data</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$nameRepair</code></td>
+<td><code>string</code></td>
+<td><code>‘check_unique’</code></td>
+<td>check_unique, unique, universal or minimal</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+<section id="dataframe-enframe" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe-enframe"><code>DataFrame::enframe()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>DataFrame::enframe(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$values</span><span class="ot">,</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">string</span> <span class="va">$name</span> <span class="op">=</span> <span class="st">'name'</span><span class="ot">,</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> <span class="va">$value</span> <span class="op">=</span> <span class="st">'value'</span><span class="ot">,</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>An array as a two-column DataFrame of names and values, as tibble’s <code>enframe()</code>. A list gets 1-based integer names, as in R.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$values</code></td>
+<td><code>array&lt;mixed&gt;</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$name</code></td>
+<td><code>?string</code></td>
+<td><code>‘name’</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$value</code></td>
+<td><code>string</code></td>
+<td><code>‘value’</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
+<strong>Returns</strong> <code>DataFrame</code></p>
+</section>
+</section>
+<section id="sqltable" class="level2">
+<h2 class="anchored" data-anchor-id="sqltable">SqlTable</h2>
+<section id="sqltable-table" class="level3">
+<h3 class="anchored" data-anchor-id="sqltable-table"><code>SqlTable::table()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>SqlTable::table(<span class="bu">PDO</span> <span class="va">$pdo</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$name</span>)<span class="ot">:</span> SqlTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A table (or view) by name.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$pdo</code></td>
+<td><code>PDO</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$name</code></td>
+<td><code>string</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Sql\SqlTable</code><br>
+<strong>Returns</strong> <code>SqlTable</code></p>
+</section>
+<section id="sqltable-query" class="level3">
+<h3 class="anchored" data-anchor-id="sqltable-query"><code>SqlTable::query()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>SqlTable::query(<span class="bu">PDO</span> <span class="va">$pdo</span><span class="ot">,</span> <span class="dt">string</span> <span class="va">$sql</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$bindings</span> <span class="op">=</span> [])<span class="ot">:</span> SqlTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Any SELECT query with positional (?) or named (:name) bindings.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$pdo</code></td>
+<td><code>PDO</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$sql</code></td>
+<td><code>string</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>$bindings</code></td>
+<td><code>array&lt;int|string, mixed&gt;</code></td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Sql\SqlTable</code><br>
+<strong>Returns</strong> <code>SqlTable</code></p>
+</section>
+<section id="sqltable-fromquery" class="level3">
+<h3 class="anchored" data-anchor-id="sqltable-fromquery"><code>SqlTable::fromQuery()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>SqlTable::fromQuery(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span> <span class="va">$builder</span><span class="ot">,</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="ot">?</span><span class="dt">object</span> <span class="va">$connection</span> <span class="op">=</span> <span class="kw">null</span><span class="ot">,</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> SqlTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A Laravel or Doctrine DBAL query builder, kept lazy.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$builder</code></td>
+<td><code>object</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>$connection</code></td>
+<td><code>?object</code></td>
+<td><code>null</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Sql\SqlTable</code><br>
+<strong>Returns</strong> <code>SqlTable</code></p>
+</section>
+<section id="sqltable-fromsource" class="level3">
+<h3 class="anchored" data-anchor-id="sqltable-fromsource"><code>SqlTable::fromSource()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>SqlTable::fromSource(PdoSource <span class="va">$source</span>)<span class="ot">:</span> SqlTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A lazy table over a PdoSource’s query and bindings.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$source</code></td>
+<td><code>PdoSource</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Sql\SqlTable</code><br>
+<strong>Returns</strong> <code>SqlTable</code></p>
+</section>
+</section>
+<section id="polarstable" class="level2">
+<h2 class="anchored" data-anchor-id="polarstable">PolarsTable</h2>
+<section id="polarstable-fromtable" class="level3">
+<h3 class="anchored" data-anchor-id="polarstable-fromtable"><code>PolarsTable::fromTable()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>PolarsTable::fromTable(Table <span class="va">$table</span>)<span class="ot">:</span> PolarsTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Copy any phibble table into Polars, keeping types, groups and factor levels.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$table</code></td>
+<td><code>Table</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Polars\PolarsTable</code><br>
+<strong>Returns</strong> <code>PolarsTable</code></p>
+</section>
+<section id="polarstable-frompolars" class="level3">
+<h3 class="anchored" data-anchor-id="polarstable-frompolars"><code>PolarsTable::fromPolars()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>PolarsTable::fromPolars(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    Phpolars\DataFrame<span class="op">|</span>Phpolars\LazyFrame <span class="va">$df</span><span class="ot">,</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> PolarsTable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Wrap a Polars DataFrame; a LazyFrame is collected.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$df</code></td>
+<td><code>Phpolars|Phpolars</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Polars\PolarsTable</code><br>
+<strong>Returns</strong> <code>PolarsTable</code></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/phibble\.phpstats\.org\/docs\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

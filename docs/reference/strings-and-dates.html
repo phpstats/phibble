@@ -1,0 +1,2859 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>String and date functions – phibble</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bb62276ab45c84d9efd712f51ff97b5a.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f3d0b6f838474b91d97a23e0a7eb39d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/strings-and-dates.html">String and date functions</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">phibble</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../coming-from-tibble.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Coming from tibble</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guides</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reading and writing data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../expr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../laravel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble for Laravel developers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Functions and methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functions and methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/creating.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Creating and loading tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/rows-and-columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rows and columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grouping and summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/combining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joins and reshaping</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/expressions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expression functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/strings-and-dates.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">String and date functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types and conversion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Output</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SqlTable, PolarsTable, and Laravel</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Examples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/read-a-csv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Read a CSV file into a typed table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/database-table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query a database table</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Contributing</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../contract.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Table contract</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../development.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Development</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#strings" id="toc-strings" class="nav-link active" data-scroll-target="#strings">Strings</a>
+  <ul class="collapse">
+  <li><a href="#str-length" id="toc-str-length" class="nav-link" data-scroll-target="#str-length"><code>str_length()</code></a></li>
+  <li><a href="#str-lower" id="toc-str-lower" class="nav-link" data-scroll-target="#str-lower"><code>str_lower()</code></a></li>
+  <li><a href="#str-upper" id="toc-str-upper" class="nav-link" data-scroll-target="#str-upper"><code>str_upper()</code></a></li>
+  <li><a href="#str-to-lower" id="toc-str-to-lower" class="nav-link" data-scroll-target="#str-to-lower"><code>str_to_lower()</code></a></li>
+  <li><a href="#str-to-upper" id="toc-str-to-upper" class="nav-link" data-scroll-target="#str-to-upper"><code>str_to_upper()</code></a></li>
+  <li><a href="#str-to-title" id="toc-str-to-title" class="nav-link" data-scroll-target="#str-to-title"><code>str_to_title()</code></a></li>
+  <li><a href="#str-trim" id="toc-str-trim" class="nav-link" data-scroll-target="#str-trim"><code>str_trim()</code></a></li>
+  <li><a href="#str-squish" id="toc-str-squish" class="nav-link" data-scroll-target="#str-squish"><code>str_squish()</code></a></li>
+  <li><a href="#str-pad" id="toc-str-pad" class="nav-link" data-scroll-target="#str-pad"><code>str_pad()</code></a></li>
+  <li><a href="#str-trunc" id="toc-str-trunc" class="nav-link" data-scroll-target="#str-trunc"><code>str_trunc()</code></a></li>
+  <li><a href="#str-sub" id="toc-str-sub" class="nav-link" data-scroll-target="#str-sub"><code>str_sub()</code></a></li>
+  <li><a href="#paste" id="toc-paste" class="nav-link" data-scroll-target="#paste"><code>paste()</code></a></li>
+  <li><a href="#paste0" id="toc-paste0" class="nav-link" data-scroll-target="#paste0"><code>paste0()</code></a></li>
+  </ul></li>
+  <li><a href="#patterns" id="toc-patterns" class="nav-link" data-scroll-target="#patterns">Patterns</a>
+  <ul class="collapse">
+  <li><a href="#fixed" id="toc-fixed" class="nav-link" data-scroll-target="#fixed"><code>fixed()</code></a></li>
+  <li><a href="#regex" id="toc-regex" class="nav-link" data-scroll-target="#regex"><code>regex()</code></a></li>
+  <li><a href="#str-detect" id="toc-str-detect" class="nav-link" data-scroll-target="#str-detect"><code>str_detect()</code></a></li>
+  <li><a href="#str-starts" id="toc-str-starts" class="nav-link" data-scroll-target="#str-starts"><code>str_starts()</code></a></li>
+  <li><a href="#str-ends" id="toc-str-ends" class="nav-link" data-scroll-target="#str-ends"><code>str_ends()</code></a></li>
+  <li><a href="#str-count" id="toc-str-count" class="nav-link" data-scroll-target="#str-count"><code>str_count()</code></a></li>
+  <li><a href="#str-extract" id="toc-str-extract" class="nav-link" data-scroll-target="#str-extract"><code>str_extract()</code></a></li>
+  <li><a href="#str-extract-all" id="toc-str-extract-all" class="nav-link" data-scroll-target="#str-extract-all"><code>str_extract_all()</code></a></li>
+  <li><a href="#str-replace" id="toc-str-replace" class="nav-link" data-scroll-target="#str-replace"><code>str_replace()</code></a></li>
+  <li><a href="#str-replace-all" id="toc-str-replace-all" class="nav-link" data-scroll-target="#str-replace-all"><code>str_replace_all()</code></a></li>
+  <li><a href="#str-split" id="toc-str-split" class="nav-link" data-scroll-target="#str-split"><code>str_split()</code></a></li>
+  <li><a href="#str-split-i" id="toc-str-split-i" class="nav-link" data-scroll-target="#str-split-i"><code>str_split_i()</code></a></li>
+  </ul></li>
+  <li><a href="#parsing-dates" id="toc-parsing-dates" class="nav-link" data-scroll-target="#parsing-dates">Parsing dates</a>
+  <ul class="collapse">
+  <li><a href="#ymd" id="toc-ymd" class="nav-link" data-scroll-target="#ymd"><code>ymd()</code></a></li>
+  <li><a href="#dmy" id="toc-dmy" class="nav-link" data-scroll-target="#dmy"><code>dmy()</code></a></li>
+  <li><a href="#mdy" id="toc-mdy" class="nav-link" data-scroll-target="#mdy"><code>mdy()</code></a></li>
+  <li><a href="#ymd-hms" id="toc-ymd-hms" class="nav-link" data-scroll-target="#ymd-hms"><code>ymd_hms()</code></a></li>
+  <li><a href="#dmy-hms" id="toc-dmy-hms" class="nav-link" data-scroll-target="#dmy-hms"><code>dmy_hms()</code></a></li>
+  <li><a href="#mdy-hms" id="toc-mdy-hms" class="nav-link" data-scroll-target="#mdy-hms"><code>mdy_hms()</code></a></li>
+  <li><a href="#parse-date-time" id="toc-parse-date-time" class="nav-link" data-scroll-target="#parse-date-time"><code>parse_date_time()</code></a></li>
+  </ul></li>
+  <li><a href="#date-parts" id="toc-date-parts" class="nav-link" data-scroll-target="#date-parts">Date parts</a>
+  <ul class="collapse">
+  <li><a href="#year" id="toc-year" class="nav-link" data-scroll-target="#year"><code>year()</code></a></li>
+  <li><a href="#quarter" id="toc-quarter" class="nav-link" data-scroll-target="#quarter"><code>quarter()</code></a></li>
+  <li><a href="#month" id="toc-month" class="nav-link" data-scroll-target="#month"><code>month()</code></a></li>
+  <li><a href="#day" id="toc-day" class="nav-link" data-scroll-target="#day"><code>day()</code></a></li>
+  <li><a href="#wday" id="toc-wday" class="nav-link" data-scroll-target="#wday"><code>wday()</code></a></li>
+  <li><a href="#yday" id="toc-yday" class="nav-link" data-scroll-target="#yday"><code>yday()</code></a></li>
+  <li><a href="#hour" id="toc-hour" class="nav-link" data-scroll-target="#hour"><code>hour()</code></a></li>
+  <li><a href="#minute" id="toc-minute" class="nav-link" data-scroll-target="#minute"><code>minute()</code></a></li>
+  <li><a href="#second" id="toc-second" class="nav-link" data-scroll-target="#second"><code>second()</code></a></li>
+  </ul></li>
+  <li><a href="#rounding-and-differences" id="toc-rounding-and-differences" class="nav-link" data-scroll-target="#rounding-and-differences">Rounding and differences</a>
+  <ul class="collapse">
+  <li><a href="#floor-date" id="toc-floor-date" class="nav-link" data-scroll-target="#floor-date"><code>floor_date()</code></a></li>
+  <li><a href="#ceiling-date" id="toc-ceiling-date" class="nav-link" data-scroll-target="#ceiling-date"><code>ceiling_date()</code></a></li>
+  <li><a href="#round-date" id="toc-round-date" class="nav-link" data-scroll-target="#round-date"><code>round_date()</code></a></li>
+  <li><a href="#difftime" id="toc-difftime" class="nav-link" data-scroll-target="#difftime"><code>difftime()</code></a></li>
+  </ul></li>
+  <li><a href="#periods" id="toc-periods" class="nav-link" data-scroll-target="#periods">Periods</a>
+  <ul class="collapse">
+  <li><a href="#seconds" id="toc-seconds" class="nav-link" data-scroll-target="#seconds"><code>seconds()</code></a></li>
+  <li><a href="#minutes" id="toc-minutes" class="nav-link" data-scroll-target="#minutes"><code>minutes()</code></a></li>
+  <li><a href="#hours" id="toc-hours" class="nav-link" data-scroll-target="#hours"><code>hours()</code></a></li>
+  <li><a href="#days" id="toc-days" class="nav-link" data-scroll-target="#days"><code>days()</code></a></li>
+  <li><a href="#weeks" id="toc-weeks" class="nav-link" data-scroll-target="#weeks"><code>weeks()</code></a></li>
+  <li><a href="#months" id="toc-months" class="nav-link" data-scroll-target="#months"><code>months()</code></a></li>
+  <li><a href="#years" id="toc-years" class="nav-link" data-scroll-target="#years"><code>years()</code></a></li>
+  </ul></li>
+  <li><a href="#time-zones-and-the-clock" id="toc-time-zones-and-the-clock" class="nav-link" data-scroll-target="#time-zones-and-the-clock">Time zones and the clock</a>
+  <ul class="collapse">
+  <li><a href="#with-tz" id="toc-with-tz" class="nav-link" data-scroll-target="#with-tz"><code>with_tz()</code></a></li>
+  <li><a href="#force-tz" id="toc-force-tz" class="nav-link" data-scroll-target="#force-tz"><code>force_tz()</code></a></li>
+  <li><a href="#today" id="toc-today" class="nav-link" data-scroll-target="#today"><code>today()</code></a></li>
+  <li><a href="#now" id="toc-now" class="nav-link" data-scroll-target="#now"><code>now()</code></a></li>
+  <li><a href="#clock-freeze" id="toc-clock-freeze" class="nav-link" data-scroll-target="#clock-freeze"><code>Clock::freeze()</code></a></li>
+  <li><a href="#clock-now" id="toc-clock-now" class="nav-link" data-scroll-target="#clock-now"><code>Clock::now()</code></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/strings-and-dates.html">String and date functions</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">String and date functions</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Expression functions in <code>Phibble\Expr</code> for text, patterns, dates, datetimes, and periods, following stringr and lubridate.</p>
+<section id="strings" class="level2">
+<h2 class="anchored" data-anchor-id="strings">Strings</h2>
+<section id="str-length" class="level3">
+<h3 class="anchored" data-anchor-id="str-length"><code>str_length()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>str_length(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Number of characters in the string.</p>
+<p>Characters are Unicode code points. NA gives NA.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-lower" class="level3">
+<h3 class="anchored" data-anchor-id="str-lower"><code>str_lower()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>str_lower(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String in lower case.</p>
+<p>Alias of <code>str_to_lower()</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-upper" class="level3">
+<h3 class="anchored" data-anchor-id="str-upper"><code>str_upper()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>str_upper(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String in upper case.</p>
+<p>Alias of <code>str_to_upper()</code>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-to-lower" class="level3">
+<h3 class="anchored" data-anchor-id="str-to-lower"><code>str_to_lower()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>str_to_lower(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String in lower case, by Unicode rules.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-to-upper" class="level3">
+<h3 class="anchored" data-anchor-id="str-to-upper"><code>str_to_upper()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>str_to_upper(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String in upper case, by Unicode rules.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-to-title" class="level3">
+<h3 class="anchored" data-anchor-id="str-to-title"><code>str_to_title()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>str_to_title(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String in title case.</p>
+<p>The string is lowercased, then each letter that follows a character other than a letter, digit, or apostrophe is uppercased. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-trim" class="level3">
+<h3 class="anchored" data-anchor-id="str-trim"><code>str_trim()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>str_trim(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String with leading and trailing white space removed.</p>
+<p>All Unicode white space is removed, as in stringr. SQL backends evaluate it in memory.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: side (string, default ‘both’) is ‘left’, ‘right’, or ‘both’.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-squish" class="level3">
+<h3 class="anchored" data-anchor-id="str-squish"><code>str_squish()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>str_squish(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String with white space trimmed from both ends and each inner run collapsed to one space.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-pad" class="level3">
+<h3 class="anchored" data-anchor-id="str-pad"><code>str_pad()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_pad</span>(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$width</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String padded to at least <code>$width</code> characters.</p>
+<p>Width counts Unicode code points; a string already at least that wide is unchanged. With side ‘both’, the extra padding goes on the right.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$width</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The minimum width.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: side (string, default ‘left’) is ‘left’, ‘right’, or ‘both’; pad (string, default ’ ’) is the padding, repeated once per missing character.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when side is not ‘left’, ‘right’, or ‘both’.</p>
+</section>
+<section id="str-trunc" class="level3">
+<h3 class="anchored" data-anchor-id="str-trunc"><code>str_trunc()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>str_trunc(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$width</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String truncated to at most <code>$width</code> characters, ellipsis included.</p>
+<p>Width counts Unicode code points; a string that fits is unchanged.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$width</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The maximum width.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: side (string, default ‘right’) is the side to cut, ‘right’, ‘left’, or ‘center’; ellipsis (string, default ‘…’) marks the cut.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when side is not ‘right’, ‘left’, or ‘center’.</p>
+</section>
+<section id="str-sub" class="level3">
+<h3 class="anchored" data-anchor-id="str-sub"><code>str_sub()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>str_sub(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$start</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$end</span> <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Substring from position <code>$start</code> to position <code>$end</code>, inclusive.</p>
+<p>Positions are 1-based characters; negative positions count from the end, so -1 is the last character. The result is NA where any argument is NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$start</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The first position.</td>
+</tr>
+<tr class="odd">
+<td><code>$end</code></td>
+<td><code>mixed</code></td>
+<td><code>-1</code></td>
+<td>The last position; the default, -1, is the end of the string.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="paste" class="level3">
+<h3 class="anchored" data-anchor-id="paste"><code>paste()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>paste(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Arguments joined into one string with a separator.</p>
+<p>NA is written as “NA”.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>One or more expressions or literals, then named options: sep (string, default ’ ’) is the separator.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="paste0" class="level3">
+<h3 class="anchored" data-anchor-id="paste0"><code>paste0()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>paste0(<span class="dt">mixed</span> ...<span class="va">$args</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Arguments joined into one string with no separator.</p>
+<p>NA is written as “NA”.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$args</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>One or more expressions or literals.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="patterns" class="level2">
+<h2 class="anchored" data-anchor-id="patterns">Patterns</h2>
+<section id="fixed" class="level3">
+<h3 class="anchored" data-anchor-id="fixed"><code>fixed()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fixed(<span class="dt">mixed</span> <span class="va">$pattern</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Pattern that matches its text literally.</p>
+<p>An empty <code>fixed()</code> pattern gives NA in the functions that take it.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The literal text to match.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="regex" class="level3">
+<h3 class="anchored" data-anchor-id="regex"><code>regex()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>regex(<span class="dt">mixed</span> <span class="va">$pattern</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Regular-expression pattern with options.</p>
+<p>Patterns are PCRE and match by Unicode code point.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The regular expression, without delimiters.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: ignore_case (bool, default false) matches without regard to case.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-detect" class="level3">
+<h3 class="anchored" data-anchor-id="str-detect"><code>str_detect()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>str_detect(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether the string contains a match for the pattern.</p>
+<p>A plain string pattern is a regular expression; wrap it in <code>fixed()</code> to match literal text. NA gives NA, as does an empty <code>fixed()</code> pattern.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: negate (bool, default false) inverts the result.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-starts" class="level3">
+<h3 class="anchored" data-anchor-id="str-starts"><code>str_starts()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>str_starts(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether the string starts with a match for the pattern.</p>
+<p>A plain string pattern is a regular expression; wrap it in <code>fixed()</code> to match literal text. NA gives NA, as does an empty <code>fixed()</code> pattern.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: negate (bool, default false) inverts the result.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-ends" class="level3">
+<h3 class="anchored" data-anchor-id="str-ends"><code>str_ends()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>str_ends(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Whether the string ends with a match for the pattern.</p>
+<p>A plain string pattern is a regular expression; wrap it in <code>fixed()</code> to match literal text. NA gives NA, as does an empty <code>fixed()</code> pattern.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: negate (bool, default false) inverts the result.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-count" class="level3">
+<h3 class="anchored" data-anchor-id="str-count"><code>str_count()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>str_count(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Number of matches of the pattern in the string.</p>
+<p>NA gives NA, as does an empty <code>fixed()</code> pattern.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-extract" class="level3">
+<h3 class="anchored" data-anchor-id="str-extract"><code>str_extract()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>str_extract(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>First match of the pattern in the string.</p>
+<p>The result is NA when there is no match. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-extract-all" class="level3">
+<h3 class="anchored" data-anchor-id="str-extract-all"><code>str_extract_all()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>str_extract_all(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Every match of the pattern in the string, as a list.</p>
+<p>NA gives a list holding one NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-replace" class="level3">
+<h3 class="anchored" data-anchor-id="str-replace"><code>str_replace()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_replace</span>(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$replacement</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String with the first match of the pattern replaced.</p>
+<p>In a regular-expression replacement, \1 to \9 refer to capture groups, and $ is literal. An NA replacement gives NA where the pattern matches.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>$replacement</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The replacement string.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-replace-all" class="level3">
+<h3 class="anchored" data-anchor-id="str-replace-all"><code>str_replace_all()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>str_replace_all(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$replacement</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>String with every match of the pattern replaced.</p>
+<p>In a regular-expression replacement, \1 to \9 refer to capture groups, and $ is literal. An NA replacement gives NA where the pattern matches.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>$replacement</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The replacement string.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-split" class="level3">
+<h3 class="anchored" data-anchor-id="str-split"><code>str_split()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_split</span>(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Pieces of the string split at each match of the pattern, as a list.</p>
+<p>An empty <code>fixed()</code> pattern splits into characters. NA gives a list holding one NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="str-split-i" class="level3">
+<h3 class="anchored" data-anchor-id="str-split-i"><code>str_split_i()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>str_split_i(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$pattern</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$i</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Piece <code>$i</code> of the string split at each match of the pattern.</p>
+<p>The result is NA when <code>$i</code> is 0 or out of range. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$pattern</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A regular expression, <code>fixed()</code>, or <code>regex()</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>$i</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The 1-based piece number; a negative number counts from the end.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="parsing-dates" class="level2">
+<h2 class="anchored" data-anchor-id="parsing-dates">Parsing dates</h2>
+<section id="ymd" class="level3">
+<h3 class="anchored" data-anchor-id="ymd"><code>ymd()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ymd(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Date parsed from text with year, month, and day in that order.</p>
+<p>Digits may run together (20240131) or be separated by any non-digits. Invalid input gives NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default none) parses to a datetime at midnight in that time zone; without it, the result is a date.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="dmy" class="level3">
+<h3 class="anchored" data-anchor-id="dmy"><code>dmy()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>dmy(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Date parsed from text with day, month, and year in that order.</p>
+<p>Digits may run together (31012024) or be separated by any non-digits. Invalid input gives NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default none) parses to a datetime at midnight in that time zone; without it, the result is a date.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="mdy" class="level3">
+<h3 class="anchored" data-anchor-id="mdy"><code>mdy()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>mdy(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Date parsed from text with month, day, and year in that order.</p>
+<p>Digits may run together (01312024) or be separated by any non-digits. Invalid input gives NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default none) parses to a datetime at midnight in that time zone; without it, the result is a date.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="ymd-hms" class="level3">
+<h3 class="anchored" data-anchor-id="ymd-hms"><code>ymd_hms()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ymd_hms(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Datetime parsed from text with year, month, day, hour, minute, and second in that order.</p>
+<p>Seconds may have a fraction. Invalid input, and a local time the zone skips, give NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default ‘UTC’) is the time zone of the clock time.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="dmy-hms" class="level3">
+<h3 class="anchored" data-anchor-id="dmy-hms"><code>dmy_hms()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>dmy_hms(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Datetime parsed from text with day, month, year, hour, minute, and second in that order.</p>
+<p>Seconds may have a fraction. Invalid input, and a local time the zone skips, give NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default ‘UTC’) is the time zone of the clock time.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="mdy-hms" class="level3">
+<h3 class="anchored" data-anchor-id="mdy-hms"><code>mdy_hms()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>mdy_hms(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Datetime parsed from text with month, day, year, hour, minute, and second in that order.</p>
+<p>Seconds may have a fraction. Invalid input, and a local time the zone skips, give NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default ‘UTC’) is the time zone of the clock time.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="parse-date-time" class="level3">
+<h3 class="anchored" data-anchor-id="parse-date-time"><code>parse_date_time()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>parse_date_time(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$orders</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Datetime parsed from text by the first of the given orders that fits.</p>
+<p>Order letters are Y (four-digit year), y (two-digit year: 00 to 68 are 2000s, 69 to 99 1900s), m, d, H, M, and S; spaces and the separators - / : _ in an order are ignored. A missing month or day is 1, and a missing hour, minute, or second is 0; an order without a year matches nothing. Text no order fits gives NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A string expression or literal.</td>
+</tr>
+<tr class="even">
+<td><code>$orders</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>One order, such as ‘Ymd HMS’, or a list of orders.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default ‘UTC’) is the time zone of the clock time.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when an order has another letter, or tz is not a known time zone.</p>
+</section>
+</section>
+<section id="date-parts" class="level2">
+<h2 class="anchored" data-anchor-id="date-parts">Date parts</h2>
+<section id="year" class="level3">
+<h3 class="anchored" data-anchor-id="year"><code>year()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>year(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Year of the date or datetime.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is a time.</p>
+</section>
+<section id="quarter" class="level3">
+<h3 class="anchored" data-anchor-id="quarter"><code>quarter()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>quarter(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Quarter of the year, from 1 to 4.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is a time.</p>
+</section>
+<section id="month" class="level3">
+<h3 class="anchored" data-anchor-id="month"><code>month()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>month(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Month of the date or datetime, from 1 to 12.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is a time.</p>
+</section>
+<section id="day" class="level3">
+<h3 class="anchored" data-anchor-id="day"><code>day()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>day(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Day of the month, from 1 to 31.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is a time.</p>
+</section>
+<section id="wday" class="level3">
+<h3 class="anchored" data-anchor-id="wday"><code>wday()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>wday(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Day of the week, from 1 to 7.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+<tr class="even">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: week_start (int, default 7) is the day numbered 1, from 1 for Monday to 7 for Sunday.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is a time.</p>
+</section>
+<section id="yday" class="level3">
+<h3 class="anchored" data-anchor-id="yday"><code>yday()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>yday(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Day of the year, from 1 to 366.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when a value is a time.</p>
+</section>
+<section id="hour" class="level3">
+<h3 class="anchored" data-anchor-id="hour"><code>hour()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>hour(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Hour of the datetime or time, from 0 to 23.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A datetime or time expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="minute" class="level3">
+<h3 class="anchored" data-anchor-id="minute"><code>minute()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>minute(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Minute of the datetime or time, from 0 to 59.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A datetime or time expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="second" class="level3">
+<h3 class="anchored" data-anchor-id="second"><code>second()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>second(<span class="dt">mixed</span> <span class="va">$x</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Second of the datetime or time, with any fraction.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A datetime or time expression.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="rounding-and-differences" class="level2">
+<h2 class="anchored" data-anchor-id="rounding-and-differences">Rounding and differences</h2>
+<section id="floor-date" class="level3">
+<h3 class="anchored" data-anchor-id="floor-date"><code>floor_date()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>floor_date(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$unit</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Date or datetime rounded down to the start of its unit.</p>
+<p>SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+<tr class="even">
+<td><code>$unit</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The unit, optionally with a count, such as ‘month’ or ‘15 minutes’: second, minute, hour, day, week, month, bimonth, quarter, or year.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: week_start (int, default 7) is the first day of a week, from 1 for Monday to 7 for Sunday.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when the unit is unknown.</p>
+</section>
+<section id="ceiling-date" class="level3">
+<h3 class="anchored" data-anchor-id="ceiling-date"><code>ceiling_date()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>ceiling_date(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$unit</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Date or datetime rounded up to the start of the next unit.</p>
+<p>A datetime already on a boundary is unchanged; a date moves to the next boundary, as in lubridate. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+<tr class="even">
+<td><code>$unit</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The unit, optionally with a count, such as ‘month’ or ‘15 minutes’: second, minute, hour, day, week, month, bimonth, quarter, or year.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: week_start (int, default 7) is the first day of a week, from 1 for Monday to 7 for Sunday.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when the unit is unknown.</p>
+</section>
+<section id="round-date" class="level3">
+<h3 class="anchored" data-anchor-id="round-date"><code>round_date()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb44"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>round_date(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$unit</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Date or datetime rounded to the nearer of <code>floor_date()</code> and <code>ceiling_date()</code>.</p>
+<p>A value halfway between rounds up. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+<tr class="even">
+<td><code>$unit</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The unit, optionally with a count, such as ‘month’ or ‘15 minutes’: second, minute, hour, day, week, month, bimonth, quarter, or year.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: week_start (int, default 7) is the first day of a week, from 1 for Monday to 7 for Sunday.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when the unit is unknown.</p>
+</section>
+<section id="difftime" class="level3">
+<h3 class="anchored" data-anchor-id="difftime"><code>difftime()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>difftime(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$y</span><span class="ot">,</span> <span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Difference <code>$x</code> - <code>$y</code> between two dates or datetimes, as a float in the given units.</p>
+<p>The result is NA where either value is NA.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+<tr class="even">
+<td><code>$y</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A date or datetime expression.</td>
+</tr>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: units (string, default ‘days’) is ‘secs’, ‘mins’, ‘hours’, ‘days’, or ‘weeks’.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when units is another value.</p>
+</section>
+</section>
+<section id="periods" class="level2">
+<h2 class="anchored" data-anchor-id="periods">Periods</h2>
+<section id="seconds" class="level3">
+<h3 class="anchored" data-anchor-id="seconds"><code>seconds()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>seconds(<span class="dt">mixed</span> <span class="va">$n</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Period of <code>$n</code> seconds, to add to or subtract from a datetime.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The number of seconds.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="minutes" class="level3">
+<h3 class="anchored" data-anchor-id="minutes"><code>minutes()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>minutes(<span class="dt">mixed</span> <span class="va">$n</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Period of <code>$n</code> minutes, to add to or subtract from a datetime.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The number of minutes.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="hours" class="level3">
+<h3 class="anchored" data-anchor-id="hours"><code>hours()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>hours(<span class="dt">mixed</span> <span class="va">$n</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Period of <code>$n</code> hours, to add to or subtract from a datetime.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The number of hours.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="days" class="level3">
+<h3 class="anchored" data-anchor-id="days"><code>days()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>days(<span class="dt">mixed</span> <span class="va">$n</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Period of <code>$n</code> days, to add to or subtract from a date or datetime.</p>
+<p>Days are calendar days, so the clock time is kept across a daylight saving change.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The number of days; a fraction is truncated.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="weeks" class="level3">
+<h3 class="anchored" data-anchor-id="weeks"><code>weeks()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>weeks(<span class="dt">mixed</span> <span class="va">$n</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Period of <code>$n</code> weeks, to add to or subtract from a date or datetime.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The number of weeks; a fraction is truncated.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="months" class="level3">
+<h3 class="anchored" data-anchor-id="months"><code>months()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>months(<span class="dt">mixed</span> <span class="va">$n</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Period of <code>$n</code> months, to add to or subtract from a date or datetime.</p>
+<p>A result that lands on a day the month lacks, such as January 31 plus one month, is NA, as in lubridate.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The number of months; a fraction is truncated.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+<section id="years" class="level3">
+<h3 class="anchored" data-anchor-id="years"><code>years()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>years(<span class="dt">mixed</span> <span class="va">$n</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Period of <code>$n</code> years, to add to or subtract from a date or datetime.</p>
+<p>A result that lands on a day the year lacks, such as February 29 plus one year, is NA, as in lubridate.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$n</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The number of years; a fraction is truncated.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code></p>
+</section>
+</section>
+<section id="time-zones-and-the-clock" class="level2">
+<h2 class="anchored" data-anchor-id="time-zones-and-the-clock">Time zones and the clock</h2>
+<section id="with-tz" class="level3">
+<h3 class="anchored" data-anchor-id="with-tz"><code>with_tz()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>with_tz(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$tz</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Same instant shown in another time zone.</p>
+<p>SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A datetime expression.</td>
+</tr>
+<tr class="even">
+<td><code>$tz</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The time zone name, such as ‘America/New_York’.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when the time zone is unknown.</p>
+</section>
+<section id="force-tz" class="level3">
+<h3 class="anchored" data-anchor-id="force-tz"><code>force_tz()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>force_tz(<span class="dt">mixed</span> <span class="va">$x</span><span class="ot">,</span> <span class="dt">mixed</span> <span class="va">$tz</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Same clock time in another time zone, which changes the instant.</p>
+<p>A clock time the zone skips, in a daylight saving gap, gives NA. SQL backends evaluate it in memory when it reads a column.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$x</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>A datetime expression.</td>
+</tr>
+<tr class="even">
+<td><code>$tz</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>The time zone name, such as ‘America/New_York’.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when the time zone is unknown.</p>
+</section>
+<section id="today" class="level3">
+<h3 class="anchored" data-anchor-id="today"><code>today()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>today(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Current date.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default ‘UTC’) is the time zone whose calendar gives the date.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="now" class="level3">
+<h3 class="anchored" data-anchor-id="now"><code>now()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>now(<span class="dt">mixed</span> ...<span class="va">$options</span>)<span class="ot">:</span> Call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Current date and time.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...$options</code></td>
+<td><code>mixed</code></td>
+<td></td>
+<td>Named options: tz (string, default ‘UTC’) is the time zone of the result.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Function</strong> in <code>Phibble\Expr</code><br>
+<strong>Returns</strong> <code>Call</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: at evaluation, when tz is not a known time zone.</p>
+</section>
+<section id="clock-freeze" class="level3">
+<h3 class="anchored" data-anchor-id="clock-freeze"><code>Clock::freeze()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>Clock::freeze(<span class="ot">?</span><span class="bu">DateTimeImmutable</span> <span class="va">$at</span>)<span class="ot">:</span> <span class="dt">void</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Fix the time that <code>today()</code> and <code>now()</code> read. Null restores the system clock.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>$at</code></td>
+<td><code>?DateTimeImmutable</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Static method</strong> of <code>Phibble\Expr\Clock</code></p>
+</section>
+<section id="clock-now" class="level3">
+<h3 class="anchored" data-anchor-id="clock-now"><code>Clock::now()</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>Clock::now()<span class="ot">:</span> <span class="bu">DateTimeImmutable</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The current time in UTC, or the frozen time.</p>
+<p><strong>Static method</strong> of <code>Phibble\Expr\Clock</code><br>
+<strong>Returns</strong> <code>DateTimeImmutable</code></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/phibble\.phpstats\.org\/docs\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

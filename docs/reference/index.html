@@ -1,0 +1,2945 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Functions and methods – phibble</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bb62276ab45c84d9efd712f51ff97b5a.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-f3d0b6f838474b91d97a23e0a7eb39d8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">phibble</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../coming-from-tibble.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Coming from tibble</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Guides</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Reading and writing data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../expr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SQL tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../laravel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">phibble for Laravel developers</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Functions and methods</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Functions and methods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/creating.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Creating and loading tables</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/rows-and-columns.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rows and columns</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/grouping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grouping and summaries</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/combining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Joins and reshaping</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/expressions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Expression functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/strings-and-dates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">String and date functions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Types and conversion</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Output</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/backends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SqlTable, PolarsTable, and Laravel</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Examples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/read-a-csv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Read a CSV file into a typed table</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/database-table.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query a database table</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Contributing</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../contract.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Table contract</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../development.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Development</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#creating-and-loading-tables" id="toc-creating-and-loading-tables" class="nav-link active" data-scroll-target="#creating-and-loading-tables">Creating and loading tables</a>
+  <ul class="collapse">
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a></li>
+  <li><a href="#dataframe" id="toc-dataframe" class="nav-link" data-scroll-target="#dataframe">DataFrame</a></li>
+  <li><a href="#sqltable" id="toc-sqltable" class="nav-link" data-scroll-target="#sqltable">SqlTable</a></li>
+  <li><a href="#polarstable" id="toc-polarstable" class="nav-link" data-scroll-target="#polarstable">PolarsTable</a></li>
+  </ul></li>
+  <li><a href="#rows-and-columns" id="toc-rows-and-columns" class="nav-link" data-scroll-target="#rows-and-columns">Rows and columns</a>
+  <ul class="collapse">
+  <li><a href="#size-and-names" id="toc-size-and-names" class="nav-link" data-scroll-target="#size-and-names">Size and names</a></li>
+  <li><a href="#values" id="toc-values" class="nav-link" data-scroll-target="#values">Values</a></li>
+  <li><a href="#selecting-and-renaming" id="toc-selecting-and-renaming" class="nav-link" data-scroll-target="#selecting-and-renaming">Selecting and renaming</a></li>
+  <li><a href="#filtering-and-sorting" id="toc-filtering-and-sorting" class="nav-link" data-scroll-target="#filtering-and-sorting">Filtering and sorting</a></li>
+  <li><a href="#adding-columns-and-rows" id="toc-adding-columns-and-rows" class="nav-link" data-scroll-target="#adding-columns-and-rows">Adding columns and rows</a></li>
+  <li><a href="#rows-by-position" id="toc-rows-by-position" class="nav-link" data-scroll-target="#rows-by-position">Rows by position</a></li>
+  </ul></li>
+  <li><a href="#grouping-and-summaries" id="toc-grouping-and-summaries" class="nav-link" data-scroll-target="#grouping-and-summaries">Grouping and summaries</a>
+  <ul class="collapse">
+  <li><a href="#grouping" id="toc-grouping" class="nav-link" data-scroll-target="#grouping">Grouping</a></li>
+  <li><a href="#summaries" id="toc-summaries" class="nav-link" data-scroll-target="#summaries">Summaries</a></li>
+  <li><a href="#per-group-operations" id="toc-per-group-operations" class="nav-link" data-scroll-target="#per-group-operations">Per-group operations</a></li>
+  </ul></li>
+  <li><a href="#joins-and-reshaping" id="toc-joins-and-reshaping" class="nav-link" data-scroll-target="#joins-and-reshaping">Joins and reshaping</a>
+  <ul class="collapse">
+  <li><a href="#joins" id="toc-joins" class="nav-link" data-scroll-target="#joins">Joins</a></li>
+  <li><a href="#binding" id="toc-binding" class="nav-link" data-scroll-target="#binding">Binding</a></li>
+  <li><a href="#reshaping" id="toc-reshaping" class="nav-link" data-scroll-target="#reshaping">Reshaping</a></li>
+  </ul></li>
+  <li><a href="#expression-functions" id="toc-expression-functions" class="nav-link" data-scroll-target="#expression-functions">Expression functions</a>
+  <ul class="collapse">
+  <li><a href="#columns-and-literals" id="toc-columns-and-literals" class="nav-link" data-scroll-target="#columns-and-literals">Columns and literals</a></li>
+  <li><a href="#operators" id="toc-operators" class="nav-link" data-scroll-target="#operators">Operators</a></li>
+  <li><a href="#conditionals-and-missing-values" id="toc-conditionals-and-missing-values" class="nav-link" data-scroll-target="#conditionals-and-missing-values">Conditionals and missing values</a></li>
+  <li><a href="#math" id="toc-math" class="nav-link" data-scroll-target="#math">Math</a></li>
+  <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion</a></li>
+  <li><a href="#aggregates" id="toc-aggregates" class="nav-link" data-scroll-target="#aggregates">Aggregates</a></li>
+  <li><a href="#window-functions" id="toc-window-functions" class="nav-link" data-scroll-target="#window-functions">Window functions</a></li>
+  <li><a href="#expression-objects" id="toc-expression-objects" class="nav-link" data-scroll-target="#expression-objects">Expression objects</a></li>
+  </ul></li>
+  <li><a href="#string-and-date-functions" id="toc-string-and-date-functions" class="nav-link" data-scroll-target="#string-and-date-functions">String and date functions</a>
+  <ul class="collapse">
+  <li><a href="#strings" id="toc-strings" class="nav-link" data-scroll-target="#strings">Strings</a></li>
+  <li><a href="#patterns" id="toc-patterns" class="nav-link" data-scroll-target="#patterns">Patterns</a></li>
+  <li><a href="#parsing-dates" id="toc-parsing-dates" class="nav-link" data-scroll-target="#parsing-dates">Parsing dates</a></li>
+  <li><a href="#date-parts" id="toc-date-parts" class="nav-link" data-scroll-target="#date-parts">Date parts</a></li>
+  <li><a href="#rounding-and-differences" id="toc-rounding-and-differences" class="nav-link" data-scroll-target="#rounding-and-differences">Rounding and differences</a></li>
+  <li><a href="#periods" id="toc-periods" class="nav-link" data-scroll-target="#periods">Periods</a></li>
+  <li><a href="#time-zones-and-the-clock" id="toc-time-zones-and-the-clock" class="nav-link" data-scroll-target="#time-zones-and-the-clock">Time zones and the clock</a></li>
+  </ul></li>
+  <li><a href="#types-and-conversion" id="toc-types-and-conversion" class="nav-link" data-scroll-target="#types-and-conversion">Types and conversion</a>
+  <ul class="collapse">
+  <li><a href="#column-types" id="toc-column-types" class="nav-link" data-scroll-target="#column-types">Column types</a></li>
+  <li><a href="#factors" id="toc-factors" class="nav-link" data-scroll-target="#factors">Factors</a></li>
+  <li><a href="#times-of-day" id="toc-times-of-day" class="nav-link" data-scroll-target="#times-of-day">Times of day</a></li>
+  <li><a href="#model-data" id="toc-model-data" class="nav-link" data-scroll-target="#model-data">Model data</a></li>
+  </ul></li>
+  <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output">Output</a>
+  <ul class="collapse">
+  <li><a href="#php-values" id="toc-php-values" class="nav-link" data-scroll-target="#php-values">PHP values</a></li>
+  <li><a href="#csv-and-json" id="toc-csv-and-json" class="nav-link" data-scroll-target="#csv-and-json">CSV and JSON</a></li>
+  <li><a href="#printing" id="toc-printing" class="nav-link" data-scroll-target="#printing">Printing</a></li>
+  </ul></li>
+  <li><a href="#sqltable-polarstable-and-laravel" id="toc-sqltable-polarstable-and-laravel" class="nav-link" data-scroll-target="#sqltable-polarstable-and-laravel">SqlTable, PolarsTable, and Laravel</a>
+  <ul class="collapse">
+  <li><a href="#sqltable-1" id="toc-sqltable-1" class="nav-link" data-scroll-target="#sqltable-1">SqlTable</a></li>
+  <li><a href="#polarstable-1" id="toc-polarstable-1" class="nav-link" data-scroll-target="#polarstable-1">PolarsTable</a></li>
+  <li><a href="#laravel" id="toc-laravel" class="nav-link" data-scroll-target="#laravel">Laravel</a></li>
+  </ul></li>
+  <li><a href="#not-listed" id="toc-not-listed" class="nav-link" data-scroll-target="#not-listed">Not listed</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li><li class="breadcrumb-item"><a href="../reference/index.html">Functions and methods</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Functions and methods</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Every public function and method, by task. Methods marked <em>all tables</em> are part of the Table contract and exist on <code>DataFrame</code>, <code>SqlTable</code>, and <code>PolarsTable</code>.</p>
+<section id="creating-and-loading-tables" class="level2">
+<h2 class="anchored" data-anchor-id="creating-and-loading-tables"><a href="../reference/creating.html">Creating and loading tables</a></h2>
+<section id="functions" class="level3">
+<h3 class="anchored" data-anchor-id="functions">Functions</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/creating.html#fn-tibble"><code>tibble()</code></a></td>
+<td>function</td>
+<td>Build a DataFrame from named arguments, one per column, as tibble’s <code>tibble()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#fn-tribble"><code>tribble()</code></a></td>
+<td>function</td>
+<td>Build a DataFrame from column names, then rows, as tibble’s <code>tribble()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#fn-as_tibble"><code>as_tibble()</code></a></td>
+<td>function</td>
+<td>Convert tables, rows, columns, or collections into a DataFrame, as tibble’s <code>as_tibble()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#fn-enframe"><code>enframe()</code></a></td>
+<td>function</td>
+<td>An array as a two-column DataFrame of names and values, as tibble’s <code>enframe()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#fn-tbl"><code>tbl()</code></a></td>
+<td>function</td>
+<td>A lazy SqlTable, as dbplyr’s <code>tbl()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#fn-polars"><code>polars()</code></a></td>
+<td>function</td>
+<td>A PolarsTable from any Table, or from anything <code>as_tibble()</code> accepts.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dataframe" class="level3">
+<h3 class="anchored" data-anchor-id="dataframe">DataFrame</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-fromrows"><code>DataFrame::fromRows()</code></a></td>
+<td>static method</td>
+<td>Build a DataFrame from rows.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#dataframe-fromcolumns"><code>DataFrame::fromColumns()</code></a></td>
+<td>static method</td>
+<td>Build a DataFrame from columns: name =&gt; list of values, or name =&gt; Column.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-fromcsv"><code>DataFrame::fromCsv()</code></a></td>
+<td>static method</td>
+<td>Read delimited text like <code>readr::read_csv()</code>: a path (“.gz” is decompressed), an http:// or https:// URL (downloaded to a temporary file first), or an open stream.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#dataframe-fromcsvstring"><code>DataFrame::fromCsvString()</code></a></td>
+<td>static method</td>
+<td>Read delimited text from a string; options as <code>fromCsv()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-fromcsvchunked"><code>DataFrame::fromCsvChunked()</code></a></td>
+<td>static method</td>
+<td>Read delimited text in chunks, as <code>readr::read_delim_chunked()</code>: each chunk of at most <code>$chunkSize</code> rows is passed to <code>$callback</code> with the 1-based index of its first row.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#dataframe-csvchunks"><code>DataFrame::csvChunks()</code></a></td>
+<td>static method</td>
+<td>The chunks <code>fromCsvChunked()</code> reads, as a generator keyed by the 1-based index of each chunk’s first row.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-fromjson"><code>DataFrame::fromJson()</code></a></td>
+<td>static method</td>
+<td>Read JSON: a list of records ([{“a”: 1}, …]) or an object of columns ({“a”: [1, 2]}).</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#dataframe-frompdo"><code>DataFrame::fromPdo()</code></a></td>
+<td>static method</td>
+<td>Run a query and load the result.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-fromquery"><code>DataFrame::fromQuery()</code></a></td>
+<td>static method</td>
+<td>Load the result of a Laravel query builder (query or Eloquent) or a Doctrine DBAL QueryBuilder.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#dataframe-fromcollection"><code>DataFrame::fromCollection()</code></a></td>
+<td>static method</td>
+<td>Build a DataFrame from a Laravel Collection (or anything with <code>all()</code> or <code>toArray()</code>, or any iterable).</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-fromsource"><code>DataFrame::fromSource()</code></a></td>
+<td>static method</td>
+<td>Read a <code>Phibble\Source\Source</code>, such as a CsvSource or PdoSource, into a DataFrame.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#dataframe-tibble"><code>DataFrame::tibble()</code></a></td>
+<td>static method</td>
+<td>Build a DataFrame column by column, as tibble’s <code>tibble()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-tribble"><code>DataFrame::tribble()</code></a></td>
+<td>static method</td>
+<td>Build a DataFrame row by row, as tibble’s <code>tribble()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#dataframe-astibble"><code>DataFrame::asTibble()</code></a></td>
+<td>static method</td>
+<td>Convert tables, rows, columns, collections, or other iterables into a DataFrame, as tibble’s <code>as_tibble()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#dataframe-enframe"><code>DataFrame::enframe()</code></a></td>
+<td>static method</td>
+<td>An array as a two-column DataFrame of names and values, as tibble’s <code>enframe()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sqltable" class="level3">
+<h3 class="anchored" data-anchor-id="sqltable">SqlTable</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/creating.html#sqltable-table"><code>SqlTable::table()</code></a></td>
+<td>static method</td>
+<td>A table (or view) by name.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#sqltable-query"><code>SqlTable::query()</code></a></td>
+<td>static method</td>
+<td>Any SELECT query with positional (?) or named (:name) bindings.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/creating.html#sqltable-fromquery"><code>SqlTable::fromQuery()</code></a></td>
+<td>static method</td>
+<td>A Laravel or Doctrine DBAL query builder, kept lazy.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#sqltable-fromsource"><code>SqlTable::fromSource()</code></a></td>
+<td>static method</td>
+<td>A lazy table over a PdoSource’s query and bindings.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="polarstable" class="level3">
+<h3 class="anchored" data-anchor-id="polarstable">PolarsTable</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/creating.html#polarstable-fromtable"><code>PolarsTable::fromTable()</code></a></td>
+<td>static method</td>
+<td>Copy any phibble table into Polars, keeping types, groups and factor levels.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/creating.html#polarstable-frompolars"><code>PolarsTable::fromPolars()</code></a></td>
+<td>static method</td>
+<td>Wrap a Polars DataFrame; a LazyFrame is collected.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="rows-and-columns" class="level2">
+<h2 class="anchored" data-anchor-id="rows-and-columns"><a href="../reference/rows-and-columns.html">Rows and columns</a></h2>
+<section id="size-and-names" class="level3">
+<h3 class="anchored" data-anchor-id="size-and-names">Size and names</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#columns"><code>-&gt;columns()</code></a></td>
+<td>method, all tables</td>
+<td>Column names in order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#types"><code>-&gt;types()</code></a></td>
+<td>method, all tables</td>
+<td>Column types by name.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#type"><code>-&gt;type()</code></a></td>
+<td>method, DataFrame</td>
+<td>One column’s type.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#nrow"><code>-&gt;nrow()</code></a></td>
+<td>method, all tables</td>
+<td>Number of rows.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#ncol"><code>-&gt;ncol()</code></a></td>
+<td>method, all tables</td>
+<td>Number of columns.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#count"><code>-&gt;count()</code></a></td>
+<td>method, all tables</td>
+<td>Number of rows, for count(<code>$df</code>).</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#has"><code>-&gt;has()</code></a></td>
+<td>method, DataFrame</td>
+<td>Whether the column exists.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="values" class="level3">
+<h3 class="anchored" data-anchor-id="values">Values</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#column"><code>-&gt;column()</code></a></td>
+<td>method, all tables</td>
+<td>One column’s values as a PHP list.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#row"><code>-&gt;row()</code></a></td>
+<td>method, DataFrame</td>
+<td>One row by 0-based position.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#row-get"><code>Row-&gt;get()</code></a></td>
+<td>method</td>
+<td>One value by column name.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#row-has"><code>Row-&gt;has()</code></a></td>
+<td>method</td>
+<td>Whether the row has the column.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#row-toarray"><code>Row-&gt;toArray()</code></a></td>
+<td>method</td>
+<td>The row as an associative array of column name =&gt; value.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="selecting-and-renaming" class="level3">
+<h3 class="anchored" data-anchor-id="selecting-and-renaming">Selecting and renaming</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#select"><code>-&gt;select()</code></a></td>
+<td>method, all tables</td>
+<td>Keep the named columns, in the given order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#rename"><code>-&gt;rename()</code></a></td>
+<td>method, all tables</td>
+<td>Rename columns.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#namerepair-repair"><code>NameRepair::repair()</code></a></td>
+<td>static method</td>
+<td>Repair column names, as <code>vctrs::vec_as_names()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="filtering-and-sorting" class="level3">
+<h3 class="anchored" data-anchor-id="filtering-and-sorting">Filtering and sorting</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#filter"><code>-&gt;filter()</code></a></td>
+<td>method, all tables</td>
+<td>Keep rows where the predicate is true.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#arrange"><code>-&gt;arrange()</code></a></td>
+<td>method, all tables</td>
+<td>Sort rows.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#distinct"><code>-&gt;distinct()</code></a></td>
+<td>method, all tables</td>
+<td>Unique rows over the named columns, keeping the first of each and only those columns.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#dropna"><code>-&gt;dropNa()</code></a></td>
+<td>method, DataFrame</td>
+<td>Drop rows with NA in any of the named columns (all columns when empty).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="adding-columns-and-rows" class="level3">
+<h3 class="anchored" data-anchor-id="adding-columns-and-rows">Adding columns and rows</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#mutate"><code>-&gt;mutate()</code></a></td>
+<td>method, all tables</td>
+<td>Add or replace columns.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#withcolumn"><code>-&gt;withColumn()</code></a></td>
+<td>method, DataFrame</td>
+<td>Add or replace one column.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#addcolumn"><code>-&gt;addColumn()</code></a></td>
+<td>method, DataFrame</td>
+<td>Insert columns, as tibble’s <code>add_column()</code>, with <code>tibble()</code>’s recycling rules.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#addrow"><code>-&gt;addRow()</code></a></td>
+<td>method, DataFrame</td>
+<td>Insert rows, as tibble’s <code>add_row()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rows-by-position" class="level3">
+<h3 class="anchored" data-anchor-id="rows-by-position">Rows by position</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#slice"><code>-&gt;slice()</code></a></td>
+<td>method, all tables</td>
+<td>Rows from <code>$offset</code>, <code>$length</code> of them or to the end.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#head"><code>-&gt;head()</code></a></td>
+<td>method, all tables</td>
+<td>The first <code>$n</code> rows.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/rows-and-columns.html#tail"><code>-&gt;tail()</code></a></td>
+<td>method, DataFrame</td>
+<td>The last n rows; a negative n drops the first |n| rows, as in R.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/rows-and-columns.html#take"><code>-&gt;take()</code></a></td>
+<td>method, all tables</td>
+<td>Rows by 0-based position, in the given order.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="grouping-and-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="grouping-and-summaries"><a href="../reference/grouping.html">Grouping and summaries</a></h2>
+<section id="grouping" class="level3">
+<h3 class="anchored" data-anchor-id="grouping">Grouping</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/grouping.html#groupby"><code>-&gt;groupBy()</code></a></td>
+<td>method, all tables</td>
+<td>Set the grouping columns, replacing any existing grouping.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/grouping.html#ungroup"><code>-&gt;ungroup()</code></a></td>
+<td>method, all tables</td>
+<td>Remove the grouping, including rowwise grouping.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/grouping.html#groups"><code>-&gt;groups()</code></a></td>
+<td>method, all tables</td>
+<td>The grouping columns.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/grouping.html#dropsemptygroups"><code>-&gt;dropsEmptyGroups()</code></a></td>
+<td>method, all tables</td>
+<td>Whether empty groups are dropped.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/grouping.html#ngroups"><code>-&gt;ngroups()</code></a></td>
+<td>method, DataFrame</td>
+<td>Number of groups (1 for an ungrouped table, nrow for a rowwise one).</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/grouping.html#rowwise"><code>-&gt;rowwise()</code></a></td>
+<td>method, all tables</td>
+<td>Treat each row as its own group, as dplyr’s <code>rowwise()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/grouping.html#isrowwise"><code>-&gt;isRowwise()</code></a></td>
+<td>method, all tables</td>
+<td>Whether the table is rowwise.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="summaries" class="level3">
+<h3 class="anchored" data-anchor-id="summaries">Summaries</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/grouping.html#summarise"><code>-&gt;summarise()</code></a></td>
+<td>method, all tables</td>
+<td>One row per group: the group keys, then one column per entry.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/grouping.html#summarize"><code>-&gt;summarize()</code></a></td>
+<td>method, all tables</td>
+<td>Alias of <code>summarise()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="per-group-operations" class="level3">
+<h3 class="anchored" data-anchor-id="per-group-operations">Per-group operations</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/grouping.html#filtergroups"><code>-&gt;filterGroups()</code></a></td>
+<td>method, all tables</td>
+<td>Keep rows by a predicate that runs once per group.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/grouping.html#mutategroups"><code>-&gt;mutateGroups()</code></a></td>
+<td>method, all tables</td>
+<td>Add or replace columns with closures that run once per group.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/grouping.html#eachgroup"><code>-&gt;eachGroup()</code></a></td>
+<td>method, all tables</td>
+<td>Each group’s key and rows as an ungrouped table, in sorted key order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/grouping.html#grouprows"><code>-&gt;groupRows()</code></a></td>
+<td>method, all tables</td>
+<td>Each group’s key and 0-based row indexes, in the order of <code>eachGroup()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="joins-and-reshaping" class="level2">
+<h2 class="anchored" data-anchor-id="joins-and-reshaping"><a href="../reference/combining.html">Joins and reshaping</a></h2>
+<section id="joins" class="level3">
+<h3 class="anchored" data-anchor-id="joins">Joins</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/combining.html#join"><code>-&gt;join()</code></a></td>
+<td>method, all tables</td>
+<td>Join another table, with dplyr 1.1 semantics.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="binding" class="level3">
+<h3 class="anchored" data-anchor-id="binding">Binding</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/combining.html#dataframe-concat"><code>DataFrame::concat()</code></a></td>
+<td>static method</td>
+<td>Stack tables by row, matching columns by name.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/combining.html#dataframe-bindcols"><code>DataFrame::bindCols()</code></a></td>
+<td>static method</td>
+<td>Put tables side by side, as dplyr’s <code>bind_cols()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reshaping" class="level3">
+<h3 class="anchored" data-anchor-id="reshaping">Reshaping</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/combining.html#pivotlongerspec"><code>-&gt;pivotLongerSpec()</code></a></td>
+<td>method, all tables</td>
+<td>Pivot columns into rows from a spec, as tidyr’s <code>pivot_longer_spec()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/combining.html#pivotwiderspec"><code>-&gt;pivotWiderSpec()</code></a></td>
+<td>method, all tables</td>
+<td>Pivot rows into columns from a spec, as tidyr’s <code>pivot_wider_spec()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/combining.html#nest"><code>-&gt;nest()</code></a></td>
+<td>method, DataFrame</td>
+<td><code>tidyr::nest()</code>: collapse columns into a list-column of tables, one row per unique combination of the other columns (first-appearance order).</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/combining.html#unnest"><code>-&gt;unnest()</code></a></td>
+<td>method, DataFrame</td>
+<td><code>tidyr::unnest()</code>: expand list-columns of tables (or lists of rows) into rows.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="expression-functions" class="level2">
+<h2 class="anchored" data-anchor-id="expression-functions"><a href="../reference/expressions.html">Expression functions</a></h2>
+<section id="columns-and-literals" class="level3">
+<h3 class="anchored" data-anchor-id="columns-and-literals">Columns and literals</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#col"><code>col()</code></a></td>
+<td>function</td>
+<td>Reference to the column with the given name.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#lit"><code>lit()</code></a></td>
+<td>function</td>
+<td>Literal value as an expression.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#call"><code>call()</code></a></td>
+<td>function</td>
+<td>Call to any registered function by name, such as call(‘str_sub’, <code>col('s')</code>, 1, 3).</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#desc"><code>desc()</code></a></td>
+<td>function</td>
+<td>Descending sort key for <code>arrange()</code>, the first argument of a ranking function, or order_by.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="operators" class="level3">
+<h3 class="anchored" data-anchor-id="operators">Operators</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-add"><code>Expr-&gt;add()</code></a></td>
+<td>method</td>
+<td>Sum of this expression and <code>$other</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-sub"><code>Expr-&gt;sub()</code></a></td>
+<td>method</td>
+<td>Difference of this expression and <code>$other</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-mul"><code>Expr-&gt;mul()</code></a></td>
+<td>method</td>
+<td>Product of this expression and <code>$other</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-div"><code>Expr-&gt;div()</code></a></td>
+<td>method</td>
+<td>Quotient of this expression and <code>$other</code>, always a float.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-mod"><code>Expr-&gt;mod()</code></a></td>
+<td>method</td>
+<td>Remainder of this expression divided by <code>$other</code>, with the sign of <code>$other</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-pow"><code>Expr-&gt;pow()</code></a></td>
+<td>method</td>
+<td>This expression raised to the power <code>$other</code>, as a float.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-neg"><code>Expr-&gt;neg()</code></a></td>
+<td>method</td>
+<td>Negation of this expression.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-eq"><code>Expr-&gt;eq()</code></a></td>
+<td>method</td>
+<td>Whether this expression equals <code>$other</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-ne"><code>Expr-&gt;ne()</code></a></td>
+<td>method</td>
+<td>Whether this expression differs from <code>$other</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-lt"><code>Expr-&gt;lt()</code></a></td>
+<td>method</td>
+<td>Whether this expression is less than <code>$other</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-le"><code>Expr-&gt;le()</code></a></td>
+<td>method</td>
+<td>Whether this expression is less than or equal to <code>$other</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-gt"><code>Expr-&gt;gt()</code></a></td>
+<td>method</td>
+<td>Whether this expression is greater than <code>$other</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-ge"><code>Expr-&gt;ge()</code></a></td>
+<td>method</td>
+<td>Whether this expression is greater than or equal to <code>$other</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-and"><code>Expr-&gt;and()</code></a></td>
+<td>method</td>
+<td>Logical AND of this expression and <code>$other</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-or"><code>Expr-&gt;or()</code></a></td>
+<td>method</td>
+<td>Logical OR of this expression and <code>$other</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-not"><code>Expr-&gt;not()</code></a></td>
+<td>method</td>
+<td>Logical negation of this expression.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-isna"><code>Expr-&gt;isNa()</code></a></td>
+<td>method</td>
+<td>Whether each value is NA.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-isin"><code>Expr-&gt;isIn()</code></a></td>
+<td>method</td>
+<td>Whether each value is one of the given values.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-between"><code>Expr-&gt;between()</code></a></td>
+<td>method</td>
+<td>Whether each value lies between <code>$low</code> and <code>$high</code>, inclusive.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-desc"><code>Expr-&gt;desc()</code></a></td>
+<td>method</td>
+<td>Descending sort key on this expression, for <code>arrange()</code>, the first argument of a ranking function, or order_by.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="conditionals-and-missing-values" class="level3">
+<h3 class="anchored" data-anchor-id="conditionals-and-missing-values">Conditionals and missing values</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#is-na"><code>is_na()</code></a></td>
+<td>function</td>
+<td>Whether each value is NA.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#if-else"><code>if_else()</code></a></td>
+<td>function</td>
+<td>Value of <code>$true</code> where the condition holds and of <code>$false</code> where it does not.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#case-when"><code>case_when()</code></a></td>
+<td>function</td>
+<td>Value paired with the first condition that holds, as <code>case_when(cond1, value1, cond2, value2, ..., default: value)</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#coalesce"><code>coalesce()</code></a></td>
+<td>function</td>
+<td>First value that is not NA among the arguments, row by row.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#between"><code>between()</code></a></td>
+<td>function</td>
+<td>Whether each value lies between <code>$low</code> and <code>$high</code>, inclusive.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#na-if"><code>na_if()</code></a></td>
+<td>function</td>
+<td>Values of <code>$x</code>, with NA where <code>$x</code> equals <code>$y</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#near"><code>near()</code></a></td>
+<td>function</td>
+<td>Whether <code>$x</code> and <code>$y</code> are equal within a tolerance.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="math" class="level3">
+<h3 class="anchored" data-anchor-id="math">Math</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#abs"><code>abs()</code></a></td>
+<td>function</td>
+<td>Absolute value.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#sqrt"><code>sqrt()</code></a></td>
+<td>function</td>
+<td>Square root.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#exp"><code>exp()</code></a></td>
+<td>function</td>
+<td>Exponential function, e raised to the power <code>$x</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#log"><code>log()</code></a></td>
+<td>function</td>
+<td>Logarithm, natural by default.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#log10"><code>log10()</code></a></td>
+<td>function</td>
+<td>Base-10 logarithm.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#round"><code>round()</code></a></td>
+<td>function</td>
+<td>Value rounded to a number of decimal digits.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#floor"><code>floor()</code></a></td>
+<td>function</td>
+<td>Largest whole number not greater than the value, as a float.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#ceiling"><code>ceiling()</code></a></td>
+<td>function</td>
+<td>Smallest whole number not less than the value, as a float.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="conversion" class="level3">
+<h3 class="anchored" data-anchor-id="conversion">Conversion</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#as-int"><code>as_int()</code></a></td>
+<td>function</td>
+<td>Values converted to integers.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#as-float"><code>as_float()</code></a></td>
+<td>function</td>
+<td>Values converted to floats.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#as-string"><code>as_string()</code></a></td>
+<td>function</td>
+<td>Values converted to strings.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#as-bool"><code>as_bool()</code></a></td>
+<td>function</td>
+<td>Values converted to logicals.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="aggregates" class="level3">
+<h3 class="anchored" data-anchor-id="aggregates">Aggregates</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#n"><code>n()</code></a></td>
+<td>function</td>
+<td>Number of rows in the group.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#sum"><code>sum()</code></a></td>
+<td>function</td>
+<td>Sum of the values.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#mean"><code>mean()</code></a></td>
+<td>function</td>
+<td>Mean of the values.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#median"><code>median()</code></a></td>
+<td>function</td>
+<td>Median of the values.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#min"><code>min()</code></a></td>
+<td>function</td>
+<td>Smallest of the values.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#max"><code>max()</code></a></td>
+<td>function</td>
+<td>Largest of the values.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#sd"><code>sd()</code></a></td>
+<td>function</td>
+<td>Sample standard deviation of the values.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#var-"><code>var_()</code></a></td>
+<td>function</td>
+<td>Sample variance of the values.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#quantile"><code>quantile()</code></a></td>
+<td>function</td>
+<td>Sample quantile of the values at probability <code>$p</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#iqr"><code>iqr()</code></a></td>
+<td>function</td>
+<td>Interquartile range of the values: the 0.75 quantile minus the 0.25 quantile.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#n-distinct"><code>n_distinct()</code></a></td>
+<td>function</td>
+<td>Number of distinct values, or of distinct combinations across several arguments.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#first"><code>first()</code></a></td>
+<td>function</td>
+<td>First value in the group.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#last"><code>last()</code></a></td>
+<td>function</td>
+<td>Last value in the group.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#nth"><code>nth()</code></a></td>
+<td>function</td>
+<td>Value at position <code>$n</code> in the group.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#any"><code>any()</code></a></td>
+<td>function</td>
+<td>Whether any value is true.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#all"><code>all()</code></a></td>
+<td>function</td>
+<td>Whether every value is true.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="window-functions" class="level3">
+<h3 class="anchored" data-anchor-id="window-functions">Window functions</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#lag"><code>lag()</code></a></td>
+<td>function</td>
+<td>Value from n rows earlier in the group.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#lead"><code>lead()</code></a></td>
+<td>function</td>
+<td>Value from n rows later in the group.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#row-number"><code>row_number()</code></a></td>
+<td>function</td>
+<td>Row number within the group, or the rank of each value with ties broken by row order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#min-rank"><code>min_rank()</code></a></td>
+<td>function</td>
+<td>Rank of each value, ties sharing the lowest rank, with gaps after ties.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#dense-rank"><code>dense_rank()</code></a></td>
+<td>function</td>
+<td>Rank of each value, ties sharing a rank, with no gaps after ties.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#percent-rank"><code>percent_rank()</code></a></td>
+<td>function</td>
+<td>Minimum rank rescaled to the range 0 to 1: (min_rank - 1) / (m - 1), where m is the number of non-NA values.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#cume-dist"><code>cume_dist()</code></a></td>
+<td>function</td>
+<td>Cumulative distribution: the share of non-NA values less than or equal to each value.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#ntile"><code>ntile()</code></a></td>
+<td>function</td>
+<td>Bucket number from 1 to n, splitting the ordered values into n groups as evenly as possible.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#cumsum"><code>cumsum()</code></a></td>
+<td>function</td>
+<td>Cumulative sum in row order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#cumprod"><code>cumprod()</code></a></td>
+<td>function</td>
+<td>Cumulative product in row order.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#cummean"><code>cummean()</code></a></td>
+<td>function</td>
+<td>Cumulative mean in row order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#cummin"><code>cummin()</code></a></td>
+<td>function</td>
+<td>Cumulative minimum in row order.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#cummax"><code>cummax()</code></a></td>
+<td>function</td>
+<td>Cumulative maximum in row order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#cumall"><code>cumall()</code></a></td>
+<td>function</td>
+<td>Whether every value so far, in row order, is true.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#cumany"><code>cumany()</code></a></td>
+<td>function</td>
+<td>Whether any value so far, in row order, is true.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#consecutive-id"><code>consecutive_id()</code></a></td>
+<td>function</td>
+<td>Run identifier that starts at 1 and increases each time the value, or combination of values, changes from the previous row.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="expression-objects" class="level3">
+<h3 class="anchored" data-anchor-id="expression-objects">Expression objects</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-of"><code>Expr::of()</code></a></td>
+<td>static method</td>
+<td>PHP value wrapped as a literal expression; an expression is returned unchanged.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-fromarray"><code>Expr::fromArray()</code></a></td>
+<td>static method</td>
+<td>Expression rebuilt from the array form that <code>toArray()</code> returns.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/expressions.html#expr-toarray"><code>Expr-&gt;toArray()</code></a></td>
+<td>method</td>
+<td>JSON-friendly description of the expression tree.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/expressions.html#expr-columns"><code>Expr-&gt;columns()</code></a></td>
+<td>method</td>
+<td>Names of the columns the expression reads, in order of first use.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="string-and-date-functions" class="level2">
+<h2 class="anchored" data-anchor-id="string-and-date-functions"><a href="../reference/strings-and-dates.html">String and date functions</a></h2>
+<section id="strings" class="level3">
+<h3 class="anchored" data-anchor-id="strings">Strings</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-length"><code>str_length()</code></a></td>
+<td>function</td>
+<td>Number of characters in the string.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-lower"><code>str_lower()</code></a></td>
+<td>function</td>
+<td>String in lower case.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-upper"><code>str_upper()</code></a></td>
+<td>function</td>
+<td>String in upper case.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-to-lower"><code>str_to_lower()</code></a></td>
+<td>function</td>
+<td>String in lower case, by Unicode rules.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-to-upper"><code>str_to_upper()</code></a></td>
+<td>function</td>
+<td>String in upper case, by Unicode rules.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-to-title"><code>str_to_title()</code></a></td>
+<td>function</td>
+<td>String in title case.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-trim"><code>str_trim()</code></a></td>
+<td>function</td>
+<td>String with leading and trailing white space removed.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-squish"><code>str_squish()</code></a></td>
+<td>function</td>
+<td>String with white space trimmed from both ends and each inner run collapsed to one space.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-pad"><code>str_pad()</code></a></td>
+<td>function</td>
+<td>String padded to at least <code>$width</code> characters.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-trunc"><code>str_trunc()</code></a></td>
+<td>function</td>
+<td>String truncated to at most <code>$width</code> characters, ellipsis included.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-sub"><code>str_sub()</code></a></td>
+<td>function</td>
+<td>Substring from position <code>$start</code> to position <code>$end</code>, inclusive.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#paste"><code>paste()</code></a></td>
+<td>function</td>
+<td>Arguments joined into one string with a separator.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#paste0"><code>paste0()</code></a></td>
+<td>function</td>
+<td>Arguments joined into one string with no separator.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="patterns" class="level3">
+<h3 class="anchored" data-anchor-id="patterns">Patterns</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#fixed"><code>fixed()</code></a></td>
+<td>function</td>
+<td>Pattern that matches its text literally.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#regex"><code>regex()</code></a></td>
+<td>function</td>
+<td>Regular-expression pattern with options.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-detect"><code>str_detect()</code></a></td>
+<td>function</td>
+<td>Whether the string contains a match for the pattern.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-starts"><code>str_starts()</code></a></td>
+<td>function</td>
+<td>Whether the string starts with a match for the pattern.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-ends"><code>str_ends()</code></a></td>
+<td>function</td>
+<td>Whether the string ends with a match for the pattern.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-count"><code>str_count()</code></a></td>
+<td>function</td>
+<td>Number of matches of the pattern in the string.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-extract"><code>str_extract()</code></a></td>
+<td>function</td>
+<td>First match of the pattern in the string.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-extract-all"><code>str_extract_all()</code></a></td>
+<td>function</td>
+<td>Every match of the pattern in the string, as a list.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-replace"><code>str_replace()</code></a></td>
+<td>function</td>
+<td>String with the first match of the pattern replaced.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-replace-all"><code>str_replace_all()</code></a></td>
+<td>function</td>
+<td>String with every match of the pattern replaced.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#str-split"><code>str_split()</code></a></td>
+<td>function</td>
+<td>Pieces of the string split at each match of the pattern, as a list.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#str-split-i"><code>str_split_i()</code></a></td>
+<td>function</td>
+<td>Piece <code>$i</code> of the string split at each match of the pattern.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="parsing-dates" class="level3">
+<h3 class="anchored" data-anchor-id="parsing-dates">Parsing dates</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#ymd"><code>ymd()</code></a></td>
+<td>function</td>
+<td>Date parsed from text with year, month, and day in that order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#dmy"><code>dmy()</code></a></td>
+<td>function</td>
+<td>Date parsed from text with day, month, and year in that order.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#mdy"><code>mdy()</code></a></td>
+<td>function</td>
+<td>Date parsed from text with month, day, and year in that order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#ymd-hms"><code>ymd_hms()</code></a></td>
+<td>function</td>
+<td>Datetime parsed from text with year, month, day, hour, minute, and second in that order.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#dmy-hms"><code>dmy_hms()</code></a></td>
+<td>function</td>
+<td>Datetime parsed from text with day, month, year, hour, minute, and second in that order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#mdy-hms"><code>mdy_hms()</code></a></td>
+<td>function</td>
+<td>Datetime parsed from text with month, day, year, hour, minute, and second in that order.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#parse-date-time"><code>parse_date_time()</code></a></td>
+<td>function</td>
+<td>Datetime parsed from text by the first of the given orders that fits.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="date-parts" class="level3">
+<h3 class="anchored" data-anchor-id="date-parts">Date parts</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#year"><code>year()</code></a></td>
+<td>function</td>
+<td>Year of the date or datetime.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#quarter"><code>quarter()</code></a></td>
+<td>function</td>
+<td>Quarter of the year, from 1 to 4.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#month"><code>month()</code></a></td>
+<td>function</td>
+<td>Month of the date or datetime, from 1 to 12.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#day"><code>day()</code></a></td>
+<td>function</td>
+<td>Day of the month, from 1 to 31.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#wday"><code>wday()</code></a></td>
+<td>function</td>
+<td>Day of the week, from 1 to 7.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#yday"><code>yday()</code></a></td>
+<td>function</td>
+<td>Day of the year, from 1 to 366.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#hour"><code>hour()</code></a></td>
+<td>function</td>
+<td>Hour of the datetime or time, from 0 to 23.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#minute"><code>minute()</code></a></td>
+<td>function</td>
+<td>Minute of the datetime or time, from 0 to 59.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#second"><code>second()</code></a></td>
+<td>function</td>
+<td>Second of the datetime or time, with any fraction.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rounding-and-differences" class="level3">
+<h3 class="anchored" data-anchor-id="rounding-and-differences">Rounding and differences</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#floor-date"><code>floor_date()</code></a></td>
+<td>function</td>
+<td>Date or datetime rounded down to the start of its unit.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#ceiling-date"><code>ceiling_date()</code></a></td>
+<td>function</td>
+<td>Date or datetime rounded up to the start of the next unit.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#round-date"><code>round_date()</code></a></td>
+<td>function</td>
+<td>Date or datetime rounded to the nearer of <code>floor_date()</code> and <code>ceiling_date()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#difftime"><code>difftime()</code></a></td>
+<td>function</td>
+<td>Difference <code>$x</code> - <code>$y</code> between two dates or datetimes, as a float in the given units.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="periods" class="level3">
+<h3 class="anchored" data-anchor-id="periods">Periods</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#seconds"><code>seconds()</code></a></td>
+<td>function</td>
+<td>Period of <code>$n</code> seconds, to add to or subtract from a datetime.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#minutes"><code>minutes()</code></a></td>
+<td>function</td>
+<td>Period of <code>$n</code> minutes, to add to or subtract from a datetime.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#hours"><code>hours()</code></a></td>
+<td>function</td>
+<td>Period of <code>$n</code> hours, to add to or subtract from a datetime.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#days"><code>days()</code></a></td>
+<td>function</td>
+<td>Period of <code>$n</code> days, to add to or subtract from a date or datetime.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#weeks"><code>weeks()</code></a></td>
+<td>function</td>
+<td>Period of <code>$n</code> weeks, to add to or subtract from a date or datetime.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#months"><code>months()</code></a></td>
+<td>function</td>
+<td>Period of <code>$n</code> months, to add to or subtract from a date or datetime.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#years"><code>years()</code></a></td>
+<td>function</td>
+<td>Period of <code>$n</code> years, to add to or subtract from a date or datetime.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="time-zones-and-the-clock" class="level3">
+<h3 class="anchored" data-anchor-id="time-zones-and-the-clock">Time zones and the clock</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#with-tz"><code>with_tz()</code></a></td>
+<td>function</td>
+<td>Same instant shown in another time zone.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#force-tz"><code>force_tz()</code></a></td>
+<td>function</td>
+<td>Same clock time in another time zone, which changes the instant.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#today"><code>today()</code></a></td>
+<td>function</td>
+<td>Current date.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#now"><code>now()</code></a></td>
+<td>function</td>
+<td>Current date and time.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/strings-and-dates.html#clock-freeze"><code>Clock::freeze()</code></a></td>
+<td>static method</td>
+<td>Fix the time that <code>today()</code> and <code>now()</code> read.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/strings-and-dates.html#clock-now"><code>Clock::now()</code></a></td>
+<td>static method</td>
+<td>The current time in UTC, or the frozen time.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="types-and-conversion" class="level2">
+<h2 class="anchored" data-anchor-id="types-and-conversion"><a href="../reference/types.html">Types and conversion</a></h2>
+<section id="column-types" class="level3">
+<h3 class="anchored" data-anchor-id="column-types">Column types</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/types.html#cast"><code>-&gt;cast()</code></a></td>
+<td>method, DataFrame</td>
+<td>Convert columns to other types.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#type-parse"><code>Type::parse()</code></a></td>
+<td>static method</td>
+<td>A Type from a case or its name, such as ‘float’ or ‘date’, in any letter case.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#type-abbreviation"><code>Type-&gt;abbreviation()</code></a></td>
+<td>method</td>
+<td>The short label printed in a column header, as in tibble: dbl, int, lgl, chr, fct, date, dttm, time, or list.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#type-isnumeric"><code>Type-&gt;isNumeric()</code></a></td>
+<td>method</td>
+<td>Whether the type is numeric: float, int, or bool.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="factors" class="level3">
+<h3 class="anchored" data-anchor-id="factors">Factors</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/types.html#asfactor"><code>-&gt;asFactor()</code></a></td>
+<td>method, DataFrame</td>
+<td>Turn a column into a factor, as R’s <code>factor()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#asordered"><code>-&gt;asOrdered()</code></a></td>
+<td>method, DataFrame</td>
+<td>Convert a column to an ordered factor, as R’s <code>factor(ordered = TRUE)</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#isordered"><code>-&gt;isOrdered()</code></a></td>
+<td>method, DataFrame</td>
+<td>Whether the column is an ordered factor.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#levels"><code>-&gt;levels()</code></a></td>
+<td>method, DataFrame</td>
+<td>The levels of a factor column, in level order.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#fctlevels"><code>-&gt;fctLevels()</code></a></td>
+<td>method, DataFrame</td>
+<td><code>factor(x, levels = ...)</code>: set the full level order.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#fctrelevel"><code>-&gt;fctRelevel()</code></a></td>
+<td>method, DataFrame</td>
+<td>Move levels to the front, or after a 0-based position (-1 for the end), as forcats’ <code>fct_relevel()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#fctrev"><code>-&gt;fctRev()</code></a></td>
+<td>method, DataFrame</td>
+<td><code>fct_rev()</code></td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#fctinorder"><code>-&gt;fctInorder()</code></a></td>
+<td>method, DataFrame</td>
+<td><code>fct_inorder()</code></td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#fctinfreq"><code>-&gt;fctInfreq()</code></a></td>
+<td>method, DataFrame</td>
+<td><code>fct_infreq()</code></td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#fctreorder"><code>-&gt;fctReorder()</code></a></td>
+<td>method, DataFrame</td>
+<td>Order levels by a summary (default median) of another column, as forcats’ <code>fct_reorder()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#fctrecode"><code>-&gt;fctRecode()</code></a></td>
+<td>method, DataFrame</td>
+<td>Rename levels, new =&gt; old, as forcats’ <code>fct_recode()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#fctcollapse"><code>-&gt;fctCollapse()</code></a></td>
+<td>method, DataFrame</td>
+<td>Merge levels, new =&gt; list of old, as forcats’ <code>fct_collapse()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#fctdrop"><code>-&gt;fctDrop()</code></a></td>
+<td>method, DataFrame</td>
+<td><code>fct_drop()</code> / <code>droplevels()</code>: remove unused levels.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="times-of-day" class="level3">
+<h3 class="anchored" data-anchor-id="times-of-day">Times of day</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/types.html#time-of"><code>Time::of()</code></a></td>
+<td>static method</td>
+<td>A time from hours, minutes, and seconds, as <code>hms::hms()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#time-fromseconds"><code>Time::fromSeconds()</code></a></td>
+<td>static method</td>
+<td>A time from a number of seconds, rounded to the microsecond.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#time-parse"><code>Time::parse()</code></a></td>
+<td>static method</td>
+<td>Text such as “07:30”, “7:30:15.25”, “-01:00:00”, “100:00:00”, or “1:30 PM” as a time, or null when it is not one.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#time-meridiem"><code>Time::meridiem()</code></a></td>
+<td>static method</td>
+<td>readr’s AM/PM rule: 12 AM is hour 0, and PM adds 12 hours to any hour but 12.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#time-seconds"><code>Time-&gt;seconds()</code></a></td>
+<td>method</td>
+<td>The number of seconds, as R’s as.<code>numeric()</code> of an hms.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#time-hour"><code>Time-&gt;hour()</code></a></td>
+<td>method</td>
+<td>The hour of the day, 0 to 23, as <code>lubridate::hour()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#time-minute"><code>Time-&gt;minute()</code></a></td>
+<td>method</td>
+<td>The minute of the hour, as <code>lubridate::minute()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#time-second"><code>Time-&gt;second()</code></a></td>
+<td>method</td>
+<td>The second of the minute, with its fraction, as <code>lubridate::second()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="model-data" class="level3">
+<h3 class="anchored" data-anchor-id="model-data">Model data</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/types.html#tomodeldata"><code>-&gt;toModelData()</code></a></td>
+<td>method, DataFrame</td>
+<td>Columns for model fitting (<code>Phit\fit_lm</code>, <code>Phit\fit_glm</code>, <code>Phit\model_matrix</code>):</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/types.html#tomatrix"><code>-&gt;toMatrix()</code></a></td>
+<td>method, DataFrame</td>
+<td>Rows of numeric columns as floats, the shape phit’s fit_* functions take for x.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/types.html#tovector"><code>-&gt;toVector()</code></a></td>
+<td>method, DataFrame</td>
+<td>A numeric column as floats, the shape phit’s fit_* functions take for y.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="output" class="level2">
+<h2 class="anchored" data-anchor-id="output"><a href="../reference/output.html">Output</a></h2>
+<section id="php-values" class="level3">
+<h3 class="anchored" data-anchor-id="php-values">PHP values</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/output.html#torows"><code>-&gt;toRows()</code></a></td>
+<td>method, all tables</td>
+<td>The rows as a list of associative arrays.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/output.html#tocolumns"><code>-&gt;toColumns()</code></a></td>
+<td>method, all tables</td>
+<td>The columns as an array of PHP lists, keyed by name.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/output.html#collect"><code>-&gt;collect()</code></a></td>
+<td>method, all tables</td>
+<td>The rows as an in-memory DataFrame.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/output.html#deframe"><code>-&gt;deframe()</code></a></td>
+<td>method, DataFrame</td>
+<td>A two-column DataFrame as a name =&gt; value array, or a one-column DataFrame as a list, as tibble’s <code>deframe()</code>.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/output.html#fn-deframe"><code>deframe()</code></a></td>
+<td>function</td>
+<td>A two-column DataFrame as a name =&gt; value array, or a one-column DataFrame as a list, as tibble’s <code>deframe()</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/output.html#tocollection"><code>-&gt;toCollection()</code></a></td>
+<td>method, DataFrame</td>
+<td>An <code>Illuminate\Support\Collection</code> of row arrays.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="csv-and-json" class="level3">
+<h3 class="anchored" data-anchor-id="csv-and-json">CSV and JSON</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/output.html#tocsv"><code>-&gt;toCsv()</code></a></td>
+<td>method, DataFrame</td>
+<td>The CSV text <code>writeCsv()</code> would write.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/output.html#writecsv"><code>-&gt;writeCsv()</code></a></td>
+<td>method, DataFrame</td>
+<td>Write CSV like <code>readr::write_csv()</code>: NA as “NA”, quoting only where needed, ISO dates, UTC datetimes with “Z”, TRUE/FALSE, and numbers in readr’s shortest form.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/output.html#tojson"><code>-&gt;toJson()</code></a></td>
+<td>method, DataFrame</td>
+<td>JSON as a list of records (‘records’) or an object of columns (‘columns’).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="printing" class="level3">
+<h3 class="anchored" data-anchor-id="printing">Printing</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/output.html#__tostring"><code>-&gt;__toString()</code></a></td>
+<td>method, DataFrame, SqlTable</td>
+<td>The table printed as tibble prints it, for echo <code>$df</code>.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/output.html#format"><code>-&gt;format()</code></a></td>
+<td>method, DataFrame</td>
+<td>Print like a tibble.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/output.html#glimpse"><code>-&gt;glimpse()</code></a></td>
+<td>method, DataFrame</td>
+<td>One line per column with its type and leading values, as tibble’s <code>glimpse()</code>.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="sqltable-polarstable-and-laravel" class="level2">
+<h2 class="anchored" data-anchor-id="sqltable-polarstable-and-laravel"><a href="../reference/backends.html">SqlTable, PolarsTable, and Laravel</a></h2>
+<section id="sqltable-1" class="level3">
+<h3 class="anchored" data-anchor-id="sqltable-1">SqlTable</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/backends.html#showquery"><code>-&gt;showQuery()</code></a></td>
+<td>method, SqlTable</td>
+<td>The SQL that <code>collect()</code> would run, with ?</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/backends.html#bindings"><code>-&gt;bindings()</code></a></td>
+<td>method, SqlTable</td>
+<td>The values of the ?</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/backends.html#dialect"><code>-&gt;dialect()</code></a></td>
+<td>method, SqlTable</td>
+<td>The SQL dialect the table compiles to, chosen from the PDO driver.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/backends.html#dialect-for"><code>Dialect::for()</code></a></td>
+<td>static method</td>
+<td>The dialect for a PDO connection: SQLite, PostgreSQL, or MySQL.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/backends.html#dialect-tryfor"><code>Dialect::tryFor()</code></a></td>
+<td>static method</td>
+<td>The dialect for a PDO connection, or null for a driver SqlTable does not support.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="polarstable-1" class="level3">
+<h3 class="anchored" data-anchor-id="polarstable-1">PolarsTable</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/backends.html#polars"><code>-&gt;polars()</code></a></td>
+<td>method, PolarsTable</td>
+<td>The underlying Polars DataFrame.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="laravel" class="level3">
+<h3 class="anchored" data-anchor-id="laravel">Laravel</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 16%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function or method</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../reference/backends.html#phibbleserviceprovider-registermacros"><code>PhibbleServiceProvider::registerMacros()</code></a></td>
+<td>static method</td>
+<td>Register the macros; safe to call more than once.</td>
+</tr>
+<tr class="even">
+<td><a href="../reference/backends.html#macro-phibble"><code>-&gt;phibble()</code></a></td>
+<td>Laravel macro</td>
+<td>A lazy SqlTable over a Laravel query, Eloquent, or relation builder, on the builder’s connection.</td>
+</tr>
+<tr class="odd">
+<td><a href="../reference/backends.html#macro-todataframe"><code>-&gt;toDataFrame()</code></a></td>
+<td>Laravel macro</td>
+<td>Run a Laravel query, or read a collection, into a DataFrame.</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="not-listed" class="level2">
+<h2 class="anchored" data-anchor-id="not-listed">Not listed</h2>
+<ul>
+<li><code>offsetExists</code>: ArrayAccess: <code>$df['name']</code> and <code>$row['name']</code> read a column or value; writing throws, because tables are immutable.</li>
+<li><code>offsetGet</code>: ArrayAccess, as above.</li>
+<li><code>offsetSet</code>: ArrayAccess, as above.</li>
+<li><code>offsetUnset</code>: ArrayAccess, as above.</li>
+<li><code>getIterator</code>: IteratorAggregate: foreach over a table yields a Row per row.</li>
+<li><code>DataFrame::storage</code>: Returns the internal column storage.</li>
+<li><code>Time::jsonSerialize</code>: JsonSerializable: a time encodes as its HH:MM:SS text.</li>
+<li><code>Time::__toString</code>: Stringable: a time casts to its HH:MM:SS text.</li>
+<li><code>Type::cases</code>: Built-in enum method.</li>
+<li><code>Type::from</code>: Built-in enum method.</li>
+<li><code>Type::tryFrom</code>: Built-in enum method.</li>
+<li><code>PhibbleServiceProvider::boot</code>: Laravel service provider hook.</li>
+<li><code>Dialect::*</code>: SQL compiler hooks that each dialect class implements; only <code>Dialect::for()</code> and <code>Dialect::tryFor()</code> are for applications.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/phibble\.phpstats\.org\/docs\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
