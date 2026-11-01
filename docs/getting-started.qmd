@@ -13,14 +13,14 @@ These are optional:
 
 | Optional | Enables |
 | --- | --- |
-| The [phit](https://github.com/phpstats/phit) extension | Native CSV reading: `fromCsv()` with phit 0.1.1 or later, and `fromCsvChunked()` and `csvChunks()` with 0.2.0 or later. Results match the PHP reader. |
+| The [phit](https://github.com/phpstats/phit) extension, 0.2.0 or later | Native CSV reading in `fromCsv()`, `fromCsvChunked()`, and `csvChunks()`. Results match the PHP reader. |
 | The php_polars extension from [phpolars](https://github.com/phpstats/phpolars) | `PolarsTable` and `polars()`, described in [Backends](backends.qmd). |
 | `illuminate/database` | The `->toDataFrame()` and `->phibble()` macros, described in [Laravel](laravel.qmd). Laravel applications already have it. |
 
 The examples use the Palmer penguins data:
 
 ```bash
-curl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv
+curl -LO https://raw.githubusercontent.com/phpstats/phibble/{{< var release >}}/docs/data/penguins.csv
 ```
 
 ## Imports

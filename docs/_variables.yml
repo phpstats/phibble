@@ -1,0 +1,3 @@
+# The latest release. Data URLs in the docs and the README point at this tag;
+# tests/SiteTest.php checks it against CHANGELOG.md.
+release: v0.6.1

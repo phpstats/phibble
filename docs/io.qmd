@@ -151,8 +151,7 @@ levels from each chunk.
 Every other option works as it does in `fromCsv()`. Each chunk's problems
 raise their own warning, with rows numbered from the start of the file.
 
-With the [phit](https://github.com/phpstats/phit) extension 0.2.0 or later
-loaded, chunks are read natively with `Phit\CsvReader`, with the same results
+With the [phit](https://github.com/phpstats/phit) extension loaded, chunks are read natively with `Phit\CsvReader`, with the same results
 as the PHP reader.
 
 ### Memory

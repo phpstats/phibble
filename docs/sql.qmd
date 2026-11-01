@@ -30,7 +30,20 @@ Which calls query the database:
 This example queries an in-memory SQLite table, `penguins`, loaded from
 `penguins.csv`:
 
-{{< include examples/_sql-tbl.md >}}
+{{< include examples/_sql-tbl-code.md >}}
+
+{{< include examples/_sql-tbl-output-1.md >}}
+
+<details>
+<summary>The SQL from <code>showQuery()</code></summary>
+
+{{< include examples/_sql-tbl-output-2.md >}}
+
+</details>
+
+{{< include examples/_sql-tbl-output-3.md >}}
+
+{{< include examples/_sql-tbl-output-4.md >}}
 
 Each verb wraps the previous query in a subquery.
 
@@ -142,7 +155,16 @@ step.
   given, then the `arrange()` order, then the source order.
 - Grouped `mutate()` and `filter()` compile to `OVER (PARTITION BY ...)`.
 
-{{< include examples/_sql-window.md >}}
+{{< include examples/_sql-window-code.md >}}
+
+<details>
+<summary>The SQL from <code>showQuery()</code></summary>
+
+{{< include examples/_sql-window-output-1.md >}}
+
+</details>
+
+{{< include examples/_sql-window-output-2.md >}}
 
 ## Joins
 
@@ -153,7 +175,16 @@ other, as in dplyr, through `IS` in SQLite, `IS NOT DISTINCT FROM` in
 PostgreSQL, and `<=>` in MySQL. Pass `naMatches: false` for SQL's usual
 equality.
 
-{{< include examples/_sql-join.md >}}
+{{< include examples/_sql-join-code.md >}}
+
+<details>
+<summary>The SQL from <code>showQuery()</code></summary>
+
+{{< include examples/_sql-join-output-1.md >}}
+
+</details>
+
+{{< include examples/_sql-join-output-2.md >}}
 
 ## Dialects
 

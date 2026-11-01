@@ -8,7 +8,7 @@ immutable, and `null` represents missing data. Names and semantics follow R's
 tibble, readr, and dplyr.
 
 This summary reads the Palmer penguins data,
-[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/v0.5.1/docs/data/penguins.csv):
+[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/{{< var release >}}/docs/data/penguins.csv):
 
 {{< include examples/_tour.md >}}
 
