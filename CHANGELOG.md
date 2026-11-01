@@ -7,6 +7,26 @@ change the public API.
 
 ## [Unreleased]
 
+### Changed
+
+- Summaries of dates, datetimes, and times keep R's types. `median()` and
+  `quantile()` of a time give a time, as in R, and so do `mean()` and
+  `sum()`, where R gives a difftime. They used to give seconds. `mean()` and
+  `median()` of a date give a date (rounded down to the day), and `mean()`,
+  `median()`, and `quantile()` of a datetime give a datetime. They used to
+  give seconds since the epoch. `sum()` of a date or datetime and
+  `quantile()` of a date throw, as in R. `sd()`, `var()`, and `iqr()` of a
+  date are in days, where they were in seconds. `SqlTable` and `PolarsTable`
+  run these summaries in memory.
+- `SqlTable` guesses SQLite columns of dates, datetimes, and times from their
+  first 1000 rows when it opens a table.
+
+### Fixed
+
+- SQLite text times that are not zero-padded, such as `7:30:00` and
+  `10:05:00`, sorted, compared, grouped, and summarized as text. Verbs that
+  use them now run in memory, where they order by time.
+
 ## [0.6.0] - 2026-11-01
 
 ### Added

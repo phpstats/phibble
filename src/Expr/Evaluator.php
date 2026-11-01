@@ -282,6 +282,11 @@ final class Evaluator
             return null;
         }
 
+        if (in_array($fn, ['sum', 'mean', 'median', 'quantile', 'sd', 'var', 'iqr'], true)
+            && ($kind = self::temporalKind($present)) !== null) {
+            return $this->temporalAggregate($fn, $kind, $present, $call);
+        }
+
         return match ($fn) {
             'sum' => array_all($present, fn ($v) => is_int($v) || is_bool($v))
                 ? array_sum(array_map(intval(...), $present))
@@ -295,6 +300,85 @@ final class Evaluator
             'any' => in_array(true, $present, false),
             'all' => ! in_array(false, $present, false),
         };
+    }
+
+    /**
+     * 'date', 'datetime', or 'time' when every value is one, else null.
+     *
+     * @param list<mixed> $present
+     */
+    private static function temporalKind(array $present): ?string
+    {
+        $kind = match (true) {
+            $present === [] => null,
+            $present[0] instanceof \Phibble\CalendarDate => 'date',
+            $present[0] instanceof DateTimeInterface => 'datetime',
+            $present[0] instanceof Time => 'time',
+            default => null,
+        };
+        $same = match ($kind) {
+            'date' => fn ($v) => $v instanceof \Phibble\CalendarDate,
+            'datetime' => fn ($v) => $v instanceof DateTimeInterface && ! $v instanceof \Phibble\CalendarDate,
+            'time' => fn ($v) => $v instanceof Time,
+            default => null,
+        };
+
+        return $same !== null && array_all($present, $same) ? $kind : null;
+    }
+
+    /**
+     * Summaries of dates, datetimes, and times with R's types: the mean and
+     * median of a date are a date, those of a datetime a datetime, and the
+     * mean, median, quantiles, and sum of a time are times (R gives a
+     * difftime for the mean and sum, which phibble does not have). R has no
+     * sum of dates or datetimes, nor quantiles of dates, so those throw. sd(),
+     * var(), and iqr() are numbers: days for dates, seconds otherwise.
+     *
+     * @param list<DateTimeInterface|Time> $present
+     */
+    private function temporalAggregate(string $fn, string $kind, array $present, Call $call): mixed
+    {
+        $numbers = array_map(fn ($v) => match ($kind) {
+            'date' => intdiv($v->getTimestamp() - ($v->getTimestamp() % 86400 + 86400) % 86400, 86400),
+            'datetime' => (float) $v->format('U.u'),
+            'time' => $v->seconds(),
+        }, $present);
+        if (($fn === 'sum' && $kind !== 'time') || ($fn === 'quantile' && $kind === 'date')) {
+            throw new InvalidArgumentException("{$fn}() is not defined for ".($kind === 'date' ? 'dates' : 'datetimes').', as in R.');
+        }
+        $value = match ($fn) {
+            'sd', 'var' => self::variance($numbers, $fn === 'sd'),
+            'iqr' => $numbers === [] ? null : self::quantile($numbers, 0.75) - self::quantile($numbers, 0.25),
+            'sum' => array_sum($numbers),
+            'mean' => (float) array_sum($numbers) / count($numbers),
+            'median' => self::quantile($numbers, 0.5),
+            'quantile' => self::quantile($numbers, (float) $this->scalarArg($call->args[1])),
+        };
+        if ($value === null || in_array($fn, ['sd', 'var', 'iqr'], true)) {
+            return $value;
+        }
+
+        return match ($kind) {
+            // A date holds whole days; R prints a fractional date as its day.
+            'date' => (new \Phibble\CalendarDate('@'.((int) floor($value) * 86400)))->setTimezone(new \DateTimeZone('UTC')),
+            'datetime' => self::epochDateTime((float) $value, $present[0]->getTimezone()),
+            'time' => Time::fromSeconds($value),
+        };
+    }
+
+    /** Seconds since the epoch as a datetime in the given timezone. */
+    private static function epochDateTime(float $seconds, \DateTimeZone $zone): \DateTimeImmutable
+    {
+        $whole = (int) floor($seconds);
+        $micro = (int) round(($seconds - $whole) * 1e6);
+        if ($micro === 1_000_000) {
+            $whole++;
+            $micro = 0;
+        }
+        $total = $whole * 1_000_000 + $micro;
+        $abs = abs($total);
+
+        return (new \DateTimeImmutable(sprintf('@%s%d.%06d', $total < 0 ? '-' : '', intdiv($abs, 1_000_000), $abs % 1_000_000)))->setTimezone($zone);
     }
 
     /** @param list<mixed> $x */

@@ -117,8 +117,15 @@ many seconds, text is parsed, and a datetime gives its time of day.
 Comparing a time with text reads the text as a time, so
 `col('departs')->gt('12:00')` compares clock times. Adding or subtracting
 seconds or a time gives a time, and so does multiplying or dividing by a
-number. `min()` and `max()` of a time column are times, where dplyr gives a
-difftime, and `mean()` gives seconds.
+number.
+
+Summaries keep R's types. The `median()` and `quantile()` of a time are times,
+as in R, and so are its `mean()`, `sum()`, `min()`, and `max()`, where R gives
+a difftime, which phibble does not have. The `mean()` and `median()` of a date
+are a date, rounded down to the day, and those of a datetime, and its
+`quantile()`, are datetimes. As in R, `sum()` of a date or datetime and
+`quantile()` of a date throw. `sd()`, `var()`, and `iqr()` are numbers: days
+for dates and seconds otherwise.
 
 ## List-columns
 

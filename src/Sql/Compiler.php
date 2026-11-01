@@ -45,10 +45,17 @@ final class Compiler
         private readonly array $text = [],
         private readonly array $bools = [],
         private readonly array $times = [],
+        private readonly array $temporal = [],
     ) {}
 
     public function compile(Expr $expr): Fragment
     {
+        // SQLite holds times as text, which neither sorts nor compares as
+        // times ('10:05:00' < '9:00:00'), so anything using one runs in memory.
+        if ($expr instanceof Col && $this->dialect->name() === 'SQLite' && in_array($expr->name, $this->times, true)) {
+            throw new Untranslatable("SQLite holds the times in '{$expr->name}' as text.");
+        }
+
         return match (true) {
             $expr instanceof Col => in_array($expr->name, $this->text, true)
                 ? $this->dialect->collate(Fragment::raw($this->dialect->quote($expr->name)))
@@ -269,6 +276,12 @@ final class Compiler
     private function aggregate(Call $call): Fragment
     {
         $fn = $call->fn;
+        // R averages and sums dates and times as dates and times (or rejects
+        // them), where SQL fails or averages text.
+        if (in_array($fn, ['sum', 'mean', 'median', 'quantile', 'sd', 'var', 'iqr'], true)
+            && array_any($call->args, fn ($a) => $a instanceof Col && in_array($a->name, $this->temporal, true))) {
+            throw new Untranslatable("{$fn}() of a date or time column is evaluated in memory.");
+        }
         $rowMode = $this->mode !== 'summary';
         // Wrap one aggregate call: plain in summarise, a window in mutate/filter.
         $w = fn (Fragment $agg) => $rowMode ? $this->over($agg, withOrder: false) : $agg;

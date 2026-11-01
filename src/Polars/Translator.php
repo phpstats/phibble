@@ -688,6 +688,12 @@ final class Translator
     private function agg(Call $c): Expr
     {
         $fn = $c->fn;
+        // Polars averages dates into datetimes; R keeps dates and rejects
+        // some summaries, as DataFrame does.
+        if (in_array($fn, ['sum', 'mean', 'median', 'quantile', 'sd', 'var', 'iqr'], true)
+            && isset($c->args[0]) && in_array($this->type($c->args[0]), ['date', 'datetime'], true)) {
+            throw new Unsupported("{$fn}() of a date runs in a DataFrame.");
+        }
         if ($fn === 'n') {
             return len()->cast('Int64');
         }

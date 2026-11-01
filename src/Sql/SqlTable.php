@@ -113,8 +113,24 @@ final readonly class SqlTable implements Table
             if ($meta !== false && $dialect->isTextColumn($meta)) {
                 $text[] = $name;
             }
-            if ($meta !== false && in_array($dialect->columnType($meta), [Type::Bool, Type::Time], true)) {
+            if ($meta !== false && in_array($dialect->columnType($meta), [Type::Bool, Type::Date, Type::DateTime, Type::Time], true)) {
                 $hints[$name] = $dialect->columnType($meta);
+            }
+        }
+
+        // SQLite declares no types, so dates, datetimes, and times are guessed
+        // from the first 1000 rows' text, as types() and collect() guess them.
+        if ($dialect->name() === 'SQLite') {
+            $sample = $pdo->prepare(self::sql("SELECT * FROM ({$from->sql}) AS phibble_sample LIMIT 1000"));
+            self::bind($sample, $from->bindings);
+            $sample->execute();
+            $rows = $sample->fetchAll(PDO::FETCH_NUM);
+            foreach ($columns as $i => $name) {
+                $values = array_column($rows, $i);
+                if (array_any($values, fn ($v) => $v !== null) && array_all($values, fn ($v) => $v === null || is_string($v))
+                    && in_array($type = Infer::guess($values), [Type::Date, Type::DateTime, Type::Time], true)) {
+                    $hints[$name] = $type;
+                }
             }
         }
 
@@ -385,7 +401,7 @@ final readonly class SqlTable implements Table
             };
         }
         try {
-            (new Compiler($this->dialect, text: $this->text))->orderBy($order);
+            (new Compiler($this->dialect, text: $this->text, times: $this->times()))->orderBy($order);
         } catch (Untranslatable) {
             return $this->collect()->arrange($keys);
         }
@@ -475,9 +491,13 @@ final readonly class SqlTable implements Table
         if (array_any($aggregates, fn (Expr $e) => ! self::isSummary($e))) {
             return $this->collect()->summarise($aggregates, $groups);
         }
-        $compiler = new Compiler($this->dialect, mode: 'summary', text: $this->text, bools: $this->bools(), times: $this->times());
+        $compiler = new Compiler($this->dialect, mode: 'summary', text: $this->text, bools: $this->bools(), times: $this->times(), temporal: $this->temporal());
         // Group keys compare in byte order (text) and keep their names.
-        $keys = array_map(fn (string $g) => $compiler->compile(new Col($g)), $this->groups);
+        try {
+            $keys = array_map(fn (string $g) => $compiler->compile(new Col($g)), $this->groups);
+        } catch (Untranslatable) {
+            return $this->collect()->summarise($aggregates, $groups);
+        }
         $parts = array_map(fn (Fragment $k, string $g) => Fragment::format('{} AS '.$this->dialect->quote($g), [$k]), $keys, $this->groups);
         $hints = array_intersect_key($baseHints, array_flip($this->groups));
         $text = array_values(array_intersect($this->text, $this->groups));
@@ -520,7 +540,12 @@ final readonly class SqlTable implements Table
     public function distinct(array $names = []): Table
     {
         $this->check($names);
+        $requested = $names;
         $names = $names === [] ? $this->columns : [...array_values(array_diff($this->groups, $names)), ...$names];
+        // SQLite's text times compare as text, so equal times can differ.
+        if ($this->dialect->name() === 'SQLite' && array_intersect($names, $this->times()) !== []) {
+            return $this->collect()->distinct($requested);
+        }
         // Keep each combination's first row in the current order, as dplyr does.
         $source = $this->numbered();
         $compiler = new Compiler($source->dialect, text: $source->text);
@@ -642,7 +667,7 @@ final readonly class SqlTable implements Table
 
     private function compiler(): Compiler
     {
-        return new Compiler($this->dialect, $this->groups, $this->rowOrder(), text: $this->text, bools: $this->bools(), times: $this->times());
+        return new Compiler($this->dialect, $this->groups, $this->rowOrder(), text: $this->text, bools: $this->bools(), times: $this->times(), temporal: $this->temporal());
     }
 
     /** Whether an expression gives one value per group: aggregates and literals, combined. */
@@ -663,6 +688,12 @@ final readonly class SqlTable implements Table
     private function bools(): array
     {
         return array_map(strval(...), array_keys(array_filter($this->hints, fn (Type $t) => $t === Type::Bool)));
+    }
+
+    /** @return list<string> Date, datetime, and time columns, whose averages and sums are evaluated in memory. */
+    private function temporal(): array
+    {
+        return array_map(strval(...), array_keys(array_filter($this->hints, fn (Type $t) => in_array($t, [Type::Date, Type::DateTime, Type::Time], true))));
     }
 
     /** @return list<string> Time columns, whose functions are evaluated in memory. */

@@ -90,8 +90,9 @@ phibble differs from R in these places:
   stringr uses ICU. `SqlTable` runs most regular-expression patterns in
   memory, as the [SQL tables](sql.qmd) page lists.
 - **Times are `Phibble\Time` values in whole microseconds.** hms stores
-  seconds as a double. `min()` and `max()` of a time column are times, where
-  dplyr gives a difftime, and `mean()` gives seconds.
+  seconds as a double. The `mean()`, `sum()`, `min()`, and `max()` of a time
+  column are times, where dplyr gives a difftime. The mean and median of a
+  date are whole days, where R keeps a fraction of a day.
 - **JSON keeps null values.** jsonlite drops NA fields from records.
   `toJson()` writes them as `null`.
 - **Datetimes are UTC.** Text without an offset is read as UTC, and text with

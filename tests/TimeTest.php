@@ -159,7 +159,7 @@ it('writes and reads times in JSON as text', function () {
     expect($df->toJson())->toBe('[{"t":"01:00:00"},{"t":"00:00:01.5"},{"t":null}]');
 });
 
-it('guesses times in SQLite text and keeps SQL time columns as times', function () {
+it('guesses times in SQLite text and filters them in memory', function () {
     $pdo = new PDO('sqlite::memory:');
     $pdo->exec("CREATE TABLE runs (pace TEXT, n INTEGER)");
     $pdo->exec("INSERT INTO runs VALUES ('07:30:00', 1), ('06:55:00', 2), (NULL, 3)");
@@ -168,7 +168,7 @@ it('guesses times in SQLite text and keeps SQL time columns as times', function 
     $fast = $runs->filter(col('pace')->lt('07:00:00'));
 
     expect($runs->collect()->type('pace'))->toBe(Type::Time)
-        ->and($fast)->toBeInstanceOf(SqlTable::class)
+        ->and($fast)->toBeInstanceOf(DataFrame::class)
         ->and($fast->collect()->n)->toBe([2]);
 });
 
@@ -208,3 +208,56 @@ it('moves time columns through Polars as durations', function () {
         ->and($fast->collect()->n)->toBe([2])
         ->and($polars->mutate(['h' => hour(col('t'))])->collect()->h)->toBe([1, 23, null, 1]);
 })->skip(! extension_loaded('php_polars'), 'php_polars extension not loaded');
+
+it('sorts and summarizes SQLite time text by its value', function () {
+    $pdo = new PDO('sqlite::memory:');
+    $pdo->exec('CREATE TABLE t (tm TEXT, g TEXT)');
+    $pdo->exec("INSERT INTO t VALUES ('7:30:00', 'a'), ('10:05:00', 'a'), ('9:00:00', 'b')");
+    $t = tbl($pdo, 't');
+
+    expect(array_map(strval(...), $t->arrange(['tm'])->column('tm')))->toBe(['07:30:00', '09:00:00', '10:05:00'])
+        ->and(array_map(strval(...), $t->arrange([\Phibble\Expr\desc(col('tm'))])->column('tm')))->toBe(['10:05:00', '09:00:00', '07:30:00'])
+        ->and($t->summarize(['lo' => min(col('tm')), 'hi' => max(col('tm'))])->toRows())->toEqual([['lo' => Time::of(7, 30), 'hi' => Time::of(10, 5)]])
+        ->and($t->filter(col('tm')->lt('9:30:00'))->column('g'))->toBe(['a', 'b'])
+        ->and($t->groupBy(['tm'])->summarize(['n' => \Phibble\Expr\n()])->column('tm'))->toEqual([Time::of(7, 30), Time::of(9), Time::of(10, 5)])
+        ->and($t->groupBy(['g'])->summarize(['n' => \Phibble\Expr\n()]))->toBeInstanceOf(SqlTable::class);
+});
+
+it('summarizes times, dates, and datetimes with R types', function () {
+    $t = DataFrame::fromColumns(['t' => times([3600, 5, 7201.5, null])]);
+    $d = DataFrame::fromColumns(['d' => [new \Phibble\CalendarDate('2024-01-01'), new \Phibble\CalendarDate('2024-01-04'), new \Phibble\CalendarDate('2024-01-10'), null]]);
+    $x = DataFrame::fromColumns(['x' => [new DateTimeImmutable('2024-01-01 00:00:00Z'), new DateTimeImmutable('2024-01-01 06:00:00Z'), null]]);
+    $all = fn (string $c) => [
+        'mean' => \Phibble\Expr\mean(col($c), na_rm: true), 'median' => \Phibble\Expr\median(col($c), na_rm: true),
+        'sd' => \Phibble\Expr\sd(col($c), na_rm: true), 'iqr' => \Phibble\Expr\iqr(col($c), na_rm: true),
+    ];
+    $ts = $t->summarize([...$all('t'), 'q' => \Phibble\Expr\quantile(col('t'), 0.25, na_rm: true), 'sum' => \Phibble\Expr\sum(col('t'), na_rm: true)])->row(0)->toArray();
+    $ds = $d->summarize($all('d'))->row(0)->toArray();
+    $xs = $x->summarize([...$all('x'), 'q' => \Phibble\Expr\quantile(col('x'), 0.25, na_rm: true)])->row(0)->toArray();
+
+    // R: mean 3602.167 secs, median 01:00:00, quantile 00:30:02.5, sum 10806.5 secs, sd 3598.25.
+    expect([$ts['mean']->seconds(), $ts['median'], $ts['q'], $ts['sum'], round($ts['sd'], 2), $ts['iqr']])
+        ->toEqual([3602.166667, Time::of(1), Time::fromSeconds(1802.5), Time::fromSeconds(10806.5), 3598.25, 3598.25])
+        // R: mean 2024-01-05, median 2024-01-04, sd 4.582576 days, IQR 4.5.
+        ->and([$ds['mean']->format('Y-m-d'), $ds['median']->format('Y-m-d'), round($ds['sd'], 6), $ds['iqr']])->toBe(['2024-01-05', '2024-01-04', 4.582576, 4.5])
+        ->and($d->summarize(['m' => \Phibble\Expr\mean(col('d'), na_rm: true)])->type('m'))->toBe(Type::Date)
+        // R: mean and median 2024-01-01 03:00:00, quantile 01:30:00, sd 15273.51.
+        ->and([$xs['mean']->format('H:i:s'), $xs['median']->format('H:i:s'), $xs['q']->format('H:i:s'), round($xs['sd'], 2)])->toBe(['03:00:00', '03:00:00', '01:30:00', 15273.51])
+        ->and(fn () => $d->summarize(['q' => \Phibble\Expr\quantile(col('d'), 0.5, na_rm: true)]))->toThrow(InvalidArgumentException::class, 'quantile() is not defined for dates')
+        ->and(fn () => $d->summarize(['s' => \Phibble\Expr\sum(col('d'), na_rm: true)]))->toThrow(InvalidArgumentException::class, 'sum() is not defined for dates')
+        ->and(DataFrame::fromColumns(['g' => ['a'], 't' => [null]], ['t' => Type::Time])->groupBy(['g'])->summarize(['m' => \Phibble\Expr\mean(col('t'))])->type('m'))->toBe(Type::Time);
+});
+
+it('summarizes database and Polars dates and times as DataFrame does', function () {
+    $pdo = new PDO('sqlite::memory:');
+    $pdo->exec('CREATE TABLE d (d TEXT, t TEXT)');
+    $pdo->exec("INSERT INTO d VALUES ('2024-01-01', '1:00:00'), ('2024-01-04', '0:00:05'), ('2024-01-10', '2:00:01')");
+    $summary = fn ($table) => $table->summarize(['md' => \Phibble\Expr\median(col('d')), 'mt' => \Phibble\Expr\mean(col('t'))])->collect()->toRows();
+    $expected = $summary(tbl($pdo, 'd')->collect());
+
+    expect($summary(tbl($pdo, 'd')))->toEqual($expected)
+        ->and($expected[0]['md']->format('Y-m-d'))->toBe('2024-01-04');
+    if (extension_loaded('php_polars')) {
+        expect($summary(PolarsTable::fromTable(tbl($pdo, 'd')->collect())))->toEqual($expected);
+    }
+});

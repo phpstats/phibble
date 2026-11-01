@@ -73,6 +73,11 @@ values are then those `DataFrame` computes, apart from the
 - functions of a PostgreSQL `time` or MySQL `TIME` column other than
   comparisons and `is_na()`, because SQL's time functions differ from
   lubridate's (MySQL's `HOUR()` of `25:00:00` is 25),
+- any use of SQLite text that holds times, such as `7:30:00`, because it
+  sorts and compares as text. SQLite columns are guessed as dates,
+  datetimes, or times from their first 1000 rows when the table is opened,
+- `sum()`, `mean()`, `median()`, `quantile()`, `sd()`, `var()`, and `iqr()`
+  of date, datetime, and time columns, which keep R's types in memory,
 - `first()`, `last()`, and `nth()` without a row order (from `arrange()` or
   `order_by:`), or with `default:` or `na_rm:`,
 - `iqr()` outside PostgreSQL, `cumprod()`, and `consecutive_id()`,

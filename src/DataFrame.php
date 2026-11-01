@@ -2281,15 +2281,22 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         $input = $arg instanceof Col && isset($this->data[$arg->name]) ? $this->data[$arg->name]->type() : null;
 
         return match ($definition->fn) {
-            'mean', 'sd', 'var', 'quantile', 'iqr' => Type::Float,
+            'sd', 'var', 'iqr' => Type::Float,
+            'mean', 'quantile' => match (true) {
+                $input === Type::Time, $input === Type::DateTime => $input,
+                $input === Type::Date && $definition->fn === 'mean' => $input,
+                default => Type::Float,
+            },
             'sum' => match ($input) {
                 Type::Int, Type::Bool => Type::Int,
                 Type::Float => Type::Float,
+                Type::Time => Type::Time,
                 default => null,
             },
             'median' => match ($input) {
                 Type::Int => Type::Int,
                 Type::Float => Type::Float,
+                Type::Date, Type::DateTime, Type::Time => $input,
                 default => null,
             },
             'min', 'max', 'first', 'last', 'nth' => match ($input) {

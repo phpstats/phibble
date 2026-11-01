@@ -20,7 +20,8 @@ beforeAll(function () {
     $port = (int) substr(strrchr(stream_socket_get_name($socket, false), ':'), 1);
     fclose($socket);
     $process = proc_open([PHP_BINARY, '-S', "127.0.0.1:{$port}", '-t', $dir], [1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']], $pipes);
-    for ($i = 0; $i < 100 && @fsockopen('127.0.0.1', $port) === false; $i++) {
+    // Wait until the server answers a request, not just a connection.
+    for ($i = 0; $i < 250 && @file_get_contents("http://127.0.0.1:{$port}/scores.csv") === false; $i++) {
         usleep(20_000);
     }
     $GLOBALS['csvUrl'] = ['dir' => $dir, 'base' => "http://127.0.0.1:{$port}", 'process' => $process];
