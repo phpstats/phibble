@@ -298,81 +298,81 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This example summarizes a database table with phibble’s verbs, which compile to one SQL query that the database runs.</p>
-<p>It needs phibble and the pdo_sqlite extension. phibble is installed as described in <a href="../getting-started.html#installation">Installation</a>.</p>
-<p>The script creates an in-memory SQLite database with an <code>orders</code> table of eight rows. It opens the table with <code>tbl()</code>, keeps the orders with at least one unit, computes each order’s revenue, and totals the orders and revenue for each region:</p>
+<p>Total the orders and revenue for each region of an SQLite <code>orders</code> table, with phibble’s verbs compiled to one SQL query that the database runs. The script needs the pdo_sqlite extension.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset" data-group="syntax">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">PHP 8.5+</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">PHP 8.3–8.4</a></li></ul>
 <div class="tab-content" data-group="syntax">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;?php</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\SqlTable<span class="ot">;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="cn">__DIR__</span><span class="op">.</span><span class="st">'/vendor/autoload.php'</span><span class="ot">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\SqlTable<span class="ot">;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\tbl<span class="ot">;</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> desc<span class="ot">,</span> n<span class="ot">,</span> sum}<span class="ot">;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">'CREATE TABLE orders (region TEXT, product TEXT, units INTEGER, price REAL)'</span>)<span class="ot">;</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">"INSERT INTO orders VALUES</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="st">    ('east', 'lamp', 3, 24.0), ('east', 'desk', 1, 180.0), ('west', 'lamp', 5, 24.0),</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'chair', 4, 65.0), ('north', 'desk', 2, 180.0), ('north', 'lamp', 1, 24.0),</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'desk', 1, 180.0), ('east', 'chair', 0, 65.0)"</span>)<span class="ot">;</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="va">$orders</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'orders'</span>)<span class="ot">;</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="va">$revenue</span> <span class="op">=</span> <span class="va">$orders</span> <span class="op">|&gt;</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;filter(col(<span class="st">'units'</span>)-&gt;gt(<span class="dv">0</span>))) <span class="op">|&gt;</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;mutate([<span class="st">'revenue'</span> =&gt; col(<span class="st">'units'</span>)-&gt;mul(col(<span class="st">'price'</span>))])) <span class="op">|&gt;</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;groupBy([<span class="st">'region'</span>])) <span class="op">|&gt;</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;summarize([<span class="st">'orders'</span> =&gt; n()<span class="ot">,</span> <span class="st">'revenue'</span> =&gt; sum(col(<span class="st">'revenue'</span>))])) <span class="op">|&gt;</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;arrange([desc(col(<span class="st">'revenue'</span>))]))<span class="ot">;</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;collect()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\tbl<span class="ot">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> desc<span class="ot">,</span> n<span class="ot">,</span> sum}<span class="ot">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">'CREATE TABLE orders (region TEXT, product TEXT, units INTEGER, price REAL)'</span>)<span class="ot">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">"INSERT INTO orders VALUES</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">    ('east', 'lamp', 3, 24.0), ('east', 'desk', 1, 180.0), ('west', 'lamp', 5, 24.0),</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'chair', 4, 65.0), ('north', 'desk', 2, 180.0), ('north', 'lamp', 1, 24.0),</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'desk', 1, 180.0), ('east', 'chair', 0, 65.0)"</span>)<span class="ot">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="va">$orders</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'orders'</span>)<span class="ot">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="va">$revenue</span> <span class="op">=</span> <span class="va">$orders</span> <span class="op">|&gt;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;filter(col(<span class="st">'units'</span>)-&gt;gt(<span class="dv">0</span>))) <span class="op">|&gt;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;mutate([<span class="st">'revenue'</span> =&gt; col(<span class="st">'units'</span>)-&gt;mul(col(<span class="st">'price'</span>))])) <span class="op">|&gt;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;groupBy([<span class="st">'region'</span>])) <span class="op">|&gt;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;summarize([<span class="st">'orders'</span> =&gt; n()<span class="ot">,</span> <span class="st">'revenue'</span> =&gt; sum(col(<span class="st">'revenue'</span>))])) <span class="op">|&gt;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">fn</span> (SqlTable <span class="va">$t</span>) =&gt; <span class="va">$t</span>-&gt;arrange([desc(col(<span class="st">'revenue'</span>))]))<span class="ot">;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;collect()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;?php</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="cn">__DIR__</span><span class="op">.</span><span class="st">'/vendor/autoload.php'</span><span class="ot">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\tbl<span class="ot">;</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> desc<span class="ot">,</span> n<span class="ot">,</span> sum}<span class="ot">;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">'CREATE TABLE orders (region TEXT, product TEXT, units INTEGER, price REAL)'</span>)<span class="ot">;</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">"INSERT INTO orders VALUES</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="st">    ('east', 'lamp', 3, 24.0), ('east', 'desk', 1, 180.0), ('west', 'lamp', 5, 24.0),</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'chair', 4, 65.0), ('north', 'desk', 2, 180.0), ('north', 'lamp', 1, 24.0),</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'desk', 1, 180.0), ('east', 'chair', 0, 65.0)"</span>)<span class="ot">;</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="va">$orders</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'orders'</span>)<span class="ot">;</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="va">$revenue</span> <span class="op">=</span> <span class="va">$orders</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'units'</span>)-&gt;gt(<span class="dv">0</span>))</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    -&gt;mutate([<span class="st">'revenue'</span> =&gt; col(<span class="st">'units'</span>)-&gt;mul(col(<span class="st">'price'</span>))])</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'region'</span>])</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([<span class="st">'orders'</span> =&gt; n()<span class="ot">,</span> <span class="st">'revenue'</span> =&gt; sum(col(<span class="st">'revenue'</span>))])</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    -&gt;arrange([desc(col(<span class="st">'revenue'</span>))])<span class="ot">;</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;collect()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\tbl<span class="ot">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> desc<span class="ot">,</span> n<span class="ot">,</span> sum}<span class="ot">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">'CREATE TABLE orders (region TEXT, product TEXT, units INTEGER, price REAL)'</span>)<span class="ot">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">"INSERT INTO orders VALUES</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="st">    ('east', 'lamp', 3, 24.0), ('east', 'desk', 1, 180.0), ('west', 'lamp', 5, 24.0),</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'chair', 4, 65.0), ('north', 'desk', 2, 180.0), ('north', 'lamp', 1, 24.0),</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="st">    ('west', 'desk', 1, 180.0), ('east', 'chair', 0, 65.0)"</span>)<span class="ot">;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="va">$orders</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="st">'orders'</span>)<span class="ot">;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="va">$revenue</span> <span class="op">=</span> <span class="va">$orders</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'units'</span>)-&gt;gt(<span class="dv">0</span>))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    -&gt;mutate([<span class="st">'revenue'</span> =&gt; col(<span class="st">'units'</span>)-&gt;mul(col(<span class="st">'price'</span>))])</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'region'</span>])</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([<span class="st">'orders'</span> =&gt; n()<span class="ot">,</span> <span class="st">'revenue'</span> =&gt; sum(col(<span class="st">'revenue'</span>))])</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    -&gt;arrange([desc(col(<span class="st">'revenue'</span>))])<span class="ot">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$revenue</span>-&gt;collect()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
-<pre class="text output"><code>SELECT "region", "orders", "revenue" FROM (SELECT "region", "orders", "revenue", ROW_NUMBER() OVER (ORDER BY ("region" IS NULL), "region") AS "__phibble_row" FROM (SELECT "region" AS "region", COUNT(*) AS "orders", (CASE WHEN COUNT(*) &gt; COUNT("revenue") THEN NULL ELSE COALESCE(SUM("revenue"), 0) END) AS "revenue" FROM (SELECT "region", "product", "units", "price", ("units" * "price") AS "revenue", "__phibble_row" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "orders") AS q1 WHERE ("units" &gt; ?)) AS q2) AS q3 GROUP BY "region") AS q4) AS q5 ORDER BY ("revenue" IS NULL), "revenue" DESC, ("__phibble_row" IS NULL), "__phibble_row"
-
-# A tibble: 3 × 3
+<details>
+<summary>
+The SQL from <code>showQuery()</code>
+</summary>
+<pre class="text output"><code>SELECT "region", "orders", "revenue" FROM (SELECT "region", "orders", "revenue", ROW_NUMBER() OVER (ORDER BY ("region" IS NULL), "region") AS "__phibble_row" FROM (SELECT "region" AS "region", COUNT(*) AS "orders", (CASE WHEN COUNT(*) &gt; COUNT("revenue") THEN NULL ELSE COALESCE(SUM("revenue"), 0) END) AS "revenue" FROM (SELECT "region", "product", "units", "price", ("units" * "price") AS "revenue", "__phibble_row" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "orders") AS q1 WHERE ("units" &gt; ?)) AS q2) AS q3 GROUP BY "region") AS q4) AS q5 ORDER BY ("revenue" IS NULL), "revenue" DESC, ("__phibble_row" IS NULL), "__phibble_row"</code></pre>
+</details>
+<pre class="text output"><code># A tibble: 3 × 3
   region orders revenue
   &lt;chr&gt;   &lt;int&gt;   &lt;dbl&gt;
 1 west        3     560
 2 north       2     384
 3 east        2     252</code></pre>
-<p><code>tbl($pdo, 'orders')</code> returns a <code>SqlTable</code>. Each verb adds to its query, and nothing runs until the rows are needed. <code>showQuery()</code> returns the SQL, with <code>?</code> in place of the bound value 0. <code>collect()</code> runs the query and returns a <code>DataFrame</code>.</p>
-<p>Each verb wraps the previous query in a subquery. The extra conditions keep dplyr’s results: the sum is NA when a group holds a missing value, the groups are sorted, and ties keep the table’s row order.</p>
-<p>The same code runs against PostgreSQL and MySQL with a different PDO connection. <a href="../sql.html">SQL tables</a> lists the verbs and functions that compile to SQL, and what runs in memory instead. <a href="https://github.com/phpstats/phplyr">phplyr</a> runs its dplyr functions on the same <code>SqlTable</code>.</p>
+<ul>
+<li><code>tbl($pdo, 'orders')</code> returns a <code>SqlTable</code>. Each verb adds to its query, and nothing runs on the database until the rows are needed.</li>
+<li><code>showQuery()</code> returns the SQL with <code>?</code> placeholders, and <code>bindings()</code> returns their values, here <code>[0]</code>.</li>
+<li><code>collect()</code> runs the query and returns a <code>DataFrame</code>.</li>
+<li>The same code runs on PostgreSQL and MySQL with their PDO connections.</li>
+<li><a href="https://github.com/phpstats/phplyr">phplyr</a> runs its dplyr functions on the same <code>SqlTable</code>.</li>
+</ul>
+<p>The runnable scripts for <a href="https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table.php">PHP 8.5+</a> and <a href="https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table-chain.php">PHP 8.3–8.4</a> load Composer’s autoloader.</p>
+<p>Reference: <a href="../sql.html">SQL tables</a>.</p>
 
 
 

@@ -298,9 +298,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This example reads a small CSV file into a <code>DataFrame</code>, with each column’s type guessed from its values and one type declared.</p>
-<p>It needs phibble, installed as described in <a href="../getting-started.html#installation">Installation</a>.</p>
-<p>The data is <a href="https://raw.githubusercontent.com/phpstats/phibble/main/docs/data/readings.csv"><code>readings.csv</code></a>, six weather readings from two stations:</p>
+<p>Read <a href="https://raw.githubusercontent.com/phpstats/phibble/main/docs/data/readings.csv"><code>readings.csv</code></a> into a <code>DataFrame</code>, with one column’s type declared and the rest guessed:</p>
 <pre class="text"><code>date,station,temp_c,rain_mm,wind_kmh,windy
 2024-03-01,north,7.5,0.0,12,FALSE
 2024-03-01,south,9.1,1.2,31,TRUE
@@ -308,16 +306,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 2024-03-02,south,8.4,3.5,35,TRUE
 2024-03-03,north,10.2,0.0,9,FALSE
 2024-03-03,south,11.0,0.4,22,FALSE</code></pre>
-<p>Save it next to this script and run the script with <code>php</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;?php</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\DataFrame<span class="ot">;</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">require</span> <span class="cn">__DIR__</span><span class="op">.</span><span class="st">'/vendor/autoload.php'</span><span class="ot">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">$readings</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'readings.csv'</span><span class="ot">,</span> types<span class="ot">:</span> [<span class="st">'station'</span> =&gt; <span class="st">'factor'</span>])<span class="ot">;</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\DataFrame<span class="ot">;</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="va">$readings</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'readings.csv'</span><span class="ot">,</span> types<span class="ot">:</span> [<span class="st">'station'</span> =&gt; <span class="st">'factor'</span>])<span class="ot">;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$readings</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$readings</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 6 × 6
   date       station temp_c rain_mm wind_kmh windy
   &lt;date&gt;     &lt;fct&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;int&gt; &lt;lgl&gt;
@@ -327,8 +320,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 4 2024-03-02 south      8.4     3.5       35 TRUE 
 5 2024-03-03 north     10.2     0          9 FALSE
 6 2024-03-03 south     11       0.4       22 FALSE</code></pre>
-<p><code>DataFrame::fromCsv()</code> guesses a type for each column, as readr’s <code>read_csv()</code> does. <code>date</code> holds ISO 8601 dates, so it is a date column. <code>temp_c</code> and <code>rain_mm</code> hold decimals, so they are floats, and <code>wind_kmh</code> holds whole numbers, so it is an int. <code>windy</code> holds <code>TRUE</code> and <code>FALSE</code>, so it is a bool. The <code>NA</code> in <code>rain_mm</code> is a missing value, which phibble stores as <code>null</code>. <code>types</code> declares <code>station</code> a factor, which the guess would have read as a string. The type of each column prints under its name.</p>
-<p><a href="../io.html">Reading and writing data</a> lists the other options of <code>fromCsv()</code>, and <a href="../types.html">Types</a> describes the column types.</p>
+<ul>
+<li>Each column’s type is guessed from its values, as readr’s <code>read_csv()</code> guesses it. The guess uses up to 1,000 sampled rows (<code>guessMax</code>).</li>
+<li>Whole numbers are read as int, where readr reads double.</li>
+<li><code>types: ['station' =&gt; 'factor']</code> overrides the guess, which reads <code>station</code> as a string.</li>
+<li><code>NA</code> and empty fields are missing values, which phibble stores as <code>null</code>.</li>
+</ul>
+<p>The <a href="https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/read-a-csv.php">runnable script</a> loads Composer’s autoloader and reads <code>readings.csv</code> from the working directory.</p>
+<p>Reference: <a href="../io.html">Reading and writing data</a> · <a href="../types.html">Types</a>.</p>
 
 
 
