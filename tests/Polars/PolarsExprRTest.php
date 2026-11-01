@@ -41,7 +41,7 @@ it('parses orders without a year into year 0 in Polars, and rejects a day withou
         ->and(fn () => pt($df)->mutate(['o' => parse_date_time(col('s'), ['md', 'd'])]))->toThrow(InvalidArgumentException::class, "order 'd' has a day but no month");
 });
 
-it('keeps fractional seconds, and gives a datetime for a date plus hours, in Polars', function () {
+it('keeps fractional seconds and gives a datetime for a date plus hours in Polars', function () {
     $df = DataFrame::fromCsvString("t,d\n2024-01-31 00:00:00,2024-01-31\n", types: 'TD');
     $out = pt($df)->mutate(['s' => col('t')->add(seconds(1.5)), 'h' => col('d')->add(hours(1)), 'dd' => col('d')->add(days(2))]);
 

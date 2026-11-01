@@ -335,6 +335,31 @@ $topics = [
             'n_compared' => isset($pivotCases[$caseLabel($t)]) ? count($pivotCases[$caseLabel($t)]['columns']) * count($pivotCases[$caseLabel($t)]['rows']) : null,
         ] : null,
     ],
+    'expression-edge-cases' => [
+        'title' => 'Expression edge cases',
+        'label' => 'Expression edge cases',
+        'kind' => 'reference',
+        'checked' => 'Argument rules of row_number() and ntile(); isIn() with dates, datetimes, and times; NaN in coalesce(); one-character pads in str_pad(); parse_date_time() orders without a year; fractional periods; and dates plus clock periods. Results and error conditions on DataFrame, the SQL databases, and Polars.',
+        'description' => "tests/r/edge_cases.R prints R's result or error for each case. The tests hold those results as expected values and check that phibble gives the same value, or raises where R raises.",
+        'reference' => "R {$r['versions']['R']} with dplyr {$r['versions']['dplyr']}, stringr {$r['versions']['stringr']}, and lubridate {$r['versions']['lubridate']}",
+        'versions' => $rVersions('dplyr', 'stringr', 'lubridate') + $backendVersions(),
+        'inputs' => [['name' => 'edge cases', 'detail' => 'Literal vectors in tests/ExprRTest.php and tests/Polars/PolarsExprRTest.php', 'url' => 'tests/r/edge_cases.R']],
+        'comparison' => [
+            ['id' => 'value', 'applies_to' => 'Values and result types; NA in identical positions, datetimes to the microsecond', 'kind' => 'exact'],
+        ],
+        'known_differences' => [
+            'parse_date_time() with an order that has a day but no month: lubridate returns NA with a warning; phibble raises an error.',
+            'Errors where R errors: phibble raises an exception with its own message.',
+        ],
+        'exclusions' => ['isIn() with temporal lists on SQLite and coalesce() of numbers on PostgreSQL run in memory; the results are compared the same way.'],
+        'data' => 'tests/r/edge_cases.R',
+        'reproduce' => ['Rscript tests/r/edge_cases.R', "{$withDatabases} {$suite} tests/ExprRTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsExprRTest.php"],
+        'match' => fn (array $t) => in_array($t['file'], ['tests/ExprRTest.php', 'tests/Polars/PolarsExprRTest.php'], true) ? [
+            'name' => preg_replace('/ in (SQL|Polars)\b/', '', $t['test']),
+            'implementation' => str_starts_with($t['file'], 'tests/Polars/') ? 'Polars' : ($drivers[end($t['labels']) ?: ''] ?? 'DataFrame'),
+            'rule' => 'value',
+        ] : null,
+    ],
     'csv-conformance' => [
         'title' => 'CSV conformance',
         'label' => 'CSV conformance',

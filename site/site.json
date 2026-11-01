@@ -201,6 +201,7 @@
         "site/verifications/lubridate-stringr.json",
         "site/verifications/join-by.json",
         "site/verifications/pivot-tidyr.json",
+        "site/verifications/expression-edge-cases.json",
         "site/verifications/csv-conformance.json",
         "site/verifications/sql-parity.json",
         "site/verifications/polars-backend.json"
