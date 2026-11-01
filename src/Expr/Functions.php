@@ -203,5 +203,14 @@ final class Functions
         if ($fn === 'ntile' && ! isset($named['n'])) {
             throw new InvalidArgumentException('ntile() needs n.');
         }
+        if ($fn === 'str_pad' && ($named['pad'] ?? null) instanceof Lit && is_string($named['pad']->value)) {
+            Strings::checkPad($named['pad']->value);
+        }
+        if ($fn === 'parse_date_time' && $args[1] instanceof Lit) {
+            Temporal::checkOrders(array_map(strval(...), (array) $args[1]->value));
+        }
+        if (in_array($fn, Period::UNITS, true) && $args[0] instanceof Lit) {
+            Period::check($args[0]->value, $fn);
+        }
     }
 }

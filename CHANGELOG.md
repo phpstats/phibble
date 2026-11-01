@@ -7,6 +7,29 @@ change the public API.
 
 ## [Unreleased]
 
+### Changed
+
+- `row_number()` takes at most one argument, and `ntile()` takes `x` and `n`
+  as parameters, with `n` required. Extra arguments throw, as in dplyr.
+  `ntile(col('x'), 3)` now works as well as `ntile(col('x'), n: 3)`.
+- `str_pad()` throws when `pad` is not one character of width 1, as stringr
+  does. It used to repeat a longer pad once per missing character.
+- Periods other than `seconds()` throw on a fractional count, as in
+  lubridate: `days(1.5)`, `2.5 * days(1)`, and `hours(0.5)`. They used to
+  truncate it. `seconds(1.5)` keeps the fraction.
+- `parse_date_time()` with an order that has no year, such as `md` or `HM`,
+  gives year 0, as lubridate does. It used to give NA. An order with a day
+  but no month throws, where lubridate gives NA.
+
+### Fixed
+
+- `isIn()` accepts dates, datetimes, and times and compares them by value.
+  SQLite evaluates such lists in memory.
+- `coalesce()` skips NaN, as `is_na()` and R do. On PostgreSQL, which stores
+  NaN, `coalesce()` of numbers runs in memory.
+- A date plus `hours()`, `minutes()`, or `seconds()` is a datetime, as in
+  lubridate. It used to stay a date and drop the time.
+
 ## [0.6.1] - 2026-11-01
 
 ### Changed

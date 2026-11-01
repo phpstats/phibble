@@ -166,8 +166,9 @@ final class Translator
             'if_else' => when($a(0)->isNull())->then($this->optional($c, 'missing', $inGroup) ?? lit(null))
                 ->when($a(0))->then($a(1))->otherwise($a(2)),
             'case_when' => $this->caseWhen($c, $inGroup),
-            'coalesce' => coalesce(...$args()),
-            'in' => $a(0)->isIn($this->setValues($c->args[1]), nullsEqual: true),
+            // NaN is missing, as in is_na().
+            'coalesce' => coalesce(...array_map(fn (Expr $e, PhibbleExpr $arg) => $this->type($arg) === 'float' ? $e->fillNan(null) : $e, $args(), $c->args)),
+            'in' => $this->in($c, $a(0)),
             'between' => $a(0)->isBetween($a(1), $a(2)),
             'na_if' => when($a(0)->eq($a(1)))->then(lit(null))->otherwise($a(0)),
             'near' => $a(0)->sub($a(1))->abs()->lt($this->optional($c, 'tol', $inGroup) ?? lit(sqrt(PHP_FLOAT_EPSILON))),
@@ -445,6 +446,7 @@ final class Translator
             throw new Unsupported('Parsing a datetime into a time zone runs on a DataFrame.');
         }
         $orders = (array) $this->scalarArg($c->args[1]);
+        Temporal::checkOrders($orders);
         $parsed = [];
         foreach ($orders as $order) {
             $letters = str_split(str_replace([' ', '-', '/', ':', '_'], '', (string) $order));
@@ -591,7 +593,10 @@ final class Translator
             foreach ([[0, 1], [1, 0]] as [$p, $k]) {
                 $inner = self::period($e->args[$p]);
                 if ($inner !== null && $e->args[$k] instanceof Lit && is_numeric($e->args[$k]->value)) {
-                    return [$inner[0] * ($e->args[$k]->value + 0), $inner[1]];
+                    $amount = $inner[0] * ($e->args[$k]->value + 0);
+                    Period::check($amount, $inner[1]);
+
+                    return [$amount, $inner[1]];
                 }
             }
         }
@@ -923,6 +928,26 @@ final class Translator
     }
 
     /** The values of a list literal, for in(). */
+    /**
+     * x %in% set. Polars types a list of PHP dates as datetimes, which it
+     * cannot test against a Date column, so a temporal list compares value by
+     * value with literals of the list's type.
+     */
+    private function in(Call $c, Expr $x): Expr
+    {
+        $set = $c->args[1];
+        if (! $set instanceof Lit || $set->dtype === null || ! is_array($set->value)) {
+            return $x->isIn($this->setValues($set), nullsEqual: true);
+        }
+        $values = array_values(array_filter($set->value, fn ($v) => $v !== null));
+        $member = lit(false);
+        foreach ($values as $v) {
+            $member = $member->or($x->eq(self::lit(new Lit($v, $set->dtype)))->fillNull(false));
+        }
+
+        return count($values) === count($set->value) ? $member : $member->or($x->isNull());
+    }
+
     private function setValues(PhibbleExpr $set): array|Expr
     {
         if ($set instanceof Lit) {

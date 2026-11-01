@@ -144,7 +144,7 @@ final class Compiler
             $value === null => Fragment::raw('NULL'),
             $value === true => Fragment::raw('TRUE'),
             $value === false => Fragment::raw('FALSE'),
-            is_array($value) => Fragment::join(', ', array_map(fn ($v) => $this->literal(new Lit($v)), $value)),
+            is_array($value) => Fragment::join(', ', array_map(fn ($v) => $this->literal(new Lit($v, $v === null ? null : $lit->dtype)), $value)),
             $value instanceof DateTimeInterface => Fragment::param($lit->dtype === 'date' ? $value->format('Y-m-d') : $value->format('Y-m-d H:i:s')),
             $value instanceof Time => Fragment::param((string) $value),
             is_float($value) && ! is_finite($value) => throw new Untranslatable('Infinite or NaN literals have no portable SQL form.'),
@@ -217,7 +217,7 @@ final class Compiler
                 $a(0), $a(1), $a(0), $a(2), $call->option('missing') ? $this->compile($call->option('missing')) : Fragment::raw('NULL'),
             ]),
             'case_when' => $this->caseWhen($call),
-            'coalesce' => Fragment::format('COALESCE('.implode(', ', array_fill(0, count($call->args), '{}')).')', $args()),
+            'coalesce' => $this->coalesce($call, $args()),
             'in' => $this->in($call),
             'between' => Fragment::format('({} BETWEEN {} AND {})', [$a(0), $a(1), $a(2)]),
             'na_if' => Fragment::format('NULLIF({}, {})', [$a(0), $a(1)]),
@@ -572,14 +572,36 @@ final class Compiler
         if (! $set instanceof Lit || ! is_array($set->value)) {
             throw new Untranslatable('in() needs a literal list.');
         }
+        // SQLite stores dates and datetimes as text, so a midnight datetime
+        // would compare as a date.
+        if ($set->dtype !== null && $this->dialect instanceof SqliteDialect) {
+            throw new Untranslatable('in() with dates, datetimes, or times is evaluated in memory in SQLite.');
+        }
         $x = $this->compile($call->args[0]);
         $values = array_values(array_filter($set->value, fn ($v) => $v !== null));
         $hasNa = count($values) !== count($set->value);
         $member = $values === []
             ? Fragment::raw('FALSE')
-            : Fragment::format('COALESCE({} IN ({}), FALSE)', [$x, $this->literal(new Lit($values))]);
+            : Fragment::format('COALESCE({} IN ({}), FALSE)', [$x, $this->literal(new Lit($values, $set->dtype))]);
 
         return $hasNa ? Fragment::format('({} OR {} IS NULL)', [$member, $x]) : $member;
+    }
+
+    /**
+     * COALESCE() skips NULL only. A database that stores NaN (PostgreSQL)
+     * would keep it, where R skips it, so there only text and logical
+     * arguments compile.
+     *
+     * @param list<Fragment> $args
+     */
+    private function coalesce(Call $call, array $args): Fragment
+    {
+        if ($this->dialect->special('nan') !== 'NULL'
+            && array_any($call->args, fn (Expr $a) => ! self::isText($a, $this->text) && ! self::isLogical($a) && ! in_array($a instanceof Col ? $a->name : null, $this->bools, true))) {
+            throw new Untranslatable("coalesce() of numbers is evaluated in memory in {$this->dialect->name()}, whose COALESCE() keeps NaN.");
+        }
+
+        return Fragment::format('COALESCE('.implode(', ', array_fill(0, count($args), '{}')).')', $args);
     }
 
     private function trim(Call $call): Fragment

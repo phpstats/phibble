@@ -265,10 +265,10 @@ abstract readonly class Expr
     /**
      * Whether each value is one of the given values.
      *
-     * R's %in% operator. NA matches only when the list holds null. The result is never NA.
+     * R's %in% operator. Dates, datetimes, and times compare by value. NA matches only when the list holds null. The result is never NA.
      *
-     * @param  list<mixed>  $values  The values to match, each null or a scalar.
-     * @throws \InvalidArgumentException When a value is not null or a scalar.
+     * @param  list<mixed>  $values  The values to match: null, scalars, or dates, datetimes, or times of one kind.
+     * @throws \InvalidArgumentException When a value is another type, or the list mixes scalars with temporal values or times with dates.
      */
     public function isIn(array $values): Call
     {

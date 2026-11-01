@@ -380,15 +380,15 @@ $expr->isIn(array $values): Call
 
 Whether each value is one of the given values.
 
-R's %in% operator. NA matches only when the list holds null. The result is never NA.
+R's %in% operator. Dates, datetimes, and times compare by value. NA matches only when the list holds null. The result is never NA.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$values` | <code>list&lt;mixed&gt;</code> |  | The values to match, each null or a scalar. |
+| `$values` | <code>list&lt;mixed&gt;</code> |  | The values to match: null, scalars, or dates, datetimes, or times of one kind. |
 
 **Method** of `Phibble\Expr\Expr`\
 **Returns** `Call`\
-**Throws** `InvalidArgumentException`: when a value is not null or a scalar.\
+**Throws** `InvalidArgumentException`: when a value is another type, or the list mixes scalars with temporal values or times with dates.\
 **Examples** [Expressions](../expr.qmd), [SQL tables](../sql.qmd)
 
 ### `Expr->between()` {#expr-between}
@@ -490,7 +490,7 @@ coalesce(mixed ...$args): Call
 
 First value that is not NA among the arguments, row by row.
 
-NaN is a value here: it is not skipped.
+NaN counts as NA and is skipped, as in `is_na()` and R's `coalesce()`.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1077,7 +1077,7 @@ Value from n rows later in the group.
 ### `row_number()` {#row-number}
 
 ```php
-row_number(mixed ...$x): Call
+row_number(mixed $x = null): Call
 ```
 
 Row number within the group, or the rank of each value with ties broken by row order.
@@ -1086,10 +1086,11 @@ With no argument, rows are numbered 1 to n in their order. With an argument, NA 
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `...$x` | <code>mixed</code> |  | Optionally one expression to rank by, or `desc()` of one. |
+| `$x` | <code>mixed</code> | <code>null</code> | An expression to rank by, or `desc()` of one. Omit it to number rows in order. |
 
 **Function** in `Phibble\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Throws** `ArgumentCountError`: when given more than one argument.
 
 ### `min_rank()` {#min-rank}
 
@@ -1162,20 +1163,22 @@ NA values get NA.
 ### `ntile()` {#ntile}
 
 ```php
-ntile(mixed ...$args): Call
+ntile(mixed $x = null, ?int $n = null): Call
 ```
 
 Bucket number from 1 to n, splitting the ordered values into n groups as evenly as possible.
 
-Earlier buckets take the extra rows when the sizes differ. NA values get NA. With no expression, rows are bucketed in row order.
+Earlier buckets take the extra rows when the sizes differ. NA values get NA. Without `$x`, rows are bucketed in row order.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `...$args` | <code>mixed</code> |  | Optionally one expression to order by, or `desc()` of one, then named options: n (int, required) is the number of buckets. |
+| `$x` | <code>mixed</code> | <code>null</code> | An expression to order by, or `desc()` of one. Null or omitted buckets rows in order. |
+| `$n` | <code>int&#124;null</code> | <code>null</code> | The number of buckets. Required. |
 
 **Function** in `Phibble\Expr`\
 **Returns** `Call`\
-**Throws** `InvalidArgumentException`: when n is not given.
+**Throws** `InvalidArgumentException`: when n is not given.\
+**Throws** `ArgumentCountError`: when given more than two arguments.
 
 ### `cumsum()` {#cumsum}
 

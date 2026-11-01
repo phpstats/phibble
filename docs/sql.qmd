@@ -109,6 +109,8 @@ Here `mul()` compiles, and `round()` and a closure fall back:
 | `str_to_upper()`, `str_to_lower()` | memory | SQL | SQL |
 | Full joins | SQL | memory, SQL with `naMatches: false` | memory |
 | Text columns that hold times, such as `7:30:00` | memory | — | — |
+| `isIn()` with dates or datetimes | memory | SQL | SQL |
+| `coalesce()` of numbers | SQL | memory | SQL |
 
 - SQLite's `sd()` formula would lose precision, and its `UPPER()` and
   `LOWER()` change only ASCII letters.
@@ -116,7 +118,9 @@ Here `mul()` compiles, and `round()` and a closure fall back:
   NA-matching keys are not.
 - MySQL's `str_detect()` uses ICU, as stringr does.
 - SQLite text times sort and compare as text, so any use of such a column
-  runs in memory.
+  runs in memory. SQLite also stores dates and datetimes as text, so a list of
+  them in `isIn()` runs in memory.
+- PostgreSQL stores NaN, and its `COALESCE()` keeps NaN where R skips it.
 
 ### SQLite column types
 

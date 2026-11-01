@@ -108,6 +108,7 @@ final class Strings
 
     public static function pad(string $s, int $width, string $side, string $pad): string
     {
+        self::checkPad($pad);
         $missing = $width - mb_strlen($s);
         if ($missing <= 0) {
             return $s;
@@ -119,6 +120,14 @@ final class Strings
             'both' => str_repeat($pad, intdiv($missing, 2)).$s.str_repeat($pad, $missing - intdiv($missing, 2)),
             default => throw new InvalidArgumentException("str_pad() side must be left, right or both, got '{$side}'."),
         };
+    }
+
+    /** stringr's rule: the pad is one character of display width 1. */
+    public static function checkPad(string $pad): void
+    {
+        if (mb_strlen($pad) !== 1 || mb_strwidth($pad) !== 1) {
+            throw new InvalidArgumentException("str_pad() pad must be one character of width 1, got '{$pad}'.");
+        }
     }
 
     public static function truncate(string $s, int $width, string $side, string $ellipsis): string

@@ -68,12 +68,15 @@ final class Temporal
 
     /**
      * parse_date_time() for orders made of Y, y, m, d, H, M and S, such as
-     * "Ymd HMS" or "dmY". The first order that fits wins.
+     * "Ymd HMS" or "dmY". The first order that fits wins. An order without a
+     * year gives year 0, and missing month and day are 1, as in lubridate.
      *
      * @param list<string> $orders
+     * @throws InvalidArgumentException For an order with a day but no month, which lubridate cannot parse.
      */
     public static function parseOrders(?string $text, array $orders, ?string $tz): ?DateTimeImmutable
     {
+        self::checkOrders($orders);
         if ($text === null) {
             return null;
         }
@@ -92,7 +95,7 @@ final class Temporal
             if (! preg_match('/^\s*'.$regex.'\s*$/', $text, $m)) {
                 continue;
             }
-            $v = ['Y' => null, 'm' => 1, 'd' => 1, 'H' => 0, 'M' => 0, 'S' => '0'];
+            $v = ['Y' => 0, 'm' => 1, 'd' => 1, 'H' => 0, 'M' => 0, 'S' => '0'];
             foreach ($letters as $i => $letter) {
                 $value = $m[$i + 1];
                 if ($letter === 'y') {
@@ -114,6 +117,21 @@ final class Temporal
         }
 
         return null;
+    }
+
+    /**
+     * Reject orders lubridate cannot parse: a day without a month.
+     *
+     * @param list<string> $orders
+     * @throws InvalidArgumentException
+     */
+    public static function checkOrders(array $orders): void
+    {
+        foreach ($orders as $order) {
+            if (str_contains((string) $order, 'd') && ! str_contains((string) $order, 'm')) {
+                throw new InvalidArgumentException("parse_date_time() order '{$order}' has a day but no month, which lubridate cannot parse.");
+            }
+        }
     }
 
     // ---------------------------------------------------------------
@@ -223,10 +241,15 @@ final class Temporal
     // Arithmetic
     // ---------------------------------------------------------------
 
-    /** Clock arithmetic with a period; invalid month and year results are NA, as in lubridate. */
+    /**
+     * Clock arithmetic with a period; invalid month and year results are NA, as
+     * in lubridate. A date plus hours, minutes, or seconds is a datetime.
+     */
     public static function plus(DateTimeInterface $x, Period $p): ?DateTimeInterface
     {
-        $x = self::immutable($x);
+        $x = $x instanceof CalendarDate && in_array($p->unit, ['hours', 'minutes', 'seconds'], true)
+            ? new DateTimeImmutable($x->format('Y-m-d'), self::zone('UTC'))
+            : self::immutable($x);
         $amount = $p->amount;
         if (in_array($p->unit, ['months', 'years'], true)) {
             $months = (int) $amount * ($p->unit === 'years' ? 12 : 1);
@@ -353,7 +376,8 @@ final class Temporal
 
     private static function checked(?int $y, int $m, int $d, int $h, int $i, int $s): bool
     {
-        return $y !== null && checkdate($m, $d, $y) && $h <= 23 && $i <= 59 && $s <= 59;
+        // Year 0 is a leap year, as 2000 is; checkdate() starts at year 1.
+        return $y !== null && checkdate($m, $d, $y === 0 ? 2000 : $y) && $h <= 23 && $i <= 59 && $s <= 59;
     }
 
     /** A local time in a zone; NA when the zone skips it. */

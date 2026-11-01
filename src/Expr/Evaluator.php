@@ -142,7 +142,8 @@ final class Evaluator
             'case_when' => $this->caseWhen($args, $call->option('default')),
             'coalesce' => $this->map(function (...$values) {
                 foreach ($values as $v) {
-                    if ($v !== null) {
+                    // NaN is missing, as is_na() and R's coalesce() treat it.
+                    if ($v !== null && ! (is_float($v) && is_nan($v))) {
                         return $v;
                     }
                 }

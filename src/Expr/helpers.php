@@ -113,7 +113,7 @@ function case_when(mixed ...$args): Call { return call_with('case_when', $args);
 /**
  * First value that is not NA among the arguments, row by row.
  *
- * NaN is a value here: it is not skipped.
+ * NaN counts as NA and is skipped, as in is_na() and R's coalesce().
  *
  * @param  mixed  ...$args  One or more expressions or literals.
  */
@@ -504,9 +504,17 @@ function lead(mixed $x, mixed ...$options): Call { return call_with('lead', [$x,
  *
  * With no argument, rows are numbered 1 to n in their order. With an argument, NA values get NA, and a factor column ranks by level order.
  *
- * @param  mixed  ...$x  Optionally one expression to rank by, or desc() of one.
+ * @param  mixed  $x  An expression to rank by, or desc() of one. Omit it to number rows in order.
+ * @throws \ArgumentCountError When given more than one argument.
  */
-function row_number(mixed ...$x): Call { return call_with('row_number', $x); }
+function row_number(mixed $x = null): Call
+{
+    if (\func_num_args() > 1) {
+        throw new \ArgumentCountError('row_number() takes at most 1 argument, '.\func_num_args().' given.');
+    }
+
+    return call_with('row_number', \func_num_args() === 0 ? [] : [$x]);
+}
 /**
  * Rank of each value, ties sharing the lowest rank, with gaps after ties.
  *
@@ -542,12 +550,24 @@ function cume_dist(mixed $x): Call { return call_with('cume_dist', [$x]); }
 /**
  * Bucket number from 1 to n, splitting the ordered values into n groups as evenly as possible.
  *
- * Earlier buckets take the extra rows when the sizes differ. NA values get NA. With no expression, rows are bucketed in row order.
+ * Earlier buckets take the extra rows when the sizes differ. NA values get NA. Without $x, rows are bucketed in row order.
  *
- * @param  mixed  ...$args  Optionally one expression to order by, or desc() of one, then named options: n (int, required) is the number of buckets.
+ * @param  mixed  $x  An expression to order by, or desc() of one. Null or omitted buckets rows in order.
+ * @param  int|null  $n  The number of buckets. Required.
  * @throws \InvalidArgumentException When n is not given.
+ * @throws \ArgumentCountError When given more than two arguments.
  */
-function ntile(mixed ...$args): Call { return call_with('ntile', $args); }
+function ntile(mixed $x = null, ?int $n = null): Call
+{
+    if (\func_num_args() > 2) {
+        throw new \ArgumentCountError('ntile() takes at most 2 arguments, '.\func_num_args().' given.');
+    }
+    if ($n === null) {
+        throw new \InvalidArgumentException('ntile() needs n, the number of buckets.');
+    }
+
+    return call_with('ntile', $x === null ? ['n' => $n] : [$x, 'n' => $n]);
+}
 /**
  * Cumulative sum in row order.
  *
@@ -686,8 +706,8 @@ function str_split_i(mixed $x, mixed $pattern, mixed $i): Call { return call_wit
  *
  * @param  mixed  $x  A string expression or literal.
  * @param  mixed  $width  The minimum width.
- * @param  mixed  ...$options  Named options: side (string, default 'left') is 'left', 'right', or 'both'; pad (string, default ' ') is the padding, repeated once per missing character.
- * @throws \InvalidArgumentException At evaluation, when side is not 'left', 'right', or 'both'.
+ * @param  mixed  ...$options  Named options: side (string, default 'left') is 'left', 'right', or 'both'; pad (string, default ' ') is one character of display width 1.
+ * @throws \InvalidArgumentException When pad is not one character of width 1, as in stringr: when the call is built for a literal pad, otherwise at evaluation. At evaluation, when side is not 'left', 'right', or 'both'.
  */
 function str_pad(mixed $x, mixed $width, mixed ...$options): Call { return call_with('str_pad', [$x, $width, ...$options]); }
 /**
@@ -792,12 +812,12 @@ function mdy_hms(mixed $x, mixed ...$options): Call { return call_with('mdy_hms'
 /**
  * Datetime parsed from text by the first of the given orders that fits.
  *
- * Order letters are Y (four-digit year), y (two-digit year: 00 to 68 are 2000s, 69 to 99 1900s), m, d, H, M, and S; spaces and the separators - / : _ in an order are ignored. A missing month or day is 1, and a missing hour, minute, or second is 0; an order without a year matches nothing. Text no order fits gives NA. SQL backends evaluate it in memory when it reads a column.
+ * Order letters are Y (four-digit year), y (two-digit year: 00 to 68 are 2000s, 69 to 99 1900s), m, d, H, M, and S; spaces and the separators - / : _ in an order are ignored. A missing year is 0, a missing month or day is 1, and a missing hour, minute, or second is 0, as in lubridate. Text no order fits gives NA. SQL backends evaluate it in memory when it reads a column.
  *
  * @param  mixed  $x  A string expression or literal.
  * @param  mixed  $orders  One order, such as 'Ymd HMS', or a list of orders.
  * @param  mixed  ...$options  Named options: tz (string, default 'UTC') is the time zone of the clock time.
- * @throws \InvalidArgumentException At evaluation, when an order has another letter, or tz is not a known time zone.
+ * @throws \InvalidArgumentException For an order with a day but no month, which lubridate cannot parse. At evaluation, when an order has another letter, or tz is not a known time zone.
  */
 function parse_date_time(mixed $x, mixed $orders, mixed ...$options): Call { return call_with('parse_date_time', [$x, \is_array($orders) ? new Lit($orders) : $orders, ...$options]); }
 /**
@@ -895,21 +915,29 @@ function ceiling_date(mixed $x, mixed $unit, mixed ...$options): Call { return c
  */
 function round_date(mixed $x, mixed $unit, mixed ...$options): Call { return call_with('round_date', [$x, $unit, ...$options]); }
 /**
- * Period of $n seconds, to add to or subtract from a datetime.
+ * Period of $n seconds, to add to or subtract from a date or datetime.
+ *
+ * A fraction of a second is kept. A date plus seconds is a datetime.
  *
  * @param  mixed  $n  The number of seconds.
  */
 function seconds(mixed $n): Call { return call_with('seconds', [$n]); }
 /**
- * Period of $n minutes, to add to or subtract from a datetime.
+ * Period of $n minutes, to add to or subtract from a date or datetime.
  *
- * @param  mixed  $n  The number of minutes.
+ * A date plus minutes is a datetime.
+ *
+ * @param  mixed  $n  The number of minutes, a whole number.
+ * @throws \InvalidArgumentException For a fractional count, as in lubridate.
  */
 function minutes(mixed $n): Call { return call_with('minutes', [$n]); }
 /**
- * Period of $n hours, to add to or subtract from a datetime.
+ * Period of $n hours, to add to or subtract from a date or datetime.
  *
- * @param  mixed  $n  The number of hours.
+ * A date plus hours is a datetime.
+ *
+ * @param  mixed  $n  The number of hours, a whole number.
+ * @throws \InvalidArgumentException For a fractional count, as in lubridate.
  */
 function hours(mixed $n): Call { return call_with('hours', [$n]); }
 /**
@@ -917,13 +945,15 @@ function hours(mixed $n): Call { return call_with('hours', [$n]); }
  *
  * Days are calendar days, so the clock time is kept across a daylight saving change.
  *
- * @param  mixed  $n  The number of days; a fraction is truncated.
+ * @param  mixed  $n  The number of days, a whole number.
+ * @throws \InvalidArgumentException For a fractional count, as in lubridate.
  */
 function days(mixed $n): Call { return call_with('days', [$n]); }
 /**
  * Period of $n weeks, to add to or subtract from a date or datetime.
  *
- * @param  mixed  $n  The number of weeks; a fraction is truncated.
+ * @param  mixed  $n  The number of weeks, a whole number.
+ * @throws \InvalidArgumentException For a fractional count, as in lubridate.
  */
 function weeks(mixed $n): Call { return call_with('weeks', [$n]); }
 /**
@@ -931,7 +961,8 @@ function weeks(mixed $n): Call { return call_with('weeks', [$n]); }
  *
  * A result that lands on a day the month lacks, such as January 31 plus one month, is NA, as in lubridate.
  *
- * @param  mixed  $n  The number of months; a fraction is truncated.
+ * @param  mixed  $n  The number of months, a whole number.
+ * @throws \InvalidArgumentException For a fractional count, as in lubridate.
  */
 function months(mixed $n): Call { return call_with('months', [$n]); }
 /**
@@ -939,7 +970,8 @@ function months(mixed $n): Call { return call_with('months', [$n]); }
  *
  * A result that lands on a day the year lacks, such as February 29 plus one year, is NA, as in lubridate.
  *
- * @param  mixed  $n  The number of years; a fraction is truncated.
+ * @param  mixed  $n  The number of years, a whole number.
+ * @throws \InvalidArgumentException For a fractional count, as in lubridate.
  */
 function years(mixed $n): Call { return call_with('years', [$n]); }
 /**

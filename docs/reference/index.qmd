@@ -422,9 +422,9 @@ Every public function and method, by task. Methods marked *all tables* are part 
 
 | Function or method | Kind | Purpose |
 | --- | --- | --- |
-| [`seconds()`](strings-and-dates.qmd#seconds) | function | Period of `$n` seconds, to add to or subtract from a datetime. |
-| [`minutes()`](strings-and-dates.qmd#minutes) | function | Period of `$n` minutes, to add to or subtract from a datetime. |
-| [`hours()`](strings-and-dates.qmd#hours) | function | Period of `$n` hours, to add to or subtract from a datetime. |
+| [`seconds()`](strings-and-dates.qmd#seconds) | function | Period of `$n` seconds, to add to or subtract from a date or datetime. |
+| [`minutes()`](strings-and-dates.qmd#minutes) | function | Period of `$n` minutes, to add to or subtract from a date or datetime. |
+| [`hours()`](strings-and-dates.qmd#hours) | function | Period of `$n` hours, to add to or subtract from a date or datetime. |
 | [`days()`](strings-and-dates.qmd#days) | function | Period of `$n` days, to add to or subtract from a date or datetime. |
 | [`weeks()`](strings-and-dates.qmd#weeks) | function | Period of `$n` weeks, to add to or subtract from a date or datetime. |
 | [`months()`](strings-and-dates.qmd#months) | function | Period of `$n` months, to add to or subtract from a date or datetime. |

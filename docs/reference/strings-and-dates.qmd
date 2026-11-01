@@ -152,11 +152,11 @@ Width counts Unicode code points; a string already at least that wide is unchang
 | --- | --- | --- | --- |
 | `$x` | <code>mixed</code> |  | A string expression or literal. |
 | `$width` | <code>mixed</code> |  | The minimum width. |
-| `...$options` | <code>mixed</code> |  | Named options: side (string, default 'left') is 'left', 'right', or 'both'; pad (string, default ' ') is the padding, repeated once per missing character. |
+| `...$options` | <code>mixed</code> |  | Named options: side (string, default 'left') is 'left', 'right', or 'both'; pad (string, default ' ') is one character of display width 1. |
 
 **Function** in `Phibble\Expr`\
 **Returns** `Call`\
-**Throws** `InvalidArgumentException`: at evaluation, when side is not 'left', 'right', or 'both'.
+**Throws** `InvalidArgumentException`: when pad is not one character of width 1, as in stringr: when the call is built for a literal pad, otherwise at evaluation. At evaluation, when side is not 'left', 'right', or 'both'.
 
 ### `str_trunc()` {#str-trunc}
 
@@ -578,7 +578,7 @@ parse_date_time(mixed $x, mixed $orders, mixed ...$options): Call
 
 Datetime parsed from text by the first of the given orders that fits.
 
-Order letters are Y (four-digit year), y (two-digit year: 00 to 68 are 2000s, 69 to 99 1900s), m, d, H, M, and S; spaces and the separators - / : _ in an order are ignored. A missing month or day is 1, and a missing hour, minute, or second is 0; an order without a year matches nothing. Text no order fits gives NA. SQL backends evaluate it in memory when it reads a column.
+Order letters are Y (four-digit year), y (two-digit year: 00 to 68 are 2000s, 69 to 99 1900s), m, d, H, M, and S; spaces and the separators - / : _ in an order are ignored. A missing year is 0, a missing month or day is 1, and a missing hour, minute, or second is 0, as in lubridate. Text no order fits gives NA. SQL backends evaluate it in memory when it reads a column.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -588,7 +588,7 @@ Order letters are Y (four-digit year), y (two-digit year: 00 to 68 are 2000s, 69
 
 **Function** in `Phibble\Expr`\
 **Returns** `Call`\
-**Throws** `InvalidArgumentException`: at evaluation, when an order has another letter, or tz is not a known time zone.
+**Throws** `InvalidArgumentException`: for an order with a day but no month, which lubridate cannot parse. At evaluation, when an order has another letter, or tz is not a known time zone.
 
 ## Date parts
 
@@ -824,7 +824,9 @@ The result is NA where either value is NA.
 seconds(mixed $n): Call
 ```
 
-Period of `$n` seconds, to add to or subtract from a datetime.
+Period of `$n` seconds, to add to or subtract from a date or datetime.
+
+A fraction of a second is kept. A date plus seconds is a datetime.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -839,14 +841,17 @@ Period of `$n` seconds, to add to or subtract from a datetime.
 minutes(mixed $n): Call
 ```
 
-Period of `$n` minutes, to add to or subtract from a datetime.
+Period of `$n` minutes, to add to or subtract from a date or datetime.
+
+A date plus minutes is a datetime.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$n` | <code>mixed</code> |  | The number of minutes. |
+| `$n` | <code>mixed</code> |  | The number of minutes, a whole number. |
 
 **Function** in `Phibble\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: for a fractional count, as in lubridate.
 
 ### `hours()` {#hours}
 
@@ -854,14 +859,17 @@ Period of `$n` minutes, to add to or subtract from a datetime.
 hours(mixed $n): Call
 ```
 
-Period of `$n` hours, to add to or subtract from a datetime.
+Period of `$n` hours, to add to or subtract from a date or datetime.
+
+A date plus hours is a datetime.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$n` | <code>mixed</code> |  | The number of hours. |
+| `$n` | <code>mixed</code> |  | The number of hours, a whole number. |
 
 **Function** in `Phibble\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: for a fractional count, as in lubridate.
 
 ### `days()` {#days}
 
@@ -875,10 +883,11 @@ Days are calendar days, so the clock time is kept across a daylight saving chang
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$n` | <code>mixed</code> |  | The number of days; a fraction is truncated. |
+| `$n` | <code>mixed</code> |  | The number of days, a whole number. |
 
 **Function** in `Phibble\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: for a fractional count, as in lubridate.
 
 ### `weeks()` {#weeks}
 
@@ -890,10 +899,11 @@ Period of `$n` weeks, to add to or subtract from a date or datetime.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$n` | <code>mixed</code> |  | The number of weeks; a fraction is truncated. |
+| `$n` | <code>mixed</code> |  | The number of weeks, a whole number. |
 
 **Function** in `Phibble\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: for a fractional count, as in lubridate.
 
 ### `months()` {#months}
 
@@ -907,10 +917,11 @@ A result that lands on a day the month lacks, such as January 31 plus one month,
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$n` | <code>mixed</code> |  | The number of months; a fraction is truncated. |
+| `$n` | <code>mixed</code> |  | The number of months, a whole number. |
 
 **Function** in `Phibble\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: for a fractional count, as in lubridate.
 
 ### `years()` {#years}
 
@@ -924,10 +935,11 @@ A result that lands on a day the year lacks, such as February 29 plus one year, 
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$n` | <code>mixed</code> |  | The number of years; a fraction is truncated. |
+| `$n` | <code>mixed</code> |  | The number of years, a whole number. |
 
 **Function** in `Phibble\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: for a fractional count, as in lubridate.
 
 ## Time zones and the clock
 
