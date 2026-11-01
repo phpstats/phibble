@@ -8,6 +8,7 @@ use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
 use Phibble\DataFrame;
+use Phibble\Format\TimeFormat;
 use Phibble\Type;
 
 /**
@@ -77,12 +78,29 @@ final class CsvWriter
             self::put($handle, implode($delimiter, array_map(fn (string $n) => $cell($n, true), $df->columns())).$eol);
         }
 
+        // A time column is formatted as a whole, as hms's as.character() is:
+        // one number of fraction digits, and hours padded to one width.
+        $times = [];
+        foreach ($types as $name => $type) {
+            if ($type === Type::Time) {
+                $times[$name] = TimeFormat::hms($df->storage((string) $name)->ticks());
+            }
+        }
+
         $rows = $df->nrow();
         for ($start = 0; $start < $rows; $start += self::CHUNK) {
             $indices = range($start, min($rows, $start + self::CHUNK) - 1);
             $columns = [];
             foreach ($types as $name => $type) {
-                $textual = in_array($type, [Type::String, Type::Factor, Type::Date, Type::DateTime], true);
+                $textual = in_array($type, [Type::String, Type::Factor, Type::Date, Type::DateTime, Type::Time], true);
+                if (isset($times[$name])) {
+                    $columns[] = array_map(
+                        fn (?string $text) => $text === null ? $na : $cell($text, true),
+                        array_slice($times[$name], $start, count($indices)),
+                    );
+
+                    continue;
+                }
                 $columns[] = array_map(function (mixed $v) use ($type, $textual, $na, $cell): string {
                     $text = self::text($v, $type);
 

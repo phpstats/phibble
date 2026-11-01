@@ -10,6 +10,7 @@ use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
 use Phibble\CalendarDate;
+use Phibble\Time;
 
 // Helpers in this namespace shadow these built-ins (see helpers.php).
 use function floor;
@@ -119,10 +120,19 @@ final class Temporal
     // Parts
     // ---------------------------------------------------------------
 
-    public static function part(?DateTimeInterface $x, string $fn, int $weekStart = 7): int|float|null
+    public static function part(DateTimeInterface|Time|null $x, string $fn, int $weekStart = 7): int|float|null
     {
         if ($x === null) {
             return null;
+        }
+        // A time has a clock, as lubridate reads an hms: no date parts.
+        if ($x instanceof Time) {
+            return match ($fn) {
+                'hour' => $x->hour(),
+                'minute' => $x->minute(),
+                'second' => $x->second(),
+                default => throw new InvalidArgumentException("{$fn}() needs a date or datetime, not a time."),
+            };
         }
 
         return match ($fn) {

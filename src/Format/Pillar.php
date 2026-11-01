@@ -6,6 +6,7 @@ namespace Phibble\Format;
 
 use DateTimeInterface;
 use Phibble\Contracts\Table;
+use Phibble\Time;
 use Phibble\Type;
 
 /**
@@ -104,8 +105,23 @@ final class Pillar
                 array_map(fn (?DateTimeInterface $v) => $v?->format('Y-m-d H:i:s'), $values),
                 width: 19,
             ),
+            Type::Time => self::timeShaft($values),
             Type::List => self::listShaft($values),
         };
+    }
+
+    /**
+     * hms's pillar shaft: H:MM, with seconds only when a value has them, or
+     * MM'SS" when no value has hours.
+     *
+     * @param list<?Time> $values
+     */
+    private static function timeShaft(array $values): SimpleShaft
+    {
+        [$cells, $naIndent] = TimeFormat::pillar(array_map(fn (?Time $v) => $v?->microseconds, $values));
+        $width = max(0, ...array_map(fn (?string $c) => $c === null ? $naIndent + 2 : strlen($c), $cells ?: [null]));
+
+        return new SimpleShaft($cells, width: $width, naIndent: $naIndent);
     }
 
     /** @param list<mixed> $values */
@@ -197,6 +213,7 @@ final class Pillar
             array_all($present, fn ($v) => is_int($v) || is_float($v)) => 'dbl',
             array_all($present, fn ($v) => is_string($v)) => 'chr',
             array_all($present, fn ($v) => $v instanceof DateTimeInterface) => 'dttm',
+            array_all($present, fn ($v) => $v instanceof Time) => 'time',
             default => 'list',
         };
     }

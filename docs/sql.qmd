@@ -70,6 +70,9 @@ values are then those `DataFrame` computes, apart from the
   tables do not track. Date parts (`year()` and the others), `wday()`, and
   `difftime()` are translated; a call on literals only, such as
   `ymd('2024-01-01')`, is evaluated once and passed as a value,
+- functions of a PostgreSQL `time` or MySQL `TIME` column other than
+  comparisons and `is_na()`, because SQL's time functions differ from
+  lubridate's (MySQL's `HOUR()` of `25:00:00` is 25),
 - `first()`, `last()`, and `nth()` without a row order (from `arrange()` or
   `order_by:`), or with `default:` or `na_rm:`,
 - `iqr()` outside PostgreSQL, `cumprod()`, and `consecutive_id()`,

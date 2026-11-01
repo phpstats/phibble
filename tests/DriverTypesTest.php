@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Phibble\DataFrame;
+use Phibble\Time;
 use Phibble\Type;
 
 use function Phibble\tbl;
@@ -12,16 +13,6 @@ use function Phibble\tbl;
  * stays text and only untyped values are guessed. These run when
  * PHIBBLE_TEST_PGSQL / PHIBBLE_TEST_MYSQL are set (see SqlConnections.php).
  */
-
-function server(string $driver): PDO
-{
-    $connect = sqlConnections()[$driver] ?? null;
-    if ($connect === null) {
-        test()->markTestSkipped("Set PHIBBLE_TEST_".strtoupper($driver).' to run this.');
-    }
-
-    return $connect();
-}
 
 /** Every way of reading a query: eager, lazy, and one column of a lazy table. */
 function readings(PDO $pdo, string $sql): array
@@ -46,12 +37,12 @@ it('keeps PostgreSQL text as text and types the rest as declared', function () {
         expect($df->types())->toBe([
             'flag' => Type::String, 'day_text' => Type::String, 'bad_day' => Type::String,
             'digits' => Type::String, 'padded' => Type::String, 'doc' => Type::String,
-            'at' => Type::String, 'ok' => Type::Bool, 'n' => Type::Int, 'x' => Type::Float,
+            'at' => Type::Time, 'ok' => Type::Bool, 'n' => Type::Int, 'x' => Type::Float,
             'inf' => Type::Float, 'day' => Type::Date, 'stamp' => Type::DateTime,
         ], $how)
             ->and($df->row(0)->toArray())->toMatchArray([
                 'flag' => 'TRUE', 'day_text' => '2024-01-02', 'bad_day' => '2024-02-30',
-                'digits' => '123', 'padded' => 'a ', 'at' => '10:00:00', 'ok' => true, 'n' => 2,
+                'digits' => '123', 'padded' => 'a ', 'at' => Time::of(10), 'ok' => true, 'n' => 2,
                 'x' => 1.5, 'inf' => INF,
             ]);
     }

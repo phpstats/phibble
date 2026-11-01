@@ -10,7 +10,9 @@ use DateTimeInterface;
 use DateTimeZone;
 use Exception;
 use InvalidArgumentException;
+use Phibble\Format\TimeFormat;
 use Phibble\Io\TextParser;
+use Phibble\Time;
 use Phibble\Type;
 use Stringable;
 
@@ -116,7 +118,12 @@ final class Infer
         if ($column->type() === $type) {
             return $column;
         }
-        // Dates and datetimes to numbers: days or seconds since the epoch, as in R.
+        // A time column to text, as hms's as.character(): one format for the column.
+        if ($column instanceof TemporalColumn && $column->type() === Type::Time && $type === Type::String) {
+            return new ArrayColumn(Type::String, TimeFormat::hms($column->ticks()));
+        }
+        // Dates, datetimes, and times to numbers: days since the epoch, seconds
+        // since the epoch, and seconds, as in R.
         if ($column instanceof TemporalColumn && in_array($type, [Type::Int, Type::Float], true)) {
             $scale = $column->type() === Type::Date ? 1 : 1_000_000;
             $numbers = array_map(
@@ -179,6 +186,7 @@ final class Infer
                 is_int($v) => 'int',
                 is_float($v) => 'float',
                 $v instanceof \Phibble\Contracts\Table => 'list',
+                $v instanceof Time => 'time',
                 is_string($v), $v instanceof Stringable, $v instanceof BackedEnum => 'string',
                 $v instanceof \Phibble\CalendarDate => 'date',
                 $v instanceof DateTimeInterface => 'datetime',
@@ -196,6 +204,7 @@ final class Infer
             // c(Date, 1L) is a Date in R: numbers count days.
             isset($seen['date']) && array_diff(array_keys($seen), ['date', 'int', 'float', 'bool']) === [] => Type::Date,
             isset($seen['datetime']) => count($seen) === 1 ? Type::DateTime : Type::String,
+            isset($seen['time']) => count($seen) === 1 ? Type::Time : Type::String,
             isset($seen['float']) => Type::Float,
             isset($seen['int']) => Type::Int,
             default => Type::Bool,
@@ -248,7 +257,7 @@ final class Infer
             );
         }
 
-        return $type === Type::Date || $type === Type::DateTime
+        return $type === Type::Date || $type === Type::DateTime || $type === Type::Time
             ? TemporalColumn::fromObjects($type, $out)
             : new ArrayColumn($type, $out);
     }
@@ -258,13 +267,14 @@ final class Infer
         if ($value instanceof BackedEnum) {
             $value = $value->value;
         }
-        if ($value instanceof Stringable && ! $value instanceof DateTimeInterface) {
+        if ($value instanceof Stringable && ! $value instanceof DateTimeInterface && ! $value instanceof Time) {
             $value = (string) $value;
         }
 
         return match ($type) {
             Type::Float => match (true) {
                 is_float($value) => $value,
+                $value instanceof Time => $value->seconds(),
                 is_int($value), is_bool($value) => (float) $value,
                 is_string($value) && self::isNumber(trim($value)) => self::toFloat(trim($value)),
                 $value instanceof DateTimeInterface => self::epoch($value, $from),
@@ -272,6 +282,7 @@ final class Infer
             },
             Type::Int => match (true) {
                 is_int($value) => $value,
+                $value instanceof Time => intdiv($value->microseconds, 1_000_000),
                 is_bool($value) => (int) $value,
                 is_float($value) => is_finite($value) && abs($value) < 2 ** 63 ? (int) $value : self::$fail,
                 is_string($value) && filter_var(trim($value), FILTER_VALIDATE_INT) !== false => (int) trim($value),
@@ -291,6 +302,7 @@ final class Infer
             },
             Type::String => match (true) {
                 is_string($value) => $value,
+                $value instanceof Time => (string) $value,
                 is_bool($value) => $value ? 'TRUE' : 'FALSE',
                 is_int($value) => (string) $value,
                 is_float($value) => self::formatFloat($value),
@@ -310,10 +322,22 @@ final class Infer
             },
             Type::DateTime => match (true) {
                 $value instanceof DateTimeInterface => DateTimeImmutable::createFromInterface($value),
+                // as.POSIXct() of an hms: that long after the epoch, in UTC.
+                $value instanceof Time => self::fromEpoch($value->seconds()),
                 is_string($value) => self::parseDateTime(trim($value)) ?? self::parseDate(trim($value)) ?? self::$fail,
                 is_int($value), is_float($value) => is_finite((float) $value)
                     ? self::fromEpoch((float) $value)
                     : self::$fail,
+                default => self::$fail,
+            },
+            Type::Time => match (true) {
+                $value instanceof Time => $value,
+                // as_hms() of a datetime: its time of day, in its own timezone.
+                $value instanceof DateTimeInterface => $from === Type::Date
+                    ? self::$fail
+                    : new Time((((int) $value->format('G') * 60 + (int) $value->format('i')) * 60 + (int) $value->format('s')) * 1_000_000 + (int) $value->format('u')),
+                is_int($value), is_float($value) => is_finite((float) $value) ? Time::fromSeconds($value) : self::$fail,
+                is_string($value) => Time::parse($value) ?? self::$fail,
                 default => self::$fail,
             },
             Type::Factor, Type::List => throw new \LogicException('Factors and lists are cast as a whole column.'),

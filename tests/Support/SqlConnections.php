@@ -59,3 +59,13 @@ function sqlFrom(PDO $pdo, DataFrame $df): SqlTable
 
     return SqlTable::query($pdo, implode(' UNION ALL ', $selects), $bindings);
 }
+
+function server(string $driver): PDO
+{
+    $connect = sqlConnections()[$driver] ?? null;
+    if ($connect === null) {
+        test()->markTestSkipped("Set PHIBBLE_TEST_".strtoupper($driver).' to run this.');
+    }
+
+    return $connect();
+}

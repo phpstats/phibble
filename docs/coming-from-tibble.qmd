@@ -89,8 +89,9 @@ phibble differs from R in these places:
   regular expression and `fixed()` matches literally. phibble uses PCRE where
   stringr uses ICU. `SqlTable` runs most regular-expression patterns in
   memory, as the [SQL tables](sql.qmd) page lists.
-- **There is no time-of-day type.** readr's `hms` columns and the `t` column
-  type stay strings.
+- **Times are `Phibble\Time` values in whole microseconds.** hms stores
+  seconds as a double. `min()` and `max()` of a time column are times, where
+  dplyr gives a difftime, and `mean()` gives seconds.
 - **JSON keeps null values.** jsonlite drops NA fields from records.
   `toJson()` writes them as `null`.
 - **Datetimes are UTC.** Text without an offset is read as UTC, and text with

@@ -1873,7 +1873,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
                     'codes' => $column->codes(),
                     'ordered' => $column->isOrdered(),
                 ],
-                Type::Date, Type::DateTime => Infer::convert($column, Type::Float, $name)->values(),
+                Type::Date, Type::DateTime, Type::Time => Infer::convert($column, Type::Float, $name)->values(),
                 Type::List => throw new InvalidArgumentException(
                     "Column '{$name}' is a list-column and cannot be used in a model."
                 ),
@@ -2229,6 +2229,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
                 $v === 0.0 => 0.0, // -0.0 equals 0.0, as in R
                 is_float($v) && is_nan($v) => 'NaN',
                 $v instanceof DateTimeInterface => 'date:'.$v->format('Y-m-d\\TH:i:s.uP'),
+                $v instanceof Time => 'time:'.$v->microseconds,
                 $v instanceof Table => 'table:'.serialize($v->toColumns()),
                 is_object($v) => 'object:'.spl_object_id($v),
                 default => $v,
@@ -2293,7 +2294,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
             },
             'min', 'max', 'first', 'last', 'nth' => match ($input) {
                 Type::Bool => in_array($definition->fn, ['min', 'max'], true) ? Type::Int : Type::Bool,
-                Type::Int, Type::Float, Type::String, Type::Date, Type::DateTime => $input,
+                Type::Int, Type::Float, Type::String, Type::Date, Type::DateTime, Type::Time => $input,
                 default => null,
             },
             default => null,

@@ -11,6 +11,7 @@ use Phibble\Expr\Desc;
 use Phibble\Expr\Expr;
 use Phibble\Expr\Functions;
 use Phibble\Expr\Lit;
+use Phibble\Time;
 
 /**
  * Compiles expressions to SQL with R's semantics where SQL differs:
@@ -43,6 +44,7 @@ final class Compiler
         private readonly string $mode = 'row',
         private readonly array $text = [],
         private readonly array $bools = [],
+        private readonly array $times = [],
     ) {}
 
     public function compile(Expr $expr): Fragment
@@ -137,6 +139,7 @@ final class Compiler
             $value === false => Fragment::raw('FALSE'),
             is_array($value) => Fragment::join(', ', array_map(fn ($v) => $this->literal(new Lit($v)), $value)),
             $value instanceof DateTimeInterface => Fragment::param($lit->dtype === 'date' ? $value->format('Y-m-d') : $value->format('Y-m-d H:i:s')),
+            $value instanceof Time => Fragment::param((string) $value),
             is_float($value) && ! is_finite($value) => throw new Untranslatable('Infinite or NaN literals have no portable SQL form.'),
             // Inline doubles with their type: bound as text they compare as text
             // in SQLite and fail against integers in PostgreSQL.
@@ -158,6 +161,14 @@ final class Compiler
             }
 
             return $this->window($call);
+        }
+
+        // SQL's time functions differ from hms and lubridate (MySQL's HOUR()
+        // of a TIME is not the hour of the day), so only comparisons and NA
+        // checks of a time column compile.
+        if (! in_array($fn, ['==', '!=', '<', '<=', '>', '>=', 'is_na'], true)
+            && array_any($call->args, fn ($a) => $a instanceof Col && in_array($a->name, $this->times, true))) {
+            throw new Untranslatable("{$fn}() of a time column is evaluated in memory.");
         }
 
         // A call on literals only (ymd('2024-01-01'), today()) is evaluated now and inlined.

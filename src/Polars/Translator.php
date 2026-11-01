@@ -17,6 +17,7 @@ use Phibble\Expr\Clock;
 use Phibble\Expr\Pattern;
 use Phibble\Expr\Period;
 use Phibble\Expr\Temporal;
+use Phibble\Time;
 use Phpolars\Expr;
 
 use function Phpolars\{concat_list, coalesce, col, concat_str, int_range, len, lit, max_horizontal, min_horizontal, struct_, when, all_horizontal};
@@ -117,12 +118,16 @@ final class Translator
         if ($v instanceof DateTimeInterface) {
             return $l->dtype === 'date' ? lit($v)->cast('Date') : lit($v);
         }
+        if ($v instanceof Time) {
+            return lit($v->microseconds)->cast('Duration(us)');
+        }
 
         return $v === null ? lit(null)->cast('Boolean') : lit($v);
     }
 
     private function call(Call $c, bool $inGroup): Expr
     {
+        $this->checkTimes($c);
         $kind = Functions::kind($c->fn);
         if ($kind === 'agg' || $kind === 'window') {
             $out = $kind === 'agg' ? $this->agg($c) : $this->window($c);
@@ -951,6 +956,24 @@ final class Translator
         throw new InvalidArgumentException('This argument must be a literal value for the Polars backend.');
     }
 
+    /**
+     * Times are Polars durations, on which Polars' clock and arithmetic
+     * differ from hms. Comparing times with times, checking for NA, and
+     * min(), max(), first(), and last() run in Polars; anything else with a
+     * time runs in a DataFrame.
+     */
+    private function checkTimes(Call $c): void
+    {
+        $types = array_map(fn (mixed $x) => $x instanceof PhibbleExpr ? $this->type($x) : null, $c->args);
+        if (! in_array('time', $types, true)) {
+            return;
+        }
+        $allowed = in_array($c->fn, ['==', '!=', '<', '<=', '>', '>=', 'is_na', 'min', 'max', 'first', 'last'], true);
+        if (! $allowed || array_any($types, fn (?string $t) => $t !== null && $t !== 'time')) {
+            throw new Unsupported("{$c->fn}() of a time runs in a DataFrame.");
+        }
+    }
+
     /** The R-level type of an expression, as far as it can be told without data. */
     public function type(PhibbleExpr $e): string
     {
@@ -963,6 +986,7 @@ final class Translator
                 $dtype === 'Boolean', $dtype === 'Null' => 'bool',
                 $dtype === 'Date' => 'date',
                 str_starts_with($dtype, 'Datetime') => 'datetime',
+                $dtype === 'Time', str_starts_with($dtype, 'Duration') => 'time',
                 default => 'string',
             };
         }
@@ -972,6 +996,7 @@ final class Translator
                 is_int($e->value) => 'int',
                 is_bool($e->value) || $e->value === null => 'bool',
                 $e->value instanceof DateTimeInterface => $e->dtype === 'date' ? 'date' : 'datetime',
+                $e->value instanceof Time => 'time',
                 default => 'string',
             };
         }

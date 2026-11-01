@@ -64,7 +64,7 @@ echo $penguins
   `addColumn()`, `enframe()`, `deframe()`, name repair, strict column access,
   and printing and `glimpse()` that match tibble's output.
 - **Types:** float, int, bool, string, factor (with ordered factors and the
-  forcats functions), date, datetime, and list-columns. Casts follow R's
+  forcats functions), date, datetime, time, and list-columns. Casts follow R's
   `as.*()` rules.
 - **Input and output:** CSV with readr's options and type guessing (and the
   phit extension's native reader when it is loaded), JSON, PDO queries,

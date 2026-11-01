@@ -113,8 +113,8 @@ final readonly class SqlTable implements Table
             if ($meta !== false && $dialect->isTextColumn($meta)) {
                 $text[] = $name;
             }
-            if ($meta !== false && $dialect->columnType($meta) === Type::Bool) {
-                $hints[$name] = Type::Bool;
+            if ($meta !== false && in_array($dialect->columnType($meta), [Type::Bool, Type::Time], true)) {
+                $hints[$name] = $dialect->columnType($meta);
             }
         }
 
@@ -475,7 +475,7 @@ final readonly class SqlTable implements Table
         if (array_any($aggregates, fn (Expr $e) => ! self::isSummary($e))) {
             return $this->collect()->summarise($aggregates, $groups);
         }
-        $compiler = new Compiler($this->dialect, mode: 'summary', text: $this->text, bools: $this->bools());
+        $compiler = new Compiler($this->dialect, mode: 'summary', text: $this->text, bools: $this->bools(), times: $this->times());
         // Group keys compare in byte order (text) and keep their names.
         $keys = array_map(fn (string $g) => $compiler->compile(new Col($g)), $this->groups);
         $parts = array_map(fn (Fragment $k, string $g) => Fragment::format('{} AS '.$this->dialect->quote($g), [$k]), $keys, $this->groups);
@@ -642,7 +642,7 @@ final readonly class SqlTable implements Table
 
     private function compiler(): Compiler
     {
-        return new Compiler($this->dialect, $this->groups, $this->rowOrder(), text: $this->text, bools: $this->bools());
+        return new Compiler($this->dialect, $this->groups, $this->rowOrder(), text: $this->text, bools: $this->bools(), times: $this->times());
     }
 
     /** Whether an expression gives one value per group: aggregates and literals, combined. */
@@ -663,6 +663,12 @@ final readonly class SqlTable implements Table
     private function bools(): array
     {
         return array_map(strval(...), array_keys(array_filter($this->hints, fn (Type $t) => $t === Type::Bool)));
+    }
+
+    /** @return list<string> Time columns, whose functions are evaluated in memory. */
+    private function times(): array
+    {
+        return array_map(strval(...), array_keys(array_filter($this->hints, fn (Type $t) => $t === Type::Time)));
     }
 
     /**

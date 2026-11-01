@@ -8,6 +8,7 @@ use DateTimeInterface;
 use InvalidArgumentException;
 use Phibble\Column\Infer;
 use Phibble\Contracts\Table;
+use Phibble\Time;
 use Phibble\Type;
 
 // Helpers in this namespace shadow these built-ins (see helpers.php).
@@ -769,6 +770,7 @@ final class Evaluator
             is_bool($v) => (int) $v,
             is_string($v) && is_numeric($v) => $v + 0,
             $v instanceof DateTimeInterface => (float) $v->format('U.u'),
+            $v instanceof Time => $v->seconds(),
             default => throw new InvalidArgumentException('Non-numeric argument to a numeric function: '.var_export($v, true).'.'),
         };
     }
@@ -805,6 +807,20 @@ final class Evaluator
                 default => throw new InvalidArgumentException("Unsupported period arithmetic: {$op}."),
             };
         }
+        // Times, as hms: adding or subtracting seconds or times, and scaling
+        // by a number, give a time.
+        if ($a instanceof Time || $b instanceof Time) {
+            $time = match (true) {
+                ($op === '+' || $op === '-') && ! $a instanceof DateTimeInterface && ! $b instanceof DateTimeInterface => true,
+                ($op === '*' && ! ($a instanceof Time && $b instanceof Time)) || ($op === '/' && ! $b instanceof Time) => true,
+                default => false,
+            };
+            if ($time) {
+                $seconds = self::arith($op, self::num($a), self::num($b));
+
+                return is_float($seconds) && ! is_finite($seconds) ? null : Time::fromSeconds($seconds);
+            }
+        }
         if ($op === '-' && $a instanceof DateTimeInterface && $b instanceof DateTimeInterface) {
             return Temporal::difference($a, $b, $a instanceof \Phibble\CalendarDate && $b instanceof \Phibble\CalendarDate ? 'days' : 'secs');
         }
@@ -832,6 +848,8 @@ final class Evaluator
         $cmp = match (true) {
             $numeric($a) && $numeric($b) => self::num($a) <=> self::num($b),
             $a instanceof DateTimeInterface && $b instanceof DateTimeInterface => $a <=> $b,
+            // A time compares with a time, a number of seconds, or text that reads as a time.
+            $a instanceof Time || $b instanceof Time => self::timeOrder($a, $b),
             $a instanceof DateTimeInterface => strcmp(self::str($a), self::str($b)) <=> 0,
             default => strcmp(self::str($a), self::str($b)) <=> 0,
         };
@@ -844,6 +862,19 @@ final class Evaluator
             '>' => $cmp > 0,
             '>=' => $cmp >= 0,
         };
+    }
+
+    private static function timeOrder(mixed $a, mixed $b): int
+    {
+        $micro = fn (mixed $v) => match (true) {
+            $v instanceof Time => $v->microseconds,
+            is_int($v), is_float($v) => $v * 1_000_000,
+            is_string($v) => Time::parse($v)?->microseconds,
+            default => null,
+        };
+        [$x, $y] = [$micro($a), $micro($b)];
+
+        return $x === null || $y === null ? strcmp(self::str($a), self::str($b)) <=> 0 : $x <=> $y;
     }
 
     /** @param list<mixed> $set */

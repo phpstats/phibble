@@ -53,7 +53,7 @@ readr's options are named arguments in camelCase:
 | `f` | factor |
 | `D` | date |
 | `T` | datetime |
-| `t` | string (phibble has no time-of-day type) |
+| `t` | time |
 | `?` | guess |
 | `_` or `-` | skip the column |
 
@@ -74,9 +74,17 @@ sampled the way readr 2 samples them. A column is:
 - float if every value is a number, including `Inf` and `NaN`,
 - date if every value is an ISO 8601 date,
 - datetime if every value is an ISO 8601 date and time,
+- time if every value is a time of day as readr reads one: hours of one or
+  two digits, a colon, two digits of minutes, and optionally seconds, a
+  fraction, and `AM` or `PM`, such as `7:30`, `00:07:15`, or `1:30 PM`,
 - string otherwise.
 
 Numbers with leading zeros such as `007` stay strings, as in readr.
+
+As in readr, a time's minutes and seconds must be under 60, `12 AM` is hour
+0, `PM` adds 12 hours to any hour but 12, and a fraction of a second is
+dropped. The phit extension has no time type, so phibble guesses times in the
+columns phit reads as text, from the same rows the PHP reader samples.
 
 When a value cannot be parsed as its column's type, a row has the wrong number
 of fields, or a quoted field is never closed, phibble still returns the data.
@@ -160,7 +168,8 @@ queries a large file without loading it, and its
 `writeCsv($path)` writes a file and `toCsv()` returns the text. The format
 follows readr's `write_csv()`. Values are quoted only when needed, NA is written
 as `NA`, logicals as `TRUE` and `FALSE`, dates in ISO 8601, and datetimes in
-UTC with a `Z`. Factors are written as their labels, and list-columns throw.
+UTC with a `Z`. Times are written as hms writes a column: one number of
+fraction digits for the column, and hours padded with spaces to one width. Factors are written as their labels, and list-columns throw.
 
 {{< include examples/_write-csv.md >}}
 

@@ -9,13 +9,15 @@ use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
 use Phibble\CalendarDate;
+use Phibble\Time;
 use Phibble\Type;
 
 /**
- * Dates and datetimes stored as integers: days since 1970-01-01 for dates
- * (as R's Date), microseconds since the epoch for datetimes. Objects are
- * built only when values are read (values(), get()), so a million
- * datetimes take integers' memory rather than objects'.
+ * Dates, datetimes, and times stored as integers: days since 1970-01-01 for
+ * dates (as R's Date), microseconds since the epoch for datetimes, and
+ * microseconds for times (as R's hms). Objects are built only when values
+ * are read (values(), get()), so a million datetimes take integers' memory
+ * rather than objects'.
  *
  * A datetime column has one timezone, like R's POSIXct "tzone"; values
  * are shown in it. Dates are UTC midnight.
@@ -25,20 +27,20 @@ final readonly class TemporalColumn implements Column
     private const int MICRO = 1_000_000;
 
     /**
-     * @param list<?int> $ticks Days (date) or microseconds (datetime); null is NA.
+     * @param list<?int> $ticks Days (date) or microseconds (datetime, time); null is NA.
      */
     public function __construct(
         private Type $type,
         private array $ticks,
         private string $timezone = 'UTC',
     ) {
-        if ($type !== Type::Date && $type !== Type::DateTime) {
-            throw new InvalidArgumentException('TemporalColumn holds dates or datetimes.');
+        if ($type !== Type::Date && $type !== Type::DateTime && $type !== Type::Time) {
+            throw new InvalidArgumentException('TemporalColumn holds dates, datetimes, or times.');
         }
     }
 
     /**
-     * @param list<?DateTimeInterface> $values
+     * @param list<DateTimeInterface|Time|null> $values Times for a time column.
      */
     public static function fromObjects(Type $type, array $values): self
     {
@@ -47,6 +49,11 @@ final readonly class TemporalColumn implements Column
         foreach ($values as $value) {
             if ($value === null) {
                 $ticks[] = null;
+
+                continue;
+            }
+            if ($value instanceof Time) {
+                $ticks[] = $value->microseconds;
 
                 continue;
             }
@@ -59,7 +66,7 @@ final readonly class TemporalColumn implements Column
             $ticks[] = $value->getTimestamp() * self::MICRO + (int) $value->format('u');
         }
 
-        return new self($type, $ticks, $type === Type::Date ? 'UTC' : ($timezone ?? 'UTC'));
+        return new self($type, $ticks, $type === Type::DateTime ? ($timezone ?? 'UTC') : 'UTC');
     }
 
     /** Days since 1970-01-01 for a calendar date. */
@@ -76,7 +83,7 @@ final readonly class TemporalColumn implements Column
         return $era * 146097 + $doe - 719468;
     }
 
-    /** @return list<?int> Days or microseconds since the epoch. */
+    /** @return list<?int> Days or microseconds since the epoch, or microseconds for times. */
     public function ticks(): array
     {
         return $this->ticks;
@@ -94,6 +101,9 @@ final readonly class TemporalColumn implements Column
 
     public function values(): array
     {
+        if ($this->type === Type::Time) {
+            return array_map(fn (?int $t) => $t === null ? null : new Time($t), $this->ticks);
+        }
         $prototype = $this->prototype();
 
         return array_map(fn (?int $t) => $t === null ? null : $this->object($prototype, $t), $this->ticks);
@@ -103,7 +113,11 @@ final readonly class TemporalColumn implements Column
     {
         $t = $this->ticks[$index];
 
-        return $t === null ? null : $this->object($this->prototype(), $t);
+        return match (true) {
+            $t === null => null,
+            $this->type === Type::Time => new Time($t),
+            default => $this->object($this->prototype(), $t),
+        };
     }
 
     public function take(array $indices): static

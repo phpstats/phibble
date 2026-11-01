@@ -19,7 +19,7 @@ gives the commands that install phibble and download the file.
 ## Tables
 
 - Every column has one type: float, int, bool, string, factor, date, datetime,
-  or list. Types are guessed as a table loads, or declared per column.
+  time, or list. Types are guessed as a table loads, or declared per column.
 - PHP `null` is a missing value (R's NA) in every type.
 - A `DataFrame` never changes in place. Every method returns a new table.
 - Tables load from CSV, JSON, PDO queries, Laravel and Doctrine query

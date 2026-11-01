@@ -108,7 +108,7 @@ text columns).
 ## Types and NA
 
 Each column has one type from the `Phibble\Type` enum: `Float`, `Int`, `Bool`,
-`String`, `Factor`, `Date`, `DateTime`, or `List`. Types are inferred from the
+`String`, `Factor`, `Date`, `DateTime`, `Time`, or `List`. Types are inferred from the
 values, and PHP `null` is NA in every type. The [types guide](types.qmd)
 describes inference, casts, and factors.
 

@@ -6,6 +6,7 @@ namespace Phibble\Expr;
 
 use DateTimeInterface;
 use InvalidArgumentException;
+use Phibble\Time;
 
 /**
  * A literal: null, bool, int, float, string, a date, or a list of scalars
@@ -28,10 +29,12 @@ final readonly class Lit extends Expr
             $value = array_values($value);
         } elseif ($value instanceof DateTimeInterface) {
             $dtype ??= $value->format('H:i:s.u') === '00:00:00.000000' ? 'date' : 'datetime';
+        } elseif ($value instanceof Time) {
+            $dtype = 'time';
         } elseif (! ($value === null || is_scalar($value))) {
-            throw new InvalidArgumentException('Literals must be scalars, dates or lists of scalars, got '.get_debug_type($value).'.');
+            throw new InvalidArgumentException('Literals must be scalars, dates, times, or lists of scalars, got '.get_debug_type($value).'.');
         }
-        if (! in_array($dtype, [null, 'date', 'datetime'], true)) {
+        if (! in_array($dtype, [null, 'date', 'datetime', 'time'], true)) {
             throw new InvalidArgumentException("Unknown literal dtype '{$dtype}'.");
         }
         $this->value = $value;
@@ -43,7 +46,9 @@ final readonly class Lit extends Expr
     {
         $dtype = $node['dtype'] ?? null;
         $value = $node['value'] ?? null;
-        if ($dtype !== null && is_string($value)) {
+        if ($dtype === 'time' && is_string($value)) {
+            $value = Time::parse($value) ?? throw new InvalidArgumentException("Invalid time literal '{$value}'.");
+        } elseif ($dtype !== null && is_string($value)) {
             $value = new \DateTimeImmutable($value, new \DateTimeZone('UTC'));
         }
 
@@ -55,6 +60,8 @@ final readonly class Lit extends Expr
         $value = $this->value;
         if ($value instanceof DateTimeInterface) {
             $value = $this->dtype === 'date' ? $value->format('Y-m-d') : $value->format('Y-m-d\TH:i:s.uP');
+        } elseif ($value instanceof Time) {
+            $value = (string) $value;
         }
 
         return $this->dtype === null

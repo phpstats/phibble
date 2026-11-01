@@ -63,11 +63,12 @@ final class MysqlDialect extends Dialect
     public function columnType(array $meta): ?Type
     {
         return match ($meta['native_type'] ?? null) {
-            'VAR_STRING', 'STRING', 'BLOB', 'JSON', 'TIME', 'ENUM', 'SET' => Type::String,
+            'VAR_STRING', 'STRING', 'BLOB', 'JSON', 'ENUM', 'SET' => Type::String,
             'TINY', 'SHORT', 'INT24', 'LONG', 'LONGLONG', 'YEAR' => Type::Int,
             'FLOAT', 'DOUBLE' => Type::Float,
             'DATE' => Type::Date,
             'DATETIME', 'TIMESTAMP' => Type::DateTime,
+            'TIME' => Type::Time,
             default => null,
         };
     }

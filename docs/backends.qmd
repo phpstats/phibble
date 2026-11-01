@@ -68,6 +68,11 @@ it cannot run, such as PHP closures and `str_to_title()`, run in `DataFrame`.
 `PolarsTable::$fallbacks` counts those steps. Set `PolarsTable::$strict = true`
 to throw `PolarsFallback` instead. The message names the verb and the reason.
 
+A time column is a Polars duration in microseconds, which, like an hms, can
+be negative or longer than a day. A Polars `Time` column reads as a time.
+Comparisons of times, `is_na()`, `min()`, `max()`, `first()`, and `last()` run
+in Polars, and other functions of a time run in a `DataFrame`.
+
 Two kinds of list-column stay in `DataFrame`. Polars stores named arrays as
 structs, which have every key in every row, so `fromTable()` throws when a
 list-column holds named arrays with different keys. A list-column of

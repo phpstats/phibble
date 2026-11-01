@@ -161,7 +161,7 @@ final class NativeCsv
         return array_map(fn ($spec) => match (true) {
             $spec === null => '?',
             $spec === 'skip' => '_',
-            $spec['number'], $spec['type'] === Type::Factor => 'c',
+            $spec['number'], $spec['type'] === Type::Factor, $spec['type'] === Type::Time => 'c',
             default => match ($spec['type']) {
                 Type::Bool => 'l',
                 Type::Int => 'i',
@@ -175,15 +175,20 @@ final class NativeCsv
 
     /**
      * A native result as a DataFrame, with the problems found finishing it:
-     * factors and numbers parsed in PHP, select applied, and each column's
-     * failed parses reported.
+     * factors, numbers, and times parsed in PHP, select applied, and each
+     * column's failed parses reported.
+     *
+     * phit has no time type, so a guessed column phit reads as text is
+     * guessed again from the rows the PHP reader samples. A column that
+     * guesses as time is parsed as one, and its spec becomes time, so later
+     * chunks are read the same way.
      *
      * @param array{columns: list<array{type: string, values: list<mixed>, failed: int}|null>} $result
      * @param list<string> $names
      * @param list<array{type: Type, number: bool, levels: ?list<string>, ordered: bool}|'skip'|null> $specs
      * @return array{0: DataFrame, 1: list<string>}
      */
-    private static function finish(array $result, array $names, array $specs, CsvOptions $o): array
+    private static function finish(array $result, array $names, array &$specs, CsvOptions $o): array
     {
         $problems = [];
         $parser = new TextParser($o->decimalMark, $o->groupingMark);
@@ -196,7 +201,13 @@ final class NativeCsv
             }
             $values = $native['values'];
             $failed = (int) ($native['failed'] ?? 0);
-            if ($spec !== null && ($spec['number'] || $spec['type'] === Type::Factor)) {
+            if ($spec === null && $native['type'] === 'string') {
+                $sample = CsvSource::sampleRows(count($values), $o->guessMax);
+                if ($parser->guess(array_map(fn (int $row) => $values[$row], $sample)) === Type::Time) {
+                    $spec = $specs[$i] = ['type' => Type::Time, 'number' => false, 'levels' => null, 'ordered' => false];
+                }
+            }
+            if ($spec !== null && ($spec['number'] || $spec['type'] === Type::Factor || $spec['type'] === Type::Time)) {
                 // Requested as text; finish the parse in PHP.
                 [$column, $failed] = $parser->parse($values, $spec['type'], [
                     'grouping' => false,

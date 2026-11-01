@@ -6,6 +6,7 @@ namespace Phibble\Format;
 
 use DateTimeInterface;
 use Phibble\Contracts\Table;
+use Phibble\Time;
 use Phibble\Type;
 
 /**
@@ -53,6 +54,7 @@ final class Glimpse
             Type::Factor => self::formatFactor($df, $name, $values),
             Type::Date => array_map(fn (?DateTimeInterface $v) => $v?->format('Y-m-d') ?? 'NA', $values),
             Type::DateTime => self::formatDateTimes($values),
+            Type::Time => self::formatTimes($values),
             Type::List => array_map(self::formatListCell(...), $values),
         };
     }
@@ -81,6 +83,20 @@ final class Glimpse
         $format = $midnight ? 'Y-m-d' : 'Y-m-d H:i:s';
 
         return array_map(fn (?DateTimeInterface $v) => $v?->format($format) ?? 'NA', $values);
+    }
+
+    /**
+     * hms's format(): as.character(), then right-justified with NA.
+     *
+     * @param list<?Time> $values
+     * @return list<string>
+     */
+    private static function formatTimes(array $values): array
+    {
+        $texts = array_map(fn (?string $t) => $t ?? 'NA', TimeFormat::hms(array_map(fn (?Time $v) => $v?->microseconds, $values)));
+        $width = max(0, ...array_map(strlen(...), $texts ?: ['']));
+
+        return array_map(fn (string $t) => str_pad($t, $width, ' ', STR_PAD_LEFT), $texts);
     }
 
     private static function formatListCell(mixed $value): string

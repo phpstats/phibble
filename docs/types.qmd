@@ -16,6 +16,7 @@ tibble's abbreviation for each type.
 | `Type::Factor` | level labels, stored as codes | `<fct>`, or `<ord>` when ordered |
 | `Type::Date` | `DateTimeImmutable` at midnight UTC | `<date>` |
 | `Type::DateTime` | `DateTimeImmutable` | `<dttm>` |
+| `Type::Time` | `Phibble\Time` | `<time>` |
 | `Type::List` | any PHP value, including data frames | `<list>` |
 
 `null` is NA in every type. `$df->types()` returns the types by column name
@@ -29,7 +30,8 @@ values:
 - Bools and ints combine to int, and ints and floats combine to float.
 - Any string makes the column a string column, and the other values are
   converted to text.
-- `DateTimeInterface` values make a datetime column.
+- `DateTimeInterface` values make a datetime column, and `Phibble\Time`
+  values make a time column.
 - Arrays and other objects make a list-column.
 - A column that is entirely NA is bool, R's logical type.
 
@@ -94,6 +96,29 @@ in ISO 8601 form is parsed as a date when it has no time, and as a datetime
 otherwise. Text without an offset is read as UTC.
 
 {{< include examples/_dates.md >}}
+
+## Times
+
+A time column holds `Phibble\Time` values, as R's hms package does. A time
+is a whole number of microseconds, which may be negative or longer than a
+day. `Time::of($hours, $minutes, $seconds)` and `Time::fromSeconds()` build
+one, and `Time::parse()` reads text such as `07:30`, `-01:00:00.5`, or
+`1:30 PM`. `seconds()` gives the number of seconds. `hour()`, `minute()`, and
+`second()` give the clock time, as lubridate does, so `25:00:00` has hour 1.
+
+A time prints as hms prints it. A column shows seconds only when a value has
+them, the fraction digits the column needs, and minutes and seconds as
+`MM'SS"` when no value has hours. A time converts to its number of seconds,
+and to text as hms's `as.character()` gives it. A number converts to that
+many seconds, text is parsed, and a datetime gives its time of day.
+
+{{< include examples/_times.md >}}
+
+Comparing a time with text reads the text as a time, so
+`col('departs')->gt('12:00')` compares clock times. Adding or subtracting
+seconds or a time gives a time, and so does multiplying or dividing by a
+number. `min()` and `max()` of a time column are times, where dplyr gives a
+difftime, and `mean()` gives seconds.
 
 ## List-columns
 

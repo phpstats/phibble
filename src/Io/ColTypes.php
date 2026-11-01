@@ -19,14 +19,14 @@ final class ColTypes
 {
     private const array LETTERS = [
         'c' => 'string', 'i' => 'int', 'd' => 'float', 'n' => 'number', 'l' => 'bool',
-        'f' => 'factor', 'D' => 'date', 'T' => 'datetime', 't' => 'string', '?' => 'guess',
+        'f' => 'factor', 'D' => 'date', 'T' => 'datetime', 't' => 'time', '?' => 'guess',
         '_' => 'skip', '-' => 'skip',
     ];
 
     private const array ALIASES = [
         'character' => 'string', 'chr' => 'string', 'integer' => 'int', 'double' => 'float',
         'dbl' => 'float', 'numeric' => 'float', 'logical' => 'bool', 'lgl' => 'bool', 'fct' => 'factor',
-        'dttm' => 'datetime', 'time' => 'string', 'number' => 'number', 'guess' => 'guess', 'skip' => 'skip',
+        'dttm' => 'datetime', 'hms' => 'time', 'number' => 'number', 'guess' => 'guess', 'skip' => 'skip',
     ];
 
     /**

@@ -121,7 +121,7 @@ such as `floor_date(d, 'month')` or `d + days(1)` are dates when `d` is.
 | --- | --- |
 | `ymd`, `dmy`, `mdy`, `ymd_hms`, `dmy_hms`, `mdy_hms` (with `tz:`) | Parse text. Separators are optional; invalid input gives NA. |
 | `parse_date_time(x, orders, tz:)` | Orders made of `Y`, `y`, `m`, `d`, `H`, `M`, and `S`, such as `'Ymd HMS'`; the first that fits wins. |
-| `year`, `month`, `day`, `yday`, `quarter`, `hour`, `minute`, `second` | Parts as numbers. |
+| `year`, `month`, `day`, `yday`, `quarter`, `hour`, `minute`, `second` | Parts as numbers. On a time, `hour()`, `minute()`, and `second()` give its clock time, and the date parts throw. |
 | `wday(x, week_start:)` | 1 is Sunday by default, as in lubridate; `week_start: 1` makes Monday 1. |
 | `floor_date`, `ceiling_date`, `round_date` (`x, unit, week_start:`) | Units from `second` to `year`, with multiples such as `'15 minutes'`. `ceiling_date` moves a date that is already on a boundary to the next one, as lubridate does for dates. |
 | `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, `years` | Periods, used as `col('d')->add(months(1))`. Month and year arithmetic that lands on a date that does not exist gives NA. |

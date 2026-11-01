@@ -488,9 +488,11 @@ final class CsvSource implements Source
      * there are at most $guessMax, otherwise $guessMax - 1 evenly spaced
      * rows plus the last.
      *
+     * @internal
+     *
      * @return list<int>
      */
-    private static function sampleRows(int $count, int $guessMax): array
+    public static function sampleRows(int $count, int $guessMax): array
     {
         if ($count <= $guessMax) {
             return $count === 0 ? [] : range(0, $count - 1);

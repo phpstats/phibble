@@ -7,6 +7,28 @@ change the public API.
 
 ## [Unreleased]
 
+### Added
+
+- A time column type, `Type::Time`, as R's hms. Its values are `Phibble\Time`
+  objects, whole microseconds that may be negative or longer than a day, with
+  `Time::of()`, `Time::fromSeconds()`, `Time::parse()`, `seconds()`, and
+  lubridate's `hour()`, `minute()`, and `second()`.
+- CSV reading guesses and parses times as readr does, such as `7:30`,
+  `00:07:15`, and `1:30 PM`, with the PHP and phit readers alike. The `t`
+  and `time` column types read times. `writeCsv()` writes them as readr
+  does.
+- Times print and `glimpse()` as tibble shows hms, convert to and from
+  numbers (seconds), text, and datetimes as R does, and compare, sort, group,
+  and join. Arithmetic with seconds gives a time.
+- PostgreSQL `time` and MySQL `TIME` columns read as times. Comparisons of
+  them compile to SQL, and other functions of them run in memory.
+  `PolarsTable` holds times as Polars durations.
+
+### Changed
+
+- SQLite text that looks like times, such as `07:30:00`, is guessed as a time
+  column, as readr would guess it.
+
 ## [0.5.3] - 2026-11-01
 
 ### Added

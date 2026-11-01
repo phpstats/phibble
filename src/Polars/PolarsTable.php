@@ -68,11 +68,16 @@ final class PolarsTable implements Table
         foreach ($dataFrame->columns() as $name) {
             $storage = $dataFrame->storage($name);
             if ($storage instanceof TemporalColumn) {
-                // Dates and datetimes cross as integer ticks, never as objects.
+                // Dates, datetimes, and times cross as integer ticks, never as
+                // objects. A time is a Polars duration, which, like an hms,
+                // may be negative or longer than a day.
                 $columns[$name] = $storage->ticks();
-                $temporal[$name] = $storage->type() === Type::Date
-                    ? 'Date'
-                    : ($storage->timezone() === 'UTC' ? 'Datetime(us)' : "Datetime(us, {$storage->timezone()})");
+                $temporal[$name] = match (true) {
+                    $storage->type() === Type::Date => 'Date',
+                    $storage->type() === Type::Time => 'Duration(us)',
+                    $storage->timezone() === 'UTC' => 'Datetime(us)',
+                    default => "Datetime(us, {$storage->timezone()})",
+                };
             } else {
                 $columns[$name] = $storage->values();
             }
@@ -90,6 +95,7 @@ final class PolarsTable implements Table
                 Type::String, Type::Factor => 'String',
                 Type::Date => 'Date',
                 Type::DateTime => 'Datetime(us)',
+                Type::Time => 'Duration(us)',
                 Type::List => null,
             };
             if ($dtype !== null) {
@@ -247,6 +253,7 @@ final class PolarsTable implements Table
                 $dtype === 'Boolean', $dtype === 'Null' => Type::Bool,
                 $dtype === 'Date' => Type::Date,
                 str_starts_with($dtype, 'Datetime') => Type::DateTime,
+                $dtype === 'Time', str_starts_with($dtype, 'Duration') => Type::Time,
                 str_starts_with($dtype, 'List'), str_starts_with($dtype, 'Array'), str_starts_with($dtype, 'Struct') => Type::List,
                 $dtype === 'Categorical' => Type::Factor,
                 default => Type::String,
@@ -327,6 +334,13 @@ final class PolarsTable implements Table
                 $casts[$name] = col($name)->dt()->castTimeUnit('us')->cast('Int64');
                 $zone = preg_match('/^Datetime\(\w+, (.+)\)$/', $dtype, $m) ? $m[1] : 'UTC';
                 $temporal[$name] = [Type::DateTime, $zone];
+            } elseif (str_starts_with($dtype, 'Duration')) {
+                $casts[$name] = col($name)->dt()->castTimeUnit('us')->cast('Int64');
+                $temporal[$name] = [Type::Time, 'UTC'];
+            } elseif ($dtype === 'Time') {
+                // Nanoseconds since midnight.
+                $casts[$name] = col($name)->cast('Int64')->floordiv(1000);
+                $temporal[$name] = [Type::Time, 'UTC'];
             }
         }
         $df = $casts === [] ? $this->df : $this->df->withColumns($casts);

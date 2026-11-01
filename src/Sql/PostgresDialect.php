@@ -51,7 +51,7 @@ final class PostgresDialect extends Dialect
 
     public function columnType(array $meta): ?Type
     {
-        // Every other type (text, json, uuid, time, interval, arrays, enums)
+        // Every other type (text, json, uuid, timetz, interval, arrays, enums)
         // reaches PHP as text and stays text.
         return match ($meta['native_type'] ?? null) {
             null => null,
@@ -60,6 +60,7 @@ final class PostgresDialect extends Dialect
             'float4', 'float8' => Type::Float,
             'date' => Type::Date,
             'timestamp', 'timestamptz' => Type::DateTime,
+            'time' => Type::Time,
             default => Type::String,
         };
     }

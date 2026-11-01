@@ -15,6 +15,7 @@ enum Type: string
     case Factor = 'factor';
     case Date = 'date';
     case DateTime = 'datetime';
+    case Time = 'time';
     case List = 'list';
 
     public static function parse(self|string $type): self
@@ -38,6 +39,7 @@ enum Type: string
             self::Factor => 'fct',
             self::Date => 'date',
             self::DateTime => 'dttm',
+            self::Time => 'time',
             self::List => 'list',
         };
     }

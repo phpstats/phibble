@@ -11,6 +11,7 @@ use Exception;
 use Phibble\Column\ArrayColumn;
 use Phibble\Column\Column;
 use Phibble\Column\FactorColumn;
+use Phibble\Time;
 use Phibble\Type;
 
 /**
@@ -30,6 +31,12 @@ final readonly class TextParser
     private const string DATE = '/^(\d{4})[-\/](\d{2})[-\/](\d{2})$/';
 
     private const string DATETIME = '/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2})(?::(\d{2})(?::(\d{2})(\.\d+)?)?)?)?(Z|[+-]\d{2}(?::?\d{2})?)?$/';
+
+    /**
+     * readr's time: H:MM, with :S or :SS, a fraction (which readr drops), and
+     * AM or PM. Hours have one or two digits.
+     */
+    private const string TIME = '/^(\d{1,2}):(\d{2})(?::(\d{1,2}))?(?:\.\d*)?\s*([AaPp][Mm])?$/';
 
     private string $grouping;
 
@@ -75,6 +82,7 @@ final readonly class TextParser
             $all(fn ($v) => $this->guessesAsNumber($v)) => Type::Float,
             $all(fn ($v) => preg_match(self::DATE, $v) === 1) => Type::Date,
             $all(fn ($v) => preg_match(self::DATETIME, $v) === 1) => Type::DateTime,
+            $all(fn ($v) => preg_match(self::TIME, $v) === 1) => Type::Time,
             default => Type::String,
         };
     }
@@ -102,6 +110,9 @@ final readonly class TextParser
 
         if ($type === Type::Date || $type === Type::DateTime) {
             return $this->parseTemporal($values, $type);
+        }
+        if ($type === Type::Time) {
+            return self::parseTimes($values);
         }
         $grouping = $options['grouping'] ?? false;
         $number = $options['number'] ?? false;
@@ -173,6 +184,37 @@ final readonly class TextParser
         }
 
         return [new TemporalColumn($type, $ticks), $failed];
+    }
+
+    /**
+     * Times as readr reads them: minutes and seconds under 60, AM and PM
+     * applied, and any fraction of a second dropped.
+     *
+     * @param list<?string> $values
+     * @return array{0: TemporalColumn, 1: int}
+     */
+    private static function parseTimes(array $values): array
+    {
+        $ticks = [];
+        $failed = 0;
+        foreach ($values as $v) {
+            if ($v === null) {
+                $ticks[] = null;
+
+                continue;
+            }
+            $tick = null;
+            if (preg_match(self::TIME, $v, $m) && (int) $m[2] <= 59 && (int) (($m[3] ?? '') ?: 0) <= 59) {
+                $hours = Time::meridiem((int) $m[1], $m[4] ?? '');
+                $tick = (($hours * 60 + (int) $m[2]) * 60 + (int) (($m[3] ?? '') ?: 0)) * 1_000_000;
+            }
+            if ($tick === null) {
+                $failed++;
+            }
+            $ticks[] = $tick;
+        }
+
+        return [new TemporalColumn(Type::Time, $ticks), $failed];
     }
 
     public function guessesAsInt(string $v): bool
