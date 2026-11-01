@@ -1,0 +1,206 @@
+---
+title: "Output"
+toc-depth: 3
+---
+
+Methods that return PHP values, write CSV and JSON, and print tables.
+
+## PHP values
+
+### `->toRows()` {#torows}
+
+```php
+$table->toRows(): array
+```
+
+The rows as a list of associative arrays.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `list<array<string, mixed>>`\
+**Examples** [SQL tables](../sql.qmd)
+
+### `->toColumns()` {#tocolumns}
+
+```php
+$table->toColumns(): array
+```
+
+The columns as an array of PHP lists, keyed by name.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `array<string, list<mixed>>`
+
+### `->collect()` {#collect}
+
+```php
+$table->collect(): DataFrame
+```
+
+The rows as an in-memory DataFrame. SqlTable runs its query; a DataFrame returns itself.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `DataFrame`\
+**Examples** [phibble for Laravel developers](../laravel.qmd), [SQL tables](../sql.qmd)
+
+### `->deframe()` {#deframe}
+
+```php
+$table->deframe(): array
+```
+
+A two-column DataFrame as a name => value array, or a one-column DataFrame as a list, as tibble's `deframe()`.
+
+**Method** of `DataFrame`\
+**Returns** `array<mixed>`
+
+### `deframe()` {#fn-deframe}
+
+```php
+deframe(DataFrame $dataFrame): array
+```
+
+A two-column DataFrame as a name => value array, or a one-column DataFrame as a list, as tibble's `deframe()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$dataFrame` | <code>DataFrame</code> |  |  |
+
+**Function** in `Phibble`\
+**Returns** `array`
+
+### `->toCollection()` {#tocollection}
+
+```php
+$table->toCollection(): object
+```
+
+An `Illuminate\Support\Collection` of row arrays. Needs Laravel's illuminate/support (or illuminate/collections) to be installed.
+
+**Method** of `DataFrame`\
+**Returns** `object`
+
+## CSV and JSON
+
+### `->toCsv()` {#tocsv}
+
+```php
+$table->toCsv(
+    string $delimiter = ',',
+    string $na = 'NA',
+    bool $colNames = true,
+    string $quote = 'needed',
+    string $escape = 'double',
+    string $eol = '
+',
+): string
+```
+
+The CSV text `writeCsv()` would write.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$delimiter` | <code>string</code> | <code>','</code> |  |
+| `$na` | <code>string</code> | <code>'NA'</code> |  |
+| `$colNames` | <code>bool</code> | <code>true</code> |  |
+| `$quote` | <code>string</code> | <code>'needed'</code> |  |
+| `$escape` | <code>string</code> | <code>'double'</code> |  |
+| `$eol` | <code>string</code> | <code>'
+'</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `string`\
+**Examples** [Reading and writing data](../io.qmd)
+
+### `->writeCsv()` {#writecsv}
+
+```php
+$table->writeCsv(
+    string $path,
+    string $delimiter = ',',
+    string $na = 'NA',
+    bool $append = false,
+    ?bool $colNames = null,
+    string $quote = 'needed',
+    string $escape = 'double',
+    string $eol = '
+',
+): void
+```
+
+Write CSV like `readr::write_csv()`: NA as "NA", quoting only where needed, ISO dates, UTC datetimes with "Z", TRUE/FALSE, and numbers in readr's shortest form. `$quote` is 'needed', 'all' or 'none'; `$escape` is 'double', 'backslash' or 'none'. Appending skips the header unless `$colNames` is true.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$path` | <code>string</code> |  |  |
+| `$delimiter` | <code>string</code> | <code>','</code> |  |
+| `$na` | <code>string</code> | <code>'NA'</code> |  |
+| `$append` | <code>bool</code> | <code>false</code> |  |
+| `$colNames` | <code>?bool</code> | <code>null</code> |  |
+| `$quote` | <code>string</code> | <code>'needed'</code> |  |
+| `$escape` | <code>string</code> | <code>'double'</code> |  |
+| `$eol` | <code>string</code> | <code>'
+'</code> |  |
+
+**Method** of `DataFrame`
+
+### `->toJson()` {#tojson}
+
+```php
+$table->toJson(string $orient = 'records', int $flags = 320): string
+```
+
+JSON as a list of records ('records') or an object of columns ('columns'). NA is null (records keep every key, unlike jsonlite); dates are "Y-m-d", datetimes ISO 8601 in UTC with "Z", factors their labels, NaN and infinities null, nested DataFrames nested JSON.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$orient` | <code>string</code> | <code>'records'</code> |  |
+| `$flags` | <code>int</code> | <code>320</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `string`\
+**Examples** [Reading and writing data](../io.qmd)
+
+## Printing
+
+### `->__toString()` {#__tostring}
+
+```php
+$table->__toString(): string
+```
+
+The table printed as tibble prints it, for echo `$df`. `format()` takes the row count and width.
+
+**Method** of `DataFrame`, `SqlTable`\
+**Returns** `string`
+
+### `->format()` {#format}
+
+```php
+$table->format(?int $n = null, int $width = 80): string
+```
+
+Print like a tibble. By default all rows are shown when there are at most 20, otherwise the first 10.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>?int</code> | <code>null</code> |  |
+| `$width` | <code>int</code> | <code>80</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `string`
+
+### `->glimpse()` {#glimpse}
+
+```php
+$table->glimpse(int $width = 80): string
+```
+
+One line per column with its type and leading values, as tibble's `glimpse()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$width` | <code>int</code> | <code>80</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `string`\
+**Examples** [Reading and writing data](../io.qmd), [Getting started](../getting-started.qmd), [Types](../types.qmd)

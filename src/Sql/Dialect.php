@@ -14,6 +14,11 @@ use Phibble\Type;
  */
 abstract class Dialect
 {
+    /**
+     * The dialect for a PDO connection: SQLite, PostgreSQL, or MySQL.
+     *
+     * @throws \InvalidArgumentException For any other driver.
+     */
     public static function for(PDO $pdo): self
     {
         return self::tryFor($pdo) ?? throw new InvalidArgumentException(
@@ -21,7 +26,7 @@ abstract class Dialect
         );
     }
 
-    /** The dialect for a connection, or null for a driver SqlTable does not support. */
+    /** The dialect for a PDO connection, or null for a driver SqlTable does not support. */
     public static function tryFor(PDO $pdo): ?self
     {
         return match ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)) {

@@ -10,42 +10,46 @@ declare(strict_types=1);
 
 namespace Phibble;
 
-/** tibble(): columns as named arguments. See DataFrame::tibble(). */
+/** Build a DataFrame from named arguments, one per column, as tibble's tibble(). Same rules as DataFrame::tibble(). */
 function tibble(mixed ...$columns): DataFrame
 {
     return DataFrame::tibble($columns);
 }
 
-/** tribble(): column names, then rows. See DataFrame::tribble(). */
+/** Build a DataFrame from column names, then rows, as tibble's tribble(). Same rules as DataFrame::tribble(). */
 function tribble(array $names, mixed ...$cells): DataFrame
 {
     return DataFrame::tribble($names, ...$cells);
 }
 
-/** as_tibble(): see DataFrame::asTibble(). */
+/** Convert tables, rows, columns, or collections into a DataFrame, as tibble's as_tibble(). Same rules as DataFrame::asTibble(). */
 function as_tibble(mixed $data, string $nameRepair = 'check_unique'): DataFrame
 {
     return DataFrame::asTibble($data, $nameRepair);
 }
 
-/** enframe(): see DataFrame::enframe(). */
+/** An array as a two-column DataFrame of names and values, as tibble's enframe(). Same rules as DataFrame::enframe(). */
 function enframe(array $values, ?string $name = 'name', string $value = 'value'): DataFrame
 {
     return DataFrame::enframe($values, $name, $value);
 }
 
-/** deframe(): see DataFrame::deframe(). */
+/** A two-column DataFrame as a name => value array, or a one-column DataFrame as a list, as tibble's deframe(). */
 function deframe(DataFrame $dataFrame): array
 {
     return $dataFrame->deframe();
 }
 
 /**
- * tbl(): a lazy SQL table, as in dbplyr. Pass a table name, or a SELECT
- * query with bindings.
+ * A lazy SqlTable, as dbplyr's tbl(). Pass a table name, or a SELECT or
+ * WITH query with bindings.
  *
  *     tbl($pdo, 'visits');
  *     tbl($pdo, 'SELECT * FROM visits WHERE year = ?', [2024]);
+ *
+ * @param string $from A table or view name, or a SELECT or WITH query.
+ * @param array<int|string, mixed> $bindings Positional (?) or named (:name) bindings, for a query only.
+ * @throws \InvalidArgumentException When bindings come with a table name.
  */
 function tbl(\PDO $pdo, string $from, array $bindings = []): Sql\SqlTable
 {
@@ -62,10 +66,12 @@ function tbl(\PDO $pdo, string $from, array $bindings = []): Sql\SqlTable
 }
 
 /**
- * polars(): a table backed by Polars (requires the php_polars extension).
- * Takes any Table, or anything as_tibble() accepts.
+ * A PolarsTable from any Table, or from anything as_tibble() accepts. Requires
+ * the php_polars extension.
  *
  *     polars(DataFrame::fromCsv('sales.csv'))->filter(col('units')->gt(0));
+ *
+ * @throws \RuntimeException When the php_polars extension is not loaded.
  */
 function polars(mixed $data): Polars\PolarsTable
 {

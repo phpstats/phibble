@@ -1,0 +1,450 @@
+---
+title: "Rows and columns"
+toc-depth: 3
+---
+
+Methods that read, select, filter, sort, and add rows and columns.
+
+## Size and names
+
+### `->columns()` {#columns}
+
+```php
+$table->columns(): array
+```
+
+Column names in order.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `list<string>`\
+**Examples** [Expressions](../expr.qmd)
+
+### `->types()` {#types}
+
+```php
+$table->types(): array
+```
+
+Column types by name.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `array<string, Type>`
+
+### `->type()` {#type}
+
+```php
+$table->type(string $name): Type
+```
+
+One column's type.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `Type`\
+**Throws** `ColumnNotFound`: when the column does not exist.
+
+### `->nrow()` {#nrow}
+
+```php
+$table->nrow(): int
+```
+
+Number of rows. SqlTable runs a COUNT(*) query.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `int`\
+**Examples** [Types](../types.qmd)
+
+### `->ncol()` {#ncol}
+
+```php
+$table->ncol(): int
+```
+
+Number of columns.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `int`
+
+### `->count()` {#count}
+
+```php
+$table->count(): int
+```
+
+Number of rows, for count(`$df`).
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `int`
+
+### `->has()` {#has}
+
+```php
+$table->has(string $name): bool
+```
+
+Whether the column exists.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `bool`
+
+## Values
+
+### `->column()` {#column}
+
+```php
+$table->column(string $name): array
+```
+
+One column's values as a PHP list. Factors return their labels.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `list<mixed>`\
+**Throws** `ColumnNotFound`: when the column does not exist.\
+**Examples** [Getting started](../getting-started.qmd)
+
+### `->row()` {#row}
+
+```php
+$table->row(int $index): Row
+```
+
+One row by 0-based position.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$index` | <code>int</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `Row`\
+**Throws** `InvalidArgumentException`: when the position is out of range.\
+**Examples** [Getting started](../getting-started.qmd)
+
+### `Row->get()` {#row-get}
+
+```php
+$row->get(string $name): mixed
+```
+
+One value by column name. `$row`->name and `$row['name']` read the same value.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `Phibble\Row`\
+**Returns** `mixed`\
+**Throws** `ColumnNotFound`: when the column does not exist.\
+**Examples** [phibble for Laravel developers](../laravel.qmd)
+
+### `Row->has()` {#row-has}
+
+```php
+$row->has(string $name): bool
+```
+
+Whether the row has the column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `Phibble\Row`\
+**Returns** `bool`
+
+### `Row->toArray()` {#row-toarray}
+
+```php
+$row->toArray(): array
+```
+
+The row as an associative array of column name => value.
+
+**Method** of `Phibble\Row`\
+**Returns** `array<string, mixed>`\
+**Examples** [Expressions](../expr.qmd)
+
+## Selecting and renaming
+
+### `->select()` {#select}
+
+```php
+$table->select(array $names): Table
+```
+
+Keep the named columns, in the given order.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&gt;</code> |  | Column names. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Throws** `ColumnNotFound`: when a column does not exist.\
+**Examples** [Expressions](../expr.qmd), [Getting started](../getting-started.qmd), [phibble for Laravel developers](../laravel.qmd)
+
+### `->rename()` {#rename}
+
+```php
+$table->rename(array $map): Table
+```
+
+Rename columns.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$map` | <code>array&lt;string, string&gt;</code> |  | New name => old name, as in dplyr. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Throws** `ColumnNotFound`: when an old name does not exist.
+
+### `NameRepair::repair()` {#namerepair-repair}
+
+```php
+NameRepair::repair(
+    array $names,
+    Closure|string $mode = 'check_unique',
+): array
+```
+
+Repair column names, as `vctrs::vec_as_names()`.
+
+Modes: minimal makes names non-null; unique adds a ...n suffix to empty, `...`, `..j`, and duplicated names; check_unique throws unless names are unique and non-empty; universal is unique and also makes names syntactic in R. A closure receives the names and returns the repaired list.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&#124;null&gt;</code> |  |  |
+| `$mode` | <code>string&#124;Closure(list&lt;string&gt;): list&lt;string&gt;</code> | <code>'check_unique'</code> | minimal, unique, check_unique, universal, or a closure. |
+
+**Static method** of `Phibble\NameRepair`\
+**Returns** `list<string>`\
+**Throws** `InvalidArgumentException`: when check_unique finds empty or duplicated names, or a closure returns a different number of names.
+
+## Filtering and sorting
+
+### `->filter()` {#filter}
+
+```php
+$table->filter(Closure|Expr $predicate): Table
+```
+
+Keep rows where the predicate is true. NA counts as false.
+
+A closure runs once per row. An Expr runs once per group, a whole column at a time, so aggregates such as `mean()` compare within the group.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$predicate` | <code>Closure(Row, Table): ?bool&#124;Expr</code> |  | A row closure or an expression. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Examples** [Expressions](../expr.qmd), [Getting started](../getting-started.qmd), [phibble for Laravel developers](../laravel.qmd)
+
+### `->arrange()` {#arrange}
+
+```php
+$table->arrange(array $keys): Table
+```
+
+Sort rows. The sort is stable, and NA sorts last in both directions.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$keys` | <code>list&lt;string&#124;array{0: string, 1?: 'asc'&#124;'desc'}&#124;Expr&gt;</code> |  | A column name sorts ascending; [name, 'desc'] sorts descending; an Expr sorts by its value, and `desc()` reverses it. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Examples** [Getting started](../getting-started.qmd), [Types](../types.qmd), [phibble for Laravel developers](../laravel.qmd)
+
+### `->distinct()` {#distinct}
+
+```php
+$table->distinct(array $names = []): Table
+```
+
+Unique rows over the named columns, keeping the first of each and only those columns.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&gt;</code> | <code>[]</code> | Columns to compare. An empty list compares all columns. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Examples** [Getting started](../getting-started.qmd)
+
+### `->dropNa()` {#dropna}
+
+```php
+$table->dropNa(array $names = []): DataFrame
+```
+
+Drop rows with NA in any of the named columns (all columns when empty).
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&gt;</code> | <code>[]</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Getting started](../getting-started.qmd)
+
+## Adding columns and rows
+
+### `->mutate()` {#mutate}
+
+```php
+$table->mutate(array $columns): Table
+```
+
+Add or replace columns.
+
+Each value is a closure run per row, an Expr evaluated per group (aggregates repeat within the group), a list with one value per row, or a scalar to repeat. Later entries can use earlier ones.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$columns` | <code>array&lt;string, Closure(Row, Table): mixed&#124;list&lt;mixed&gt;&gt;</code> |  | New column name => value. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Examples** [Expressions](../expr.qmd), [Getting started](../getting-started.qmd), [Types](../types.qmd)
+
+### `->withColumn()` {#withcolumn}
+
+```php
+$table->withColumn(
+    string $name,
+    Column\Column|array $values,
+    Type|string|null $type = null,
+): DataFrame
+```
+
+Add or replace one column. Replaced columns keep their position.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$values` | <code>list&lt;mixed&gt;&#124;Column</code> |  |  |
+| `$type` | <code>Type&#124;string&#124;null</code> | <code>null</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`
+
+### `->addColumn()` {#addcolumn}
+
+```php
+$table->addColumn(
+    array $columns,
+    string|int|null $before = null,
+    string|int|null $after = null,
+): DataFrame
+```
+
+Insert columns, as tibble's `add_column()`, with `tibble()`'s recycling rules. Place them before or after a column, by name or 0-based position; by default at the end.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$columns` | <code>array&lt;string, mixed&gt;</code> |  |  |
+| `$before` | <code>string&#124;int&#124;null</code> | <code>null</code> |  |
+| `$after` | <code>string&#124;int&#124;null</code> | <code>null</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`
+
+### `->addRow()` {#addrow}
+
+```php
+$table->addRow(
+    array $rows = [],
+    ?int $before = null,
+    ?int $after = null,
+): DataFrame
+```
+
+Insert rows, as tibble's `add_row()`. Pass one row (name => value), a list of rows, or nothing for an all-NA row. Missing columns are NA; unknown columns throw. Positions are 0-based: `$before` inserts before that row, `$after` after it. The default appends.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$rows` | <code>array&lt;string, mixed&gt;&#124;list&lt;array&lt;string, mixed&gt;&gt;</code> | <code>[]</code> |  |
+| `$before` | <code>?int</code> | <code>null</code> |  |
+| `$after` | <code>?int</code> | <code>null</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`
+
+## Rows by position
+
+### `->slice()` {#slice}
+
+```php
+$table->slice(int $offset, ?int $length = null): Table
+```
+
+Rows from `$offset`, `$length` of them or to the end. Ignores groups.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$offset` | <code>int</code> |  | 0-based start; negative counts from the end. |
+| `$length` | <code>int&#124;null</code> | <code>null</code> | Number of rows; null for the rest, negative to stop that many rows before the end. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`
+
+### `->head()` {#head}
+
+```php
+$table->head(int $n = 6): Table
+```
+
+The first `$n` rows. Ignores groups.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>int</code> | <code>6</code> |  |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Examples** [Getting started](../getting-started.qmd), [phibble for Laravel developers](../laravel.qmd), [Types](../types.qmd)
+
+### `->tail()` {#tail}
+
+```php
+$table->tail(int $n = 6): DataFrame
+```
+
+The last n rows; a negative n drops the first \|n\| rows, as in R.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>int</code> | <code>6</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`
+
+### `->take()` {#take}
+
+```php
+$table->take(array $indices): Table
+```
+
+Rows by 0-based position, in the given order. A null index gives an all-NA row.
+
+Types, factor levels, and grouping are kept.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$indices` | <code>list&lt;int&#124;null&gt;</code> |  |  |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`

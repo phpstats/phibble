@@ -3,7 +3,7 @@ title: "Query a database table"
 ---
 
 Total the orders and revenue for each region of an SQLite `orders` table,
-with phibble's verbs compiled to one SQL query that the database runs. The
+with phibble's methods compiled to one SQL query that the database runs. The
 script needs the pdo_sqlite extension.
 
 ::: {.panel-tabset group="syntax"}
@@ -25,7 +25,7 @@ script needs the pdo_sqlite extension.
 
 {{< include _database-table-output-2.md >}}
 
-- Verbs only build the query. Nothing runs on the database until the rows
+- Table methods only build the query. Nothing runs on the database until the rows
   are needed.
 - `showQuery()` shows the SQL with `?` placeholders, and `bindings()` gives
   their values.

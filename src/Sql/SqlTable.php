@@ -23,7 +23,7 @@ use Phibble\Source\QuerySource;
 use Phibble\Type;
 
 /**
- * A lazy table backed by a SQL query, like dbplyr's tbl(). Verbs given
+ * A lazy table backed by a SQL query, like dbplyr's tbl(). Methods given
  * Expr arguments compile to SQL; nothing runs until the rows are needed
  * (collect(), toRows(), nrow(), iteration, printing). A Closure argument,
  * or an expression with no faithful SQL translation, collects the rows
@@ -83,6 +83,7 @@ final readonly class SqlTable implements Table
         return self::start($pdo, Dialect::for($pdo), self::positional($sql, $bindings, $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'));
     }
 
+    /** A lazy table over a PdoSource's query and bindings. */
     public static function fromSource(PdoSource $source): self
     {
         return self::query($source->pdo, $source->sql, $source->bindings);
@@ -177,12 +178,17 @@ final readonly class SqlTable implements Table
         return str_replace(Dialect::BRACES, '{}', $sql);
     }
 
-    /** @return list<mixed> Bindings for showQuery(), in order. */
+    /**
+     * The values of the ? placeholders in showQuery(), in order.
+     *
+     * @return list<mixed>
+     */
     public function bindings(): array
     {
         return $this->render()->bindings;
     }
 
+    /** The SQL dialect the table compiles to, chosen from the PDO driver. */
     public function dialect(): Dialect
     {
         return $this->dialect;
@@ -276,13 +282,16 @@ final readonly class SqlTable implements Table
         return $this->groups === [] ? $df : $df->groupBy($this->groups);
     }
 
+    /**
+     * The table printed as tibble prints it, with a source line naming the database. Runs the query for the first rows.
+     */
     public function __toString(): string
     {
         return "# Source: SQL [{$this->dialect->name()}]\n".(string) $this->head(10)->collect();
     }
 
     // ---------------------------------------------------------------
-    // Verbs
+    // Table methods
     // ---------------------------------------------------------------
 
     public function select(array $names): Table

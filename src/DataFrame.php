@@ -230,6 +230,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return QuerySource::fromBuilder($builder, $connection, $types)->read();
     }
 
+    /** Read a Phibble\Source\Source, such as a CsvSource or PdoSource, into a DataFrame. */
     public static function fromSource(Source $source): self
     {
         return $source->read();
@@ -340,7 +341,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     // ---------------------------------------------------------------
 
     /**
-     * tibble(): build a DataFrame column by column.
+     * Build a DataFrame column by column, as tibble's tibble().
      *
      * - A list is a column; a scalar (or null) is repeated to the common
      *   length. Only length-1 values are recycled.
@@ -419,8 +420,8 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * tribble(): a DataFrame written row by row. Pass the column names, then
-     * either one list per row or the cells in row order.
+     * Build a DataFrame row by row, as tibble's tribble(). Pass the column
+     * names, then either one list per row or the cells in row order.
      *
      *     DataFrame::tribble(['x', 'y'], [1, 'a'], [2, 'b']);
      *
@@ -451,8 +452,8 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * as_tibble(): turn tables, rows, columns, collections or other
-     * iterables into a DataFrame.
+     * Convert tables, rows, columns, collections, or other iterables into a
+     * DataFrame, as tibble's as_tibble().
      *
      * - A Table is collected.
      * - A list of associative arrays (or objects) is rows.
@@ -496,8 +497,8 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * enframe(): an array as a two-column DataFrame of names and values. A list
-     * gets 1-based integer names, as in R.
+     * An array as a two-column DataFrame of names and values, as tibble's
+     * enframe(). A list gets 1-based integer names, as in R.
      *
      * @param array<mixed> $values
      */
@@ -515,8 +516,8 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * deframe(): a two-column DataFrame as name => value, or a one-column DataFrame
-     * as a list.
+     * A two-column DataFrame as a name => value array, or a one-column
+     * DataFrame as a list, as tibble's deframe().
      *
      * @return array<mixed>
      */
@@ -533,7 +534,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * add_row(): insert rows. Pass one row (name => value), a list of rows,
+     * Insert rows, as tibble's add_row(). Pass one row (name => value), a list of rows,
      * or nothing for an all-NA row. Missing columns are NA; unknown columns
      * throw. Positions are 0-based: $before inserts before that row,
      * $after after it. The default appends.
@@ -575,7 +576,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * add_column(): insert columns, with tibble()'s recycling rules. Place
+     * Insert columns, as tibble's add_column(), with tibble()'s recycling rules. Place
      * them before or after a column, by name or 0-based position; by
      * default at the end.
      *
@@ -758,6 +759,11 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return array_map(fn (Column $c) => $c->type(), $this->data);
     }
 
+    /**
+     * One column's type.
+     *
+     * @throws \Phibble\Exception\ColumnNotFound When the column does not exist.
+     */
     public function type(string $name): Type
     {
         return $this->storage($name)->type();
@@ -773,11 +779,13 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return count($this->data);
     }
 
+    /** Number of rows, for count($df). */
     public function count(): int
     {
         return $this->rows;
     }
 
+    /** Whether the column exists. */
     public function has(string $name): bool
     {
         return isset($this->data[$name]);
@@ -794,7 +802,11 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $this->data[$name] ?? throw ColumnNotFound::named($name, $this->columns());
     }
 
-    /** @return list<string> The levels of a factor column. */
+    /**
+     * The levels of a factor column, in level order.
+     *
+     * @return list<string>
+     */
     public function levels(string $name): array
     {
         $column = $this->storage($name);
@@ -805,6 +817,11 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $column->levels();
     }
 
+    /**
+     * One row by 0-based position.
+     *
+     * @throws \InvalidArgumentException When the position is out of range.
+     */
     public function row(int $index): Row
     {
         if ($index < 0 || $index >= $this->rows) {
@@ -848,7 +865,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     // ---------------------------------------------------------------
-    // Verbs
+    // Table methods
     // ---------------------------------------------------------------
 
     public function select(array $names): static
@@ -1297,7 +1314,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * bind_cols(): put tables side by side. They must have the same number
+     * Put tables side by side, as dplyr's bind_cols(). They must have the same number
      * of rows; clashing names are repaired as name...position.
      *
      * @param list<Table> $tables
@@ -1693,12 +1710,19 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $this->withColumn($name, FactorColumn::fromValues($this->column($name), $levels, $ordered));
     }
 
-    /** @param list<string|int|float>|null $levels */
+    /**
+     * Convert a column to an ordered factor, as R's factor(ordered = TRUE).
+     *
+     * An existing factor keeps its levels unless $levels is given.
+     *
+     * @param list<string|int|float>|null $levels Levels in order; null takes the sorted distinct values.
+     */
     public function asOrdered(string $name, ?array $levels = null): self
     {
         return $this->asFactor($name, $levels ?? ($this->storage($name) instanceof FactorColumn ? $this->levels($name) : null), true);
     }
 
+    /** Whether the column is an ordered factor. */
     public function isOrdered(string $name): bool
     {
         $column = $this->storage($name);
@@ -1706,7 +1730,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $column instanceof FactorColumn && $column->isOrdered();
     }
 
-    /** fct_relevel(): move levels to the front, or after a 0-based position (-1 for the end). */
+    /** Move levels to the front, or after a 0-based position (-1 for the end), as forcats' fct_relevel(). */
     public function fctRelevel(string $name, array $levels, int $after = 0): self
     {
         return $this->withColumn($name, $this->factor($name)->relevel($levels, $after));
@@ -1737,7 +1761,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * fct_reorder(): order levels by a summary (default median) of another column.
+     * Order levels by a summary (default median) of another column, as forcats' fct_reorder().
      *
      * @param Closure(list<mixed>): mixed|null $summary
      */
@@ -1746,13 +1770,13 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $this->withColumn($name, $this->factor($name)->reorder($this->column($by), $summary, $descending));
     }
 
-    /** fct_recode(): rename levels, new => old. */
+    /** Rename levels, new => old, as forcats' fct_recode(). */
     public function fctRecode(string $name, array $map): self
     {
         return $this->withColumn($name, $this->factor($name)->recode($map));
     }
 
-    /** fct_collapse(): merge levels, new => list of old. */
+    /** Merge levels, new => list of old, as forcats' fct_collapse(). */
     public function fctCollapse(string $name, array $groups): self
     {
         return $this->withColumn($name, $this->factor($name)->collapse($groups));
@@ -1950,6 +1974,9 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     // Printing
     // ---------------------------------------------------------------
 
+    /**
+     * The table printed as tibble prints it, for echo $df. format() takes the row count and width.
+     */
     public function __toString(): string
     {
         return $this->format();

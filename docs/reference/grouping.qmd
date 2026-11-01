@@ -1,0 +1,197 @@
+---
+title: "Grouping and summaries"
+toc-depth: 3
+---
+
+Methods that set groups, summarize them, and run operations per group.
+
+## Grouping
+
+### `->groupBy()` {#groupby}
+
+```php
+$table->groupBy(array $names, bool $drop = true): Table
+```
+
+Set the grouping columns, replacing any existing grouping.
+
+Grouping is metadata: `filter()`, `mutate()`, and `summarise()` work within groups, and other methods keep the grouping.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&gt;</code> |  | Grouping columns. |
+| `$drop` | <code>bool</code> | <code>true</code> | dplyr's .drop. With false, grouped operations also visit empty groups: every factor level without rows. Other key columns contribute their observed values. The setting survives row operations; `ungroup()` and `groupBy()` reset it. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Examples** [Getting started](../getting-started.qmd), [Reading and writing data](../io.qmd), [Expressions](../expr.qmd)
+
+### `->ungroup()` {#ungroup}
+
+```php
+$table->ungroup(): Table
+```
+
+Remove the grouping, including rowwise grouping.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`
+
+### `->groups()` {#groups}
+
+```php
+$table->groups(): array
+```
+
+The grouping columns. Empty when ungrouped; the id columns of a rowwise table.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `list<string>`
+
+### `->dropsEmptyGroups()` {#dropsemptygroups}
+
+```php
+$table->dropsEmptyGroups(): bool
+```
+
+Whether empty groups are dropped. False after groupBy(`$names`, drop: false).
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `bool`
+
+### `->ngroups()` {#ngroups}
+
+```php
+$table->ngroups(): int
+```
+
+Number of groups (1 for an ungrouped table, nrow for a rowwise one).
+
+**Method** of `DataFrame`\
+**Returns** `int`
+
+### `->rowwise()` {#rowwise}
+
+```php
+$table->rowwise(array $idColumns = []): Table
+```
+
+Treat each row as its own group, as dplyr's `rowwise()`. `groupBy()` and `ungroup()` clear it.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$idColumns` | <code>list&lt;string&gt;</code> | <code>[]</code> | Columns `summarise()` keeps, as with group keys. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`
+
+### `->isRowwise()` {#isrowwise}
+
+```php
+$table->isRowwise(): bool
+```
+
+Whether the table is rowwise.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `bool`
+
+## Summaries
+
+### `->summarise()` {#summarise}
+
+```php
+$table->summarise(array $aggregates, ?string $groups = null): Table
+```
+
+One row per group: the group keys, then one column per entry.
+
+Groups are sorted, with NA last. Each entry is a closure given the group's table, or an Expr that evaluates to one value, usually an aggregate. The result drops the last grouping column, as in dplyr; a rowwise table keeps its id columns as groups.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$aggregates` | <code>array&lt;string, Closure(Table): mixed&#124;Expr&gt;</code> |  | New column name => closure or expression. |
+| `$groups` | <code>string&#124;null</code> | <code>null</code> | dplyr's .groups: 'drop_last' (the default), 'drop', 'keep', or 'rowwise'. Rowwise tables default to 'keep'. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Throws** `LengthException`: when an expression gives more than one value per group.
+
+### `->summarize()` {#summarize}
+
+```php
+$table->summarize(array $aggregates, ?string $groups = null): static
+```
+
+Alias of `summarise()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$aggregates` | <code>array</code> |  |  |
+| `$groups` | <code>?string</code> | <code>null</code> |  |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `static`\
+**Examples** [Getting started](../getting-started.qmd), [Reading and writing data](../io.qmd), [Expressions](../expr.qmd)
+
+## Per-group operations
+
+### `->filterGroups()` {#filtergroups}
+
+```php
+$table->filterGroups(Closure $predicate): Table
+```
+
+Keep rows by a predicate that runs once per group.
+
+The closure receives the group's table and returns one value per row; a truthy value keeps the row.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$predicate` | <code>Closure(Table): list&lt;?bool&gt;</code> |  |  |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`
+
+### `->mutateGroups()` {#mutategroups}
+
+```php
+$table->mutateGroups(array $columns): Table
+```
+
+Add or replace columns with closures that run once per group.
+
+Each closure receives the group's table and returns a list with one value per row of the group, or a scalar to repeat. Other values behave as in `mutate()`. Window functions and `across()` build on this method.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$columns` | <code>array&lt;string, Closure(Table): (list&lt;mixed&gt;&#124;scalar&#124;null)&#124;list&lt;mixed&gt;&#124;scalar&#124;null&gt;</code> |  | New column name => value. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`
+
+### `->eachGroup()` {#eachgroup}
+
+```php
+$table->eachGroup(): iterable
+```
+
+Each group's key and rows as an ungrouped table, in sorted key order.
+
+Rowwise tables yield one group per row, in row order. An ungrouped table yields one group with an empty key, also when it has no rows.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `iterable<int, array{key: array<string, mixed>, table: Table}>`
+
+### `->groupRows()` {#grouprows}
+
+```php
+$table->groupRows(): array
+```
+
+Each group's key and 0-based row indexes, in the order of `eachGroup()`.
+
+Empty groups (drop: false) have no rows; a rowwise table has one group per row.
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `list<array{key: array<string, mixed>, rows: list<int>}>`

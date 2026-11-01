@@ -1,0 +1,123 @@
+---
+title: "SqlTable, PolarsTable, and Laravel"
+toc-depth: 3
+---
+
+Methods specific to the SQL and Polars backends, and the Laravel integration.
+
+## SqlTable
+
+### `->showQuery()` {#showquery}
+
+```php
+$table->showQuery(): string
+```
+
+The SQL that `collect()` would run, with ? placeholders.
+
+**Method** of `SqlTable`\
+**Returns** `string`\
+**Examples** [phibble for Laravel developers](../laravel.qmd), [SQL tables](../sql.qmd)
+
+### `->bindings()` {#bindings}
+
+```php
+$table->bindings(): array
+```
+
+The values of the ? placeholders in `showQuery()`, in order.
+
+**Method** of `SqlTable`\
+**Returns** `list<mixed>`\
+**Examples** [SQL tables](../sql.qmd)
+
+### `->dialect()` {#dialect}
+
+```php
+$table->dialect(): Dialect
+```
+
+The SQL dialect the table compiles to, chosen from the PDO driver.
+
+**Method** of `SqlTable`\
+**Returns** `Dialect`
+
+### `Dialect::for()` {#dialect-for}
+
+```php
+Dialect::for(PDO $pdo): Dialect
+```
+
+The dialect for a PDO connection: SQLite, PostgreSQL, or MySQL.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pdo` | <code>PDO</code> |  |  |
+
+**Static method** of `Phibble\Sql\Dialect`\
+**Returns** `Dialect`\
+**Throws** `InvalidArgumentException`: for any other driver.
+
+### `Dialect::tryFor()` {#dialect-tryfor}
+
+```php
+Dialect::tryFor(PDO $pdo): ?Dialect
+```
+
+The dialect for a PDO connection, or null for a driver SqlTable does not support.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pdo` | <code>PDO</code> |  |  |
+
+**Static method** of `Phibble\Sql\Dialect`\
+**Returns** `?Dialect`
+
+## PolarsTable
+
+### `->polars()` {#polars}
+
+```php
+$table->polars(): Phpolars\DataFrame
+```
+
+The underlying Polars DataFrame.
+
+**Method** of `PolarsTable`\
+**Returns** `Phpolars\DataFrame`
+
+## Laravel
+
+### `PhibbleServiceProvider::registerMacros()` {#phibbleserviceprovider-registermacros}
+
+```php
+PhibbleServiceProvider::registerMacros(): void
+```
+
+Register the macros; safe to call more than once.
+
+**Static method** of `Phibble\Laravel\PhibbleServiceProvider`
+
+### `->phibble()` {#macro-phibble}
+
+```php
+$builder->phibble(): SqlTable
+```
+
+A lazy SqlTable over a Laravel query, Eloquent, or relation builder, on the builder's connection.
+
+Global scopes, such as soft deletes, apply. Attribute casts and accessors do not, because rows come from SQL.
+
+On Illuminate\Database\Query\Builder, Illuminate\Database\Eloquent\Builder, and Illuminate\Database\Eloquent\Relations\Relation, after PhibbleServiceProvider::registerMacros(), which package discovery runs.
+
+### `->toDataFrame()` {#macro-todataframe}
+
+```php
+$builderOrCollection->toDataFrame(array $types = []): DataFrame
+```
+
+Run a Laravel query, or read a collection, into a DataFrame.
+
+On builders it calls `DataFrame::fromQuery()`; on Collection and LazyCollection it calls `DataFrame::fromCollection()`. `$types` declares column types, as in `fromColumns()`.
+
+On the query, Eloquent, and relation builders, Illuminate\Support\Collection, and Illuminate\Support\LazyCollection, after PhibbleServiceProvider::registerMacros(), which package discovery runs.

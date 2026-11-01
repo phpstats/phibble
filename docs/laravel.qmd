@@ -9,7 +9,7 @@ is the whole setup, since package discovery registers two macros:
 - `->toDataFrame()` on collections and query builders returns an in-memory
   `DataFrame`.
 - `->phibble()` on query builders, Eloquent builders, and relations returns a
-  lazy `SqlTable` that compiles verbs to SQL.
+  lazy `SqlTable` that compiles table methods to SQL.
 
 ## The example data
 
@@ -45,7 +45,7 @@ final class Penguin extends Model
 {{< include examples/_laravel-phibble.md >}}
 
 - The builder's SQL, bindings, and scopes become the table's source, and
-  phibble's verbs add to that query.
+  phibble's methods add to that query.
 - Nothing runs until the rows are needed, as with `collect()`, printing, or
   `nrow()`.
 - Global scopes such as `SoftDeletes` apply. Attribute casts and accessors do
@@ -72,7 +72,7 @@ Reference: [SQL tables](sql.qmd).
 
 ## With phplyr
 
-[phplyr](https://github.com/phpstats/phplyr) runs dplyr's verbs on the same
+[phplyr](https://github.com/phpstats/phplyr) runs dplyr's functions on the same
 lazy table, so this pipeline also runs in the database.
 
 ::: {.panel-tabset group="syntax"}

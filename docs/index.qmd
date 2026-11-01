@@ -20,15 +20,18 @@ phibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions.
 [Installation](getting-started.qmd#installation) lists the optional
 extensions.
 
-## Guides
+## Documentation
 
-- **Start:** [Getting started](getting-started.qmd) ·
-  [Coming from tibble](coming-from-tibble.qmd) · [Examples](examples/read-a-csv.qmd)
-- **Data:** [Types](types.qmd) · [Reading and writing data](io.qmd) ·
-  [Expressions](expr.qmd)
-- **Backends:** [Backends](backends.qmd) · [SQL tables](sql.qmd) ·
+- **[Functions and methods](reference/index.qmd):** every public function and
+  method, by task, with signatures, parameters, and return values.
+- **Getting started:** [Getting started](getting-started.qmd) ·
+  [Coming from tibble](coming-from-tibble.qmd)
+- **Guides:** [Types](types.qmd) · [Reading and writing data](io.qmd) ·
+  [Expressions](expr.qmd) · [SQL tables](sql.qmd) · [Backends](backends.qmd) ·
   [Laravel](laravel.qmd)
-- **Contributors:** [The Table contract](contract.qmd) ·
+- **Examples:** [Read a CSV file](examples/read-a-csv.qmd) ·
+  [Query a database table](examples/database-table.qmd)
+- **Contributing:** [The Table contract](contract.qmd) ·
   [Development](development.qmd)
 
 ## Backends

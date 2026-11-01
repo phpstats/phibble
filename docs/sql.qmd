@@ -3,7 +3,7 @@ title: "SQL tables"
 ---
 
 `Phibble\Sql\SqlTable` is a table backed by a SQL query, like dbplyr's `tbl()`.
-Verbs called with [expressions](expr.qmd) compile to SQL for SQLite,
+Methods called with [expressions](expr.qmd) compile to SQL for SQLite,
 PostgreSQL, or MySQL, and the database runs the query when the rows are
 needed.
 
@@ -24,7 +24,7 @@ Which calls query the database:
 - `nrow()` and `count()` run a `COUNT(*)` query, and `types()` collects the
   first 1,000 rows.
 - `collect()`, `toRows()`, `column()`, iteration, and printing load the rows.
-- Verbs and `showQuery()` run nothing. `showQuery()` returns the SQL with `?`
+- Other methods and `showQuery()` run nothing. `showQuery()` returns the SQL with `?`
   placeholders, and `bindings()` returns their values in order.
 
 This example queries an in-memory SQLite table, `penguins`, loaded from
@@ -45,7 +45,7 @@ This example queries an in-memory SQLite table, `penguins`, loaded from
 
 {{< include examples/_sql-tbl-output-4.md >}}
 
-Each verb wraps the previous query in a subquery.
+Each method wraps the previous query in a subquery.
 
 ## What compiles to SQL
 
@@ -68,8 +68,8 @@ semantics:
 ## When the table falls back to memory
 
 When an argument has no faithful SQL translation, the `SqlTable` runs the
-query so far, collects its rows into PHP, and runs the verb in memory. The
-verb returns a `DataFrame`, so every later step also runs in memory, with
+query so far, collects its rows into PHP, and runs the method in memory. The
+method returns a `DataFrame`, so every later step also runs in memory, with
 `DataFrame`'s values apart from the [known differences](#known-differences).
 Here `mul()` compiles, and `round()` and a closure fall back:
 

@@ -250,7 +250,7 @@ rules.
   run the SQL through PDO. Without one, the builder runs the query itself and
   phibble guesses every column, since DBAL results carry no column types.
 
-To keep a query in the database and run verbs there, use a
+To keep a query in the database and run operations there, use a
 [SQL table](sql.qmd) instead.
 
 ## Laravel collections

@@ -18,6 +18,11 @@ enum Type: string
     case Time = 'time';
     case List = 'list';
 
+    /**
+     * A Type from a case or its name, such as 'float' or 'date', in any letter case.
+     *
+     * @throws \InvalidArgumentException For an unknown type name.
+     */
     public static function parse(self|string $type): self
     {
         if ($type instanceof self) {
@@ -28,7 +33,9 @@ enum Type: string
             ?? throw new InvalidArgumentException("Unknown column type '{$type}'.");
     }
 
-    /** Short label used when printing a table, as in tibble. */
+    /**
+     * The short label printed in a column header, as in tibble: dbl, int, lgl, chr, fct, date, dttm, time, or list.
+     */
     public function abbreviation(): string
     {
         return match ($this) {
@@ -44,6 +51,7 @@ enum Type: string
         };
     }
 
+    /** Whether the type is numeric: float, int, or bool. */
     public function isNumeric(): bool
     {
         return in_array($this, [self::Float, self::Int, self::Bool], true);

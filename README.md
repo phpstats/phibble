@@ -69,13 +69,13 @@ echo $penguins
 - **Input and output:** CSV with readr's options and type guessing (and the
   phit extension's native reader when it is loaded), JSON, PDO queries,
   Laravel and Doctrine query builders, and Laravel collections.
-- **Verbs:** `select`, `filter`, `mutate`, `arrange`, `groupBy`, `summarize`,
+- **Table methods:** `select`, `filter`, `mutate`, `arrange`, `groupBy`, `summarize`,
   `distinct`, joins (including `join_by` comparisons and rolling joins),
   `nest`, `unnest`, and tidyr's spec-based pivots, with dplyr 1.1 semantics.
 - **Expressions:** `Phibble\Expr` describes computations as inspectable,
   serializable trees that follow dplyr's semantics, with stringr and
   lubridate basics.
-- **SQL tables:** `SqlTable` compiles verbs to SQL for SQLite, PostgreSQL, and
+- **SQL tables:** `SqlTable` compiles table methods to SQL for SQLite, PostgreSQL, and
   MySQL, like dbplyr. Anything SQL cannot compute exactly runs in memory.
 - **Laravel:** `->toDataFrame()` and `->phibble()` on queries and collections.
 - **Backends:** `DataFrame` (in memory), `SqlTable` (databases), and

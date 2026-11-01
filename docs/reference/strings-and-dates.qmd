@@ -1,0 +1,1027 @@
+---
+title: "String and date functions"
+toc-depth: 3
+---
+
+Expression functions in `Phibble\Expr` for text, patterns, dates, datetimes, and periods, following stringr and lubridate.
+
+## Strings
+
+### `str_length()` {#str-length}
+
+```php
+str_length(mixed $x): Call
+```
+
+Number of characters in the string.
+
+Characters are Unicode code points. NA gives NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_lower()` {#str-lower}
+
+```php
+str_lower(mixed $x): Call
+```
+
+String in lower case.
+
+Alias of `str_to_lower()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_upper()` {#str-upper}
+
+```php
+str_upper(mixed $x): Call
+```
+
+String in upper case.
+
+Alias of `str_to_upper()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_to_lower()` {#str-to-lower}
+
+```php
+str_to_lower(mixed $x): Call
+```
+
+String in lower case, by Unicode rules.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_to_upper()` {#str-to-upper}
+
+```php
+str_to_upper(mixed $x): Call
+```
+
+String in upper case, by Unicode rules.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_to_title()` {#str-to-title}
+
+```php
+str_to_title(mixed $x): Call
+```
+
+String in title case.
+
+The string is lowercased, then each letter that follows a character other than a letter, digit, or apostrophe is uppercased. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_trim()` {#str-trim}
+
+```php
+str_trim(mixed $x, mixed ...$options): Call
+```
+
+String with leading and trailing white space removed.
+
+All Unicode white space is removed, as in stringr. SQL backends evaluate it in memory.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: side (string, default 'both') is 'left', 'right', or 'both'. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_squish()` {#str-squish}
+
+```php
+str_squish(mixed $x): Call
+```
+
+String with white space trimmed from both ends and each inner run collapsed to one space.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_pad()` {#str-pad}
+
+```php
+str_pad(mixed $x, mixed $width, mixed ...$options): Call
+```
+
+String padded to at least `$width` characters.
+
+Width counts Unicode code points; a string already at least that wide is unchanged. With side 'both', the extra padding goes on the right.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$width` | <code>mixed</code> |  | The minimum width. |
+| `...$options` | <code>mixed</code> |  | Named options: side (string, default 'left') is 'left', 'right', or 'both'; pad (string, default ' ') is the padding, repeated once per missing character. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when side is not 'left', 'right', or 'both'.
+
+### `str_trunc()` {#str-trunc}
+
+```php
+str_trunc(mixed $x, mixed $width, mixed ...$options): Call
+```
+
+String truncated to at most `$width` characters, ellipsis included.
+
+Width counts Unicode code points; a string that fits is unchanged.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$width` | <code>mixed</code> |  | The maximum width. |
+| `...$options` | <code>mixed</code> |  | Named options: side (string, default 'right') is the side to cut, 'right', 'left', or 'center'; ellipsis (string, default '...') marks the cut. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when side is not 'right', 'left', or 'center'.
+
+### `str_sub()` {#str-sub}
+
+```php
+str_sub(mixed $x, mixed $start, mixed $end = -1): Call
+```
+
+Substring from position `$start` to position `$end`, inclusive.
+
+Positions are 1-based characters; negative positions count from the end, so -1 is the last character. The result is NA where any argument is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$start` | <code>mixed</code> |  | The first position. |
+| `$end` | <code>mixed</code> | <code>-1</code> | The last position; the default, -1, is the end of the string. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `paste()` {#paste}
+
+```php
+paste(mixed ...$args): Call
+```
+
+Arguments joined into one string with a separator.
+
+NA is written as "NA".
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$args` | <code>mixed</code> |  | One or more expressions or literals, then named options: sep (string, default ' ') is the separator. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `paste0()` {#paste0}
+
+```php
+paste0(mixed ...$args): Call
+```
+
+Arguments joined into one string with no separator.
+
+NA is written as "NA".
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$args` | <code>mixed</code> |  | One or more expressions or literals. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Patterns
+
+### `fixed()` {#fixed}
+
+```php
+fixed(mixed $pattern): Call
+```
+
+Pattern that matches its text literally.
+
+An empty `fixed()` pattern gives NA in the functions that take it.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pattern` | <code>mixed</code> |  | The literal text to match. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `regex()` {#regex}
+
+```php
+regex(mixed $pattern, mixed ...$options): Call
+```
+
+Regular-expression pattern with options.
+
+Patterns are PCRE and match by Unicode code point.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pattern` | <code>mixed</code> |  | The regular expression, without delimiters. |
+| `...$options` | <code>mixed</code> |  | Named options: ignore_case (bool, default false) matches without regard to case. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_detect()` {#str-detect}
+
+```php
+str_detect(mixed $x, mixed $pattern, mixed ...$options): Call
+```
+
+Whether the string contains a match for the pattern.
+
+A plain string pattern is a regular expression; wrap it in `fixed()` to match literal text. NA gives NA, as does an empty `fixed()` pattern.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+| `...$options` | <code>mixed</code> |  | Named options: negate (bool, default false) inverts the result. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_starts()` {#str-starts}
+
+```php
+str_starts(mixed $x, mixed $pattern, mixed ...$options): Call
+```
+
+Whether the string starts with a match for the pattern.
+
+A plain string pattern is a regular expression; wrap it in `fixed()` to match literal text. NA gives NA, as does an empty `fixed()` pattern.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+| `...$options` | <code>mixed</code> |  | Named options: negate (bool, default false) inverts the result. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_ends()` {#str-ends}
+
+```php
+str_ends(mixed $x, mixed $pattern, mixed ...$options): Call
+```
+
+Whether the string ends with a match for the pattern.
+
+A plain string pattern is a regular expression; wrap it in `fixed()` to match literal text. NA gives NA, as does an empty `fixed()` pattern.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+| `...$options` | <code>mixed</code> |  | Named options: negate (bool, default false) inverts the result. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_count()` {#str-count}
+
+```php
+str_count(mixed $x, mixed $pattern): Call
+```
+
+Number of matches of the pattern in the string.
+
+NA gives NA, as does an empty `fixed()` pattern.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_extract()` {#str-extract}
+
+```php
+str_extract(mixed $x, mixed $pattern): Call
+```
+
+First match of the pattern in the string.
+
+The result is NA when there is no match. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_extract_all()` {#str-extract-all}
+
+```php
+str_extract_all(mixed $x, mixed $pattern): Call
+```
+
+Every match of the pattern in the string, as a list.
+
+NA gives a list holding one NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_replace()` {#str-replace}
+
+```php
+str_replace(mixed $x, mixed $pattern, mixed $replacement): Call
+```
+
+String with the first match of the pattern replaced.
+
+In a regular-expression replacement, \1 to \9 refer to capture groups, and $ is literal. An NA replacement gives NA where the pattern matches.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+| `$replacement` | <code>mixed</code> |  | The replacement string. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_replace_all()` {#str-replace-all}
+
+```php
+str_replace_all(mixed $x, mixed $pattern, mixed $replacement): Call
+```
+
+String with every match of the pattern replaced.
+
+In a regular-expression replacement, \1 to \9 refer to capture groups, and $ is literal. An NA replacement gives NA where the pattern matches.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+| `$replacement` | <code>mixed</code> |  | The replacement string. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_split()` {#str-split}
+
+```php
+str_split(mixed $x, mixed $pattern): Call
+```
+
+Pieces of the string split at each match of the pattern, as a list.
+
+An empty `fixed()` pattern splits into characters. NA gives a list holding one NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `str_split_i()` {#str-split-i}
+
+```php
+str_split_i(mixed $x, mixed $pattern, mixed $i): Call
+```
+
+Piece `$i` of the string split at each match of the pattern.
+
+The result is NA when `$i` is 0 or out of range. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$pattern` | <code>mixed</code> |  | A regular expression, `fixed()`, or `regex()`. |
+| `$i` | <code>mixed</code> |  | The 1-based piece number; a negative number counts from the end. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Parsing dates
+
+### `ymd()` {#ymd}
+
+```php
+ymd(mixed $x, mixed ...$options): Call
+```
+
+Date parsed from text with year, month, and day in that order.
+
+Digits may run together (20240131) or be separated by any non-digits. Invalid input gives NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default none) parses to a datetime at midnight in that time zone; without it, the result is a date. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `dmy()` {#dmy}
+
+```php
+dmy(mixed $x, mixed ...$options): Call
+```
+
+Date parsed from text with day, month, and year in that order.
+
+Digits may run together (31012024) or be separated by any non-digits. Invalid input gives NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default none) parses to a datetime at midnight in that time zone; without it, the result is a date. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `mdy()` {#mdy}
+
+```php
+mdy(mixed $x, mixed ...$options): Call
+```
+
+Date parsed from text with month, day, and year in that order.
+
+Digits may run together (01312024) or be separated by any non-digits. Invalid input gives NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default none) parses to a datetime at midnight in that time zone; without it, the result is a date. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `ymd_hms()` {#ymd-hms}
+
+```php
+ymd_hms(mixed $x, mixed ...$options): Call
+```
+
+Datetime parsed from text with year, month, day, hour, minute, and second in that order.
+
+Seconds may have a fraction. Invalid input, and a local time the zone skips, give NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default 'UTC') is the time zone of the clock time. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `dmy_hms()` {#dmy-hms}
+
+```php
+dmy_hms(mixed $x, mixed ...$options): Call
+```
+
+Datetime parsed from text with day, month, year, hour, minute, and second in that order.
+
+Seconds may have a fraction. Invalid input, and a local time the zone skips, give NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default 'UTC') is the time zone of the clock time. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `mdy_hms()` {#mdy-hms}
+
+```php
+mdy_hms(mixed $x, mixed ...$options): Call
+```
+
+Datetime parsed from text with month, day, year, hour, minute, and second in that order.
+
+Seconds may have a fraction. Invalid input, and a local time the zone skips, give NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default 'UTC') is the time zone of the clock time. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `parse_date_time()` {#parse-date-time}
+
+```php
+parse_date_time(mixed $x, mixed $orders, mixed ...$options): Call
+```
+
+Datetime parsed from text by the first of the given orders that fits.
+
+Order letters are Y (four-digit year), y (two-digit year: 00 to 68 are 2000s, 69 to 99 1900s), m, d, H, M, and S; spaces and the separators - / : _ in an order are ignored. A missing month or day is 1, and a missing hour, minute, or second is 0; an order without a year matches nothing. Text no order fits gives NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A string expression or literal. |
+| `$orders` | <code>mixed</code> |  | One order, such as 'Ymd HMS', or a list of orders. |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default 'UTC') is the time zone of the clock time. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when an order has another letter, or tz is not a known time zone.
+
+## Date parts
+
+### `year()` {#year}
+
+```php
+year(mixed $x): Call
+```
+
+Year of the date or datetime.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is a time.
+
+### `quarter()` {#quarter}
+
+```php
+quarter(mixed $x): Call
+```
+
+Quarter of the year, from 1 to 4.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is a time.
+
+### `month()` {#month}
+
+```php
+month(mixed $x): Call
+```
+
+Month of the date or datetime, from 1 to 12.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is a time.
+
+### `day()` {#day}
+
+```php
+day(mixed $x): Call
+```
+
+Day of the month, from 1 to 31.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is a time.
+
+### `wday()` {#wday}
+
+```php
+wday(mixed $x, mixed ...$options): Call
+```
+
+Day of the week, from 1 to 7.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+| `...$options` | <code>mixed</code> |  | Named options: week_start (int, default 7) is the day numbered 1, from 1 for Monday to 7 for Sunday. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is a time.
+
+### `yday()` {#yday}
+
+```php
+yday(mixed $x): Call
+```
+
+Day of the year, from 1 to 366.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is a time.
+
+### `hour()` {#hour}
+
+```php
+hour(mixed $x): Call
+```
+
+Hour of the datetime or time, from 0 to 23.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A datetime or time expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `minute()` {#minute}
+
+```php
+minute(mixed $x): Call
+```
+
+Minute of the datetime or time, from 0 to 59.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A datetime or time expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `second()` {#second}
+
+```php
+second(mixed $x): Call
+```
+
+Second of the datetime or time, with any fraction.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A datetime or time expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Rounding and differences
+
+### `floor_date()` {#floor-date}
+
+```php
+floor_date(mixed $x, mixed $unit, mixed ...$options): Call
+```
+
+Date or datetime rounded down to the start of its unit.
+
+SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+| `$unit` | <code>mixed</code> |  | The unit, optionally with a count, such as 'month' or '15 minutes': second, minute, hour, day, week, month, bimonth, quarter, or year. |
+| `...$options` | <code>mixed</code> |  | Named options: week_start (int, default 7) is the first day of a week, from 1 for Monday to 7 for Sunday. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when the unit is unknown.
+
+### `ceiling_date()` {#ceiling-date}
+
+```php
+ceiling_date(mixed $x, mixed $unit, mixed ...$options): Call
+```
+
+Date or datetime rounded up to the start of the next unit.
+
+A datetime already on a boundary is unchanged; a date moves to the next boundary, as in lubridate. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+| `$unit` | <code>mixed</code> |  | The unit, optionally with a count, such as 'month' or '15 minutes': second, minute, hour, day, week, month, bimonth, quarter, or year. |
+| `...$options` | <code>mixed</code> |  | Named options: week_start (int, default 7) is the first day of a week, from 1 for Monday to 7 for Sunday. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when the unit is unknown.
+
+### `round_date()` {#round-date}
+
+```php
+round_date(mixed $x, mixed $unit, mixed ...$options): Call
+```
+
+Date or datetime rounded to the nearer of `floor_date()` and `ceiling_date()`.
+
+A value halfway between rounds up. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+| `$unit` | <code>mixed</code> |  | The unit, optionally with a count, such as 'month' or '15 minutes': second, minute, hour, day, week, month, bimonth, quarter, or year. |
+| `...$options` | <code>mixed</code> |  | Named options: week_start (int, default 7) is the first day of a week, from 1 for Monday to 7 for Sunday. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when the unit is unknown.
+
+### `difftime()` {#difftime}
+
+```php
+difftime(mixed $x, mixed $y, mixed ...$options): Call
+```
+
+Difference `$x` - `$y` between two dates or datetimes, as a float in the given units.
+
+The result is NA where either value is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A date or datetime expression. |
+| `$y` | <code>mixed</code> |  | A date or datetime expression. |
+| `...$options` | <code>mixed</code> |  | Named options: units (string, default 'days') is 'secs', 'mins', 'hours', 'days', or 'weeks'. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when units is another value.
+
+## Periods
+
+### `seconds()` {#seconds}
+
+```php
+seconds(mixed $n): Call
+```
+
+Period of `$n` seconds, to add to or subtract from a datetime.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>mixed</code> |  | The number of seconds. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `minutes()` {#minutes}
+
+```php
+minutes(mixed $n): Call
+```
+
+Period of `$n` minutes, to add to or subtract from a datetime.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>mixed</code> |  | The number of minutes. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `hours()` {#hours}
+
+```php
+hours(mixed $n): Call
+```
+
+Period of `$n` hours, to add to or subtract from a datetime.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>mixed</code> |  | The number of hours. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `days()` {#days}
+
+```php
+days(mixed $n): Call
+```
+
+Period of `$n` days, to add to or subtract from a date or datetime.
+
+Days are calendar days, so the clock time is kept across a daylight saving change.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>mixed</code> |  | The number of days; a fraction is truncated. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `weeks()` {#weeks}
+
+```php
+weeks(mixed $n): Call
+```
+
+Period of `$n` weeks, to add to or subtract from a date or datetime.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>mixed</code> |  | The number of weeks; a fraction is truncated. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `months()` {#months}
+
+```php
+months(mixed $n): Call
+```
+
+Period of `$n` months, to add to or subtract from a date or datetime.
+
+A result that lands on a day the month lacks, such as January 31 plus one month, is NA, as in lubridate.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>mixed</code> |  | The number of months; a fraction is truncated. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `years()` {#years}
+
+```php
+years(mixed $n): Call
+```
+
+Period of `$n` years, to add to or subtract from a date or datetime.
+
+A result that lands on a day the year lacks, such as February 29 plus one year, is NA, as in lubridate.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$n` | <code>mixed</code> |  | The number of years; a fraction is truncated. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Time zones and the clock
+
+### `with_tz()` {#with-tz}
+
+```php
+with_tz(mixed $x, mixed $tz): Call
+```
+
+Same instant shown in another time zone.
+
+SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A datetime expression. |
+| `$tz` | <code>mixed</code> |  | The time zone name, such as 'America/New_York'. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when the time zone is unknown.
+
+### `force_tz()` {#force-tz}
+
+```php
+force_tz(mixed $x, mixed $tz): Call
+```
+
+Same clock time in another time zone, which changes the instant.
+
+A clock time the zone skips, in a daylight saving gap, gives NA. SQL backends evaluate it in memory when it reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A datetime expression. |
+| `$tz` | <code>mixed</code> |  | The time zone name, such as 'America/New_York'. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when the time zone is unknown.
+
+### `today()` {#today}
+
+```php
+today(mixed ...$options): Call
+```
+
+Current date.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default 'UTC') is the time zone whose calendar gives the date. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `now()` {#now}
+
+```php
+now(mixed ...$options): Call
+```
+
+Current date and time.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$options` | <code>mixed</code> |  | Named options: tz (string, default 'UTC') is the time zone of the result. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when tz is not a known time zone.
+
+### `Clock::freeze()` {#clock-freeze}
+
+```php
+Clock::freeze(?DateTimeImmutable $at): void
+```
+
+Fix the time that `today()` and `now()` read. Null restores the system clock.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$at` | <code>?DateTimeImmutable</code> |  |  |
+
+**Static method** of `Phibble\Expr\Clock`
+
+### `Clock::now()` {#clock-now}
+
+```php
+Clock::now(): DateTimeImmutable
+```
+
+The current time in UTC, or the frozen time.
+
+**Static method** of `Phibble\Expr\Clock`\
+**Returns** `DateTimeImmutable`

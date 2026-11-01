@@ -94,10 +94,11 @@ Read values:
 
 ## Transform
 
-Data frames have the dplyr verbs as methods: `select()`, `filter()`,
+Data frames have dplyr's functions as methods: `select()`, `filter()`,
 `mutate()`, `rename()`, `arrange()`, `groupBy()`, `summarize()`, `distinct()`,
 `slice()`, `head()`, and `join()`. Each returns a new data frame, and the
-original never changes:
+original never changes. [Functions and methods](reference/index.qmd) lists
+them all:
 
 {{< include examples/_immutable.md >}}
 
@@ -106,7 +107,7 @@ original never changes:
 
 {{< include examples/_verbs.md >}}
 
-The same verbs accept [expressions](expr.qmd) built with `col()` and the
+The same methods accept [expressions](expr.qmd) built with `col()` and the
 helper functions. Expressions run a whole column at a time, and SQL and Polars
 tables can translate them.
 
@@ -165,9 +166,9 @@ options.
 
 ## Method chains and the pipe operator
 
-Verbs chain as methods on PHP 8.3, 8.4, and 8.5. On PHP 8.5, `|>` with arrow
+Methods chain on PHP 8.3, 8.4, and 8.5. On PHP 8.5, `|>` with arrow
 functions runs the same pipeline. [phplyr](https://github.com/phpstats/phplyr)
-provides verbs that work with `|>` without arrow functions.
+provides functions that work with `|>` without arrow functions.
 
 ::: {.panel-tabset group="syntax"}
 ## PHP 8.5+

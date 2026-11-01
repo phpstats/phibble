@@ -27,7 +27,7 @@ use function Phpolars\{all, all_horizontal, any_horizontal, col, concat, lit, wh
 /**
  * A Phibble\Contracts\Table backed by a Polars DataFrame.
  *
- * Verbs that take column names or Phibble\Expr run in Polars. Verbs given a
+ * Methods that take column names or Phibble\Expr run in Polars. Methods given a
  * PHP closure cannot run on Polars threads, so they materialise a
  * Phibble\DataFrame, run there, and convert the result back.
  *
@@ -160,7 +160,7 @@ final class PolarsTable implements Table
 
     /**
      * With groupBy(drop: false), a factor key has a group for every level,
-     * even empty ones. Polars only sees observed groups, so those verbs run
+     * even empty ones. Polars only sees observed groups, so those methods run
      * on a DataFrame.
      */
     private function keepsEmptyGroups(): bool
@@ -168,17 +168,17 @@ final class PolarsTable implements Table
         return ! $this->dropGroups && array_any($this->groups, fn (string $g) => isset($this->factors[$g]));
     }
 
-    /** How many verbs fell back to an in-memory DataFrame in this process. */
+    /** How many method calls fell back to an in-memory DataFrame in this process. */
     public static int $fallbacks = 0;
 
     /**
-     * Throw PolarsFallback instead of running a verb in an in-memory
+     * Throw PolarsFallback instead of running a method in an in-memory
      * DataFrame. Off by default; turn it on to find the steps that leave
      * Polars.
      */
     public static bool $strict = false;
 
-    /** Run a verb on an in-memory DataFrame and bring the result back. */
+    /** Run a method on an in-memory DataFrame and bring the result back. */
     private function viaDataFrame(string $verb, string $reason, Closure $run): static
     {
         if (self::$strict) {
@@ -189,7 +189,7 @@ final class PolarsTable implements Table
         return self::fromTable($run($this->collect()));
     }
 
-    /** Why a verb cannot run in Polars, for PolarsFallback. */
+    /** Why a method cannot run in Polars, for PolarsFallback. */
     private function fallbackReason(bool $closure): string
     {
         return match (true) {
@@ -376,7 +376,7 @@ final class PolarsTable implements Table
         return $this->groups === [] ? $dataFrame : $dataFrame->groupBy($this->groups, $this->dropGroups);
     }
 
-    // Verbs
+    // Table methods
 
     public function select(array $names): static
     {

@@ -4,7 +4,7 @@
     "tagline": "A typed, immutable data frame for PHP, with readr-style input and output.",
     "summary": [
         "Load, transform, and summarize typed data frames in PHP. Tables are immutable, and `null` represents missing data.",
-        "Names and semantics follow R's tibble, readr, and dplyr. The same verbs run in memory, in SQLite, PostgreSQL, or MySQL, or in Polars."
+        "Names and semantics follow R's tibble, readr, and dplyr. The same methods run in memory, in SQLite, PostgreSQL, or MySQL, or in Polars."
     ],
     "install": [
         "composer require phpstats/phibble"
@@ -65,55 +65,118 @@
         "nav": [
             {
                 "title": "Overview",
-                "path": "index.qmd"
+                "path": "index.qmd",
+                "section": "Getting started"
             },
             {
                 "title": "Getting started",
-                "path": "getting-started.qmd"
-            },
-            {
-                "title": "Read a CSV file into a typed table",
-                "path": "examples/read-a-csv.qmd"
-            },
-            {
-                "title": "Query a database table",
-                "path": "examples/database-table.qmd"
+                "path": "getting-started.qmd",
+                "section": "Getting started"
             },
             {
                 "title": "Coming from tibble",
-                "path": "coming-from-tibble.qmd"
+                "path": "coming-from-tibble.qmd",
+                "section": "Getting started"
             },
             {
                 "title": "Types",
-                "path": "types.qmd"
+                "path": "types.qmd",
+                "section": "Guides"
             },
             {
                 "title": "Reading and writing data",
-                "path": "io.qmd"
+                "path": "io.qmd",
+                "section": "Guides"
             },
             {
                 "title": "Expressions",
-                "path": "expr.qmd"
+                "path": "expr.qmd",
+                "section": "Guides"
             },
             {
                 "title": "SQL tables",
-                "path": "sql.qmd"
-            },
-            {
-                "title": "Laravel",
-                "path": "laravel.qmd"
+                "path": "sql.qmd",
+                "section": "Guides"
             },
             {
                 "title": "Backends",
-                "path": "backends.qmd"
+                "path": "backends.qmd",
+                "section": "Guides"
+            },
+            {
+                "title": "Laravel",
+                "path": "laravel.qmd",
+                "section": "Guides"
+            },
+            {
+                "title": "Functions and methods",
+                "path": "reference/index.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Creating and loading tables",
+                "path": "reference/creating.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Rows and columns",
+                "path": "reference/rows-and-columns.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Grouping and summaries",
+                "path": "reference/grouping.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Joins and reshaping",
+                "path": "reference/combining.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Expression functions",
+                "path": "reference/expressions.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "String and date functions",
+                "path": "reference/strings-and-dates.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Types and conversion",
+                "path": "reference/types.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Output",
+                "path": "reference/output.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "SqlTable, PolarsTable, and Laravel",
+                "path": "reference/backends.qmd",
+                "section": "Functions and methods"
+            },
+            {
+                "title": "Read a CSV file into a typed table",
+                "path": "examples/read-a-csv.qmd",
+                "section": "Examples"
+            },
+            {
+                "title": "Query a database table",
+                "path": "examples/database-table.qmd",
+                "section": "Examples"
             },
             {
                 "title": "The Table contract",
-                "path": "contract.qmd"
+                "path": "contract.qmd",
+                "section": "Contributing"
             },
             {
                 "title": "Development",
-                "path": "development.qmd"
+                "path": "development.qmd",
+                "section": "Contributing"
             }
         ]
     },

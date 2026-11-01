@@ -32,7 +32,7 @@ use function Phpolars\{concat_list, coalesce, col, concat_str, int_range, len, l
 final class Translator
 {
     /**
-     * Arguments that must hold no NA, checked before the verb runs: R's
+     * Arguments that must hold no NA, checked before the method runs: R's
      * quantile() raises an error on NA unless na.rm is TRUE.
      *
      * @var list<Expr>

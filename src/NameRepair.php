@@ -30,9 +30,17 @@ final class NameRepair
     ];
 
     /**
+     * Repair column names, as vctrs::vec_as_names().
+     *
+     * Modes: minimal makes names non-null; unique adds a ...n suffix to empty,
+     * `...`, `..j`, and duplicated names; check_unique throws unless names are
+     * unique and non-empty; universal is unique and also makes names syntactic in
+     * R. A closure receives the names and returns the repaired list.
+     *
      * @param list<string|null> $names
-     * @param string|Closure(list<string>): list<string> $mode
+     * @param string|Closure(list<string>): list<string> $mode minimal, unique, check_unique, universal, or a closure.
      * @return list<string>
+     * @throws \InvalidArgumentException When check_unique finds empty or duplicated names, or a closure returns a different number of names.
      */
     public static function repair(array $names, string|Closure $mode = 'check_unique'): array
     {

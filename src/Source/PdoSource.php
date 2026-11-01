@@ -16,7 +16,7 @@ use Phibble\Type;
  * Runs SQL with bindings through PDO and loads the result eagerly.
  *
  * The SQL, bindings and connection are public so that a later lazy SQL
- * table can start from a source and compile verbs into the query instead
+ * table can start from a source and compile methods into the query instead
  * of loading rows.
  */
 final readonly class PdoSource implements Source

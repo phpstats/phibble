@@ -87,6 +87,19 @@ bin/bench-record --php="php -d extension=phit.so -d extension=php_polars.so"
 `bin/bench` runs one backend in one process and prints its timings, for
 quick comparisons while working.
 
+## Functions and methods reference
+
+`bin/api-reference` writes the pages in `docs/reference/` from the public API
+by reflection: every function in `Phibble` and `Phibble\Expr`, and every
+public method of the table classes and the other public classes it lists.
+Text comes from the docblocks. The script fails when a public callable has no
+page or no docblock summary, and `tests/SiteTest.php` fails when the pages
+are out of date:
+
+```bash
+bin/api-reference
+```
+
 ## Documentation
 
 The site is a Quarto project in `docs/`. Every example is a PHP file in

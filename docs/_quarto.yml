@@ -4,6 +4,7 @@ project:
   render:
     - "*.qmd"
     - "examples/*.qmd"
+    - "reference/*.qmd"
   resources:
     - data/*.csv
 
@@ -15,26 +16,38 @@ website:
     style: docked
     search: true
     contents:
-      - index.qmd
-      - getting-started.qmd
-      - section: "Examples"
+      - section: "Getting started"
         contents:
-          - examples/read-a-csv.qmd
-          - examples/database-table.qmd
+          - index.qmd
+          - getting-started.qmd
+          - coming-from-tibble.qmd
       - section: "Guides"
         contents:
-          - coming-from-tibble.qmd
           - types.qmd
           - io.qmd
           - expr.qmd
           - sql.qmd
-          - laravel.qmd
           - backends.qmd
-      - section: "Reference"
+          - laravel.qmd
+      - section: "Functions and methods"
         contents:
-          - contract.qmd
+          - reference/index.qmd
+          - reference/creating.qmd
+          - reference/rows-and-columns.qmd
+          - reference/grouping.qmd
+          - reference/combining.qmd
+          - reference/expressions.qmd
+          - reference/strings-and-dates.qmd
+          - reference/types.qmd
+          - reference/output.qmd
+          - reference/backends.qmd
+      - section: "Examples"
+        contents:
+          - examples/read-a-csv.qmd
+          - examples/database-table.qmd
       - section: "Contributing"
         contents:
+          - contract.qmd
           - development.qmd
 
 format:

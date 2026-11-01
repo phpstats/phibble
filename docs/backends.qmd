@@ -2,7 +2,7 @@
 title: "Backends"
 ---
 
-Run the same pipeline in memory, in a database, or in Polars. Every verb is
+Run the same pipeline in memory, in a database, or in Polars. Every table method is
 part of the `Phibble\Contracts\Table` interface, and three classes implement
 it:
 
@@ -12,7 +12,7 @@ it:
 | SQL | `Phibble\Sql\SqlTable` | SQLite, PostgreSQL, or MySQL | Data that lives in a database |
 | Polars | `Phibble\Polars\PolarsTable` | Polars, through the php_polars extension from [phpolars](https://github.com/phpstats/phpolars) | Large data in memory |
 
-Code written against `Table`, including phplyr's verbs, runs on any of them.
+Code written against `Table`, including phplyr's functions, runs on any of them.
 A backend that cannot run a step exactly, such as a PHP closure or a function
 with no exact translation, loads its rows into PHP and runs the step in a
 `DataFrame`. Later steps also run in memory. Results match `DataFrame` with
@@ -65,7 +65,7 @@ $summary($fast)->collect();
 - Steps it cannot run, such as PHP closures and `str_to_title()`, run in a
   `DataFrame`. `PolarsTable::$fallbacks` counts them.
 - `PolarsTable::$strict = true` throws `PolarsFallback` instead, naming the
-  verb and the reason.
+  method and the reason.
 
 Type mapping:
 

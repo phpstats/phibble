@@ -8,7 +8,7 @@ use RuntimeException;
 
 /**
  * Thrown by Translator for an expression Polars cannot run with the same
- * result as phibble's evaluator. PolarsTable runs that verb on a DataFrame.
+ * result as phibble's evaluator. PolarsTable runs that method on a DataFrame.
  *
  * @internal
  */

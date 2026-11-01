@@ -1,0 +1,1375 @@
+---
+title: "Expression functions"
+toc-depth: 3
+---
+
+Functions in `Phibble\Expr` that build expressions for `filter()`, `mutate()`, `arrange()`, and `summarise()`, and the methods of Expr objects.
+
+## Columns and literals
+
+### `col()` {#col}
+
+```php
+col(string $name): Col
+```
+
+Reference to the column with the given name.
+
+A plain PHP string passed to a helper is a literal; `col()` is how an expression reads a column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  | The column name. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Col`\
+**Examples** [phibble for Laravel developers](../laravel.qmd), [phibble](../index.qmd)
+
+### `lit()` {#lit}
+
+```php
+lit(mixed $value): Lit
+```
+
+Literal value as an expression.
+
+A date or datetime literal is typed as a date when its time of day is midnight, and as a datetime otherwise.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$value` | <code>mixed</code> |  | Null, a bool, int, float, or string, a DateTimeInterface, a `Phibble\Time`, or a list of scalars. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Lit`\
+**Throws** `InvalidArgumentException`: when the value is of another type, or a list holds a value that is not a scalar.
+
+### `call()` {#call}
+
+```php
+call(string $fn, mixed ...$args): Call
+```
+
+Call to any registered function by name, such as call('str_sub', `col('s')`, 1, 3).
+
+String keys in `$args` become named options; other arguments are positional. Values that are not expressions are wrapped as literals.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$fn` | <code>string</code> |  | The registered function name, as listed in Functions::REGISTRY. |
+| `...$args` | <code>mixed</code> |  | Positional arguments, then named options. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: when the function is not registered, the number of positional arguments is out of range, or a named option is not allowed.
+
+### `desc()` {#desc}
+
+```php
+desc(Expr|string $expr): Desc
+```
+
+Descending sort key for `arrange()`, the first argument of a ranking function, or order_by.
+
+`desc()` is rejected anywhere else in an expression.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$expr` | <code>Expr&#124;string</code> |  | An expression, or a column name. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Desc`
+
+## Operators
+
+### `Expr->add()` {#expr-add}
+
+```php
+$expr->add(mixed $other): Call
+```
+
+Sum of this expression and `$other`.
+
+NA gives NA. Adding a period such as `days(1)` to a date or datetime uses clock arithmetic, and adding seconds or a time to a time gives a time.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd), [Types](../types.qmd)
+
+### `Expr->sub()` {#expr-sub}
+
+```php
+$expr->sub(mixed $other): Call
+```
+
+Difference of this expression and `$other`.
+
+NA gives NA. Subtracting a date from a date gives days, a datetime from a datetime gives seconds, and a period from a date or datetime uses clock arithmetic.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd), [Getting started](../getting-started.qmd)
+
+### `Expr->mul()` {#expr-mul}
+
+```php
+$expr->mul(mixed $other): Call
+```
+
+Product of this expression and `$other`.
+
+NA gives NA. A period or time multiplied by a number is scaled.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Getting started](../getting-started.qmd), [SQL tables](../sql.qmd)
+
+### `Expr->div()` {#expr-div}
+
+```php
+$expr->div(mixed $other): Call
+```
+
+Quotient of this expression and `$other`, always a float.
+
+NA gives NA. Division by zero gives Inf or -Inf, and 0 / 0 gives NaN, as in R.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd), [SQL tables](../sql.qmd), [Getting started](../getting-started.qmd)
+
+### `Expr->mod()` {#expr-mod}
+
+```php
+$expr->mod(mixed $other): Call
+```
+
+Remainder of this expression divided by `$other`, with the sign of `$other`.
+
+R's %% operator: the remainder after floored division. NA gives NA. An integer remainder by zero is NA, and a float remainder by zero NaN.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd)
+
+### `Expr->pow()` {#expr-pow}
+
+```php
+$expr->pow(mixed $other): Call
+```
+
+This expression raised to the power `$other`, as a float.
+
+R's ^ operator. NA gives NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`
+
+### `Expr->neg()` {#expr-neg}
+
+```php
+$expr->neg(): Call
+```
+
+Negation of this expression.
+
+NA gives NA.
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`
+
+### `Expr->eq()` {#expr-eq}
+
+```php
+$expr->eq(mixed $other): Call
+```
+
+Whether this expression equals `$other`.
+
+R's == operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [phibble for Laravel developers](../laravel.qmd), [SQL tables](../sql.qmd)
+
+### `Expr->ne()` {#expr-ne}
+
+```php
+$expr->ne(mixed $other): Call
+```
+
+Whether this expression differs from `$other`.
+
+R's != operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Getting started](../getting-started.qmd)
+
+### `Expr->lt()` {#expr-lt}
+
+```php
+$expr->lt(mixed $other): Call
+```
+
+Whether this expression is less than `$other`.
+
+R's < operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`
+
+### `Expr->le()` {#expr-le}
+
+```php
+$expr->le(mixed $other): Call
+```
+
+Whether this expression is less than or equal to `$other`.
+
+R's <= operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd)
+
+### `Expr->gt()` {#expr-gt}
+
+```php
+$expr->gt(mixed $other): Call
+```
+
+Whether this expression is greater than `$other`.
+
+R's > operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd), [Types](../types.qmd), [Getting started](../getting-started.qmd)
+
+### `Expr->ge()` {#expr-ge}
+
+```php
+$expr->ge(mixed $other): Call
+```
+
+Whether this expression is greater than or equal to `$other`.
+
+R's >= operator. NA on either side gives NA. Numbers and logicals compare numerically, dates and datetimes by instant, and other values as strings, byte by byte.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | An expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd)
+
+### `Expr->and()` {#expr-and}
+
+```php
+$expr->and(mixed $other): Call
+```
+
+Logical AND of this expression and `$other`.
+
+R's & operator, with three-valued logic: false wins over NA, and NA with true gives NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | A logical expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd)
+
+### `Expr->or()` {#expr-or}
+
+```php
+$expr->or(mixed $other): Call
+```
+
+Logical OR of this expression and `$other`.
+
+R's \| operator, with three-valued logic: true wins over NA, and NA with false gives NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>mixed</code> |  | A logical expression or literal. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd)
+
+### `Expr->not()` {#expr-not}
+
+```php
+$expr->not(): Call
+```
+
+Logical negation of this expression.
+
+R's ! operator. NA gives NA.
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [Expressions](../expr.qmd), [phibble](../index.qmd)
+
+### `Expr->isNa()` {#expr-isna}
+
+```php
+$expr->isNa(): Call
+```
+
+Whether each value is NA.
+
+NaN counts as NA. Equivalent to `is_na()`.
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Examples** [phibble](../index.qmd)
+
+### `Expr->isIn()` {#expr-isin}
+
+```php
+$expr->isIn(array $values): Call
+```
+
+Whether each value is one of the given values.
+
+R's %in% operator. NA matches only when the list holds null. The result is never NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$values` | <code>list&lt;mixed&gt;</code> |  | The values to match, each null or a scalar. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: when a value is not null or a scalar.\
+**Examples** [Expressions](../expr.qmd), [SQL tables](../sql.qmd)
+
+### `Expr->between()` {#expr-between}
+
+```php
+$expr->between(mixed $low, mixed $high): Call
+```
+
+Whether each value lies between `$low` and `$high`, inclusive.
+
+NA in the value or either bound gives NA. Equivalent to `between()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$low` | <code>mixed</code> |  | The lower bound. |
+| `$high` | <code>mixed</code> |  | The upper bound. |
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Call`
+
+### `Expr->desc()` {#expr-desc}
+
+```php
+$expr->desc(): Desc
+```
+
+Descending sort key on this expression, for `arrange()`, the first argument of a ranking function, or order_by.
+
+Equivalent to `desc()`.
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `Desc`
+
+## Conditionals and missing values
+
+### `is_na()` {#is-na}
+
+```php
+is_na(mixed $x): Call
+```
+
+Whether each value is NA.
+
+NaN counts as NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `if_else()` {#if-else}
+
+```php
+if_else(
+    mixed $condition,
+    mixed $true,
+    mixed $false,
+    mixed ...$options,
+): Call
+```
+
+Value of `$true` where the condition holds and of `$false` where it does not.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$condition` | <code>mixed</code> |  | A logical expression. |
+| `$true` | <code>mixed</code> |  | The value where the condition is true. |
+| `$false` | <code>mixed</code> |  | The value where the condition is false. |
+| `...$options` | <code>mixed</code> |  | Named options: missing (mixed, default NA) is the value where the condition is NA. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `case_when()` {#case-when}
+
+```php
+case_when(mixed ...$args): Call
+```
+
+Value paired with the first condition that holds, as `case_when(cond1, value1, cond2, value2, ..., default: value)`.
+
+Conditions are tested in order per row; an NA condition does not match.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$args` | <code>mixed</code> |  | Condition and value pairs, then named options: default (mixed, default NA) is the value where no condition holds. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: when the positional arguments do not form condition and value pairs.
+
+### `coalesce()` {#coalesce}
+
+```php
+coalesce(mixed ...$args): Call
+```
+
+First value that is not NA among the arguments, row by row.
+
+NaN is a value here: it is not skipped.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$args` | <code>mixed</code> |  | One or more expressions or literals. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `between()` {#between}
+
+```php
+between(mixed $x, mixed $low, mixed $high): Call
+```
+
+Whether each value lies between `$low` and `$high`, inclusive.
+
+The result is NA where `$x`, `$low`, or `$high` is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `$low` | <code>mixed</code> |  | The lower bound. |
+| `$high` | <code>mixed</code> |  | The upper bound. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `na_if()` {#na-if}
+
+```php
+na_if(mixed $x, mixed $y): Call
+```
+
+Values of `$x`, with NA where `$x` equals `$y`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `$y` | <code>mixed</code> |  | The value to replace with NA. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `near()` {#near}
+
+```php
+near(mixed $x, mixed $y, mixed ...$options): Call
+```
+
+Whether `$x` and `$y` are equal within a tolerance.
+
+The result is NA where either value is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+| `$y` | <code>mixed</code> |  | A numeric expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: tol (float, default `sqrt(PHP_FLOAT_EPSILON)`, about 1.5e-8) is the tolerance; an absolute difference below it counts as equal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Math
+
+### `abs()` {#abs}
+
+```php
+abs(mixed $x): Call
+```
+
+Absolute value.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `sqrt()` {#sqrt}
+
+```php
+sqrt(mixed $x): Call
+```
+
+Square root.
+
+The square root of a negative number is NaN.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `exp()` {#exp}
+
+```php
+exp(mixed $x): Call
+```
+
+Exponential function, e raised to the power `$x`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `log()` {#log}
+
+```php
+log(mixed $x, mixed ...$options): Call
+```
+
+Logarithm, natural by default.
+
+The logarithm of 0 is -Inf, and of a negative number NaN.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: base (float, default e) is the base of the logarithm. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `log10()` {#log10}
+
+```php
+log10(mixed $x): Call
+```
+
+Base-10 logarithm.
+
+The logarithm of 0 is -Inf, and of a negative number NaN.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `round()` {#round}
+
+```php
+round(mixed $x, mixed ...$options): Call
+```
+
+Value rounded to a number of decimal digits.
+
+Rounding follows R 4.0 and later: the candidate nearer the stored double wins, and exact ties go to the even digit, so `round(2.675, digits: 2)` is 2.67. Integers are returned unchanged when digits is 0 or more. SQL backends evaluate it in memory.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+| `...$options` | <code>mixed</code> |  | Named options: digits (int, default 0) is the number of decimal places; a negative value rounds to tens, hundreds, and so on. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `floor()` {#floor}
+
+```php
+floor(mixed $x): Call
+```
+
+Largest whole number not greater than the value, as a float.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `ceiling()` {#ceiling}
+
+```php
+ceiling(mixed $x): Call
+```
+
+Smallest whole number not less than the value, as a float.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression or literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Conversion
+
+### `as_int()` {#as-int}
+
+```php
+as_int(mixed $x): Call
+```
+
+Values converted to integers.
+
+R's as.`integer()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `as_float()` {#as-float}
+
+```php
+as_float(mixed $x): Call
+```
+
+Values converted to floats.
+
+R's as.`double()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `as_string()` {#as-string}
+
+```php
+as_string(mixed $x): Call
+```
+
+Values converted to strings.
+
+R's as.`character()`. SQL backends evaluate it in memory.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `as_bool()` {#as-bool}
+
+```php
+as_bool(mixed $x): Call
+```
+
+Values converted to logicals.
+
+R's as.`logical()`. SQL backends evaluate it in memory.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Aggregates
+
+### `n()` {#n}
+
+```php
+n(): Call
+```
+
+Number of rows in the group.
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Examples** [phibble for Laravel developers](../laravel.qmd), [phibble](../index.qmd)
+
+### `sum()` {#sum}
+
+```php
+sum(mixed $x, mixed ...$options): Call
+```
+
+Sum of the values.
+
+The result is NA when a value is NA, unless na_rm is true. The sum is an integer when every value is an integer or logical, and 0 for no values. The sum of times is a time.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when the values are dates or datetimes.
+
+### `mean()` {#mean}
+
+```php
+mean(mixed $x, mixed ...$options): Call
+```
+
+Mean of the values.
+
+The result is NA when a value is NA, unless na_rm is true, and NaN for no values. The mean of dates is a date, of datetimes a datetime, and of times a time.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric or temporal expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Examples** [phibble for Laravel developers](../laravel.qmd), [phibble](../index.qmd)
+
+### `median()` {#median}
+
+```php
+median(mixed $x, mixed ...$options): Call
+```
+
+Median of the values.
+
+The result is NA when a value is NA, unless na_rm is true, and NA for no values. The median of dates is a date, of datetimes a datetime, and of times a time.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric or temporal expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Examples** [phibble](../index.qmd)
+
+### `min()` {#min}
+
+```php
+min(mixed $x, mixed ...$options): Call
+```
+
+Smallest of the values.
+
+The result is NA when a value is NA, unless na_rm is true, NaN when a value is NaN, and Inf for no values. Strings compare byte by byte.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `max()` {#max}
+
+```php
+max(mixed $x, mixed ...$options): Call
+```
+
+Largest of the values.
+
+The result is NA when a value is NA, unless na_rm is true, NaN when a value is NaN, and -Inf for no values. Strings compare byte by byte.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Examples** [phibble for Laravel developers](../laravel.qmd)
+
+### `sd()` {#sd}
+
+```php
+sd(mixed $x, mixed ...$options): Call
+```
+
+Sample standard deviation of the values.
+
+The divisor is n - 1, and the result is NA for fewer than two values. The result is NA when a value is NA, unless na_rm is true. Dates are measured in days, and datetimes and times in seconds.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric or temporal expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `var_()` {#var-}
+
+```php
+var_(mixed $x, mixed ...$options): Call
+```
+
+Sample variance of the values.
+
+R's `var()`; the trailing underscore avoids PHP's reserved word. The divisor is n - 1, and the result is NA for fewer than two values. The result is NA when a value is NA, unless na_rm is true. Dates are measured in days, and datetimes and times in seconds.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric or temporal expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `quantile()` {#quantile}
+
+```php
+quantile(mixed $x, mixed $p, mixed ...$options): Call
+```
+
+Sample quantile of the values at probability `$p`.
+
+Uses R's default method (type 7), interpolating between order statistics. The quantile of datetimes is a datetime, and of times a time.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric or temporal expression. |
+| `$p` | <code>mixed</code> |  | The probability, from 0 to 1. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is NA and na_rm is false, or when the values are dates.
+
+### `iqr()` {#iqr}
+
+```php
+iqr(mixed $x, mixed ...$options): Call
+```
+
+Interquartile range of the values: the 0.75 quantile minus the 0.25 quantile.
+
+R's IQR(). Quantiles use R's default method (type 7). The result is NA for no values. Dates are measured in days, and datetimes and times in seconds.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric or temporal expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: at evaluation, when a value is NA and na_rm is false.
+
+### `n_distinct()` {#n-distinct}
+
+```php
+n_distinct(mixed ...$args): Call
+```
+
+Number of distinct values, or of distinct combinations across several arguments.
+
+NA counts as a distinct value unless na_rm is true.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$args` | <code>mixed</code> |  | One or more expressions, then named options: na_rm (bool, default false) skips rows where any argument is NA. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `first()` {#first}
+
+```php
+first(mixed $x, mixed ...$options): Call
+```
+
+First value in the group.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `...$options` | <code>mixed</code> |  | Named options: default (mixed, default NA) is returned when the group has no values; order_by (expression, default row order) sorts the values first, NA last, and accepts `desc()`; na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `last()` {#last}
+
+```php
+last(mixed $x, mixed ...$options): Call
+```
+
+Last value in the group.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `...$options` | <code>mixed</code> |  | Named options: default (mixed, default NA) is returned when the group has no values; order_by (expression, default row order) sorts the values first, NA last, and accepts `desc()`; na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `nth()` {#nth}
+
+```php
+nth(mixed $x, mixed $n, mixed ...$options): Call
+```
+
+Value at position `$n` in the group.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `$n` | <code>mixed</code> |  | The 1-based position; a negative position counts from the end. |
+| `...$options` | <code>mixed</code> |  | Named options: default (mixed, default NA) is returned when the position is 0 or out of range; order_by (expression, default row order) sorts the values first, NA last, and accepts `desc()`; na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `any()` {#any}
+
+```php
+any(mixed $x, mixed ...$options): Call
+```
+
+Whether any value is true.
+
+With NA present and na_rm false, the result is true when some value is true, and NA otherwise. The result is false for no values.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A logical expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `all()` {#all}
+
+```php
+all(mixed $x, mixed ...$options): Call
+```
+
+Whether every value is true.
+
+With NA present and na_rm false, the result is false when some value is false, and NA otherwise. The result is true for no values.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A logical expression. |
+| `...$options` | <code>mixed</code> |  | Named options: na_rm (bool, default false) drops NA first. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Window functions
+
+### `lag()` {#lag}
+
+```php
+lag(mixed $x, mixed ...$options): Call
+```
+
+Value from n rows earlier in the group.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `...$options` | <code>mixed</code> |  | Named options: n (int, default 1) is the offset; default (mixed, default NA) fills rows with no earlier row; order_by (expression, default row order) sets the order, NA last, and accepts `desc()`. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `lead()` {#lead}
+
+```php
+lead(mixed $x, mixed ...$options): Call
+```
+
+Value from n rows later in the group.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+| `...$options` | <code>mixed</code> |  | Named options: n (int, default 1) is the offset; default (mixed, default NA) fills rows with no later row; order_by (expression, default row order) sets the order, NA last, and accepts `desc()`. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `row_number()` {#row-number}
+
+```php
+row_number(mixed ...$x): Call
+```
+
+Row number within the group, or the rank of each value with ties broken by row order.
+
+With no argument, rows are numbered 1 to n in their order. With an argument, NA values get NA, and a factor column ranks by level order.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$x` | <code>mixed</code> |  | Optionally one expression to rank by, or `desc()` of one. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `min_rank()` {#min-rank}
+
+```php
+min_rank(mixed $x): Call
+```
+
+Rank of each value, ties sharing the lowest rank, with gaps after ties.
+
+NA values get NA. A factor column ranks by level order.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | An expression to rank by, or `desc()` of one. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `dense_rank()` {#dense-rank}
+
+```php
+dense_rank(mixed $x): Call
+```
+
+Rank of each value, ties sharing a rank, with no gaps after ties.
+
+NA values get NA. A factor column ranks by level order.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | An expression to rank by, or `desc()` of one. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `percent_rank()` {#percent-rank}
+
+```php
+percent_rank(mixed $x): Call
+```
+
+Minimum rank rescaled to the range 0 to 1: (min_rank - 1) / (m - 1), where m is the number of non-NA values.
+
+NA values get NA. With one non-NA value, the result is NaN.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | An expression to rank by, or `desc()` of one. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `cume_dist()` {#cume-dist}
+
+```php
+cume_dist(mixed $x): Call
+```
+
+Cumulative distribution: the share of non-NA values less than or equal to each value.
+
+NA values get NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | An expression to rank by, or `desc()` of one. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `ntile()` {#ntile}
+
+```php
+ntile(mixed ...$args): Call
+```
+
+Bucket number from 1 to n, splitting the ordered values into n groups as evenly as possible.
+
+Earlier buckets take the extra rows when the sizes differ. NA values get NA. With no expression, rows are bucketed in row order.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$args` | <code>mixed</code> |  | Optionally one expression to order by, or `desc()` of one, then named options: n (int, required) is the number of buckets. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`\
+**Throws** `InvalidArgumentException`: when n is not given.
+
+### `cumsum()` {#cumsum}
+
+```php
+cumsum(mixed $x): Call
+```
+
+Cumulative sum in row order.
+
+Once a value is NA, every later result is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `cumprod()` {#cumprod}
+
+```php
+cumprod(mixed $x): Call
+```
+
+Cumulative product in row order.
+
+Once a value is NA, every later result is NA. SQL backends evaluate it in memory.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `cummean()` {#cummean}
+
+```php
+cummean(mixed $x): Call
+```
+
+Cumulative mean in row order.
+
+Once a value is NA, every later result is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A numeric expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `cummin()` {#cummin}
+
+```php
+cummin(mixed $x): Call
+```
+
+Cumulative minimum in row order.
+
+Once a value is NA, every later result is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `cummax()` {#cummax}
+
+```php
+cummax(mixed $x): Call
+```
+
+Cumulative maximum in row order.
+
+Once a value is NA, every later result is NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A column expression, such as `col('x')`, or a literal. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `cumall()` {#cumall}
+
+```php
+cumall(mixed $x): Call
+```
+
+Whether every value so far, in row order, is true.
+
+Once a value is false, every later result is false. After an NA, results are NA until a false value appears.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A logical expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `cumany()` {#cumany}
+
+```php
+cumany(mixed $x): Call
+```
+
+Whether any value so far, in row order, is true.
+
+Once a value is true, every later result is true. After an NA, results are NA until a true value appears.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$x` | <code>mixed</code> |  | A logical expression. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+### `consecutive_id()` {#consecutive-id}
+
+```php
+consecutive_id(mixed ...$args): Call
+```
+
+Run identifier that starts at 1 and increases each time the value, or combination of values, changes from the previous row.
+
+SQL backends evaluate it in memory.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$args` | <code>mixed</code> |  | One or more expressions. |
+
+**Function** in `Phibble\Expr`\
+**Returns** `Call`
+
+## Expression objects
+
+### `Expr::of()` {#expr-of}
+
+```php
+Expr::of(mixed $value): Expr
+```
+
+PHP value wrapped as a literal expression; an expression is returned unchanged.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$value` | <code>mixed</code> |  | An expression, or a value `lit()` accepts. |
+
+**Static method** of `Phibble\Expr\Expr`\
+**Returns** `Expr`\
+**Throws** `InvalidArgumentException`: when the value is not one `lit()` accepts.
+
+### `Expr::fromArray()` {#expr-fromarray}
+
+```php
+Expr::fromArray(array $node): Expr
+```
+
+Expression rebuilt from the array form that `toArray()` returns.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$node` | <code>array&lt;string, mixed&gt;</code> |  | A node as `toArray()` gives it. |
+
+**Static method** of `Phibble\Expr\Expr`\
+**Returns** `Expr`\
+**Throws** `InvalidArgumentException`: when a node has an unknown type, a literal is invalid, or a call does not fit the function registry.\
+**Examples** [Expressions](../expr.qmd)
+
+### `Expr->toArray()` {#expr-toarray}
+
+```php
+$expr->toArray(): array
+```
+
+JSON-friendly description of the expression tree.
+
+`Expr::fromArray()` rebuilds the expression from it.
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `array<string, mixed>`\
+**Examples** [Expressions](../expr.qmd)
+
+### `Expr->columns()` {#expr-columns}
+
+```php
+$expr->columns(): array
+```
+
+Names of the columns the expression reads, in order of first use.
+
+**Method** of `Phibble\Expr\Expr`\
+**Returns** `list<string>`\
+**Examples** [Expressions](../expr.qmd)

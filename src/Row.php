@@ -28,6 +28,11 @@ final readonly class Row implements ArrayAccess
         return isset($this->values[$name]);
     }
 
+    /**
+     * One value by column name. $row->name and $row['name'] read the same value.
+     *
+     * @throws \Phibble\Exception\ColumnNotFound When the column does not exist.
+     */
     public function get(string $name): mixed
     {
         if (! array_key_exists($name, $this->values)) {
@@ -37,12 +42,17 @@ final readonly class Row implements ArrayAccess
         return $this->values[$name];
     }
 
+    /** Whether the row has the column. */
     public function has(string $name): bool
     {
         return array_key_exists($name, $this->values);
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * The row as an associative array of column name => value.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return $this->values;

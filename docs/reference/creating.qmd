@@ -1,0 +1,567 @@
+---
+title: "Creating and loading tables"
+toc-depth: 3
+---
+
+Functions and static methods that create a table from PHP values, files, queries, or other tables.
+
+## Functions
+
+### `tibble()` {#fn-tibble}
+
+```php
+tibble(mixed ...$columns): DataFrame
+```
+
+Build a DataFrame from named arguments, one per column, as tibble's `tibble()`. Same rules as `DataFrame::tibble()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `...$columns` | <code>mixed</code> |  |  |
+
+**Function** in `Phibble`\
+**Returns** `DataFrame`
+
+### `tribble()` {#fn-tribble}
+
+```php
+tribble(array $names, mixed ...$cells): DataFrame
+```
+
+Build a DataFrame from column names, then rows, as tibble's `tribble()`. Same rules as `DataFrame::tribble()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>array</code> |  |  |
+| `...$cells` | <code>mixed</code> |  |  |
+
+**Function** in `Phibble`\
+**Returns** `DataFrame`
+
+### `as_tibble()` {#fn-as_tibble}
+
+```php
+as_tibble(mixed $data, string $nameRepair = 'check_unique'): DataFrame
+```
+
+Convert tables, rows, columns, or collections into a DataFrame, as tibble's `as_tibble()`. Same rules as `DataFrame::asTibble()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$data` | <code>mixed</code> |  |  |
+| `$nameRepair` | <code>string</code> | <code>'check_unique'</code> |  |
+
+**Function** in `Phibble`\
+**Returns** `DataFrame`
+
+### `enframe()` {#fn-enframe}
+
+```php
+enframe(
+    array $values,
+    ?string $name = 'name',
+    string $value = 'value',
+): DataFrame
+```
+
+An array as a two-column DataFrame of names and values, as tibble's `enframe()`. Same rules as `DataFrame::enframe()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$values` | <code>array</code> |  |  |
+| `$name` | <code>?string</code> | <code>'name'</code> |  |
+| `$value` | <code>string</code> | <code>'value'</code> |  |
+
+**Function** in `Phibble`\
+**Returns** `DataFrame`
+
+### `tbl()` {#fn-tbl}
+
+```php
+tbl(PDO $pdo, string $from, array $bindings = []): SqlTable
+```
+
+A lazy SqlTable, as dbplyr's `tbl()`. Pass a table name, or a SELECT or WITH query with bindings.
+
+tbl(`$pdo`, 'visits');
+    tbl(`$pdo`, 'SELECT * FROM visits WHERE year = ?', [2024]);
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pdo` | <code>PDO</code> |  |  |
+| `$from` | <code>string</code> |  | A table or view name, or a SELECT or WITH query. |
+| `$bindings` | <code>array&lt;int&#124;string, mixed&gt;</code> | <code>[]</code> | Positional (?) or named (:name) bindings, for a query only. |
+
+**Function** in `Phibble`\
+**Returns** `SqlTable`\
+**Throws** `InvalidArgumentException`: when bindings come with a table name.
+
+### `polars()` {#fn-polars}
+
+```php
+polars(mixed $data): PolarsTable
+```
+
+A PolarsTable from any Table, or from anything `as_tibble()` accepts. Requires the php_polars extension.
+
+polars(`DataFrame::fromCsv('sales.csv')`)->filter(`col('units')``->gt(0)`);
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$data` | <code>mixed</code> |  |  |
+
+**Function** in `Phibble`\
+**Returns** `PolarsTable`\
+**Throws** `RuntimeException`: when the php_polars extension is not loaded.
+
+## DataFrame
+
+### `DataFrame::fromRows()` {#dataframe-fromrows}
+
+```php
+DataFrame::fromRows(
+    iterable $rows,
+    array $types = [],
+    bool $parseStrings = false,
+): DataFrame
+```
+
+Build a DataFrame from rows. Column order follows first appearance; keys missing from a row are NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$rows` | <code>iterable&lt;array&lt;string, mixed&gt;&#124;object&gt;</code> |  |  |
+| `$types` | <code>array&lt;string, Type&#124;string&gt;</code> | <code>[]</code> | Explicit types by column name. |
+| `$parseStrings` | <code>bool</code> | <code>false</code> | Parse all-string columns as text (as fromCsv does). |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Getting started](../getting-started.qmd)
+
+### `DataFrame::fromColumns()` {#dataframe-fromcolumns}
+
+```php
+DataFrame::fromColumns(array $columns, array $types = []): DataFrame
+```
+
+Build a DataFrame from columns: name => list of values, or name => Column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$columns` | <code>array&lt;string, list&lt;mixed&gt;&#124;Column&gt;</code> |  |  |
+| `$types` | <code>array&lt;string, Type&#124;string&gt;</code> | <code>[]</code> | Explicit types by column name. |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd), [Getting started](../getting-started.qmd)
+
+### `DataFrame::fromCsv()` {#dataframe-fromcsv}
+
+```php
+DataFrame::fromCsv(
+    mixed $file,
+    array|string $types = [],
+    string $delimiter = ',',
+    array $na = ['', 'NA'],
+    mixed ...$options,
+): DataFrame
+```
+
+Read delimited text like `readr::read_csv()`: a path (".gz" is decompressed), an http:// or https:// URL (downloaded to a temporary file first), or an open stream. Types are guessed from up to guessMax rows; "" and "NA" are NA. More readr options go as named arguments; see `Phibble\Io\CsvOptions` (colNames, select, skip, nMax, quote, comment, trimWs, skipEmptyRows, guessMax, nameRepair, decimalMark, groupingMark, escapeDouble, escapeBackslash).
+
+Problems (unparseable values, ragged rows) raise one E_USER_WARNING; the data is still returned, with NA where values failed.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$file` | <code>string&#124;resource</code> |  |  |
+| `$types` | <code>string&#124;array&lt;int&#124;string, mixed&gt;</code> | <code>[]</code> | readr col_types: "icdlDTfn_?" or name => spec. |
+| `$delimiter` | <code>string</code> | <code>','</code> |  |
+| `$na` | <code>list&lt;string&gt;</code> | <code>['', 'NA']</code> |  |
+| `...$options` | <code>mixed</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Getting started](../getting-started.qmd), [Reading and writing data](../io.qmd), [Expressions](../expr.qmd)
+
+### `DataFrame::fromCsvString()` {#dataframe-fromcsvstring}
+
+```php
+DataFrame::fromCsvString(
+    string $csv,
+    array|string $types = [],
+    string $delimiter = ',',
+    array $na = ['', 'NA'],
+    mixed ...$options,
+): DataFrame
+```
+
+Read delimited text from a string; options as `fromCsv()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$csv` | <code>string</code> |  |  |
+| `$types` | <code>string&#124;array&lt;int&#124;string, mixed&gt;</code> | <code>[]</code> |  |
+| `$delimiter` | <code>string</code> | <code>','</code> |  |
+| `$na` | <code>list&lt;string&gt;</code> | <code>['', 'NA']</code> |  |
+| `...$options` | <code>mixed</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Reading and writing data](../io.qmd), [Types](../types.qmd)
+
+### `DataFrame::fromCsvChunked()` {#dataframe-fromcsvchunked}
+
+```php
+DataFrame::fromCsvChunked(
+    mixed $file,
+    callable $callback,
+    int $chunkSize = 10000,
+    array|string $types = [],
+    string $delimiter = ',',
+    array $na = ['', 'NA'],
+    mixed ...$options,
+): void
+```
+
+Read delimited text in chunks, as `readr::read_delim_chunked()`: each chunk of at most `$chunkSize` rows is passed to `$callback` with the 1-based index of its first row. Returning false from the callback stops reading. Memory follows the chunk size, not the file's.
+
+Types not given are guessed from the first chunk (guessMax defaults to the chunk size, as in readr) and every later chunk is parsed as those types. Give types, for example ['.default' => 'c'], to skip guessing. Factors without levels take their levels from each chunk. Each chunk's problems raise their own warning, with rows numbered from the start of the file. Options are those of `fromCsv()`, and `$file` may be a URL as there. With phit 0.2.0 or later loaded, the chunks are read natively by `Phit\CsvReader`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$file` | <code>string&#124;resource</code> |  |  |
+| `$callback` | <code>callable(DataFrame, int): (bool&#124;null&#124;void)</code> |  |  |
+| `$chunkSize` | <code>int</code> | <code>10000</code> |  |
+| `$types` | <code>string&#124;array&lt;int&#124;string, mixed&gt;</code> | <code>[]</code> |  |
+| `$delimiter` | <code>string</code> | <code>','</code> |  |
+| `$na` | <code>list&lt;string&gt;</code> | <code>['', 'NA']</code> |  |
+| `...$options` | <code>mixed</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Examples** [Reading and writing data](../io.qmd)
+
+### `DataFrame::csvChunks()` {#dataframe-csvchunks}
+
+```php
+DataFrame::csvChunks(
+    mixed $file,
+    int $chunkSize = 10000,
+    array|string $types = [],
+    string $delimiter = ',',
+    array $na = ['', 'NA'],
+    mixed ...$options,
+): Generator
+```
+
+The chunks `fromCsvChunked()` reads, as a generator keyed by the 1-based index of each chunk's first row.
+
+`$kept` = [];
+    foreach (`DataFrame::csvChunks('feed.tsv', delimiter: "\t", types: ['.default' => 'c'])` as `$chunk`) {
+        `$kept[]` = `$chunk`->filter(`col('category')``->eq('running')`);
+    }
+    `$shoes` = DataFrame::concat(`$kept`);
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$file` | <code>string&#124;resource</code> |  |  |
+| `$chunkSize` | <code>int</code> | <code>10000</code> |  |
+| `$types` | <code>string&#124;array&lt;int&#124;string, mixed&gt;</code> | <code>[]</code> |  |
+| `$delimiter` | <code>string</code> | <code>','</code> |  |
+| `$na` | <code>list&lt;string&gt;</code> | <code>['', 'NA']</code> |  |
+| `...$options` | <code>mixed</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `Generator<int, DataFrame>`
+
+### `DataFrame::fromJson()` {#dataframe-fromjson}
+
+```php
+DataFrame::fromJson(
+    string $json,
+    array $types = [],
+    ?string $orient = null,
+): DataFrame
+```
+
+Read JSON: a list of records ([{"a": 1}, ...]) or an object of columns ({"a": [1, 2]}). The shape is detected unless `$orient` is 'records' or 'columns'. Missing keys and nulls are NA; nested arrays and objects become list-columns.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$json` | <code>string</code> |  |  |
+| `$types` | <code>array&lt;string, Type&#124;string&gt;</code> | <code>[]</code> |  |
+| `$orient` | <code>?string</code> | <code>null</code> |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Reading and writing data](../io.qmd)
+
+### `DataFrame::fromPdo()` {#dataframe-frompdo}
+
+```php
+DataFrame::fromPdo(
+    PDO $pdo,
+    string $sql,
+    array $bindings = [],
+    array $types = [],
+): DataFrame
+```
+
+Run a query and load the result.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pdo` | <code>PDO</code> |  |  |
+| `$sql` | <code>string</code> |  |  |
+| `$bindings` | <code>array&lt;int&#124;string, mixed&gt;</code> | <code>[]</code> | Positional or named. |
+| `$types` | <code>array&lt;string, Type&#124;string&gt;</code> | <code>[]</code> |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Reading and writing data](../io.qmd)
+
+### `DataFrame::fromQuery()` {#dataframe-fromquery}
+
+```php
+DataFrame::fromQuery(
+    object $builder,
+    ?object $connection = null,
+    array $types = [],
+): DataFrame
+```
+
+Load the result of a Laravel query builder (query or Eloquent) or a Doctrine DBAL QueryBuilder. Neither library is required.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$builder` | <code>object</code> |  |  |
+| `$connection` | <code>?object</code> | <code>null</code> |  |
+| `$types` | <code>array&lt;string, Type&#124;string&gt;</code> | <code>[]</code> |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+### `DataFrame::fromCollection()` {#dataframe-fromcollection}
+
+```php
+DataFrame::fromCollection(
+    Traversable|object|array $collection,
+    array $types = [],
+): DataFrame
+```
+
+Build a DataFrame from a Laravel Collection (or anything with `all()` or `toArray()`, or any iterable). Items may be arrays, Eloquent models or other objects with `toArray()`, or plain objects. Laravel is not needed.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$collection` | <code>iterable&lt;mixed&gt;&#124;object</code> |  |  |
+| `$types` | <code>array&lt;string, Type&#124;string&gt;</code> | <code>[]</code> |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Reading and writing data](../io.qmd)
+
+### `DataFrame::fromSource()` {#dataframe-fromsource}
+
+```php
+DataFrame::fromSource(Source $source): DataFrame
+```
+
+Read a `Phibble\Source\Source`, such as a CsvSource or PdoSource, into a DataFrame.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$source` | <code>Source</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+### `DataFrame::tibble()` {#dataframe-tibble}
+
+```php
+DataFrame::tibble(
+    array $columns,
+    string $nameRepair = 'check_unique',
+): DataFrame
+```
+
+Build a DataFrame column by column, as tibble's `tibble()`.
+
+- A list is a column; a scalar (or null) is repeated to the common
+  length. Only length-1 values are recycled.
+- A closure receives the DataFrame built so far and returns a list or a
+  scalar, so columns can be computed from earlier ones.
+- A Table under an integer key is spliced in column by column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$columns` | <code>array&lt;string&#124;int, mixed&gt;</code> |  |  |
+| `$nameRepair` | <code>string</code> | <code>'check_unique'</code> | check_unique, unique, universal or minimal |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+### `DataFrame::tribble()` {#dataframe-tribble}
+
+```php
+DataFrame::tribble(array $names, mixed ...$cells): DataFrame
+```
+
+Build a DataFrame row by row, as tibble's `tribble()`. Pass the column names, then either one list per row or the cells in row order.
+
+`DataFrame::tribble(['x', 'y'], [1, 'a'], [2, 'b'])`;
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&gt;</code> |  |  |
+| `...$cells` | <code>mixed</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+### `DataFrame::asTibble()` {#dataframe-astibble}
+
+```php
+DataFrame::asTibble(
+    mixed $data,
+    string $nameRepair = 'check_unique',
+): DataFrame
+```
+
+Convert tables, rows, columns, collections, or other iterables into a DataFrame, as tibble's `as_tibble()`.
+
+- A Table is collected.
+- A list of associative arrays (or objects) is rows.
+- An associative array of lists is columns.
+- An object with `all()` or `toArray()` (a Laravel Collection) is unwrapped.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$data` | <code>mixed</code> |  |  |
+| `$nameRepair` | <code>string</code> | <code>'check_unique'</code> | check_unique, unique, universal or minimal |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+### `DataFrame::enframe()` {#dataframe-enframe}
+
+```php
+DataFrame::enframe(
+    array $values,
+    ?string $name = 'name',
+    string $value = 'value',
+): DataFrame
+```
+
+An array as a two-column DataFrame of names and values, as tibble's `enframe()`. A list gets 1-based integer names, as in R.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$values` | <code>array&lt;mixed&gt;</code> |  |  |
+| `$name` | <code>?string</code> | <code>'name'</code> |  |
+| `$value` | <code>string</code> | <code>'value'</code> |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+## SqlTable
+
+### `SqlTable::table()` {#sqltable-table}
+
+```php
+SqlTable::table(PDO $pdo, string $name): SqlTable
+```
+
+A table (or view) by name.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pdo` | <code>PDO</code> |  |  |
+| `$name` | <code>string</code> |  |  |
+
+**Static method** of `Phibble\Sql\SqlTable`\
+**Returns** `SqlTable`
+
+### `SqlTable::query()` {#sqltable-query}
+
+```php
+SqlTable::query(PDO $pdo, string $sql, array $bindings = []): SqlTable
+```
+
+Any SELECT query with positional (?) or named (:name) bindings.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$pdo` | <code>PDO</code> |  |  |
+| `$sql` | <code>string</code> |  |  |
+| `$bindings` | <code>array&lt;int&#124;string, mixed&gt;</code> | <code>[]</code> |  |
+
+**Static method** of `Phibble\Sql\SqlTable`\
+**Returns** `SqlTable`
+
+### `SqlTable::fromQuery()` {#sqltable-fromquery}
+
+```php
+SqlTable::fromQuery(
+    object $builder,
+    ?object $connection = null,
+): SqlTable
+```
+
+A Laravel or Doctrine DBAL query builder, kept lazy.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$builder` | <code>object</code> |  |  |
+| `$connection` | <code>?object</code> | <code>null</code> |  |
+
+**Static method** of `Phibble\Sql\SqlTable`\
+**Returns** `SqlTable`
+
+### `SqlTable::fromSource()` {#sqltable-fromsource}
+
+```php
+SqlTable::fromSource(PdoSource $source): SqlTable
+```
+
+A lazy table over a PdoSource's query and bindings.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$source` | <code>PdoSource</code> |  |  |
+
+**Static method** of `Phibble\Sql\SqlTable`\
+**Returns** `SqlTable`
+
+## PolarsTable
+
+### `PolarsTable::fromTable()` {#polarstable-fromtable}
+
+```php
+PolarsTable::fromTable(Table $table): PolarsTable
+```
+
+Copy any phibble table into Polars, keeping types, groups and factor levels.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$table` | <code>Table</code> |  |  |
+
+**Static method** of `Phibble\Polars\PolarsTable`\
+**Returns** `PolarsTable`
+
+### `PolarsTable::fromPolars()` {#polarstable-frompolars}
+
+```php
+PolarsTable::fromPolars(
+    Phpolars\DataFrame|Phpolars\LazyFrame $df,
+): PolarsTable
+```
+
+Wrap a Polars DataFrame; a LazyFrame is collected.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$df` | <code>Phpolars\DataFrame&#124;Phpolars\LazyFrame</code> |  |  |
+
+**Static method** of `Phibble\Polars\PolarsTable`\
+**Returns** `PolarsTable`

@@ -1,0 +1,557 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * Writes the Functions and methods reference in docs/reference/ from the
+ * public API, by reflection and docblocks.
+ *
+ * Usage: bin/api-reference [--check]
+ *
+ * The callables are every function in the Phibble and Phibble\Expr
+ * namespaces and every public method of the classes in CLASSES, less those
+ * marked @internal and those in EXCLUDED. Each must be placed on a page
+ * below, and each must have a docblock summary; otherwise the script lists
+ * them and fails. --check fails when the pages on disk differ from what the
+ * script would write.
+ */
+
+declare(strict_types=1);
+
+use Phibble\Contracts\Table;
+
+$root = dirname(__DIR__);
+chdir($root);
+require 'vendor/autoload.php';
+require_once 'src/functions.php';
+require_once 'src/Expr/helpers.php';
+
+const TABLES = ['DataFrame' => Phibble\DataFrame::class, 'SqlTable' => Phibble\Sql\SqlTable::class, 'PolarsTable' => Phibble\Polars\PolarsTable::class];
+const CLASSES = [
+    'Expr' => Phibble\Expr\Expr::class,
+    'Row' => Phibble\Row::class,
+    'Type' => Phibble\Type::class,
+    'Time' => Phibble\Time::class,
+    'Clock' => Phibble\Expr\Clock::class,
+    'NameRepair' => Phibble\NameRepair::class,
+    'Dialect' => Phibble\Sql\Dialect::class,
+    'PhibbleServiceProvider' => Phibble\Laravel\PhibbleServiceProvider::class,
+];
+/** Public methods left out of the reference, with the reason. */
+const EXCLUDED = [
+    'offsetExists' => 'ArrayAccess: $df[\'name\'] and $row[\'name\'] read a column or value; writing throws, because tables are immutable.',
+    'offsetGet' => 'ArrayAccess, as above.',
+    'offsetSet' => 'ArrayAccess, as above.',
+    'offsetUnset' => 'ArrayAccess, as above.',
+    'getIterator' => 'IteratorAggregate: foreach over a table yields a Row per row.',
+    'DataFrame::storage' => 'Returns the internal column storage.',
+    'Time::jsonSerialize' => 'JsonSerializable: a time encodes as its HH:MM:SS text.',
+    'Time::__toString' => 'Stringable: a time casts to its HH:MM:SS text.',
+    'Type::cases' => 'Built-in enum method.',
+    'Type::from' => 'Built-in enum method.',
+    'Type::tryFrom' => 'Built-in enum method.',
+    'PhibbleServiceProvider::boot' => 'Laravel service provider hook.',
+    'Dialect::*' => 'SQL compiler hooks that each dialect class implements; only Dialect::for() and Dialect::tryFor() are for applications.',
+];
+
+/*
+ * Pages and their sections. Keys:
+ *   tibble          a function in Phibble, or in Phibble\Expr for expression pages
+ *   DataFrame::x    a static method
+ *   ->x             an instance method of the table classes
+ *   Expr->x         an instance method of another class
+ *   @macro          a Laravel macro, described in MACROS
+ */
+$pages = [
+    'creating' => ['Creating and loading tables', 'Functions and static methods that create a table from PHP values, files, queries, or other tables.', [
+        'Functions' => ['tibble', 'tribble', 'as_tibble', 'enframe', 'tbl', 'polars'],
+        'DataFrame' => ['DataFrame::fromRows', 'DataFrame::fromColumns', 'DataFrame::fromCsv', 'DataFrame::fromCsvString', 'DataFrame::fromCsvChunked', 'DataFrame::csvChunks', 'DataFrame::fromJson', 'DataFrame::fromPdo', 'DataFrame::fromQuery', 'DataFrame::fromCollection', 'DataFrame::fromSource', 'DataFrame::tibble', 'DataFrame::tribble', 'DataFrame::asTibble', 'DataFrame::enframe'],
+        'SqlTable' => ['SqlTable::table', 'SqlTable::query', 'SqlTable::fromQuery', 'SqlTable::fromSource'],
+        'PolarsTable' => ['PolarsTable::fromTable', 'PolarsTable::fromPolars'],
+    ]],
+    'rows-and-columns' => ['Rows and columns', 'Methods that read, select, filter, sort, and add rows and columns.', [
+        'Size and names' => ['->columns', '->types', '->type', '->nrow', '->ncol', '->count', '->has'],
+        'Values' => ['->column', '->row', 'Row->get', 'Row->has', 'Row->toArray'],
+        'Selecting and renaming' => ['->select', '->rename', 'NameRepair::repair'],
+        'Filtering and sorting' => ['->filter', '->arrange', '->distinct', '->dropNa'],
+        'Adding columns and rows' => ['->mutate', '->withColumn', '->addColumn', '->addRow'],
+        'Rows by position' => ['->slice', '->head', '->tail', '->take'],
+    ]],
+    'grouping' => ['Grouping and summaries', 'Methods that set groups, summarize them, and run operations per group.', [
+        'Grouping' => ['->groupBy', '->ungroup', '->groups', '->dropsEmptyGroups', '->ngroups', '->rowwise', '->isRowwise'],
+        'Summaries' => ['->summarise', '->summarize'],
+        'Per-group operations' => ['->filterGroups', '->mutateGroups', '->eachGroup', '->groupRows'],
+    ]],
+    'combining' => ['Joins and reshaping', 'Methods that join, bind, pivot, and nest tables.', [
+        'Joins' => ['->join'],
+        'Binding' => ['DataFrame::concat', 'DataFrame::bindCols'],
+        'Reshaping' => ['->pivotLongerSpec', '->pivotWiderSpec', '->nest', '->unnest'],
+    ]],
+    'expressions' => ['Expression functions', 'Functions in Phibble\Expr that build expressions for filter(), mutate(), arrange(), and summarise(), and the methods of Expr objects.', [
+        'Columns and literals' => ['col', 'lit', 'call', 'desc'],
+        'Operators' => ['Expr->add', 'Expr->sub', 'Expr->mul', 'Expr->div', 'Expr->mod', 'Expr->pow', 'Expr->neg', 'Expr->eq', 'Expr->ne', 'Expr->lt', 'Expr->le', 'Expr->gt', 'Expr->ge', 'Expr->and', 'Expr->or', 'Expr->not', 'Expr->isNa', 'Expr->isIn', 'Expr->between', 'Expr->desc'],
+        'Conditionals and missing values' => ['is_na', 'if_else', 'case_when', 'coalesce', 'between', 'na_if', 'near'],
+        'Math' => ['abs', 'sqrt', 'exp', 'log', 'log10', 'round', 'floor', 'ceiling'],
+        'Conversion' => ['as_int', 'as_float', 'as_string', 'as_bool'],
+        'Aggregates' => ['n', 'sum', 'mean', 'median', 'min', 'max', 'sd', 'var_', 'quantile', 'iqr', 'n_distinct', 'first', 'last', 'nth', 'any', 'all'],
+        'Window functions' => ['lag', 'lead', 'row_number', 'min_rank', 'dense_rank', 'percent_rank', 'cume_dist', 'ntile', 'cumsum', 'cumprod', 'cummean', 'cummin', 'cummax', 'cumall', 'cumany', 'consecutive_id'],
+        'Expression objects' => ['Expr::of', 'Expr::fromArray', 'Expr->toArray', 'Expr->columns'],
+    ]],
+    'strings-and-dates' => ['String and date functions', 'Expression functions in Phibble\Expr for text, patterns, dates, datetimes, and periods, following stringr and lubridate.', [
+        'Strings' => ['str_length', 'str_lower', 'str_upper', 'str_to_lower', 'str_to_upper', 'str_to_title', 'str_trim', 'str_squish', 'str_pad', 'str_trunc', 'str_sub', 'paste', 'paste0'],
+        'Patterns' => ['fixed', 'regex', 'str_detect', 'str_starts', 'str_ends', 'str_count', 'str_extract', 'str_extract_all', 'str_replace', 'str_replace_all', 'str_split', 'str_split_i'],
+        'Parsing dates' => ['ymd', 'dmy', 'mdy', 'ymd_hms', 'dmy_hms', 'mdy_hms', 'parse_date_time'],
+        'Date parts' => ['year', 'quarter', 'month', 'day', 'wday', 'yday', 'hour', 'minute', 'second'],
+        'Rounding and differences' => ['floor_date', 'ceiling_date', 'round_date', 'difftime'],
+        'Periods' => ['seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'],
+        'Time zones and the clock' => ['with_tz', 'force_tz', 'today', 'now', 'Clock::freeze', 'Clock::now'],
+    ]],
+    'types' => ['Types and conversion', 'Column types, casts, factors, times of day, and conversion to model data.', [
+        'Column types' => ['->cast', 'Type::parse', 'Type->abbreviation', 'Type->isNumeric'],
+        'Factors' => ['->asFactor', '->asOrdered', '->isOrdered', '->levels', '->fctLevels', '->fctRelevel', '->fctRev', '->fctInorder', '->fctInfreq', '->fctReorder', '->fctRecode', '->fctCollapse', '->fctDrop'],
+        'Times of day' => ['Time::of', 'Time::fromSeconds', 'Time::parse', 'Time::meridiem', 'Time->seconds', 'Time->hour', 'Time->minute', 'Time->second'],
+        'Model data' => ['->toModelData', '->toMatrix', '->toVector'],
+    ]],
+    'output' => ['Output', 'Methods that return PHP values, write CSV and JSON, and print tables.', [
+        'PHP values' => ['->toRows', '->toColumns', '->collect', '->deframe', 'deframe', '->toCollection'],
+        'CSV and JSON' => ['->toCsv', '->writeCsv', '->toJson'],
+        'Printing' => ['->__toString', '->format', '->glimpse'],
+    ]],
+    'backends' => ['SqlTable, PolarsTable, and Laravel', 'Methods specific to the SQL and Polars backends, and the Laravel integration.', [
+        'SqlTable' => ['->showQuery', '->bindings', '->dialect', 'Dialect::for', 'Dialect::tryFor'],
+        'PolarsTable' => ['->polars'],
+        'Laravel' => ['PhibbleServiceProvider::registerMacros', '@phibble', '@toDataFrame'],
+    ]],
+];
+
+const MACROS = [
+    'phibble' => [
+        'signature' => '$builder->phibble(): SqlTable',
+        'summary' => 'A lazy SqlTable over a Laravel query, Eloquent, or relation builder, on the builder\'s connection.',
+        'body' => 'Global scopes, such as soft deletes, apply. Attribute casts and accessors do not, because rows come from SQL.',
+        'classes' => 'Illuminate\Database\Query\Builder, Illuminate\Database\Eloquent\Builder, and Illuminate\Database\Eloquent\Relations\Relation',
+    ],
+    'toDataFrame' => [
+        'signature' => '$builderOrCollection->toDataFrame(array $types = []): DataFrame',
+        'summary' => 'Run a Laravel query, or read a collection, into a DataFrame.',
+        'body' => 'On builders it calls DataFrame::fromQuery(); on Collection and LazyCollection it calls DataFrame::fromCollection(). $types declares column types, as in fromColumns().',
+        'classes' => 'the query, Eloquent, and relation builders, Illuminate\Support\Collection, and Illuminate\Support\LazyCollection',
+    ],
+];
+
+// ---------------------------------------------------------------------
+// The public API, by reflection
+// ---------------------------------------------------------------------
+
+$isInternal = fn (Reflector $r) => str_contains((string) $r->getDocComment(), '@internal');
+
+/** @var array<string, array{kind: string, reflection: list<ReflectionFunctionAbstract>, classes: list<string>}> */
+$api = [];
+foreach (get_defined_functions()['user'] as $name) {
+    $r = new ReflectionFunction($name);
+    if (preg_match('/^phibble\\\\(expr\\\\)?(\w+)$/i', $r->getName(), $m) && ! $isInternal($r)) {
+        $api[$m[2]] = ['kind' => 'function', 'namespace' => $m[1] !== '' ? 'Phibble\Expr' : 'Phibble', 'reflection' => [$r], 'classes' => []];
+    }
+}
+$methodKey = function (string $short, ReflectionMethod $m, bool $table): string {
+    return match (true) {
+        $m->isStatic() => "{$short}::{$m->getName()}",
+        $table => "->{$m->getName()}",
+        default => "{$short}->{$m->getName()}",
+    };
+};
+$excluded = function (string $short, string $method) {
+    return isset(EXCLUDED[$method]) || isset(EXCLUDED["{$short}::{$method}"]) || isset(EXCLUDED["{$short}::*"]);
+};
+foreach ([...array_map(fn ($c) => [$c, true], TABLES), ...array_map(fn ($c) => [$c, false], CLASSES)] as $short => [$class, $table]) {
+    $r = new ReflectionClass($class);
+    foreach ($r->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
+        if ($m->getDeclaringClass()->getName() !== $class && ! $table) {
+            continue;
+        }
+        if (($m->isConstructor() || str_starts_with($m->getName(), '__')) && $m->getName() !== '__toString') {
+            continue;
+        }
+        if ($isInternal($m)) {
+            continue;
+        }
+        $key = $methodKey($short, $m, $table);
+        $keep = ! $excluded($short, $m->getName()) || in_array("{$short}::{$m->getName()}", ['Dialect::for', 'Dialect::tryFor'], true);
+        if (! $keep) {
+            continue;
+        }
+        $api[$key] ??= ['kind' => $m->isStatic() ? 'static method' : 'method', 'reflection' => [], 'classes' => []];
+        $api[$key]['reflection'][] = $m;
+        $api[$key]['classes'][] = $short;
+    }
+}
+foreach (array_keys(MACROS) as $macro) {
+    $api["@{$macro}"] = ['kind' => 'macro', 'reflection' => [], 'classes' => []];
+}
+
+$placed = [];
+foreach ($pages as $page) {
+    foreach ($page[2] as $keys) {
+        foreach ($keys as $key) {
+            $placed[$key] = ($placed[$key] ?? 0) + 1;
+        }
+    }
+}
+$problems = [];
+foreach (array_diff_key($api, $placed) as $key => $_) {
+    $problems[] = "{$key} is public but on no page.";
+}
+foreach (array_diff_key($placed, $api) as $key => $_) {
+    $problems[] = "{$key} is on a page but is not public API.";
+}
+foreach (array_filter($placed, fn ($n) => $n > 1) as $key => $n) {
+    $problems[] = "{$key} is on {$n} pages.";
+}
+
+// ---------------------------------------------------------------------
+// Docblocks
+// ---------------------------------------------------------------------
+
+/** Split a type off the front of a tag's text, respecting brackets. */
+function splitType(string $text): array
+{
+    $depth = 0;
+    for ($i = 0; $i < strlen($text); $i++) {
+        $c = $text[$i];
+        $depth += match ($c) {
+            '<', '(', '{', '[' => 1,
+            '>', ')', '}', ']' => -1,
+            default => 0,
+        };
+        // "): T" in a closure type continues the type.
+        if ($depth === 0 && ctype_space($c) && ! str_ends_with(rtrim(substr($text, 0, $i)), ':') && ! preg_match('/^\s*:/', substr($text, $i))) {
+            return [substr($text, 0, $i), trim(substr($text, $i))];
+        }
+    }
+
+    return [$text, ''];
+}
+
+function parseDoc(string|false $doc): array
+{
+    $lines = array_map(fn ($l) => preg_replace('/^\s*\*\s?/', '', $l), explode("\n", trim((string) $doc, "/* \n")));
+    $lines = array_map(fn ($l) => preg_replace('/^\*\s?/', '', $l), $lines);
+    $text = [];
+    $tags = [];
+    foreach ($lines as $line) {
+        if (str_starts_with($line, '@')) {
+            $tags[] = $line;
+        } elseif ($tags !== [] && trim($line) !== '') {
+            $tags[count($tags) - 1] .= ' '.trim($line);
+        } elseif ($tags === []) {
+            $text[] = $line;
+        }
+    }
+    $paragraphs = array_values(array_filter(array_map('trim', preg_split('/\n\s*\n/', implode("\n", $text))), fn ($p) => $p !== ''));
+    $out = ['summary' => '', 'body' => [], 'params' => [], 'paramTypes' => [], 'return' => '', 'returnType' => '', 'throws' => []];
+    foreach ($paragraphs as $i => $p) {
+        // Keep bulleted lists and indented code as written; join wrapped prose.
+        $p = preg_match('/^\s*(- |\d+\. )/m', $p) || preg_match('/^ {4}/m', $p) ? $p : preg_replace('/\s*\n\s*/', ' ', $p);
+        $i === 0 ? $out['summary'] = $p : $out['body'][] = $p;
+    }
+    foreach ($tags as $tag) {
+        if (preg_match('/^@param\s+(.*)$/s', $tag, $m)) {
+            if (preg_match('/^(.*?)(\.\.\.)?\$(\w+)\s*(.*)$/s', $m[1], $p)) {
+                $out['params'][$p[3]] = trim($p[4]);
+                $out['paramTypes'][$p[3]] = trim($p[1]);
+            }
+        } elseif (preg_match('/^@return\s+(.*)$/s', $tag, $m)) {
+            [$out['returnType'], $out['return']] = splitType(trim($m[1]));
+        } elseif (preg_match('/^@throws\s+(\S+)\s*(.*)$/s', $tag, $m)) {
+            $out['throws'][] = [ltrim($m[1], '\\'), trim($m[2])];
+        }
+    }
+    if ($out['summary'] === '' && $out['return'] !== '') {
+        $out['summary'] = ucfirst($out['return']);
+        $out['return'] = '';
+    }
+
+    return $out;
+}
+
+/** Docblock of an entry: the Table contract first, then the first class with one. */
+$docOf = function (array $entry, string $key): array {
+    $docs = [];
+    foreach ($entry['reflection'] as $r) {
+        $docs[] = parseDoc($r->getDocComment());
+    }
+    if (str_starts_with($key, '->') && interface_exists(Table::class) && method_exists(Table::class, substr($key, 2))) {
+        array_unshift($docs, parseDoc((new ReflectionMethod(Table::class, substr($key, 2)))->getDocComment()));
+    }
+    $doc = current(array_filter($docs, fn ($d) => $d['summary'] !== '')) ?: ($docs[0] ?? parseDoc(false));
+    foreach ($docs as $d) {
+        $doc['params'] += $d['params'];
+        $doc['paramTypes'] += $d['paramTypes'];
+        $doc['returnType'] = $doc['returnType'] ?: $d['returnType'];
+        $doc['throws'] = $doc['throws'] ?: $d['throws'];
+    }
+
+    return $doc;
+};
+
+// ---------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------
+
+function anchor(string $key): string
+{
+    return match (true) {
+        function_exists("Phibble\\{$key}") => 'fn-'.strtolower($key),
+        str_starts_with($key, '->') => strtolower(substr($key, 2)),
+        str_starts_with($key, '@') => 'macro-'.strtolower(substr($key, 1)),
+        default => strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', $key)),
+    };
+}
+
+function display(string $key, string $kind): string
+{
+    return match (true) {
+        str_starts_with($key, '@') => '->'.substr($key, 1).'()',
+        $kind === 'function' => "{$key}()",
+        default => "{$key}()",
+    };
+}
+
+/** Inline code for a pipe-table cell, where a literal | would end the cell. */
+function cellCode(string $code): string
+{
+    return '<code>'.str_replace('|', '&#124;', htmlspecialchars($code, ENT_NOQUOTES)).'</code>';
+}
+
+/** The class `self` names, set while rendering a method. */
+$GLOBALS['selfClass'] = null;
+
+/** A type with phibble's namespaces dropped, and self as its class, as PHP 8.5 reports it. */
+function short(string $type): string
+{
+    if ($GLOBALS['selfClass'] !== null) {
+        $type = preg_replace('/(?<![\w\\\\])self\b/', $GLOBALS['selfClass'], $type);
+    }
+
+    return preg_replace('/\\\\?Phibble\\\\(?:(?:Expr|Sql|Polars|Contracts|Source|Exception)\\\\)?/', '', $type);
+}
+
+function value(mixed $v): string
+{
+    return match (true) {
+        $v === null => 'null',
+        is_bool($v) => $v ? 'true' : 'false',
+        is_string($v) => var_export($v, true),
+        is_array($v) => '['.implode(', ', array_is_list($v) ? array_map(value(...), $v) : array_map(fn ($k, $x) => value($k).' => '.value($x), array_keys($v), $v)).']',
+        default => var_export($v, true),
+    };
+}
+
+function parameter(ReflectionParameter $p): string
+{
+    $type = $p->getType() !== null ? short((string) $p->getType()).' ' : '';
+    $default = '';
+    if ($p->isDefaultValueAvailable()) {
+        $default = ' = '.($p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : value($p->getDefaultValue()));
+    }
+
+    return $type.($p->isVariadic() ? '...' : '').'$'.$p->getName().$default;
+}
+
+function signature(string $prefix, ReflectionFunctionAbstract $r): string
+{
+    $params = array_map(parameter(...), $r->getParameters());
+    $return = $r->getReturnType() !== null ? ': '.short((string) $r->getReturnType()) : '';
+    $one = $prefix.'('.implode(', ', $params).')'.$return;
+    if (strlen($one) <= 72) {
+        return $one;
+    }
+
+    return $prefix."(\n".implode('', array_map(fn ($p) => "    {$p},\n", $params)).')'.$return;
+}
+
+/** Prose from a docblock as Markdown: code-format names, keep $ out of math. */
+function prose(string $text): string
+{
+    $parts = preg_split('/(`[^`]*`)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    foreach ($parts as $i => $part) {
+        if ($i % 2 === 1) {
+            continue;
+        }
+        $part = preg_replace('/(?<![\w`])((?:\$|\.\.\.\$)\w+(?:\[[^\]]*\])?)/', '`$1`', $part);
+        $part = preg_replace('/(?<![\w`$\\\\])((?:\w+(?:\\\\\w+)*::)?(?:->)?[a-z_][\w]*\([^()`]*\))/', '`$1`', $part);
+        $part = preg_replace('/(?<![\w`\\\\])([A-Z]\w*(?:\\\\\w+)+)(?![\w\\\\(])/', '`$1`', $part);
+        $parts[$i] = str_replace('|', '\|', $part);
+    }
+
+    return implode('', $parts);
+}
+
+/** Pages and anchors of the examples that call a callable. */
+$exampleFiles = [];
+foreach (glob('docs/examples/*.php') as $file) {
+    $name = basename($file, '.php');
+    $code = (string) file_get_contents($file);
+    foreach ([...glob('docs/*.qmd'), ...glob('docs/examples/*.qmd')] as $qmd) {
+        if (str_contains((string) file_get_contents($qmd), "examples/_{$name}") || str_contains((string) file_get_contents($qmd), "/_{$name}")) {
+            preg_match('/^title:\s*"?(.*?)"?\s*$/m', (string) file_get_contents($qmd), $t);
+            $exampleFiles[$name] = ['code' => $code, 'page' => substr($qmd, 5), 'title' => $t[1] ?? basename($qmd, '.qmd')];
+            break;
+        }
+    }
+}
+$examplesFor = function (string $key, array $entry) use ($exampleFiles): array {
+    $method = preg_replace('/^.*(->|::)/', '', ltrim($key, '@'));
+    $pattern = match (true) {
+        $entry['kind'] === 'function' => '/(?<![\w>$:\\\\])'.preg_quote($key, '/').'\(/',
+        str_contains($key, '::') => '/\b'.preg_quote($key, '/').'\(/',
+        default => '/->'.preg_quote($method, '/').'\(/',
+    };
+    $pages = [];
+    foreach ($exampleFiles as $file) {
+        if ($entry['kind'] === 'function' && ! preg_match('/use function Phibble\\\\(Expr\\\\)?\{[^}]*\b'.preg_quote($key, '/').'\b|use function Phibble\\\\(Expr\\\\)?'.preg_quote($key, '/').'\b/', $file['code'])) {
+            continue;
+        }
+        if (preg_match($pattern, $file['code'])) {
+            $pages[$file['page']] = $file['title'];
+        }
+    }
+
+    return array_slice($pages, 0, 3, true);
+};
+
+$location = [];
+foreach ($pages as $slug => [, , $sections]) {
+    $anchors = [];
+    foreach ($sections as $keys) {
+        foreach ($keys as $key) {
+            $location[$key] = "{$slug}.qmd#".anchor($key);
+            $anchors[anchor($key)][] = $key;
+        }
+    }
+    foreach (array_filter($anchors, fn ($keys) => count($keys) > 1) as $anchor => $keys) {
+        $problems[] = "{$slug}: ".implode(' and ', $keys)." share the anchor {$anchor}.";
+    }
+}
+
+$docs = [];
+foreach ($api as $key => $entry) {
+    $docs[$key] = str_starts_with($key, '@') ? ['summary' => MACROS[substr($key, 1)]['summary']] + parseDoc(false) : $docOf($entry, $key);
+    if ($docs[$key]['summary'] === '') {
+        $problems[] = "{$key} has no docblock summary.";
+    }
+}
+if ($problems !== []) {
+    fwrite(STDERR, implode("\n", $problems)."\n");
+    exit(1);
+}
+
+$firstSentence = fn (string $s) => preg_match('/^(.+?[.!?])(\s|$)/s', $s, $m) ? $m[1] : $s;
+$entryText = function (string $key) use ($api, $docs, $examplesFor): string {
+    $entry = $api[$key];
+    $doc = $docs[$key];
+    $out = '### `'.display($key, $entry['kind']).'` {#'.anchor($key)."}\n\n";
+    if ($entry['kind'] === 'macro') {
+        $macro = MACROS[substr($key, 1)];
+        $out .= "```php\n{$macro['signature']}\n```\n\n".prose($macro['summary'])."\n\n".prose($macro['body'])."\n\nOn {$macro['classes']}, after PhibbleServiceProvider::registerMacros(), which package discovery runs.\n\n";
+
+        return $out;
+    }
+    $r = str_starts_with($key, '->') && method_exists(Table::class, substr($key, 2))
+        && (new ReflectionMethod(Table::class, substr($key, 2)))->getDeclaringClass()->getName() === Table::class
+        ? new ReflectionMethod(Table::class, substr($key, 2))
+        : $entry['reflection'][0];
+    $prefix = match (true) {
+        $entry['kind'] === 'function' => $entry['namespace'].'\\'.$key,
+        $entry['kind'] === 'static method' => $key,
+        str_starts_with($key, '->') => '$table->'.substr($key, 2),
+        default => '$'.lcfirst(strstr($key, '->', true)).'->'.substr(strstr($key, '->'), 2),
+    };
+    if ($entry['kind'] === 'function') {
+        $prefix = $key;
+    }
+    $GLOBALS['selfClass'] = $r instanceof ReflectionMethod ? $r->getDeclaringClass()->getName() : null;
+    $out .= "```php\n".signature($prefix, $r)."\n```\n\n";
+    $out .= prose($doc['summary'])."\n\n";
+    foreach ($doc['body'] as $paragraph) {
+        $out .= prose($paragraph)."\n\n";
+    }
+    $meta = [];
+    $meta[] = match (true) {
+        $entry['kind'] === 'function' => '**Function** in `'.$entry['namespace'].'`',
+        str_starts_with($key, '->') => '**Method** of '.implode(', ', array_map(fn ($c) => "`{$c}`", $entry['classes'])),
+        default => '**'.ucfirst($entry['kind']).'** of `'.$entry['reflection'][0]->getDeclaringClass()->getName().'`',
+    };
+    $params = $r->getParameters();
+    if ($params !== []) {
+        $rows = ["| Parameter | Type | Default | Description |", '| --- | --- | --- | --- |'];
+        foreach ($params as $p) {
+            $default = $p->isDefaultValueAvailable() ? cellCode($p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : value($p->getDefaultValue())) : '';
+            $type = short($doc['paramTypes'][$p->getName()] ?? '') ?: ($p->getType() !== null ? short((string) $p->getType()) : '');
+            $rows[] = '| `'.($p->isVariadic() ? '...' : '').'$'.$p->getName().'` | '.($type !== '' ? cellCode($type) : '').' | '.$default.' | '.prose($doc['params'][$p->getName()] ?? '').' |';
+        }
+        $out .= implode("\n", $rows)."\n\n";
+    }
+    if ($r->getReturnType() !== null && (string) $r->getReturnType() !== 'void') {
+        $meta[] = '**Returns** `'.short($doc['returnType'] ?: (string) $r->getReturnType()).'`'.($doc['return'] !== '' ? ': '.prose(lcfirst(rtrim($doc['return'], '.'))).'.' : '');
+    }
+    foreach ($doc['throws'] as [$class, $why]) {
+        $meta[] = '**Throws** `'.short($class).'`'.($why !== '' ? ': '.prose(lcfirst(rtrim($why, '.'))).'.' : '');
+    }
+    $examples = $examplesFor($key, $entry);
+    if ($examples !== []) {
+        $meta[] = '**Examples** '.implode(', ', array_map(fn ($page, $title) => "[{$title}](../{$page})", array_keys($examples), $examples));
+    }
+    $out .= implode("\\\n", $meta)."\n\n";
+
+    return $out;
+};
+
+$written = [];
+$index = "---\ntitle: \"Functions and methods\"\ntoc-depth: 3\n---\n\n";
+$index .= "Every public function and method, by task. Methods marked *all tables* are part of the Table contract and exist on `DataFrame`, `SqlTable`, and `PolarsTable`.\n\n";
+foreach ($pages as $slug => [$title, $intro, $sections]) {
+    $page = "---\ntitle: \"{$title}\"\ntoc-depth: 3\n---\n\n".prose($intro)."\n\n";
+    $index .= "## [{$title}]({$slug}.qmd)\n\n";
+    foreach ($sections as $section => $keys) {
+        $page .= "## {$section}\n\n";
+        $index .= "### {$section}\n\n| Function or method | Kind | Purpose |\n| --- | --- | --- |\n";
+        foreach ($keys as $key) {
+            $entry = $api[$key];
+            $page .= $entryText($key);
+            $kind = match (true) {
+                $entry['kind'] === 'function' => 'function',
+                $entry['kind'] === 'macro' => 'Laravel macro',
+                str_starts_with($key, '->') => count($entry['classes']) === 3 ? 'method, all tables' : 'method, '.implode(', ', $entry['classes']),
+                default => $entry['kind'],
+            };
+            $index .= '| [`'.display($key, $entry['kind']).'`]('.$location[$key].') | '.$kind.' | '.prose($firstSentence($docs[$key]['summary'])).' |'."\n";
+        }
+        $index .= "\n: {tbl-colwidths=\"[34,16,50]\"}\n\n";
+    }
+    $written["docs/reference/{$slug}.qmd"] = rtrim($page)."\n";
+}
+$index .= "## Not listed\n\n";
+foreach (EXCLUDED as $name => $why) {
+    $index .= '- `'.$name.'`: '.prose($why)."\n";
+}
+$written['docs/reference/index.qmd'] = $index;
+
+$check = in_array('--check', $argv, true);
+$stale = [];
+foreach ($written as $path => $content) {
+    if ($check) {
+        if (! is_file($path) || file_get_contents($path) !== $content) {
+            $stale[] = $path;
+        }
+
+        continue;
+    }
+    @mkdir(dirname($path), 0777, true);
+    file_put_contents($path, $content);
+}
+if ($check && $stale !== []) {
+    fwrite(STDERR, "Out of date; run bin/api-reference:\n  ".implode("\n  ", $stale)."\n");
+    exit(1);
+}
+$counts = array_count_values(array_column($api, 'kind'));
+fwrite(STDERR, sprintf("%d callables: %s.\n", count($api), implode(', ', array_map(fn ($k, $n) => "{$n} {$k}s", array_keys($counts), $counts))));

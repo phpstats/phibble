@@ -1,0 +1,154 @@
+---
+title: "Joins and reshaping"
+toc-depth: 3
+---
+
+Methods that join, bind, pivot, and nest tables.
+
+## Joins
+
+### `->join()` {#join}
+
+```php
+$table->join(
+    Table $other,
+    array $by,
+    string $type = 'inner',
+    array $suffix = ['.x', '.y'],
+    ?bool $keep = null,
+    bool $naMatches = true,
+    string $multiple = 'all',
+    ?string $relationship = null,
+    string $unmatched = 'drop',
+): Table
+```
+
+Join another table, with dplyr 1.1 semantics.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$other` | <code>Table</code> |  | The right-hand table. |
+| `$by` | <code>list&lt;string&#124;array{0: string, 1: string}&gt;</code> |  |  |
+| `$type` | <code>string</code> | <code>'inner'</code> | inner, left, right, full, semi, anti, or cross. |
+| `$suffix` | <code>array{0: string, 1: string}</code> | <code>['.x', '.y']</code> |  |
+| `$keep` | <code>bool&#124;null</code> | <code>null</code> | Keep both tables' key columns. |
+| `$naMatches` | <code>bool</code> | <code>true</code> | Whether NA keys match each other. |
+| `$multiple` | <code>string</code> | <code>'all'</code> | all, any, first, or last match per x row. |
+| `$relationship` | <code>string&#124;null</code> | <code>null</code> | one-to-one, one-to-many, many-to-one, or many-to-many; a violation throws. |
+| `$unmatched` | <code>string</code> | <code>'drop'</code> | drop, or error when the join would drop rows. - `$by`: list of [leftColumn, rightColumn] pairs; a bare 'k' means ['k', 'k']. Empty for a cross join. - `$type`: inner, left, right, full, semi, anti or cross. - Columns: x's columns, then y's non-key columns (all of y's with `$keep`). Clashing names get `$suffix`. Without `$keep`, key columns come from x, filled from y for rows only y has (right and full joins). - Rows: x order, with each x row's matches in y order; right and full joins then add y's unmatched rows in y order. Semi and anti joins keep x's rows and columns and never duplicate rows. - Matching: NA matches NA unless !`$naMatches`; 1 matches 1.0; factors match strings by label. - `$multiple`: all, any, first or last match per x row. - `$relationship`: one-to-one, one-to-many, many-to-one or many-to-many; a violation throws. Unspecified many-to-many warns. - `$unmatched`: drop, or error when a join would drop rows. - The result keeps x's grouping. |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`\
+**Examples** [Getting started](../getting-started.qmd), [SQL tables](../sql.qmd)
+
+## Binding
+
+### `DataFrame::concat()` {#dataframe-concat}
+
+```php
+DataFrame::concat(array $tables): DataFrame
+```
+
+Stack tables by row, matching columns by name. Columns missing from a table are NA there. A column keeps its type when every table agrees (factors also need the same levels); otherwise it is inferred again. The result takes the first table's grouping.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$tables` | <code>list&lt;Table&gt;</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+### `DataFrame::bindCols()` {#dataframe-bindcols}
+
+```php
+DataFrame::bindCols(array $tables): DataFrame
+```
+
+Put tables side by side, as dplyr's `bind_cols()`. They must have the same number of rows; clashing names are repaired as name...position.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$tables` | <code>list&lt;Table&gt;</code> |  |  |
+
+**Static method** of `Phibble\DataFrame`\
+**Returns** `DataFrame`
+
+## Reshaping
+
+### `->pivotLongerSpec()` {#pivotlongerspec}
+
+```php
+$table->pivotLongerSpec(array $spec, bool $dropNa = false): Table
+```
+
+Pivot columns into rows from a spec, as tidyr's `pivot_longer_spec()`.
+
+Each spec row is ['.name' => source column, '.value' => value column, ...name parts]. Output: the other (id) columns, the name-part columns, then one column per distinct .value. Each input row gives one row per distinct name-part combination, in spec order; a missing (combination, .value) is NA. `$dropNa` drops rows whose value columns are all NA. Values combine by vctrs rules (int and double give double); incompatible types throw "Can't combine".
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$spec` | <code>list&lt;array&lt;string, mixed&gt;&gt;</code> |  |  |
+| `$dropNa` | <code>bool</code> | <code>false</code> |  |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`
+
+### `->pivotWiderSpec()` {#pivotwiderspec}
+
+```php
+$table->pivotWiderSpec(
+    array $spec,
+    ?array $idColumns = null,
+    array $valuesFill = [],
+): Table
+```
+
+Pivot rows into columns from a spec, as tidyr's `pivot_wider_spec()`.
+
+Each spec row is ['.name' => new column, '.value' => values_from column, ...names_from column => value]. New columns appear in spec order after the id columns, which default to every column not used by the spec; rows follow the first appearance of each id combination. Missing cells take `$valuesFill[valueColumn]` or NA. When some cell has several values, every new column becomes a list-column (a list of values per cell, null when empty) and tidyr's "not uniquely identified" warning is raised.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$spec` | <code>list&lt;array&lt;string, mixed&gt;&gt;</code> |  |  |
+| `$idColumns` | <code>list&lt;string&gt;&#124;null</code> | <code>null</code> |  |
+| `$valuesFill` | <code>array&lt;string, mixed&gt;</code> | <code>[]</code> |  |
+
+**Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
+**Returns** `Table`
+
+### `->nest()` {#nest}
+
+```php
+$table->nest(array $columns = [], string $into = 'data'): DataFrame
+```
+
+`tidyr::nest()`: collapse columns into a list-column of tables, one row per unique combination of the other columns (first-appearance order). On a grouped table with no columns given, nests everything but the grouping columns.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$columns` | <code>list&lt;string&gt;</code> | <code>[]</code> |  |
+| `$into` | <code>string</code> | <code>'data'</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->unnest()` {#unnest}
+
+```php
+$table->unnest(
+    array|string $columns,
+    bool $keepEmpty = false,
+): DataFrame
+```
+
+`tidyr::unnest()`: expand list-columns of tables (or lists of rows) into rows. Rows whose value is NA or empty are dropped unless `$keepEmpty`. Nested columns take the place of the list-column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$columns` | <code>list&lt;string&gt;&#124;string</code> |  |  |
+| `$keepEmpty` | <code>bool</code> | <code>false</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)

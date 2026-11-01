@@ -18,7 +18,7 @@ use Phibble\Sql\SqlTable;
  *
  * - Collection::toDataFrame() and LazyCollection::toDataFrame(): an in-memory DataFrame.
  * - Query, Eloquent and relation builders get phibble(): a lazy SqlTable on
- *   the builder's connection, so verbs run in the database:
+ *   the builder's connection, so table methods run in the database:
  *
  *       User::query()->where('active', true)->phibble()
  *           ->groupBy(['country'])

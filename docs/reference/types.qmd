@@ -1,0 +1,466 @@
+---
+title: "Types and conversion"
+toc-depth: 3
+---
+
+Column types, casts, factors, times of day, and conversion to model data.
+
+## Column types
+
+### `->cast()` {#cast}
+
+```php
+$table->cast(array $types): DataFrame
+```
+
+Convert columns to other types.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$types` | <code>array&lt;string, Type&#124;string&gt;</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `Type::parse()` {#type-parse}
+
+```php
+Type::parse(Type|string $type): Type
+```
+
+A Type from a case or its name, such as 'float' or 'date', in any letter case.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$type` | <code>Type&#124;string</code> |  |  |
+
+**Static method** of `Phibble\Type`\
+**Returns** `Type`\
+**Throws** `InvalidArgumentException`: for an unknown type name.
+
+### `Type->abbreviation()` {#type-abbreviation}
+
+```php
+$type->abbreviation(): string
+```
+
+The short label printed in a column header, as in tibble: dbl, int, lgl, chr, fct, date, dttm, time, or list.
+
+**Method** of `Phibble\Type`\
+**Returns** `string`
+
+### `Type->isNumeric()` {#type-isnumeric}
+
+```php
+$type->isNumeric(): bool
+```
+
+Whether the type is numeric: float, int, or bool.
+
+**Method** of `Phibble\Type`\
+**Returns** `bool`
+
+## Factors
+
+### `->asFactor()` {#asfactor}
+
+```php
+$table->asFactor(
+    string $name,
+    ?array $levels = null,
+    bool $ordered = false,
+): DataFrame
+```
+
+Turn a column into a factor, as R's `factor()`. Without levels, they are the sorted unique values. Values not in `$levels` become NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$levels` | <code>list&lt;string&#124;int&#124;float&gt;&#124;null</code> | <code>null</code> |  |
+| `$ordered` | <code>bool</code> | <code>false</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd), [Getting started](../getting-started.qmd)
+
+### `->asOrdered()` {#asordered}
+
+```php
+$table->asOrdered(string $name, ?array $levels = null): DataFrame
+```
+
+Convert a column to an ordered factor, as R's `factor(ordered = TRUE)`.
+
+An existing factor keeps its levels unless `$levels` is given.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$levels` | <code>list&lt;string&#124;int&#124;float&gt;&#124;null</code> | <code>null</code> | Levels in order; null takes the sorted distinct values. |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->isOrdered()` {#isordered}
+
+```php
+$table->isOrdered(string $name): bool
+```
+
+Whether the column is an ordered factor.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `bool`\
+**Examples** [Types](../types.qmd)
+
+### `->levels()` {#levels}
+
+```php
+$table->levels(string $name): array
+```
+
+The levels of a factor column, in level order.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `list<string>`\
+**Examples** [Types](../types.qmd)
+
+### `->fctLevels()` {#fctlevels}
+
+```php
+$table->fctLevels(string $name, array $levels): DataFrame
+```
+
+`factor(x, levels = ...)`: set the full level order. Unlisted values become NA.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$levels` | <code>array</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`
+
+### `->fctRelevel()` {#fctrelevel}
+
+```php
+$table->fctRelevel(
+    string $name,
+    array $levels,
+    int $after = 0,
+): DataFrame
+```
+
+Move levels to the front, or after a 0-based position (-1 for the end), as forcats' `fct_relevel()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$levels` | <code>array</code> |  |  |
+| `$after` | <code>int</code> | <code>0</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->fctRev()` {#fctrev}
+
+```php
+$table->fctRev(string $name): DataFrame
+```
+
+`fct_rev()`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->fctInorder()` {#fctinorder}
+
+```php
+$table->fctInorder(string $name): DataFrame
+```
+
+`fct_inorder()`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`
+
+### `->fctInfreq()` {#fctinfreq}
+
+```php
+$table->fctInfreq(string $name): DataFrame
+```
+
+`fct_infreq()`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->fctReorder()` {#fctreorder}
+
+```php
+$table->fctReorder(
+    string $name,
+    string $by,
+    ?Closure $summary = null,
+    bool $descending = false,
+): DataFrame
+```
+
+Order levels by a summary (default median) of another column, as forcats' `fct_reorder()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$by` | <code>string</code> |  |  |
+| `$summary` | <code>Closure(list&lt;mixed&gt;): mixed&#124;null</code> | <code>null</code> |  |
+| `$descending` | <code>bool</code> | <code>false</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->fctRecode()` {#fctrecode}
+
+```php
+$table->fctRecode(string $name, array $map): DataFrame
+```
+
+Rename levels, new => old, as forcats' `fct_recode()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$map` | <code>array</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->fctCollapse()` {#fctcollapse}
+
+```php
+$table->fctCollapse(string $name, array $groups): DataFrame
+```
+
+Merge levels, new => list of old, as forcats' `fct_collapse()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+| `$groups` | <code>array</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`\
+**Examples** [Types](../types.qmd)
+
+### `->fctDrop()` {#fctdrop}
+
+```php
+$table->fctDrop(?string $name = null, ?array $only = null): DataFrame
+```
+
+`fct_drop()` / `droplevels()`: remove unused levels. With no name, every factor column.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>?string</code> | <code>null</code> |  |
+| `$only` | <code>list&lt;string&gt;&#124;null</code> | <code>null</code> |  |
+
+**Method** of `DataFrame`\
+**Returns** `DataFrame`
+
+## Times of day
+
+### `Time::of()` {#time-of}
+
+```php
+Time::of(int $hours, int $minutes = 0, int|float $seconds = 0): Time
+```
+
+A time from hours, minutes, and seconds, as `hms::hms()`.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$hours` | <code>int</code> |  |  |
+| `$minutes` | <code>int</code> | <code>0</code> |  |
+| `$seconds` | <code>int&#124;float</code> | <code>0</code> |  |
+
+**Static method** of `Phibble\Time`\
+**Returns** `Time`\
+**Examples** [Types](../types.qmd)
+
+### `Time::fromSeconds()` {#time-fromseconds}
+
+```php
+Time::fromSeconds(int|float $seconds): Time
+```
+
+A time from a number of seconds, rounded to the microsecond.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$seconds` | <code>int&#124;float</code> |  |  |
+
+**Static method** of `Phibble\Time`\
+**Returns** `Time`\
+**Examples** [Types](../types.qmd)
+
+### `Time::parse()` {#time-parse}
+
+```php
+Time::parse(string $text): ?Time
+```
+
+Text such as "07:30", "7:30:15.25", "-01:00:00", "100:00:00", or "1:30 PM" as a time, or null when it is not one. Unlike reading CSV, which follows readr, fractional seconds are kept.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$text` | <code>string</code> |  |  |
+
+**Static method** of `Phibble\Time`\
+**Returns** `?Time`\
+**Examples** [Types](../types.qmd)
+
+### `Time::meridiem()` {#time-meridiem}
+
+```php
+Time::meridiem(int $hours, string $suffix): int
+```
+
+readr's AM/PM rule: 12 AM is hour 0, and PM adds 12 hours to any hour but 12.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$hours` | <code>int</code> |  |  |
+| `$suffix` | <code>string</code> |  |  |
+
+**Static method** of `Phibble\Time`\
+**Returns** `int`
+
+### `Time->seconds()` {#time-seconds}
+
+```php
+$time->seconds(): float
+```
+
+The number of seconds, as R's as.`numeric()` of an hms.
+
+**Method** of `Phibble\Time`\
+**Returns** `float`\
+**Examples** [Types](../types.qmd)
+
+### `Time->hour()` {#time-hour}
+
+```php
+$time->hour(): int
+```
+
+The hour of the day, 0 to 23, as `lubridate::hour()`.
+
+**Method** of `Phibble\Time`\
+**Returns** `int`
+
+### `Time->minute()` {#time-minute}
+
+```php
+$time->minute(): int
+```
+
+The minute of the hour, as `lubridate::minute()`.
+
+**Method** of `Phibble\Time`\
+**Returns** `int`
+
+### `Time->second()` {#time-second}
+
+```php
+$time->second(): float
+```
+
+The second of the minute, with its fraction, as `lubridate::second()`.
+
+**Method** of `Phibble\Time`\
+**Returns** `float`
+
+## Model data
+
+### `->toModelData()` {#tomodeldata}
+
+```php
+$table->toModelData(?array $names = null): array
+```
+
+Columns for model fitting (`Phit\fit_lm`, `Phit\fit_glm`, `Phit\model_matrix`):
+
+- float, int: list<float\|int\|null>
+- bool: list<bool\|null> (a two-level contrast, as in R)
+- string: list<string\|null> (the model sorts levels, as R does)
+- date: days since 1970-01-01; datetime: seconds since epoch
+- factor: ['levels' => list<string>, 'codes' => list<?int>, 'ordered' => bool],
+  with 0-based codes, null for NA, and every level in table order
+
+List-columns cannot be modelled and throw.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&gt;&#124;null</code> | <code>null</code> | Columns to include; all by default. |
+
+**Method** of `DataFrame`\
+**Returns** `array<string, list<mixed>|array{levels: list<string>, codes: list<?int>, ordered: bool}>`\
+**Examples** [Types](../types.qmd)
+
+### `->toMatrix()` {#tomatrix}
+
+```php
+$table->toMatrix(array $names): array
+```
+
+Rows of numeric columns as floats, the shape phit's fit_* functions take for x. Bool columns become 0.0/1.0; NA stays null.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$names` | <code>list&lt;string&gt;</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `list<list<float|null>>`
+
+### `->toVector()` {#tovector}
+
+```php
+$table->toVector(string $name): array
+```
+
+A numeric column as floats, the shape phit's fit_* functions take for y.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `$name` | <code>string</code> |  |  |
+
+**Method** of `DataFrame`\
+**Returns** `list<float|null>`

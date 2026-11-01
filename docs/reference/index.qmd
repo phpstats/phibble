@@ -1,0 +1,587 @@
+---
+title: "Functions and methods"
+toc-depth: 3
+---
+
+Every public function and method, by task. Methods marked *all tables* are part of the Table contract and exist on `DataFrame`, `SqlTable`, and `PolarsTable`.
+
+## [Creating and loading tables](creating.qmd)
+
+### Functions
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`tibble()`](creating.qmd#fn-tibble) | function | Build a DataFrame from named arguments, one per column, as tibble's `tibble()`. |
+| [`tribble()`](creating.qmd#fn-tribble) | function | Build a DataFrame from column names, then rows, as tibble's `tribble()`. |
+| [`as_tibble()`](creating.qmd#fn-as_tibble) | function | Convert tables, rows, columns, or collections into a DataFrame, as tibble's `as_tibble()`. |
+| [`enframe()`](creating.qmd#fn-enframe) | function | An array as a two-column DataFrame of names and values, as tibble's `enframe()`. |
+| [`tbl()`](creating.qmd#fn-tbl) | function | A lazy SqlTable, as dbplyr's `tbl()`. |
+| [`polars()`](creating.qmd#fn-polars) | function | A PolarsTable from any Table, or from anything `as_tibble()` accepts. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### DataFrame
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`DataFrame::fromRows()`](creating.qmd#dataframe-fromrows) | static method | Build a DataFrame from rows. |
+| [`DataFrame::fromColumns()`](creating.qmd#dataframe-fromcolumns) | static method | Build a DataFrame from columns: name => list of values, or name => Column. |
+| [`DataFrame::fromCsv()`](creating.qmd#dataframe-fromcsv) | static method | Read delimited text like `readr::read_csv()`: a path (".gz" is decompressed), an http:// or https:// URL (downloaded to a temporary file first), or an open stream. |
+| [`DataFrame::fromCsvString()`](creating.qmd#dataframe-fromcsvstring) | static method | Read delimited text from a string; options as `fromCsv()`. |
+| [`DataFrame::fromCsvChunked()`](creating.qmd#dataframe-fromcsvchunked) | static method | Read delimited text in chunks, as `readr::read_delim_chunked()`: each chunk of at most `$chunkSize` rows is passed to `$callback` with the 1-based index of its first row. |
+| [`DataFrame::csvChunks()`](creating.qmd#dataframe-csvchunks) | static method | The chunks `fromCsvChunked()` reads, as a generator keyed by the 1-based index of each chunk's first row. |
+| [`DataFrame::fromJson()`](creating.qmd#dataframe-fromjson) | static method | Read JSON: a list of records ([{"a": 1}, ...]) or an object of columns ({"a": [1, 2]}). |
+| [`DataFrame::fromPdo()`](creating.qmd#dataframe-frompdo) | static method | Run a query and load the result. |
+| [`DataFrame::fromQuery()`](creating.qmd#dataframe-fromquery) | static method | Load the result of a Laravel query builder (query or Eloquent) or a Doctrine DBAL QueryBuilder. |
+| [`DataFrame::fromCollection()`](creating.qmd#dataframe-fromcollection) | static method | Build a DataFrame from a Laravel Collection (or anything with `all()` or `toArray()`, or any iterable). |
+| [`DataFrame::fromSource()`](creating.qmd#dataframe-fromsource) | static method | Read a `Phibble\Source\Source`, such as a CsvSource or PdoSource, into a DataFrame. |
+| [`DataFrame::tibble()`](creating.qmd#dataframe-tibble) | static method | Build a DataFrame column by column, as tibble's `tibble()`. |
+| [`DataFrame::tribble()`](creating.qmd#dataframe-tribble) | static method | Build a DataFrame row by row, as tibble's `tribble()`. |
+| [`DataFrame::asTibble()`](creating.qmd#dataframe-astibble) | static method | Convert tables, rows, columns, collections, or other iterables into a DataFrame, as tibble's `as_tibble()`. |
+| [`DataFrame::enframe()`](creating.qmd#dataframe-enframe) | static method | An array as a two-column DataFrame of names and values, as tibble's `enframe()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### SqlTable
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`SqlTable::table()`](creating.qmd#sqltable-table) | static method | A table (or view) by name. |
+| [`SqlTable::query()`](creating.qmd#sqltable-query) | static method | Any SELECT query with positional (?) or named (:name) bindings. |
+| [`SqlTable::fromQuery()`](creating.qmd#sqltable-fromquery) | static method | A Laravel or Doctrine DBAL query builder, kept lazy. |
+| [`SqlTable::fromSource()`](creating.qmd#sqltable-fromsource) | static method | A lazy table over a PdoSource's query and bindings. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### PolarsTable
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`PolarsTable::fromTable()`](creating.qmd#polarstable-fromtable) | static method | Copy any phibble table into Polars, keeping types, groups and factor levels. |
+| [`PolarsTable::fromPolars()`](creating.qmd#polarstable-frompolars) | static method | Wrap a Polars DataFrame; a LazyFrame is collected. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [Rows and columns](rows-and-columns.qmd)
+
+### Size and names
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->columns()`](rows-and-columns.qmd#columns) | method, all tables | Column names in order. |
+| [`->types()`](rows-and-columns.qmd#types) | method, all tables | Column types by name. |
+| [`->type()`](rows-and-columns.qmd#type) | method, DataFrame | One column's type. |
+| [`->nrow()`](rows-and-columns.qmd#nrow) | method, all tables | Number of rows. |
+| [`->ncol()`](rows-and-columns.qmd#ncol) | method, all tables | Number of columns. |
+| [`->count()`](rows-and-columns.qmd#count) | method, all tables | Number of rows, for count(`$df`). |
+| [`->has()`](rows-and-columns.qmd#has) | method, DataFrame | Whether the column exists. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Values
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->column()`](rows-and-columns.qmd#column) | method, all tables | One column's values as a PHP list. |
+| [`->row()`](rows-and-columns.qmd#row) | method, DataFrame | One row by 0-based position. |
+| [`Row->get()`](rows-and-columns.qmd#row-get) | method | One value by column name. |
+| [`Row->has()`](rows-and-columns.qmd#row-has) | method | Whether the row has the column. |
+| [`Row->toArray()`](rows-and-columns.qmd#row-toarray) | method | The row as an associative array of column name => value. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Selecting and renaming
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->select()`](rows-and-columns.qmd#select) | method, all tables | Keep the named columns, in the given order. |
+| [`->rename()`](rows-and-columns.qmd#rename) | method, all tables | Rename columns. |
+| [`NameRepair::repair()`](rows-and-columns.qmd#namerepair-repair) | static method | Repair column names, as `vctrs::vec_as_names()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Filtering and sorting
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->filter()`](rows-and-columns.qmd#filter) | method, all tables | Keep rows where the predicate is true. |
+| [`->arrange()`](rows-and-columns.qmd#arrange) | method, all tables | Sort rows. |
+| [`->distinct()`](rows-and-columns.qmd#distinct) | method, all tables | Unique rows over the named columns, keeping the first of each and only those columns. |
+| [`->dropNa()`](rows-and-columns.qmd#dropna) | method, DataFrame | Drop rows with NA in any of the named columns (all columns when empty). |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Adding columns and rows
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->mutate()`](rows-and-columns.qmd#mutate) | method, all tables | Add or replace columns. |
+| [`->withColumn()`](rows-and-columns.qmd#withcolumn) | method, DataFrame | Add or replace one column. |
+| [`->addColumn()`](rows-and-columns.qmd#addcolumn) | method, DataFrame | Insert columns, as tibble's `add_column()`, with `tibble()`'s recycling rules. |
+| [`->addRow()`](rows-and-columns.qmd#addrow) | method, DataFrame | Insert rows, as tibble's `add_row()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Rows by position
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->slice()`](rows-and-columns.qmd#slice) | method, all tables | Rows from `$offset`, `$length` of them or to the end. |
+| [`->head()`](rows-and-columns.qmd#head) | method, all tables | The first `$n` rows. |
+| [`->tail()`](rows-and-columns.qmd#tail) | method, DataFrame | The last n rows; a negative n drops the first \|n\| rows, as in R. |
+| [`->take()`](rows-and-columns.qmd#take) | method, all tables | Rows by 0-based position, in the given order. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [Grouping and summaries](grouping.qmd)
+
+### Grouping
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->groupBy()`](grouping.qmd#groupby) | method, all tables | Set the grouping columns, replacing any existing grouping. |
+| [`->ungroup()`](grouping.qmd#ungroup) | method, all tables | Remove the grouping, including rowwise grouping. |
+| [`->groups()`](grouping.qmd#groups) | method, all tables | The grouping columns. |
+| [`->dropsEmptyGroups()`](grouping.qmd#dropsemptygroups) | method, all tables | Whether empty groups are dropped. |
+| [`->ngroups()`](grouping.qmd#ngroups) | method, DataFrame | Number of groups (1 for an ungrouped table, nrow for a rowwise one). |
+| [`->rowwise()`](grouping.qmd#rowwise) | method, all tables | Treat each row as its own group, as dplyr's `rowwise()`. |
+| [`->isRowwise()`](grouping.qmd#isrowwise) | method, all tables | Whether the table is rowwise. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Summaries
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->summarise()`](grouping.qmd#summarise) | method, all tables | One row per group: the group keys, then one column per entry. |
+| [`->summarize()`](grouping.qmd#summarize) | method, all tables | Alias of `summarise()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Per-group operations
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->filterGroups()`](grouping.qmd#filtergroups) | method, all tables | Keep rows by a predicate that runs once per group. |
+| [`->mutateGroups()`](grouping.qmd#mutategroups) | method, all tables | Add or replace columns with closures that run once per group. |
+| [`->eachGroup()`](grouping.qmd#eachgroup) | method, all tables | Each group's key and rows as an ungrouped table, in sorted key order. |
+| [`->groupRows()`](grouping.qmd#grouprows) | method, all tables | Each group's key and 0-based row indexes, in the order of `eachGroup()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [Joins and reshaping](combining.qmd)
+
+### Joins
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->join()`](combining.qmd#join) | method, all tables | Join another table, with dplyr 1.1 semantics. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Binding
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`DataFrame::concat()`](combining.qmd#dataframe-concat) | static method | Stack tables by row, matching columns by name. |
+| [`DataFrame::bindCols()`](combining.qmd#dataframe-bindcols) | static method | Put tables side by side, as dplyr's `bind_cols()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Reshaping
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->pivotLongerSpec()`](combining.qmd#pivotlongerspec) | method, all tables | Pivot columns into rows from a spec, as tidyr's `pivot_longer_spec()`. |
+| [`->pivotWiderSpec()`](combining.qmd#pivotwiderspec) | method, all tables | Pivot rows into columns from a spec, as tidyr's `pivot_wider_spec()`. |
+| [`->nest()`](combining.qmd#nest) | method, DataFrame | `tidyr::nest()`: collapse columns into a list-column of tables, one row per unique combination of the other columns (first-appearance order). |
+| [`->unnest()`](combining.qmd#unnest) | method, DataFrame | `tidyr::unnest()`: expand list-columns of tables (or lists of rows) into rows. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [Expression functions](expressions.qmd)
+
+### Columns and literals
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`col()`](expressions.qmd#col) | function | Reference to the column with the given name. |
+| [`lit()`](expressions.qmd#lit) | function | Literal value as an expression. |
+| [`call()`](expressions.qmd#call) | function | Call to any registered function by name, such as call('str_sub', `col('s')`, 1, 3). |
+| [`desc()`](expressions.qmd#desc) | function | Descending sort key for `arrange()`, the first argument of a ranking function, or order_by. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Operators
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`Expr->add()`](expressions.qmd#expr-add) | method | Sum of this expression and `$other`. |
+| [`Expr->sub()`](expressions.qmd#expr-sub) | method | Difference of this expression and `$other`. |
+| [`Expr->mul()`](expressions.qmd#expr-mul) | method | Product of this expression and `$other`. |
+| [`Expr->div()`](expressions.qmd#expr-div) | method | Quotient of this expression and `$other`, always a float. |
+| [`Expr->mod()`](expressions.qmd#expr-mod) | method | Remainder of this expression divided by `$other`, with the sign of `$other`. |
+| [`Expr->pow()`](expressions.qmd#expr-pow) | method | This expression raised to the power `$other`, as a float. |
+| [`Expr->neg()`](expressions.qmd#expr-neg) | method | Negation of this expression. |
+| [`Expr->eq()`](expressions.qmd#expr-eq) | method | Whether this expression equals `$other`. |
+| [`Expr->ne()`](expressions.qmd#expr-ne) | method | Whether this expression differs from `$other`. |
+| [`Expr->lt()`](expressions.qmd#expr-lt) | method | Whether this expression is less than `$other`. |
+| [`Expr->le()`](expressions.qmd#expr-le) | method | Whether this expression is less than or equal to `$other`. |
+| [`Expr->gt()`](expressions.qmd#expr-gt) | method | Whether this expression is greater than `$other`. |
+| [`Expr->ge()`](expressions.qmd#expr-ge) | method | Whether this expression is greater than or equal to `$other`. |
+| [`Expr->and()`](expressions.qmd#expr-and) | method | Logical AND of this expression and `$other`. |
+| [`Expr->or()`](expressions.qmd#expr-or) | method | Logical OR of this expression and `$other`. |
+| [`Expr->not()`](expressions.qmd#expr-not) | method | Logical negation of this expression. |
+| [`Expr->isNa()`](expressions.qmd#expr-isna) | method | Whether each value is NA. |
+| [`Expr->isIn()`](expressions.qmd#expr-isin) | method | Whether each value is one of the given values. |
+| [`Expr->between()`](expressions.qmd#expr-between) | method | Whether each value lies between `$low` and `$high`, inclusive. |
+| [`Expr->desc()`](expressions.qmd#expr-desc) | method | Descending sort key on this expression, for `arrange()`, the first argument of a ranking function, or order_by. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Conditionals and missing values
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`is_na()`](expressions.qmd#is-na) | function | Whether each value is NA. |
+| [`if_else()`](expressions.qmd#if-else) | function | Value of `$true` where the condition holds and of `$false` where it does not. |
+| [`case_when()`](expressions.qmd#case-when) | function | Value paired with the first condition that holds, as `case_when(cond1, value1, cond2, value2, ..., default: value)`. |
+| [`coalesce()`](expressions.qmd#coalesce) | function | First value that is not NA among the arguments, row by row. |
+| [`between()`](expressions.qmd#between) | function | Whether each value lies between `$low` and `$high`, inclusive. |
+| [`na_if()`](expressions.qmd#na-if) | function | Values of `$x`, with NA where `$x` equals `$y`. |
+| [`near()`](expressions.qmd#near) | function | Whether `$x` and `$y` are equal within a tolerance. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Math
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`abs()`](expressions.qmd#abs) | function | Absolute value. |
+| [`sqrt()`](expressions.qmd#sqrt) | function | Square root. |
+| [`exp()`](expressions.qmd#exp) | function | Exponential function, e raised to the power `$x`. |
+| [`log()`](expressions.qmd#log) | function | Logarithm, natural by default. |
+| [`log10()`](expressions.qmd#log10) | function | Base-10 logarithm. |
+| [`round()`](expressions.qmd#round) | function | Value rounded to a number of decimal digits. |
+| [`floor()`](expressions.qmd#floor) | function | Largest whole number not greater than the value, as a float. |
+| [`ceiling()`](expressions.qmd#ceiling) | function | Smallest whole number not less than the value, as a float. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Conversion
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`as_int()`](expressions.qmd#as-int) | function | Values converted to integers. |
+| [`as_float()`](expressions.qmd#as-float) | function | Values converted to floats. |
+| [`as_string()`](expressions.qmd#as-string) | function | Values converted to strings. |
+| [`as_bool()`](expressions.qmd#as-bool) | function | Values converted to logicals. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Aggregates
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`n()`](expressions.qmd#n) | function | Number of rows in the group. |
+| [`sum()`](expressions.qmd#sum) | function | Sum of the values. |
+| [`mean()`](expressions.qmd#mean) | function | Mean of the values. |
+| [`median()`](expressions.qmd#median) | function | Median of the values. |
+| [`min()`](expressions.qmd#min) | function | Smallest of the values. |
+| [`max()`](expressions.qmd#max) | function | Largest of the values. |
+| [`sd()`](expressions.qmd#sd) | function | Sample standard deviation of the values. |
+| [`var_()`](expressions.qmd#var-) | function | Sample variance of the values. |
+| [`quantile()`](expressions.qmd#quantile) | function | Sample quantile of the values at probability `$p`. |
+| [`iqr()`](expressions.qmd#iqr) | function | Interquartile range of the values: the 0.75 quantile minus the 0.25 quantile. |
+| [`n_distinct()`](expressions.qmd#n-distinct) | function | Number of distinct values, or of distinct combinations across several arguments. |
+| [`first()`](expressions.qmd#first) | function | First value in the group. |
+| [`last()`](expressions.qmd#last) | function | Last value in the group. |
+| [`nth()`](expressions.qmd#nth) | function | Value at position `$n` in the group. |
+| [`any()`](expressions.qmd#any) | function | Whether any value is true. |
+| [`all()`](expressions.qmd#all) | function | Whether every value is true. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Window functions
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`lag()`](expressions.qmd#lag) | function | Value from n rows earlier in the group. |
+| [`lead()`](expressions.qmd#lead) | function | Value from n rows later in the group. |
+| [`row_number()`](expressions.qmd#row-number) | function | Row number within the group, or the rank of each value with ties broken by row order. |
+| [`min_rank()`](expressions.qmd#min-rank) | function | Rank of each value, ties sharing the lowest rank, with gaps after ties. |
+| [`dense_rank()`](expressions.qmd#dense-rank) | function | Rank of each value, ties sharing a rank, with no gaps after ties. |
+| [`percent_rank()`](expressions.qmd#percent-rank) | function | Minimum rank rescaled to the range 0 to 1: (min_rank - 1) / (m - 1), where m is the number of non-NA values. |
+| [`cume_dist()`](expressions.qmd#cume-dist) | function | Cumulative distribution: the share of non-NA values less than or equal to each value. |
+| [`ntile()`](expressions.qmd#ntile) | function | Bucket number from 1 to n, splitting the ordered values into n groups as evenly as possible. |
+| [`cumsum()`](expressions.qmd#cumsum) | function | Cumulative sum in row order. |
+| [`cumprod()`](expressions.qmd#cumprod) | function | Cumulative product in row order. |
+| [`cummean()`](expressions.qmd#cummean) | function | Cumulative mean in row order. |
+| [`cummin()`](expressions.qmd#cummin) | function | Cumulative minimum in row order. |
+| [`cummax()`](expressions.qmd#cummax) | function | Cumulative maximum in row order. |
+| [`cumall()`](expressions.qmd#cumall) | function | Whether every value so far, in row order, is true. |
+| [`cumany()`](expressions.qmd#cumany) | function | Whether any value so far, in row order, is true. |
+| [`consecutive_id()`](expressions.qmd#consecutive-id) | function | Run identifier that starts at 1 and increases each time the value, or combination of values, changes from the previous row. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Expression objects
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`Expr::of()`](expressions.qmd#expr-of) | static method | PHP value wrapped as a literal expression; an expression is returned unchanged. |
+| [`Expr::fromArray()`](expressions.qmd#expr-fromarray) | static method | Expression rebuilt from the array form that `toArray()` returns. |
+| [`Expr->toArray()`](expressions.qmd#expr-toarray) | method | JSON-friendly description of the expression tree. |
+| [`Expr->columns()`](expressions.qmd#expr-columns) | method | Names of the columns the expression reads, in order of first use. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [String and date functions](strings-and-dates.qmd)
+
+### Strings
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`str_length()`](strings-and-dates.qmd#str-length) | function | Number of characters in the string. |
+| [`str_lower()`](strings-and-dates.qmd#str-lower) | function | String in lower case. |
+| [`str_upper()`](strings-and-dates.qmd#str-upper) | function | String in upper case. |
+| [`str_to_lower()`](strings-and-dates.qmd#str-to-lower) | function | String in lower case, by Unicode rules. |
+| [`str_to_upper()`](strings-and-dates.qmd#str-to-upper) | function | String in upper case, by Unicode rules. |
+| [`str_to_title()`](strings-and-dates.qmd#str-to-title) | function | String in title case. |
+| [`str_trim()`](strings-and-dates.qmd#str-trim) | function | String with leading and trailing white space removed. |
+| [`str_squish()`](strings-and-dates.qmd#str-squish) | function | String with white space trimmed from both ends and each inner run collapsed to one space. |
+| [`str_pad()`](strings-and-dates.qmd#str-pad) | function | String padded to at least `$width` characters. |
+| [`str_trunc()`](strings-and-dates.qmd#str-trunc) | function | String truncated to at most `$width` characters, ellipsis included. |
+| [`str_sub()`](strings-and-dates.qmd#str-sub) | function | Substring from position `$start` to position `$end`, inclusive. |
+| [`paste()`](strings-and-dates.qmd#paste) | function | Arguments joined into one string with a separator. |
+| [`paste0()`](strings-and-dates.qmd#paste0) | function | Arguments joined into one string with no separator. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Patterns
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`fixed()`](strings-and-dates.qmd#fixed) | function | Pattern that matches its text literally. |
+| [`regex()`](strings-and-dates.qmd#regex) | function | Regular-expression pattern with options. |
+| [`str_detect()`](strings-and-dates.qmd#str-detect) | function | Whether the string contains a match for the pattern. |
+| [`str_starts()`](strings-and-dates.qmd#str-starts) | function | Whether the string starts with a match for the pattern. |
+| [`str_ends()`](strings-and-dates.qmd#str-ends) | function | Whether the string ends with a match for the pattern. |
+| [`str_count()`](strings-and-dates.qmd#str-count) | function | Number of matches of the pattern in the string. |
+| [`str_extract()`](strings-and-dates.qmd#str-extract) | function | First match of the pattern in the string. |
+| [`str_extract_all()`](strings-and-dates.qmd#str-extract-all) | function | Every match of the pattern in the string, as a list. |
+| [`str_replace()`](strings-and-dates.qmd#str-replace) | function | String with the first match of the pattern replaced. |
+| [`str_replace_all()`](strings-and-dates.qmd#str-replace-all) | function | String with every match of the pattern replaced. |
+| [`str_split()`](strings-and-dates.qmd#str-split) | function | Pieces of the string split at each match of the pattern, as a list. |
+| [`str_split_i()`](strings-and-dates.qmd#str-split-i) | function | Piece `$i` of the string split at each match of the pattern. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Parsing dates
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`ymd()`](strings-and-dates.qmd#ymd) | function | Date parsed from text with year, month, and day in that order. |
+| [`dmy()`](strings-and-dates.qmd#dmy) | function | Date parsed from text with day, month, and year in that order. |
+| [`mdy()`](strings-and-dates.qmd#mdy) | function | Date parsed from text with month, day, and year in that order. |
+| [`ymd_hms()`](strings-and-dates.qmd#ymd-hms) | function | Datetime parsed from text with year, month, day, hour, minute, and second in that order. |
+| [`dmy_hms()`](strings-and-dates.qmd#dmy-hms) | function | Datetime parsed from text with day, month, year, hour, minute, and second in that order. |
+| [`mdy_hms()`](strings-and-dates.qmd#mdy-hms) | function | Datetime parsed from text with month, day, year, hour, minute, and second in that order. |
+| [`parse_date_time()`](strings-and-dates.qmd#parse-date-time) | function | Datetime parsed from text by the first of the given orders that fits. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Date parts
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`year()`](strings-and-dates.qmd#year) | function | Year of the date or datetime. |
+| [`quarter()`](strings-and-dates.qmd#quarter) | function | Quarter of the year, from 1 to 4. |
+| [`month()`](strings-and-dates.qmd#month) | function | Month of the date or datetime, from 1 to 12. |
+| [`day()`](strings-and-dates.qmd#day) | function | Day of the month, from 1 to 31. |
+| [`wday()`](strings-and-dates.qmd#wday) | function | Day of the week, from 1 to 7. |
+| [`yday()`](strings-and-dates.qmd#yday) | function | Day of the year, from 1 to 366. |
+| [`hour()`](strings-and-dates.qmd#hour) | function | Hour of the datetime or time, from 0 to 23. |
+| [`minute()`](strings-and-dates.qmd#minute) | function | Minute of the datetime or time, from 0 to 59. |
+| [`second()`](strings-and-dates.qmd#second) | function | Second of the datetime or time, with any fraction. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Rounding and differences
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`floor_date()`](strings-and-dates.qmd#floor-date) | function | Date or datetime rounded down to the start of its unit. |
+| [`ceiling_date()`](strings-and-dates.qmd#ceiling-date) | function | Date or datetime rounded up to the start of the next unit. |
+| [`round_date()`](strings-and-dates.qmd#round-date) | function | Date or datetime rounded to the nearer of `floor_date()` and `ceiling_date()`. |
+| [`difftime()`](strings-and-dates.qmd#difftime) | function | Difference `$x` - `$y` between two dates or datetimes, as a float in the given units. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Periods
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`seconds()`](strings-and-dates.qmd#seconds) | function | Period of `$n` seconds, to add to or subtract from a datetime. |
+| [`minutes()`](strings-and-dates.qmd#minutes) | function | Period of `$n` minutes, to add to or subtract from a datetime. |
+| [`hours()`](strings-and-dates.qmd#hours) | function | Period of `$n` hours, to add to or subtract from a datetime. |
+| [`days()`](strings-and-dates.qmd#days) | function | Period of `$n` days, to add to or subtract from a date or datetime. |
+| [`weeks()`](strings-and-dates.qmd#weeks) | function | Period of `$n` weeks, to add to or subtract from a date or datetime. |
+| [`months()`](strings-and-dates.qmd#months) | function | Period of `$n` months, to add to or subtract from a date or datetime. |
+| [`years()`](strings-and-dates.qmd#years) | function | Period of `$n` years, to add to or subtract from a date or datetime. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Time zones and the clock
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`with_tz()`](strings-and-dates.qmd#with-tz) | function | Same instant shown in another time zone. |
+| [`force_tz()`](strings-and-dates.qmd#force-tz) | function | Same clock time in another time zone, which changes the instant. |
+| [`today()`](strings-and-dates.qmd#today) | function | Current date. |
+| [`now()`](strings-and-dates.qmd#now) | function | Current date and time. |
+| [`Clock::freeze()`](strings-and-dates.qmd#clock-freeze) | static method | Fix the time that `today()` and `now()` read. |
+| [`Clock::now()`](strings-and-dates.qmd#clock-now) | static method | The current time in UTC, or the frozen time. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [Types and conversion](types.qmd)
+
+### Column types
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->cast()`](types.qmd#cast) | method, DataFrame | Convert columns to other types. |
+| [`Type::parse()`](types.qmd#type-parse) | static method | A Type from a case or its name, such as 'float' or 'date', in any letter case. |
+| [`Type->abbreviation()`](types.qmd#type-abbreviation) | method | The short label printed in a column header, as in tibble: dbl, int, lgl, chr, fct, date, dttm, time, or list. |
+| [`Type->isNumeric()`](types.qmd#type-isnumeric) | method | Whether the type is numeric: float, int, or bool. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Factors
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->asFactor()`](types.qmd#asfactor) | method, DataFrame | Turn a column into a factor, as R's `factor()`. |
+| [`->asOrdered()`](types.qmd#asordered) | method, DataFrame | Convert a column to an ordered factor, as R's `factor(ordered = TRUE)`. |
+| [`->isOrdered()`](types.qmd#isordered) | method, DataFrame | Whether the column is an ordered factor. |
+| [`->levels()`](types.qmd#levels) | method, DataFrame | The levels of a factor column, in level order. |
+| [`->fctLevels()`](types.qmd#fctlevels) | method, DataFrame | `factor(x, levels = ...)`: set the full level order. |
+| [`->fctRelevel()`](types.qmd#fctrelevel) | method, DataFrame | Move levels to the front, or after a 0-based position (-1 for the end), as forcats' `fct_relevel()`. |
+| [`->fctRev()`](types.qmd#fctrev) | method, DataFrame | `fct_rev()` |
+| [`->fctInorder()`](types.qmd#fctinorder) | method, DataFrame | `fct_inorder()` |
+| [`->fctInfreq()`](types.qmd#fctinfreq) | method, DataFrame | `fct_infreq()` |
+| [`->fctReorder()`](types.qmd#fctreorder) | method, DataFrame | Order levels by a summary (default median) of another column, as forcats' `fct_reorder()`. |
+| [`->fctRecode()`](types.qmd#fctrecode) | method, DataFrame | Rename levels, new => old, as forcats' `fct_recode()`. |
+| [`->fctCollapse()`](types.qmd#fctcollapse) | method, DataFrame | Merge levels, new => list of old, as forcats' `fct_collapse()`. |
+| [`->fctDrop()`](types.qmd#fctdrop) | method, DataFrame | `fct_drop()` / `droplevels()`: remove unused levels. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Times of day
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`Time::of()`](types.qmd#time-of) | static method | A time from hours, minutes, and seconds, as `hms::hms()`. |
+| [`Time::fromSeconds()`](types.qmd#time-fromseconds) | static method | A time from a number of seconds, rounded to the microsecond. |
+| [`Time::parse()`](types.qmd#time-parse) | static method | Text such as "07:30", "7:30:15.25", "-01:00:00", "100:00:00", or "1:30 PM" as a time, or null when it is not one. |
+| [`Time::meridiem()`](types.qmd#time-meridiem) | static method | readr's AM/PM rule: 12 AM is hour 0, and PM adds 12 hours to any hour but 12. |
+| [`Time->seconds()`](types.qmd#time-seconds) | method | The number of seconds, as R's as.`numeric()` of an hms. |
+| [`Time->hour()`](types.qmd#time-hour) | method | The hour of the day, 0 to 23, as `lubridate::hour()`. |
+| [`Time->minute()`](types.qmd#time-minute) | method | The minute of the hour, as `lubridate::minute()`. |
+| [`Time->second()`](types.qmd#time-second) | method | The second of the minute, with its fraction, as `lubridate::second()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Model data
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->toModelData()`](types.qmd#tomodeldata) | method, DataFrame | Columns for model fitting (`Phit\fit_lm`, `Phit\fit_glm`, `Phit\model_matrix`): |
+| [`->toMatrix()`](types.qmd#tomatrix) | method, DataFrame | Rows of numeric columns as floats, the shape phit's fit_* functions take for x. |
+| [`->toVector()`](types.qmd#tovector) | method, DataFrame | A numeric column as floats, the shape phit's fit_* functions take for y. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [Output](output.qmd)
+
+### PHP values
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->toRows()`](output.qmd#torows) | method, all tables | The rows as a list of associative arrays. |
+| [`->toColumns()`](output.qmd#tocolumns) | method, all tables | The columns as an array of PHP lists, keyed by name. |
+| [`->collect()`](output.qmd#collect) | method, all tables | The rows as an in-memory DataFrame. |
+| [`->deframe()`](output.qmd#deframe) | method, DataFrame | A two-column DataFrame as a name => value array, or a one-column DataFrame as a list, as tibble's `deframe()`. |
+| [`deframe()`](output.qmd#fn-deframe) | function | A two-column DataFrame as a name => value array, or a one-column DataFrame as a list, as tibble's `deframe()`. |
+| [`->toCollection()`](output.qmd#tocollection) | method, DataFrame | An `Illuminate\Support\Collection` of row arrays. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### CSV and JSON
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->toCsv()`](output.qmd#tocsv) | method, DataFrame | The CSV text `writeCsv()` would write. |
+| [`->writeCsv()`](output.qmd#writecsv) | method, DataFrame | Write CSV like `readr::write_csv()`: NA as "NA", quoting only where needed, ISO dates, UTC datetimes with "Z", TRUE/FALSE, and numbers in readr's shortest form. |
+| [`->toJson()`](output.qmd#tojson) | method, DataFrame | JSON as a list of records ('records') or an object of columns ('columns'). |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Printing
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->__toString()`](output.qmd#__tostring) | method, DataFrame, SqlTable | The table printed as tibble prints it, for echo `$df`. |
+| [`->format()`](output.qmd#format) | method, DataFrame | Print like a tibble. |
+| [`->glimpse()`](output.qmd#glimpse) | method, DataFrame | One line per column with its type and leading values, as tibble's `glimpse()`. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## [SqlTable, PolarsTable, and Laravel](backends.qmd)
+
+### SqlTable
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->showQuery()`](backends.qmd#showquery) | method, SqlTable | The SQL that `collect()` would run, with ? |
+| [`->bindings()`](backends.qmd#bindings) | method, SqlTable | The values of the ? |
+| [`->dialect()`](backends.qmd#dialect) | method, SqlTable | The SQL dialect the table compiles to, chosen from the PDO driver. |
+| [`Dialect::for()`](backends.qmd#dialect-for) | static method | The dialect for a PDO connection: SQLite, PostgreSQL, or MySQL. |
+| [`Dialect::tryFor()`](backends.qmd#dialect-tryfor) | static method | The dialect for a PDO connection, or null for a driver SqlTable does not support. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### PolarsTable
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`->polars()`](backends.qmd#polars) | method, PolarsTable | The underlying Polars DataFrame. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+### Laravel
+
+| Function or method | Kind | Purpose |
+| --- | --- | --- |
+| [`PhibbleServiceProvider::registerMacros()`](backends.qmd#phibbleserviceprovider-registermacros) | static method | Register the macros; safe to call more than once. |
+| [`->phibble()`](backends.qmd#macro-phibble) | Laravel macro | A lazy SqlTable over a Laravel query, Eloquent, or relation builder, on the builder's connection. |
+| [`->toDataFrame()`](backends.qmd#macro-todataframe) | Laravel macro | Run a Laravel query, or read a collection, into a DataFrame. |
+
+: {tbl-colwidths="[34,16,50]"}
+
+## Not listed
+
+- `offsetExists`: ArrayAccess: `$df['name']` and `$row['name']` read a column or value; writing throws, because tables are immutable.
+- `offsetGet`: ArrayAccess, as above.
+- `offsetSet`: ArrayAccess, as above.
+- `offsetUnset`: ArrayAccess, as above.
+- `getIterator`: IteratorAggregate: foreach over a table yields a Row per row.
+- `DataFrame::storage`: Returns the internal column storage.
+- `Time::jsonSerialize`: JsonSerializable: a time encodes as its HH:MM:SS text.
+- `Time::__toString`: Stringable: a time casts to its HH:MM:SS text.
+- `Type::cases`: Built-in enum method.
+- `Type::from`: Built-in enum method.
+- `Type::tryFrom`: Built-in enum method.
+- `PhibbleServiceProvider::boot`: Laravel service provider hook.
+- `Dialect::*`: SQL compiler hooks that each dialect class implements; only `Dialect::for()` and `Dialect::tryFor()` are for applications.

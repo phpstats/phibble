@@ -3,13 +3,13 @@ title: "Expressions"
 ---
 
 Build column computations with `col()` and the functions in `Phibble\Expr`,
-and pass them to verbs. An expression runs on every backend: `DataFrame`
+and pass them to table methods. An expression runs on every backend: `DataFrame`
 evaluates it, `SqlTable` compiles it to SQL, and `PolarsTable` maps it to
 Polars. Each backend follows R's semantics and runs a function in memory when
 it has no exact translation. Results can still differ where a database cannot
 represent R's value, as [SQL tables](sql.qmd#known-differences) lists.
 
-Verbs also accept PHP closures. A closure can only run in PHP, so a SQL or
+Table methods also accept PHP closures. A closure can only run in PHP, so a SQL or
 Polars table loads its rows to run one.
 
 ## Building expressions
@@ -37,9 +37,9 @@ Functions in the `Phibble\Expr` namespace build the other calls:
 - A function outside the [list below](#functions) throws when the expression
   is built.
 
-## Using expressions with verbs
+## Using expressions with table methods {#using-expressions-with-verbs}
 
-Each verb evaluates expressions per group:
+Each method evaluates expressions per group:
 
 - `filter()` keeps rows where the expression is true. NA counts as false.
 - `mutate()` adds a column with one value per row. An aggregate such as
