@@ -587,7 +587,8 @@ fctCollapse               ["brush-tailed","Chinstrap"]</code></pre>
 1 B     12:40      12 14:10 
 2 C     18:15      18 19:45 
 01:30:00, -00:01:30.5, 90000</code></pre>
-<p>Comparing a time with text reads the text as a time, so <code>col('departs')-&gt;gt('12:00')</code> compares clock times. Adding or subtracting seconds or a time gives a time, and so does multiplying or dividing by a number. <code>min()</code> and <code>max()</code> of a time column are times, where dplyr gives a difftime, and <code>mean()</code> gives seconds.</p>
+<p>Comparing a time with text reads the text as a time, so <code>col('departs')-&gt;gt('12:00')</code> compares clock times. Adding or subtracting seconds or a time gives a time, and so does multiplying or dividing by a number.</p>
+<p>Summaries keep R’s types. The <code>median()</code> and <code>quantile()</code> of a time are times, as in R, and so are its <code>mean()</code>, <code>sum()</code>, <code>min()</code>, and <code>max()</code>, where R gives a difftime, which phibble does not have. The <code>mean()</code> and <code>median()</code> of a date are a date, rounded down to the day, and those of a datetime, and its <code>quantile()</code>, are datetimes. As in R, <code>sum()</code> of a date or datetime and <code>quantile()</code> of a date throw. <code>sd()</code>, <code>var()</code>, and <code>iqr()</code> are numbers: days for dates and seconds otherwise.</p>
 </section>
 <section id="list-columns" class="level2">
 <h2 class="anchored" data-anchor-id="list-columns">List-columns</h2>

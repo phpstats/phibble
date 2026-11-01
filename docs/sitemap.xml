@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://phibble.phpstats.org/docs/types.html</loc>
-    <lastmod>2026-11-01T14:13:27.696Z</lastmod>
+    <lastmod>2026-11-01T14:33:17.462Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/laravel.html</loc>
@@ -10,11 +10,11 @@
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/index.html</loc>
-    <lastmod>2026-11-01T14:13:43.705Z</lastmod>
+    <lastmod>2026-11-01T14:15:24.914Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/expr.html</loc>
-    <lastmod>2026-11-01T14:13:43.705Z</lastmod>
+    <lastmod>2026-11-01T14:15:24.914Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/examples/database-table.html</loc>
@@ -26,11 +26,11 @@
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/backends.html</loc>
-    <lastmod>2026-11-01T14:13:43.705Z</lastmod>
+    <lastmod>2026-11-01T14:33:17.475Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/coming-from-tibble.html</loc>
-    <lastmod>2026-11-01T14:13:43.704Z</lastmod>
+    <lastmod>2026-11-01T14:33:17.466Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/development.html</loc>
@@ -42,14 +42,14 @@
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/getting-started.html</loc>
-    <lastmod>2026-11-01T14:13:43.705Z</lastmod>
+    <lastmod>2026-11-01T14:15:24.914Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/io.html</loc>
-    <lastmod>2026-11-01T14:13:43.704Z</lastmod>
+    <lastmod>2026-11-01T14:15:24.915Z</lastmod>
   </url>
   <url>
     <loc>https://phibble.phpstats.org/docs/sql.html</loc>
-    <lastmod>2026-11-01T14:13:43.705Z</lastmod>
+    <lastmod>2026-11-01T14:33:17.470Z</lastmod>
   </url>
 </urlset>
