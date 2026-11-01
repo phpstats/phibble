@@ -549,6 +549,9 @@ final class Evaluator
         if ($vectors === []) {
             return new Scalar($fn(...array_map(fn (Scalar $s) => $s->value, $args)));
         }
+        if (count($vectors) === 1 && is_string(self::firstValue($vector = reset($vectors)))) {
+            return self::mapStrings($fn, $args, key($vectors), $vector);
+        }
         $out = [];
         // One and two arguments are the common cases; avoid building an
         // argument list per element for them.
@@ -584,6 +587,73 @@ final class Evaluator
         }
 
         return $out;
+    }
+
+    /**
+     * map() over one vector of strings, the other arguments being scalars.
+     * A repeated string is computed once, and repeated string results share
+     * one string, as the CSV reader shares repeated values. Both stop once
+     * the values turn out to be mostly distinct.
+     *
+     * @param array<int, list<mixed>|Scalar> $args
+     * @param list<mixed> $vector
+     * @return list<mixed>
+     */
+    private static function mapStrings(\Closure $fn, array $args, int $at, array $vector): array
+    {
+        $fixed = array_map(fn ($a) => $a instanceof Scalar ? $a->value : null, $args);
+        $call = match (true) {
+            count($args) === 1 => $fn,
+            count($args) === 2 && $at === 0 => fn ($v) => $fn($v, $fixed[1]),
+            default => function ($v) use ($fn, $fixed, $at) {
+                $fixed[$at] = $v;
+
+                return $fn(...$fixed);
+            },
+        };
+        $memo = [];
+        $pool = [];
+        $sharing = true;
+        $out = [];
+        foreach ($vector as $i => $v) {
+            if (! $sharing || ! is_string($v)) {
+                $out[] = $call($v);
+
+                continue;
+            }
+            if (array_key_exists($v, $memo)) {
+                $out[] = $memo[$v];
+
+                continue;
+            }
+            $r = $call($v);
+            if (is_string($r)) {
+                $r = $pool[$r] ??= $r;
+            }
+            // Objects are not shared between rows.
+            if (! is_object($r)) {
+                $memo[$v] = $r;
+            }
+            $out[] = $r;
+            if (($i + 1) % 4096 === 0 && count($memo) > ($i + 1) / 2) {
+                $sharing = false;
+                $memo = $pool = [];
+            }
+        }
+
+        return $out;
+    }
+
+    /** The first value that is not NA, or null. */
+    private static function firstValue(array $values): mixed
+    {
+        foreach ($values as $v) {
+            if ($v !== null) {
+                return $v;
+            }
+        }
+
+        return null;
     }
 
     /**

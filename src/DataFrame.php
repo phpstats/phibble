@@ -869,6 +869,16 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     public function filter(Closure|Expr $predicate): static
     {
         $keep = [];
+        if ($predicate instanceof Expr && $this->ungrouped()) {
+            // Every row in one group: no index of row numbers is needed.
+            foreach ($this->evaluator(null)->vector($predicate) as $i => $flag) {
+                if ($flag === true) {
+                    $keep[] = $i;
+                }
+            }
+
+            return $this->take($keep);
+        }
         foreach ($this->groupIndex() as [$_, $indices]) {
             if ($predicate instanceof Expr) {
                 foreach ($this->evaluator($indices)->vector($predicate) as $j => $flag) {
@@ -1978,46 +1988,52 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         return $cache[$this] ??= $this->buildGroupIndex();
     }
 
+    /** Whether every row is in one group: no grouping columns and not rowwise. */
+    private function ungrouped(): bool
+    {
+        return $this->groups === [] && ! $this->rowwise;
+    }
+
     /** @return list<array{0: array<string, mixed>, 1: list<int>}> */
     private function buildGroupIndex(): array
     {
-        $all = $this->rows === 0 ? [] : range(0, $this->rows - 1);
+        $all = fn () => $this->rows === 0 ? [] : range(0, $this->rows - 1);
         if ($this->rowwise) {
-            return array_map(fn (int $i) => [array_map(fn (string $g) => $this->data[$g]->get($i), array_combine($this->groups, $this->groups)), [$i]], $all);
+            return array_map(fn (int $i) => [array_map(fn (string $g) => $this->data[$g]->get($i), array_combine($this->groups, $this->groups)), [$i]], $all());
         }
         if ($this->groups === []) {
-            return [[[], $all]];
+            return [[[], $all()]];
         }
         if (! $this->drop) {
-            return $this->expandGroups($this->groups, $all, []);
+            return $this->expandGroups($this->groups, $all(), []);
+        }
+        if ($this->rows === 0) {
+            return [];
         }
 
-        // Bucket rows by an encoded key: one hashable value per row.
-        $encoded = array_map(fn (string $g) => $this->encodeKeys($g), $this->groups);
+        // Bucket rows by one dense integer code per row, folding in one
+        // grouping column at a time, so no key string is built per row.
+        $codes = $this->groupCodes($this->groups[0]);
+        for ($k = 1; $k < count($this->groups); $k++) {
+            $next = $this->groupCodes($this->groups[$k]);
+            $width = max($next) + 1;
+            $dense = [];
+            foreach ($codes as $i => $code) {
+                $codes[$i] = $dense[$code * $width + $next[$i]] ??= count($dense);
+            }
+            unset($next, $dense);
+        }
         $rowsByKey = [];
-        if (count($encoded) === 1) {
-            foreach ($encoded[0] as $i => $key) {
-                $rowsByKey[$key][] = $i;
-            }
-        } else {
-            for ($i = 0; $i < $this->rows; $i++) {
-                // Length-prefixed parts: values can't run together into another key.
-                $key = '';
-                foreach ($encoded as $column) {
-                    $part = (string) $column[$i];
-                    $key .= strlen($part).':'.$part;
-                }
-                $rowsByKey[$key][] = $i;
-            }
+        foreach ($codes as $i => $code) {
+            $rowsByKey[$code][] = $i;
         }
+        unset($codes);
 
-        $values = array_map(fn (string $g) => $this->data[$g]->values(), $this->groups);
         $index = [];
         foreach ($rowsByKey as $rows) {
-            $first = $rows[0];
             $key = [];
-            foreach ($this->groups as $k => $g) {
-                $key[$g] = $values[$k][$first];
+            foreach ($this->groups as $g) {
+                $key[$g] = $this->data[$g]->get($rows[0]);
             }
             $index[] = [$key, $rows];
         }
@@ -2035,6 +2051,38 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         });
 
         return $index;
+    }
+
+    /**
+     * One integer per row for grouping, numbering the column's distinct keys
+     * from 0 in order of first appearance. Rows share a code exactly when
+     * encodeKeys() gives them the same key.
+     *
+     * @return list<int>
+     */
+    private function groupCodes(string $name): array
+    {
+        $column = $this->data[$name];
+        $type = $column->type();
+        $values = match (true) {
+            $column instanceof FactorColumn => $column->codes(),
+            $column instanceof TemporalColumn => $column->ticks(),
+            $type === Type::Int, $type === Type::String, $type === Type::Bool => $column->values(),
+            default => $this->encodeKeys($name),
+        };
+        // Within one column, ints, bools and strings are distinct array keys
+        // (a numeric string key becomes the int it spells, and only that
+        // string spells it), so the values themselves key the codes; NA gets
+        // a code of its own.
+        $seen = [];
+        $na = null;
+        $next = 0;
+        $codes = [];
+        foreach ($values as $v) {
+            $codes[] = $v === null ? ($na ??= $next++) : ($seen[$v] ??= $next++);
+        }
+
+        return $codes;
     }
 
     /**
@@ -2317,13 +2365,13 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
 
     /**
      * An evaluator over the given rows that slices only the columns an
-     * expression reads. All rows in order means the whole columns.
+     * expression reads. All rows in order, or null, means the whole columns.
      *
-     * @param list<int> $indices
+     * @param list<int>|null $indices
      */
-    private function evaluator(array $indices): Evaluator
+    private function evaluator(?array $indices): Evaluator
     {
-        $whole = count($indices) === $this->rows;
+        $whole = $indices === null || count($indices) === $this->rows;
 
         return Evaluator::over(function (string $name) use ($indices, $whole): array {
             $storage = $this->storage($name);
@@ -2341,7 +2389,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
             }
 
             return $slice;
-        }, count($indices), function (string $name) use ($indices, $whole): ?array {
+        }, $indices === null ? $this->rows : count($indices), function (string $name) use ($indices, $whole): ?array {
             // Factors rank and order by level, so give their codes for sorting.
             $storage = $this->storage($name);
             if (! $storage instanceof FactorColumn) {
@@ -2439,6 +2487,9 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
             return $definition;
         }
         if ($definition instanceof Expr) {
+            if ($this->ungrouped()) {
+                return $this->evaluator(null)->vector($definition);
+            }
             $index = $this->groupIndex();
             if (count($index) === 1 && count($index[0][1]) === $this->rows) {
                 return $this->evaluator($index[0][1])->vector($definition);

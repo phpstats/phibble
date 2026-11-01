@@ -6,6 +6,9 @@ namespace Phibble\Source;
 
 use Generator;
 use InvalidArgumentException;
+use Phibble\Column\ArrayColumn;
+use Phibble\Column\Column;
+use Phibble\Column\TemporalColumn;
 use Phibble\DataFrame;
 use Phibble\Io\ColTypes;
 use Phibble\Io\CsvOptions;
@@ -170,6 +173,10 @@ final class CsvSource implements Source
             $batch = 0;
             while (! $done) {
                 $columns = array_fill_keys($kept, []);
+                // A column whose values are mostly distinct is packed every
+                // 4096 rows into one string per block, which takes a few bytes
+                // per value where a string of its own takes at least 32.
+                $packed = array_fill_keys($kept, []);
                 $pools = array_fill_keys($kept, []);
                 $problems = [];
                 $inBatch = 0;
@@ -218,6 +225,12 @@ final class CsvSource implements Source
                                 unset($pools[$i]);
                             }
                         }
+                        foreach ($kept as $i) {
+                            if (! isset($pools[$i])) {
+                                $packed[$i][] = self::pack($columns[$i]);
+                                $columns[$i] = [];
+                            }
+                        }
                     }
                     $count++;
                     $inBatch++;
@@ -247,19 +260,20 @@ final class CsvSource implements Source
                     if ($spec === 'skip') {
                         continue;
                     }
-                    $values = $columns[$i];
-                    $columns[$i] = null;
+                    $parts = [...$packed[$i], $columns[$i]];
+                    $packed[$i] = $columns[$i] = null;
                     if ($spec === null) {
                         // readr reads the columns of a header-only file as text.
-                        $type = $inBatch === 0 ? Type::String : $parser->guess(array_map(fn (int $row) => $values[$row], $sample));
+                        $type = $inBatch === 0 ? Type::String : $parser->guess(self::sampled($parts, $sample));
                         $spec = $specs[$i] = ['type' => $type, 'number' => false, 'levels' => null, 'ordered' => false, 'guessed' => true];
                     }
-                    [$column, $failed] = $parser->parse($values, $spec['type'], [
+                    [$column, $failed] = self::parseParts($parser, $parts, $spec['type'], [
                         'grouping' => $spec['guessed'] ?? false,
                         'number' => $spec['number'],
                         'levels' => $spec['levels'],
                         'ordered' => $spec['ordered'],
                     ]);
+                    unset($parts);
                     if ($failed > 0) {
                         $problems[] = "column '{$name}': {$failed} value".($failed === 1 ? '' : 's')." could not be parsed as {$spec['type']->value}";
                     }
@@ -298,6 +312,110 @@ final class CsvSource implements Source
             $more = count($problems) > 5 ? ' (and '.(count($problems) - 5).' more)' : '';
             trigger_error('One or more parsing issues: '.implode('; ', $shown).$more.'.', E_USER_WARNING);
         }
+    }
+
+    /**
+     * A block of raw values as one string, with the positions of its NAs, or
+     * the values as they are when one holds the NUL that separates them.
+     *
+     * @param list<?string> $values
+     * @return list<?string>|array{0: string, 1: list<int>}
+     */
+    private static function pack(array $values): array
+    {
+        $joined = implode("\0", $values);
+        if (substr_count($joined, "\0") !== count($values) - 1) {
+            return $values;
+        }
+
+        return [$joined, array_keys($values, null, true)];
+    }
+
+    /**
+     * The values of one part of a column: a packed block or a list.
+     *
+     * @param list<?string>|array{0: string, 1: list<int>} $part
+     * @return list<?string>
+     */
+    private static function unpack(array $part): array
+    {
+        if (! (count($part) === 2 && is_string($part[0] ?? null) && is_array($part[1] ?? null))) {
+            return $part;
+        }
+        $values = explode("\0", $part[0]);
+        foreach ($part[1] as $k) {
+            $values[$k] = null;
+        }
+
+        return $values;
+    }
+
+    /**
+     * The values at the given ascending rows of a column held in parts.
+     *
+     * @param list<list<?string>|array{0: string, 1: list<int>}> $parts
+     * @param list<int> $rows
+     * @return list<?string>
+     */
+    private static function sampled(array $parts, array $rows): array
+    {
+        $out = [];
+        $start = 0;
+        $r = 0;
+        foreach ($parts as $part) {
+            if ($r === count($rows)) {
+                break;
+            }
+            $values = self::unpack($part);
+            while ($r < count($rows) && $rows[$r] < $start + count($values)) {
+                $out[] = $values[$rows[$r] - $start];
+                $r++;
+            }
+            $start += count($values);
+        }
+
+        return $out;
+    }
+
+    /**
+     * TextParser::parse() over a column held in parts. Types parsed value by
+     * value are parsed a part at a time, so the raw values of only one part
+     * are held as separate strings at once.
+     *
+     * @param list<list<?string>|array{0: string, 1: list<int>}> $parts
+     * @param array<string, mixed> $options
+     * @return array{0: Column, 1: int}
+     */
+    private static function parseParts(TextParser $parser, array $parts, Type $type, array $options): array
+    {
+        if (count($parts) === 1) {
+            return $parser->parse(self::unpack($parts[0]), $type, $options);
+        }
+        if (in_array($type, [Type::String, Type::List, Type::Factor], true)) {
+            $values = [];
+            $count = count($parts);
+            for ($k = 0; $k < $count; $k++) {
+                foreach (self::unpack($parts[$k]) as $v) {
+                    $values[] = $v;
+                }
+                unset($parts[$k]);
+            }
+
+            return $parser->parse($values, $type, $options);
+        }
+        $out = [];
+        $failed = 0;
+        $count = count($parts);
+        for ($k = 0; $k < $count; $k++) {
+            [$column, $f] = $parser->parse(self::unpack($parts[$k]), $type, $options);
+            unset($parts[$k]);
+            $failed += $f;
+            foreach ($column instanceof TemporalColumn ? $column->ticks() : $column->values() as $v) {
+                $out[] = $v;
+            }
+        }
+
+        return [$column instanceof TemporalColumn ? new TemporalColumn($type, $out) : new ArrayColumn($type, $out), $failed];
     }
 
     /**
