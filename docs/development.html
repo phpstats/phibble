@@ -432,6 +432,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td><code>tests/r/pivot.R</code></td>
 <td>Pivots against tidyr.</td>
 </tr>
+<tr class="even">
+<td><code>tests/r/edge_cases.R</code></td>
+<td>Prints R’s results for the edge cases in <code>tests/ExprRTest.php</code>, which hold them as expected values.</td>
+</tr>
 </tbody>
 </table>
 <p>The fixtures are committed, so the tests do not need R. <code>tests/r/versions.json</code> records the R and package versions that reproduce them byte for byte. After changing a script, regenerate its fixtures from the repository root, for example with <code>Rscript tests/r/expr.R</code>. The scripts need the tibble, readr, dplyr, tidyr, stringr, lubridate, and jsonlite packages.</p>

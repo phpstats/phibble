@@ -39,6 +39,7 @@ operations in R and write the expected results to `tests/fixtures/`:
 | `tests/r/lubridate_stringr.R` | Date and string functions against lubridate and stringr. |
 | `tests/r/joins.R` | `join_by()` joins against dplyr. |
 | `tests/r/pivot.R` | Pivots against tidyr. |
+| `tests/r/edge_cases.R` | Prints R's results for the edge cases in `tests/ExprRTest.php`, which hold them as expected values. |
 
 The fixtures are committed, so the tests do not need R.
 `tests/r/versions.json` records the R and package versions that reproduce
