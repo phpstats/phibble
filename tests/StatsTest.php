@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 use Phibble\DataFrame;
 
+/**
+ * phit's matrix least-squares fit: Phit\fit_ols_matrix() from phit 0.4,
+ * Phit\fit_ols() before.
+ */
+function phit_fit_ols_matrix(array $x, array $y): array
+{
+    return function_exists('Phit\\fit_ols_matrix') ? Phit\fit_ols_matrix($x, $y) : Phit\fit_ols($x, $y);
+}
+
 it('builds the x matrix and y vector for stats functions', function () {
     $df = DataFrame::fromColumns(['x1' => [1, 2, null], 'x2' => [true, false, true], 'y' => [1.5, 2.5, 3.5]]);
 
@@ -15,16 +24,16 @@ it('refuses non-numeric matrix columns', function () {
     penguins()->toMatrix(['species']);
 })->throws(InvalidArgumentException::class, "Column 'species' is string");
 
-it('feeds Phit\fit_ols', function () {
+it('feeds phit\'s matrix fit_ols', function () {
     $df = DataFrame::fromColumns(['x' => [1, 2, 3, 4, 5], 'y' => [3.0, 5.0, 7.0, 9.0, 11.0]]);
 
-    $fit = Phit\fit_ols($df->toMatrix(['x']), $df->toVector('y'));
+    $fit = phit_fit_ols_matrix($df->toMatrix(['x']), $df->toVector('y'));
 
     expect($fit['coefficients'][0])->toEqualWithDelta(1.0, 1e-9)
         ->and($fit['coefficients'][1])->toEqualWithDelta(2.0, 1e-9);
 })->skip(! function_exists('Phit\\fit_ols'), 'phit extension not loaded');
 
-it('passes NA through to Phit\fit_ols, which drops the row and warns once', function () {
+it('passes NA through to phit\'s matrix fit_ols, which drops the row and warns once', function () {
     $df = DataFrame::fromColumns([
         'x' => [1, 2, 3, 4, 5, null],
         'y' => [3.0, 5.0, 7.0, 9.0, 11.0, 2.0],
@@ -37,7 +46,7 @@ it('passes NA through to Phit\fit_ols, which drops the row and warns once', func
         return true;
     }, E_WARNING);
     try {
-        $fit = Phit\fit_ols($df->toMatrix(['x']), $df->toVector('y'));
+        $fit = phit_fit_ols_matrix($df->toMatrix(['x']), $df->toVector('y'));
     } finally {
         restore_error_handler();
     }
