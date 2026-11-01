@@ -484,7 +484,7 @@
     "href": "development.html#comparing-with-r",
     "title": "Development",
     "section": "Comparing with R",
-    "text": "Comparing with R\nMany tests compare phibble with R. Scripts in tests/r/ run the same operations in R and write the expected results to tests/fixtures/:\n\n\n\nScript\nChecks\n\n\n\n\ntests/r/print.R\nPrinting and glimpse() against tibble.\n\n\ntests/r/io.R\nCSV reading and writing against readr.\n\n\ntests/r/expr.R\nExpressions against dplyr.\n\n\n\nThe fixtures are committed, so the tests do not need R. After changing a script, regenerate its fixtures from the repository root, for example with Rscript tests/r/expr.R. The scripts need the tibble, readr, dplyr, stringr, and jsonlite packages.",
+    "text": "Comparing with R\nMany tests compare phibble with R. Scripts in tests/r/ run the same operations in R and write the expected results to tests/fixtures/:\n\n\n\n\n\n\n\nScript\nChecks\n\n\n\n\ntests/r/print.R\nPrinting and glimpse() against tibble.\n\n\ntests/r/io.R\nCSV reading and writing against readr.\n\n\ntests/r/expr.R\nExpressions against dplyr.\n\n\ntests/r/expr-types.R\nAggregate result types against dplyr.\n\n\ntests/r/lubridate_stringr.R\nDate and string functions against lubridate and stringr.\n\n\ntests/r/joins.R\njoin_by() joins against dplyr.\n\n\ntests/r/pivot.R\nPivots against tidyr.\n\n\n\nThe fixtures are committed, so the tests do not need R. tests/r/versions.json records the R and package versions that reproduce them byte for byte. After changing a script, regenerate its fixtures from the repository root, for example with Rscript tests/r/expr.R. The scripts need the tibble, readr, dplyr, tidyr, stringr, lubridate, and jsonlite packages.",
     "crumbs": [
       "Contributing",
       "Development"
@@ -496,6 +496,17 @@
     "title": "Development",
     "section": "Database tests",
     "text": "Database tests\ntests/SqlTest.php runs against an in-memory SQLite database. It also runs against PostgreSQL and MySQL when these environment variables hold PDO DSNs:\nexport PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\"\nexport PHIBBLE_TEST_PGSQL_USER=postgres\nexport PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\"\nexport PHIBBLE_TEST_MYSQL_USER=root\nPHIBBLE_TEST_PGSQL_PASSWORD and PHIBBLE_TEST_MYSQL_PASSWORD set passwords. The tests only run SELECT statements over inline data and create no tables.",
+    "crumbs": [
+      "Contributing",
+      "Development"
+    ]
+  },
+  {
+    "objectID": "development.html#verification-and-benchmark-records",
+    "href": "development.html#verification-and-benchmark-records",
+    "title": "Development",
+    "section": "Verification and benchmark records",
+    "text": "Verification and benchmark records\nphpstats.org renders the JSON records in site/verifications/ and site/benchmarks/. Scripts write both, and nothing is edited by hand.\nbin/verify runs the test suite and writes one verification record per topic. Each case is one test, with the suite’s status and skip reason. Set the database variables above and load phit and php_polars to run every case:\nbin/verify --php=\"php -d extension=phit.so -d extension=php_polars.so\"\nbin/bench-record runs the benchmarks in bench/ and writes their records. Each run is a fresh process under peakmem, built from phit’s bench/peakmem.c. Records come from the Linux benchmark machine only:\nbin/bench-record --php=\"php -d extension=phit.so -d extension=php_polars.so\"\nbin/bench runs one backend in one process and prints its timings, for quick comparisons while working.",
     "crumbs": [
       "Contributing",
       "Development"

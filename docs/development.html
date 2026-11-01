@@ -281,6 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#tests" id="toc-tests" class="nav-link active" data-scroll-target="#tests">Tests</a></li>
   <li><a href="#comparing-with-r" id="toc-comparing-with-r" class="nav-link" data-scroll-target="#comparing-with-r">Comparing with R</a></li>
   <li><a href="#database-tests" id="toc-database-tests" class="nav-link" data-scroll-target="#database-tests">Database tests</a></li>
+  <li><a href="#verification-and-benchmark-records" id="toc-verification-and-benchmark-records" class="nav-link" data-scroll-target="#verification-and-benchmark-records">Verification and benchmark records</a></li>
   <li><a href="#documentation" id="toc-documentation" class="nav-link" data-scroll-target="#documentation">Documentation</a></li>
   </ul>
 </nav>
@@ -320,6 +321,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="comparing-with-r">Comparing with R</h2>
 <p>Many tests compare phibble with R. Scripts in <code>tests/r/</code> run the same operations in R and write the expected results to <code>tests/fixtures/</code>:</p>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Script</th>
@@ -339,9 +344,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td><code>tests/r/expr.R</code></td>
 <td>Expressions against dplyr.</td>
 </tr>
+<tr class="even">
+<td><code>tests/r/expr-types.R</code></td>
+<td>Aggregate result types against dplyr.</td>
+</tr>
+<tr class="odd">
+<td><code>tests/r/lubridate_stringr.R</code></td>
+<td>Date and string functions against lubridate and stringr.</td>
+</tr>
+<tr class="even">
+<td><code>tests/r/joins.R</code></td>
+<td><code>join_by()</code> joins against dplyr.</td>
+</tr>
+<tr class="odd">
+<td><code>tests/r/pivot.R</code></td>
+<td>Pivots against tidyr.</td>
+</tr>
 </tbody>
 </table>
-<p>The fixtures are committed, so the tests do not need R. After changing a script, regenerate its fixtures from the repository root, for example with <code>Rscript tests/r/expr.R</code>. The scripts need the tibble, readr, dplyr, stringr, and jsonlite packages.</p>
+<p>The fixtures are committed, so the tests do not need R. <code>tests/r/versions.json</code> records the R and package versions that reproduce them byte for byte. After changing a script, regenerate its fixtures from the repository root, for example with <code>Rscript tests/r/expr.R</code>. The scripts need the tibble, readr, dplyr, tidyr, stringr, lubridate, and jsonlite packages.</p>
 </section>
 <section id="database-tests" class="level2">
 <h2 class="anchored" data-anchor-id="database-tests">Database tests</h2>
@@ -352,11 +373,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PHIBBLE_TEST_MYSQL_USER</span><span class="op">=</span>root</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>PHIBBLE_TEST_PGSQL_PASSWORD</code> and <code>PHIBBLE_TEST_MYSQL_PASSWORD</code> set passwords. The tests only run <code>SELECT</code> statements over inline data and create no tables.</p>
 </section>
+<section id="verification-and-benchmark-records" class="level2">
+<h2 class="anchored" data-anchor-id="verification-and-benchmark-records">Verification and benchmark records</h2>
+<p>phpstats.org renders the JSON records in <code>site/verifications/</code> and <code>site/benchmarks/</code>. Scripts write both, and nothing is edited by hand.</p>
+<p><code>bin/verify</code> runs the test suite and writes one verification record per topic. Each case is one test, with the suite’s status and skip reason. Set the database variables above and load phit and php_polars to run every case:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bin/verify</span> <span class="at">--php</span><span class="op">=</span><span class="st">"php -d extension=phit.so -d extension=php_polars.so"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>bin/bench-record</code> runs the benchmarks in <code>bench/</code> and writes their records. Each run is a fresh process under <code>peakmem</code>, built from phit’s <code>bench/peakmem.c</code>. Records come from the Linux benchmark machine only:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bin/bench-record</span> <span class="at">--php</span><span class="op">=</span><span class="st">"php -d extension=phit.so -d extension=php_polars.so"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>bin/bench</code> runs one backend in one process and prints its timings, for quick comparisons while working.</p>
+</section>
 <section id="documentation" class="level2">
 <h2 class="anchored" data-anchor-id="documentation">Documentation</h2>
 <p>The site is a Quarto project in <code>docs/</code>. Every example is a PHP file in <code>docs/examples/</code>. <code>bin/docs-examples</code> runs each example with <code>docs/data</code> as the working directory and writes its code and output to <code>docs/examples/_&lt;name&gt;.md</code>, which the pages include. Quarto never runs PHP.</p>
 <p><code>bin/render-docs</code> refreshes the examples, renders the site, and copies the result into <code>docs/</code>. Commit the rendered HTML, because phpstats.org imports it from <code>docs/</code> and never runs Quarto:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">PHP</span><span class="op">=</span>php85 <span class="ex">bin/render-docs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">PHP</span><span class="op">=</span>php85 <span class="ex">bin/render-docs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bin/docs-examples name</code> refreshes one example. Set <code>QUARTO</code> when the <code>quarto</code> command is not on the path.</p>
 <p><code>docs/_variables.yml</code> names the latest release. The data URLs in the docs and the README point at that tag, and <code>tests/SiteTest.php</code> fails until a new CHANGELOG release is matched there and in the README.</p>
 <p>The documentation is published at <a href="https://phibble.phpstats.org/docs" class="uri">https://phibble.phpstats.org/docs</a>. GitHub Pages serves only redirects there: the <code>pages</code> workflow runs <code>bin/pages-redirects</code>, which writes one redirect page for each page in <code>docs/</code>.</p>
