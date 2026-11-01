@@ -117,6 +117,19 @@
             }
         ]
     },
+    "benchmarks": [
+        "site/benchmarks/tables-load.json",
+        "site/benchmarks/group-summarise.json",
+        "site/benchmarks/group-summarise-closure.json",
+        "site/benchmarks/grouped-window.json",
+        "site/benchmarks/filter.json",
+        "site/benchmarks/mutate.json",
+        "site/benchmarks/join.json",
+        "site/benchmarks/arrange.json",
+        "site/benchmarks/csv-typed.json",
+        "site/benchmarks/csv-chunked.json",
+        "site/benchmarks/csv-write.json"
+    ],
     "verifications": [
         "site/verifications/print-tibble.json",
         "site/verifications/csv-readr.json",

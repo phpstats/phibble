@@ -1,0 +1,180 @@
+{
+    "title": "Grouped window functions",
+    "label": "Window functions",
+    "group": "Tables",
+    "description": "Within each key, ordered by t, compute lag(x), a running sum of id, and the row number.",
+    "workload": "1,000,000 rows of events and 100,000 rows of dims",
+    "dataset": {
+        "rows": 1000000,
+        "bytes": 45819208,
+        "sha256": "136e805ed48a594f67828cc7cd72367a3795dbd7276c0a4f11e53d93a18e83f7",
+        "file": "events.csv",
+        "generator": "php bench/generate.php 1000000",
+        "dims": {
+            "rows": 100000,
+            "bytes": 2277802,
+            "sha256": "625a7c6cce35cfae7ca4898560c66c6fc9f5b024efd140952515a9c13ea0a84f"
+        }
+    },
+    "check": {
+        "result_rows": 1000000,
+        "note": "Every implementation returned the same number of result rows in every run."
+    },
+    "implementations": {
+        "DataFrame": "Phibble\\DataFrame: PHP arrays",
+        "SqlTable": "Phibble\\Sql\\SqlTable on a SQLite 3.45.1 file, through PDO",
+        "PolarsTable": "Phibble\\Polars\\PolarsTable, php_polars 0.2.1"
+    },
+    "measure": "Elapsed time",
+    "unit": "ms",
+    "statistic": "median",
+    "method": "Each run is a fresh PHP process. The clock starts after the input tables are loaded and stops when the result has been collected into PHP and its rows counted, so lazy backends run their query inside the timing. Loading is measured separately in the Loading record. Process startup is excluded. Each implementation runs one warm-up, then the implementations alternate for 7 rounds in a rotated order.",
+    "time_spent_in": "the PHP process, with SQLite and Polars running in it as linked libraries",
+    "memory_measure": "peak anonymous memory",
+    "memory_method": "Peak anonymous memory is RssAnon from /proc/PID/status, sampled every millisecond by peakmem (phit's bench/peakmem.c), for the whole process, with the input tables loaded. peak_rss_mib is the kernel's peak resident set size from getrusage(), which also counts mapped file pages. php_peak_mib is memory_get_peak_usage(true) at the end of the run; it does not count memory that SQLite or Polars allocate outside PHP's allocator. SqlTable keeps its tables in the SQLite file: SQLite reads pages through a page cache of about 2 MiB (its default cache_size, with memory mapping off), and the kernel's file cache counts in neither figure. SqlTable's memory is therefore mostly the rows it collects into PHP, which is small when the result is small, as in a grouped summary.",
+    "environment": {
+        "threads": {
+            "DataFrame": 1,
+            "SqlTable": 1,
+            "PolarsTable": "Polars' default thread pool, one thread per core (2 here)"
+        },
+        "cpu": "AMD Ryzen 9 9955HX 16-Core Processor",
+        "cores": 2,
+        "memory_gb": 7.8,
+        "os": "Linux, Ubuntu 24.04.5 LTS (x86_64)",
+        "php": "8.5.12",
+        "versions": {
+            "phibble": "v0.6.1-12-g7d3b3c3",
+            "phit": "0.4.3",
+            "php_polars": "0.2.1",
+            "SQLite": "3.45.1"
+        },
+        "cache": "warm",
+        "repeats": 7,
+        "warmups": 1,
+        "date": "2026-11-01",
+        "commit": "7d3b3c3"
+    },
+    "rows": [
+        {
+            "case": "1,000,000 rows",
+            "implementation": "DataFrame",
+            "value": 1077.233,
+            "reps": [
+                1061.849,
+                1075.022,
+                1077.233,
+                1087.169,
+                1079.486,
+                1083.91,
+                1076.839
+            ],
+            "peak_memory_mib": 338.3,
+            "reps_peak_memory_mib": [
+                338.3,
+                338.3,
+                338.3,
+                338.3,
+                338.3,
+                338.3,
+                338.3
+            ],
+            "peak_rss_mib": 369.7,
+            "reps_peak_rss_mib": [
+                369.6,
+                369.8,
+                369.8,
+                369.7,
+                369.7,
+                369.8,
+                369.6
+            ],
+            "php_peak_mib": 319.8
+        },
+        {
+            "case": "1,000,000 rows",
+            "implementation": "SqlTable",
+            "value": 5844.397,
+            "reps": [
+                5870.39,
+                5936.924,
+                5839.248,
+                5842.39,
+                5852.239,
+                5844.397,
+                5825.957
+            ],
+            "peak_memory_mib": 593.3,
+            "reps_peak_memory_mib": [
+                593.3,
+                593.3,
+                593.3,
+                593.3,
+                593.3,
+                593.3,
+                593.3
+            ],
+            "peak_rss_mib": 625.8,
+            "reps_peak_rss_mib": [
+                625.8,
+                625.8,
+                625.7,
+                625.8,
+                625.9,
+                625.8,
+                625.7
+            ],
+            "php_peak_mib": 594
+        },
+        {
+            "case": "1,000,000 rows",
+            "implementation": "PolarsTable",
+            "value": 524.892,
+            "reps": [
+                526.759,
+                525.326,
+                514.42,
+                523.061,
+                526.47,
+                524.892,
+                522.512
+            ],
+            "peak_memory_mib": 388.1,
+            "reps_peak_memory_mib": [
+                388.3,
+                392.7,
+                378.4,
+                392.6,
+                378.5,
+                388.1,
+                378.1
+            ],
+            "peak_rss_mib": 444.2,
+            "reps_peak_rss_mib": [
+                444.3,
+                448.7,
+                434.3,
+                448.6,
+                434.5,
+                444.2,
+                433.9
+            ],
+            "php_peak_mib": 168
+        }
+    ],
+    "code": {
+        "DataFrame": "$events = DataFrame::fromCsv('events.csv');\n$dims = DataFrame::fromCsv('dims.csv');\n\n$rows = $events\n    ->groupBy(['key'])\n    ->arrange(['t'])\n    ->mutate(['prev' => lag(col('x')), 'run' => cumsum(col('id')), 'rn' => row_number()])\n    ->collect()->nrow();",
+        "SqlTable": "$pdo = new PDO('sqlite:bench.sqlite');\n$events = SqlTable::table($pdo, 'events');\n$dims = SqlTable::table($pdo, 'dims');\n\n$rows = $events\n    ->groupBy(['key'])\n    ->arrange(['t'])\n    ->mutate(['prev' => lag(col('x')), 'run' => cumsum(col('id')), 'rn' => row_number()])\n    ->collect()->nrow();",
+        "PolarsTable": "$events = PolarsTable::fromTable(DataFrame::fromCsv('events.csv'));\n$dims = PolarsTable::fromTable(DataFrame::fromCsv('dims.csv'));\n\n$rows = $events\n    ->groupBy(['key'])\n    ->arrange(['t'])\n    ->mutate(['prev' => lag(col('x')), 'run' => cumsum(col('id')), 'rn' => row_number()])\n    ->collect()->nrow();"
+    },
+    "languages": {
+        "DataFrame": "php",
+        "SqlTable": "php",
+        "PolarsTable": "php"
+    },
+    "reproduce": [
+        "cc -O2 -o ~/.local/bin/peakmem bench/peakmem.c  # in a phit checkout",
+        "bin/bench-record --php='php -d extension=phit.so -d extension=php_polars.so' grouped-window"
+    ],
+    "source": "bench/src/Workloads.php"
+}
