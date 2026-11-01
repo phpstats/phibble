@@ -600,7 +600,7 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="va">$running</span> <span class="op">=</span> DataFrame::concat(<span class="va">$kept</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Types not given are guessed from the first chunk, and every later chunk is parsed as those types. As in readr, <code>guessMax</code> defaults to the chunk size. Give every type, as above, to skip guessing. A value in a later chunk that does not fit its column’s type becomes NA. Factors without levels take their levels from each chunk.</p>
 <p>Every other option works as it does in <code>fromCsv()</code>. Each chunk’s problems raise their own warning, with rows numbered from the start of the file.</p>
-<p>With the <a href="https://github.com/phpstats/phit">phit</a> extension 0.2.0 or later loaded, chunks are read natively with <code>Phit\CsvReader</code>, with the same results as the PHP reader.</p>
+<p>With the <a href="https://github.com/phpstats/phit">phit</a> extension loaded, chunks are read natively with <code>Phit\CsvReader</code>, with the same results as the PHP reader.</p>
 </section>
 <section id="memory" class="level3">
 <h3 class="anchored" data-anchor-id="memory">Memory</h3>

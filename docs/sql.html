@@ -370,13 +370,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span>-&gt;showQuery()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="va">$summary</span>-&gt;bindings())<span class="ot">,</span> <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span><span class="ot">;</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$summary</span>-&gt;collect()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre class="text output"><code>Phibble\Sql\SqlTable
-
-SELECT "species", "n", "mass" FROM (SELECT "species", "n", "mass", ROW_NUMBER() OVER (ORDER BY ("species" IS NULL), "species") AS "__phibble_row" FROM (SELECT "species" AS "species", COUNT(*) AS "n", (CASE WHEN COUNT("body_mass") = 0 THEN NULL ELSE AVG(CAST("body_mass" AS REAL)) END) AS "mass" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "penguins") AS q1 WHERE ("year" = ?)) AS q2 GROUP BY "species") AS q3) AS q4 ORDER BY ("__phibble_row" IS NULL), "__phibble_row"
-
-[2008]
-
-# A tibble: 3 × 3
+<pre class="text output"><code>Phibble\Sql\SqlTable</code></pre>
+<details>
+<summary>
+The SQL from <code>showQuery()</code>
+</summary>
+<pre class="text output"><code>SELECT "species", "n", "mass" FROM (SELECT "species", "n", "mass", ROW_NUMBER() OVER (ORDER BY ("species" IS NULL), "species") AS "__phibble_row" FROM (SELECT "species" AS "species", COUNT(*) AS "n", (CASE WHEN COUNT("body_mass") = 0 THEN NULL ELSE AVG(CAST("body_mass" AS REAL)) END) AS "mass" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "penguins") AS q1 WHERE ("year" = ?)) AS q2 GROUP BY "species") AS q3) AS q4 ORDER BY ("__phibble_row" IS NULL), "__phibble_row"</code></pre>
+</details>
+<pre class="text output"><code>[2008]</code></pre>
+<pre class="text output"><code># A tibble: 3 × 3
   species       n  mass
   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt;
 1 Adelie       50 3742 
@@ -400,21 +402,21 @@ SELECT "species", "n", "mass" FROM (SELECT "species", "n", "mass", ROW_NUMBER() 
 <section id="when-the-table-falls-back-to-memory" class="level2">
 <h2 class="anchored" data-anchor-id="when-the-table-falls-back-to-memory">When the table falls back to memory</h2>
 <p>When an argument has no faithful SQL translation, the <code>SqlTable</code> runs the query so far, collects its rows into PHP, and runs the verb in memory. The verb returns a <code>DataFrame</code>, so every later step also runs in memory, with <code>DataFrame</code>’s values apart from the <a href="#known-differences">known differences</a>. Here <code>mul()</code> compiles, and <code>round()</code> and a closure fall back:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">$t</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS id, 2.5 AS x</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 2, 3.5</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="st">$doubled = $t-&gt;mutate(['y' =&gt; col('x')-&gt;mul(2)]);</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">$rounded = $t-&gt;mutate(['y' =&gt; Phibble\Expr\round(col('x'))]);</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">$closure = $t-&gt;filter(fn ($r) =&gt; $r-&gt;x &gt; 3);</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($doubled), "\n";</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($rounded), "\n";</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($closure), "\n";</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="st">echo $rounded;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">$t</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS id, 2.5 AS x</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 2, 3.5</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">$doubled = $t-&gt;mutate(['y' =&gt; col('x')-&gt;mul(2)]);</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">$rounded = $t-&gt;mutate(['y' =&gt; Phibble\Expr\round(col('x'))]);</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="st">$closure = $t-&gt;filter(fn ($r) =&gt; $r-&gt;x &gt; 3);</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($doubled), "\n";</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($rounded), "\n";</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="st">echo get_class($closure), "\n";</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="st">echo $rounded;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Phibble\Sql\SqlTable
 Phibble\DataFrame
 Phibble\DataFrame
@@ -593,29 +595,33 @@ Phibble\DataFrame
 <li>Window functions such as <code>lag()</code> and <code>cumsum()</code> use <code>order_by:</code> where given, then the <code>arrange()</code> order, then the source order.</li>
 <li>Grouped <code>mutate()</code> and <code>filter()</code> compile to <code>OVER (PARTITION BY ...)</code>.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">$sales</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 'a' AS store, 1 AS week, 10 AS units</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 'a', 2, 14 UNION ALL SELECT 'a', 3, 9</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="st">$out = $sales</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;groupBy(['store'])</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;arrange(['store', 'week'])</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;mutate([</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st">        'running' =&gt; cumsum(col('units')),</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">        'of_best' =&gt; col('units')</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="st">            -&gt;div(max(col('units'), na_rm: true)),</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="st">    ]);</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;showQuery(), "\n\n";</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;collect();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="va">$sales</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 'a' AS store, 1 AS week, 10 AS units</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 'a', 2, 14 UNION ALL SELECT 'a', 3, 9</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="st">$out = $sales</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;groupBy(['store'])</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;arrange(['store', 'week'])</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;mutate([</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="st">        'running' =&gt; cumsum(col('units')),</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="st">        'of_best' =&gt; col('units')</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="st">            -&gt;div(max(col('units'), na_rm: true)),</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="st">    ]);</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;showQuery(), "\n\n";</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="st">echo $out-&gt;collect();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details>
+<summary>
+The SQL from <code>showQuery()</code>
+</summary>
 <pre class="text output"><code>SELECT "store", "week", "units", "running", "of_best" FROM (SELECT "store", "week", "units", "running", (CASE WHEN (CASE WHEN COUNT("units") OVER (PARTITION BY "store") = 0 THEN -9e999 ELSE MAX("units") OVER (PARTITION BY "store") END) = 0 THEN (CASE WHEN "units" &gt; 0 THEN 9e999 WHEN "units" &lt; 0 THEN -9e999 WHEN "units" = 0 THEN NULL END) ELSE CAST("units" AS REAL) / (CASE WHEN COUNT("units") OVER (PARTITION BY "store") = 0 THEN -9e999 ELSE MAX("units") OVER (PARTITION BY "store") END) END) AS "of_best", "__phibble_row" FROM (SELECT "store", "week", "units", (CASE WHEN COUNT(*) OVER (PARTITION BY "store" ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) &gt; COUNT("units") OVER (PARTITION BY "store" ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) THEN NULL ELSE SUM("units") OVER (PARTITION BY "store" ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) END) AS "running", "__phibble_row" FROM (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 'a' AS store, 1 AS week, 10 AS units
 UNION ALL SELECT 'a', 2, 14 UNION ALL SELECT 'a', 3, 9
-UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL) AS phibble_source) AS q1) AS q2) AS q3 ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row"
-
-# A tibble: 5 × 5
+UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL) AS phibble_source) AS q1) AS q2) AS q3 ORDER BY ("store" IS NULL), "store", ("week" IS NULL), "week", ("__phibble_row" IS NULL), "__phibble_row"</code></pre>
+</details>
+<pre class="text output"><code># A tibble: 5 × 5
 # Groups:   store [2]
   store  week units running of_best
   &lt;chr&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;   &lt;dbl&gt;
@@ -628,28 +634,32 @@ UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL) AS phibble_source) AS 
 <section id="joins" class="level2">
 <h2 class="anchored" data-anchor-id="joins">Joins</h2>
 <p><code>join()</code> between two tables on the same PDO connection compiles to a SQL join. The output columns follow <code>DataFrame::join()</code>: x’s columns, then y’s other columns, with <code>.x</code> and <code>.y</code> suffixes on clashing names. NA keys match each other, as in dplyr, through <code>IS</code> in SQLite, <code>IS NOT DISTINCT FROM</code> in PostgreSQL, and <code>&lt;=&gt;</code> in MySQL. Pass <code>naMatches: false</code> for SQL’s usual equality.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">$visits</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS clinic_id, 120 AS bp</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 2, 135</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT NULL, 128</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">$clinics = tbl($pdo, &lt;&lt;&lt;'SQL'</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS id, 'north' AS name</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT NULL, 'unassigned'</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="st">$joined = $visits</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;join($clinics, [['clinic_id', 'id']], 'left');</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="st">echo $joined-&gt;showQuery(), "\n\n";</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="st">echo $joined-&gt;arrange(['bp'])-&gt;collect();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="va">$visits</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS clinic_id, 120 AS bp</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT 2, 135</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT NULL, 128</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">$clinics = tbl($pdo, &lt;&lt;&lt;'SQL'</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT 1 AS id, 'north' AS name</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="st">    UNION ALL SELECT NULL, 'unassigned'</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="st">    SQL);</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="st">$joined = $visits</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="st">    -&gt;join($clinics, [['clinic_id', 'id']], 'left');</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="st">echo $joined-&gt;showQuery(), "\n\n";</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="st">echo $joined-&gt;arrange(['bp'])-&gt;collect();</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details>
+<summary>
+The SQL from <code>showQuery()</code>
+</summary>
 <pre class="text output"><code>SELECT "clinic_id", "bp", "name" FROM (SELECT jq1x."clinic_id" AS "clinic_id", jq1x."bp" AS "bp", jq1y."name" AS "name", jq1x."__phibble_row" AS "__phibble_row", jq1y."__phibble_row" AS "__phibble_row_1" FROM (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS clinic_id, 120 AS bp
 UNION ALL SELECT 2, 135
 UNION ALL SELECT NULL, 128) AS phibble_source) AS jq1x LEFT JOIN (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS id, 'north' AS name
-UNION ALL SELECT NULL, 'unassigned') AS phibble_source) AS jq1y ON (jq1x."clinic_id" IS jq1y."id")) AS q2 ORDER BY ("__phibble_row" IS NULL), "__phibble_row", ("__phibble_row_1" IS NULL), "__phibble_row_1"
-
-# A tibble: 3 × 3
+UNION ALL SELECT NULL, 'unassigned') AS phibble_source) AS jq1y ON (jq1x."clinic_id" IS jq1y."id")) AS q2 ORDER BY ("__phibble_row" IS NULL), "__phibble_row", ("__phibble_row_1" IS NULL), "__phibble_row_1"</code></pre>
+</details>
+<pre class="text output"><code># A tibble: 3 × 3
   clinic_id    bp name      
       &lt;int&gt; &lt;int&gt; &lt;chr&gt;     
 1         1   120 north     
@@ -659,40 +669,40 @@ UNION ALL SELECT NULL, 'unassigned') AS phibble_source) AS jq1y ON (jq1x."clinic
 <section id="dialects" class="level2">
 <h2 class="anchored" data-anchor-id="dialects">Dialects</h2>
 <p><code>Dialect::for($pdo)</code> chooses the dialect from the PDO driver. The dialects differ in identifier quoting, cast types, string functions, and NULL-safe equality. The SQL for one expression in each dialect:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\Compiler<span class="ot">;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\MysqlDialect<span class="ot">;</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\PostgresDialect<span class="ot">;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\SqliteDialect<span class="ot">;</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="va">$expressions</span> <span class="op">=</span> [</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mean, NA aware'</span> =&gt; mean(col(<span class="st">'bp'</span>))<span class="ot">,</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'ratio'</span> =&gt; col(<span class="st">'bp'</span>)-&gt;div(col(<span class="st">'baseline'</span>))<span class="ot">,</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'contains'</span> =&gt; str_detect(col(<span class="st">'name'</span>)<span class="ot">,</span> <span class="st">'north'</span>)<span class="ot">,</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'in, with NA'</span> =&gt; col(<span class="st">'arm'</span>)-&gt;isIn([<span class="st">'a'</span><span class="ot">,</span> <span class="kw">null</span>])<span class="ot">,</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="va">$dialects</span> <span class="op">=</span> [</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> SqliteDialect()<span class="ot">,</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> PostgresDialect()<span class="ot">,</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> MysqlDialect()<span class="ot">,</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$dialects</span> <span class="kw">as</span> <span class="va">$dialect</span>) {</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"-- </span>{<span class="va">$dialect</span>-&gt;name()}<span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="va">$compiler</span> <span class="op">=</span> <span class="kw">new</span> Compiler(<span class="va">$dialect</span><span class="ot">,</span> mode<span class="ot">:</span> <span class="st">'summary'</span>)<span class="ot">;</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">foreach</span> (<span class="va">$expressions</span> <span class="kw">as</span> <span class="va">$label</span> =&gt; <span class="va">$expr</span>) {</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">$sql</span> <span class="op">=</span> <span class="va">$compiler</span>-&gt;compile(<span class="va">$expr</span>)-&gt;sql<span class="ot">;</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">echo</span> \<span class="fu">str_pad</span>(<span class="va">$label</span><span class="ot">,</span> <span class="dv">16</span>)<span class="ot">,</span> <span class="va">$sql</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="va">$window</span> <span class="op">=</span> <span class="kw">new</span> Compiler(</span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> PostgresDialect()<span class="ot">,</span></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    groups<span class="ot">:</span> [<span class="st">'clinic'</span>]<span class="ot">,</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    order<span class="ot">:</span> [[col(<span class="st">'visit'</span>)<span class="ot">,</span> <span class="kw">false</span>]]<span class="ot">,</span></span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$window</span>-&gt;compile(cumsum(col(<span class="st">'bp'</span>)))-&gt;sql<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\Compiler<span class="ot">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\MysqlDialect<span class="ot">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\PostgresDialect<span class="ot">;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\Sql\SqliteDialect<span class="ot">;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="va">$expressions</span> <span class="op">=</span> [</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mean, NA aware'</span> =&gt; mean(col(<span class="st">'bp'</span>))<span class="ot">,</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'ratio'</span> =&gt; col(<span class="st">'bp'</span>)-&gt;div(col(<span class="st">'baseline'</span>))<span class="ot">,</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'contains'</span> =&gt; str_detect(col(<span class="st">'name'</span>)<span class="ot">,</span> <span class="st">'north'</span>)<span class="ot">,</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'in, with NA'</span> =&gt; col(<span class="st">'arm'</span>)-&gt;isIn([<span class="st">'a'</span><span class="ot">,</span> <span class="kw">null</span>])<span class="ot">,</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="va">$dialects</span> <span class="op">=</span> [</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> SqliteDialect()<span class="ot">,</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> PostgresDialect()<span class="ot">,</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> MysqlDialect()<span class="ot">,</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>]<span class="ot">;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$dialects</span> <span class="kw">as</span> <span class="va">$dialect</span>) {</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"-- </span>{<span class="va">$dialect</span>-&gt;name()}<span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="va">$compiler</span> <span class="op">=</span> <span class="kw">new</span> Compiler(<span class="va">$dialect</span><span class="ot">,</span> mode<span class="ot">:</span> <span class="st">'summary'</span>)<span class="ot">;</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">foreach</span> (<span class="va">$expressions</span> <span class="kw">as</span> <span class="va">$label</span> =&gt; <span class="va">$expr</span>) {</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">$sql</span> <span class="op">=</span> <span class="va">$compiler</span>-&gt;compile(<span class="va">$expr</span>)-&gt;sql<span class="ot">;</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">echo</span> \<span class="fu">str_pad</span>(<span class="va">$label</span><span class="ot">,</span> <span class="dv">16</span>)<span class="ot">,</span> <span class="va">$sql</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">echo</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="va">$window</span> <span class="op">=</span> <span class="kw">new</span> Compiler(</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> PostgresDialect()<span class="ot">,</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    groups<span class="ot">:</span> [<span class="st">'clinic'</span>]<span class="ot">,</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    order<span class="ot">:</span> [[col(<span class="st">'visit'</span>)<span class="ot">,</span> <span class="kw">false</span>]]<span class="ot">,</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$window</span>-&gt;compile(cumsum(col(<span class="st">'bp'</span>)))-&gt;sql<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>-- SQLite
 mean, NA aware  (CASE WHEN COUNT(*) &gt; COUNT("bp") THEN NULL ELSE (CASE WHEN COUNT("bp") = 0 THEN NULL ELSE AVG(CAST("bp" AS REAL)) END) END)
 ratio           (CASE WHEN "baseline" = 0 THEN (CASE WHEN "bp" &gt; 0 THEN 9e999 WHEN "bp" &lt; 0 THEN -9e999 WHEN "bp" = 0 THEN NULL END) ELSE CAST("bp" AS REAL) / "baseline" END)

@@ -358,6 +358,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>bin/render-docs</code> refreshes the examples, renders the site, and copies the result into <code>docs/</code>. Commit the rendered HTML, because phpstats.org imports it from <code>docs/</code> and never runs Quarto:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">PHP</span><span class="op">=</span>php85 <span class="ex">bin/render-docs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>bin/docs-examples name</code> refreshes one example. Set <code>QUARTO</code> when the <code>quarto</code> command is not on the path.</p>
+<p><code>docs/_variables.yml</code> names the latest release. The data URLs in the docs and the README point at that tag, and <code>tests/SiteTest.php</code> fails until a new CHANGELOG release is matched there and in the README.</p>
 <p>The documentation is published at <a href="https://phibble.phpstats.org/docs" class="uri">https://phibble.phpstats.org/docs</a>. GitHub Pages serves only redirects there: the <code>pages</code> workflow runs <code>bin/pages-redirects</code>, which writes one redirect page for each page in <code>docs/</code>.</p>
 
 
