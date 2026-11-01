@@ -1,8 +1,8 @@
 {
-    "title": "Grouped window functions",
+    "title": "Window functions",
     "label": "Window functions",
     "group": "Tables",
-    "description": "Within each key, ordered by t, compute lag(x), a running sum of id, and the row number.",
+    "description": "lag(x), a running sum of id, and the row number, by key, ordered by t.",
     "workload": "1,000,000 rows of events and 100,000 rows of dims",
     "dataset": {
         "rows": 1000000,
@@ -18,7 +18,7 @@
     },
     "check": {
         "result_rows": 1000000,
-        "note": "Every implementation returned the same number of result rows in every run."
+        "note": "Identical result row counts across implementations and runs."
     },
     "implementations": {
         "DataFrame": "Phibble\\DataFrame: PHP arrays",
@@ -28,10 +28,10 @@
     "measure": "Elapsed time",
     "unit": "ms",
     "statistic": "median",
-    "method": "Each run is a fresh PHP process. The clock starts after the input tables are loaded and stops when the result has been collected into PHP and its rows counted, so lazy backends run their query inside the timing. Loading is measured separately in the Loading record. Process startup is excluded. Each implementation runs one warm-up, then the implementations alternate for 7 rounds in a rotated order.",
-    "time_spent_in": "the PHP process, with SQLite and Polars running in it as linked libraries",
+    "method": "Fresh PHP process per run. Timing from loaded input tables to the result collected into PHP and its rows counted; lazy backends run their query within the timing. Loading (measured in Table load) and process startup excluded. One warm-up per implementation, then 7 rounds with implementations alternating in rotated order.",
+    "time_spent_in": "The PHP process; SQLite and Polars run in it as linked libraries.",
     "memory_measure": "peak anonymous memory",
-    "memory_method": "Peak anonymous memory is RssAnon from /proc/PID/status, sampled every millisecond by peakmem (phit's bench/peakmem.c), for the whole process, with the input tables loaded. peak_rss_mib is the kernel's peak resident set size from getrusage(), which also counts mapped file pages. php_peak_mib is memory_get_peak_usage(true) at the end of the run; it does not count memory that SQLite or Polars allocate outside PHP's allocator. SqlTable keeps its tables in the SQLite file: SQLite reads pages through a page cache of about 2 MiB (its default cache_size, with memory mapping off), and the kernel's file cache counts in neither figure. SqlTable's memory is therefore mostly the rows it collects into PHP, which is small when the result is small, as in a grouped summary.",
+    "memory_method": "Peak anonymous memory: RssAnon from /proc/PID/status, sampled every millisecond by peakmem (phit bench/peakmem.c), whole process, inputs included. Peak resident set size: getrusage() maximum, mapped file pages included. PHP allocator peak: memory_get_peak_usage(true) at the end of the run; SQLite and Polars allocations excluded. SqlTable tables remain in the SQLite file, read through a page cache of about 2 MiB (SQLite default cache_size, memory mapping off). The kernel file cache counts in neither memory measure; SqlTable memory is mostly the rows collected into PHP.",
     "environment": {
         "threads": {
             "DataFrame": 1,

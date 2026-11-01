@@ -1,17 +1,18 @@
 {
-    "title": "Polars backend: the Table contract and fallback",
+    "title": "Polars backend",
     "label": "Polars backend",
     "kind": "contract",
-    "checked": "PolarsTable against phibble's Table contract: joins, grouping and group order, summarise .groups, factors, list-columns, type round trips, strict mode, and the fallback to a DataFrame for closures and rowwise work.",
+    "checked": "PolarsTable against the Table contract: joins, grouping and group order, summarise .groups, factors, list-columns, type round trips, strict mode, and DataFrame fallback for closures and rowwise operations.",
+    "description": "Each test runs a PolarsTable operation and compares it with the DataFrame result or a fixed expectation.",
     "versions": {
         "PHP": "8.5.10",
         "php_polars": "0.1.0"
     },
-    "inputs": "Small tables defined in tests/Polars/.",
+    "inputs": "Tables defined in tests/Polars/.",
     "comparison": [
         {
             "id": "contract",
-            "applies_to": "the values, types, groups, and exceptions each test expects, which are the DataFrame results",
+            "applies_to": "Values, types, groups, and exceptions",
             "kind": "exact"
         }
     ],
@@ -148,7 +149,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

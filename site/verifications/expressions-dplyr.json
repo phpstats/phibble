@@ -1,8 +1,9 @@
 {
-    "title": "Expressions: agreement with dplyr",
+    "title": "Expressions",
     "label": "Expressions",
     "kind": "reference",
-    "checked": "The column each expression gives in mutate(), grouped mutate(), and grouped summarise(), on every backend: arithmetic, comparison and logic with NA, conditionals, rounding, strings, offsets, ranks, cumulative functions, and aggregates.",
+    "checked": "Results of mutate(), grouped mutate(), and grouped summarise() expressions on all five backends: arithmetic, comparison and logic with NA, conditionals, rounding, strings, offsets, ranks, cumulative functions, and aggregates.",
+    "description": "tests/r/expr.R evaluates each expression with dplyr on a 7-row table and writes the results. The PHP tests evaluate the same expressions on the same table in each backend. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
     "reference": "dplyr 1.2.1 and stringr 1.6.0, on R 4.6.1",
     "versions": {
         "R": "4.6.1",
@@ -18,24 +19,24 @@
     "inputs": [
         {
             "name": "expression cases",
-            "detail": "A 7-row table with NA in every column, defined in tests/Support/ExprCases.php and tests/r/expr.R",
+            "detail": "7 rows, NA in every column",
             "url": "tests/fixtures/expr/expected.json"
         }
     ],
     "comparison": [
         {
             "id": "rounded",
-            "applies_to": "Numbers on both sides are rounded to 9 decimal places with PHP round(), then compared exactly. Inf, -Inf, and NaN count as NA, because the JSON fixtures cannot hold them. NA must be NA in the same positions.",
+            "applies_to": "Column values; numbers rounded to 9 decimal places with PHP round() on both sides, Inf, -Inf, and NaN read as NA, and NA in identical positions",
             "kind": "exact"
         },
         {
             "id": "rounded-native",
-            "applies_to": "Numbers on both sides are rounded to 9 decimal places with PHP round(), then compared exactly. Inf, -Inf, and NaN count as NA, because the JSON fixtures cannot hold them. NA must be NA in the same positions. The verb must also run in Polars, with no fallback to a DataFrame.",
+            "applies_to": "Polars column values; as above, with no fallback to a DataFrame",
             "kind": "exact"
         }
     ],
     "exclusions": [
-        "The round case is not run on SQL databases. SQL ROUND does not round half to even, so SqlTable always evaluates round() in memory."
+        "round: not run on SQL databases. SQL ROUND does not round half to even; SqlTable evaluates round() in memory."
     ],
     "data": "tests/fixtures/expr/expected.json",
     "reproduce": [
@@ -43,7 +44,6 @@
         "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/ExprTest.php tests/SqlTest.php",
         "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsExprTest.php"
     ],
-    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
     "cases": [
         {
             "name": "arith",
@@ -2708,7 +2708,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

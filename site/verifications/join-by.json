@@ -1,8 +1,9 @@
 {
-    "title": "Inequality, rolling, and overlap joins: agreement with dplyr",
-    "label": "join_by joins",
+    "title": "Joins",
+    "label": "Joins",
     "kind": "reference",
-    "checked": "Output columns and rows of joins with join_by() conditions: inequalities, closest() rolling joins, between, within, and overlaps, across join types and the keep and naMatches options, on every backend.",
+    "checked": "Output columns and rows of join_by() joins on all five backends: inequality, closest() rolling, between, within, and overlap conditions, across join types and the keep and naMatches options.",
+    "description": "tests/r/joins.R runs each join with dplyr and writes the output. The PHP tests run the same joins on the same tables in each backend. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
     "reference": "dplyr 1.2.1 join_by(), on R 4.6.1",
     "versions": {
         "R": "4.6.1",
@@ -17,19 +18,19 @@
     "inputs": [
         {
             "name": "join cases",
-            "detail": "Two small tables with NA keys, and two interval tables, defined in tests/Support/JoinCases.php and tests/r/joins.R",
+            "detail": "Two tables with NA keys; two interval tables",
             "url": "tests/fixtures/joins/expected.json"
         }
     ],
     "comparison": [
         {
             "id": "ordered",
-            "applies_to": "column names, and rows in order, with numbers compared as doubles. NA must be NA in the same positions.",
+            "applies_to": "Columns and rows in order; numbers as doubles, NA in identical positions",
             "kind": "exact"
         },
         {
             "id": "unordered",
-            "applies_to": "column names, and rows after sorting, with numbers compared as doubles, because SQL and Polars joins do not fix the row order. The Polars join must run with no fallback to a DataFrame.",
+            "applies_to": "Columns and sorted rows; SQL and Polars joins have no defined row order, Polars with no fallback to a DataFrame",
             "kind": "exact"
         }
     ],
@@ -39,7 +40,6 @@
         "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/ContractV1Test.php tests/SqlTest.php",
         "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsContractTest.php"
     ],
-    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
     "cases": [
         {
             "name": "ge_eq",
@@ -604,7 +604,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

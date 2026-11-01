@@ -1,8 +1,9 @@
 {
-    "title": "Aggregate result types: agreement with dplyr",
+    "title": "Aggregate types",
     "label": "Aggregate types",
     "kind": "reference",
-    "checked": "The column type of each aggregate in a grouped summarise() when every group holds only NA, so the type cannot come from the values.",
+    "checked": "Result type of 22 aggregates in a grouped summarise() where every group holds only NA.",
+    "description": "tests/r/expr-types.R records the column type dplyr gives each aggregate. tests/AggregateTypeTest.php runs the same summaries on a DataFrame. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
     "reference": "dplyr 1.2.1 summarise(), on R 4.6.1",
     "versions": {
         "R": "4.6.1",
@@ -20,7 +21,7 @@
     "comparison": [
         {
             "id": "type",
-            "applies_to": "the result type abbreviation (dbl, int, lgl, chr, date), and that every value is NA",
+            "applies_to": "Result type and values; type abbreviation (dbl, int, lgl, chr, date), every value NA",
             "kind": "exact"
         }
     ],
@@ -29,7 +30,6 @@
         "Rscript tests/r/expr-types.R",
         "php vendor/bin/pest tests/AggregateTypeTest.php"
     ],
-    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
     "cases": [
         {
             "name": "sum_dbl",
@@ -188,7 +188,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

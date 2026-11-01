@@ -1,8 +1,9 @@
 {
-    "title": "Dates and strings: agreement with lubridate and stringr",
-    "label": "lubridate and stringr",
+    "title": "Dates and strings",
+    "label": "Dates and strings",
     "kind": "reference",
-    "checked": "Date parsing, date parts, rounding, periods, time zones, and stringr pattern, padding, truncation, and case functions in mutate(), on every backend.",
+    "checked": "Date parsing, date parts, date rounding, periods, and time zones; string patterns, padding, truncation, and case. mutate() on all five backends.",
+    "description": "tests/r/lubridate_stringr.R evaluates each case with lubridate and stringr and writes the results. The PHP tests evaluate the same expressions in each backend. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
     "reference": "lubridate 1.9.5 and stringr 1.6.0, on R 4.6.1",
     "versions": {
         "R": "4.6.1",
@@ -18,24 +19,24 @@
     "inputs": [
         {
             "name": "date and string cases",
-            "detail": "A 5-row table of dates, datetimes, and text with NA, plus per-case vectors, defined in tests/Support/LubridateStringrCases.php and tests/r/lubridate_stringr.R",
+            "detail": "5 rows of dates, datetimes, and text with NA; per-case vectors",
             "url": "tests/fixtures/expr/lubridate_stringr.json"
         }
     ],
     "comparison": [
         {
             "id": "rounded",
-            "applies_to": "Dates compare as YYYY-MM-DD and datetimes as \"YYYY-MM-DD HH:MM:SS +hhmm\" in their time zone. Numbers are rounded to 9 decimal places with PHP round(), then compared exactly. NA must be NA in the same positions.",
+            "applies_to": "Column values; dates as YYYY-MM-DD, datetimes as YYYY-MM-DD HH:MM:SS +hhmm in their time zone, numbers rounded to 9 decimal places, NA in identical positions",
             "kind": "exact"
         },
         {
             "id": "rounded-native",
-            "applies_to": "As rounded, and the verb must run in Polars with no fallback to a DataFrame, except str_to_title(), which needs ICU word breaks and runs on a DataFrame.",
+            "applies_to": "Polars column values; as above, with no fallback to a DataFrame except str_to_title(), which requires ICU word breaks",
             "kind": "exact"
         }
     ],
     "known_differences": [
-        "On SQL databases, a function with no faithful SQL translation runs in memory after the query. Those cases are compared the same way."
+        "SQL databases: functions without a faithful SQL translation run in memory after the query. These cases are compared identically."
     ],
     "data": "tests/fixtures/expr/lubridate_stringr.json",
     "reproduce": [
@@ -43,7 +44,6 @@
         "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/LubridateStringrTest.php tests/SqlTest.php",
         "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsLubridateStringrTest.php"
     ],
-    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
     "cases": [
         {
             "name": "ymd",
@@ -2648,7 +2648,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

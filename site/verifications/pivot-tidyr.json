@@ -1,8 +1,9 @@
 {
-    "title": "Pivots: agreement with tidyr",
+    "title": "Pivots",
     "label": "Pivots",
     "kind": "reference",
-    "checked": "pivotLongerSpec() and pivotWiderSpec() output columns, rows, and warnings for spec-driven pivots, including NA dropping, names_sep-style specs, value types, and duplicate keys.",
+    "checked": "Output columns, rows, and warnings of pivotLongerSpec() and pivotWiderSpec(): NA dropping, multi-part names, value types, and duplicate keys.",
+    "description": "tests/r/pivot.R writes each input, spec, and tidyr result. The PHP tests apply the same specs on a DataFrame and a PolarsTable. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
     "reference": "tidyr 1.3.2 pivot_longer_spec() and pivot_wider_spec(), on R 4.6.1",
     "versions": {
         "R": "4.6.1",
@@ -15,14 +16,14 @@
     "inputs": [
         {
             "name": "pivot cases",
-            "detail": "Inputs and specs written with the expected output by tests/r/pivot.R",
+            "detail": "Inputs, specs, and tidyr output",
             "url": "tests/fixtures/pivot/cases.json"
         }
     ],
     "comparison": [
         {
             "id": "rows",
-            "applies_to": "column names, rows in order, and the warning text. Numbers compare as doubles, and a list cell of length 1 compares as its value, as jsonlite writes it.",
+            "applies_to": "Columns, rows in order, and warnings; numbers as doubles, a length-1 list cell as its value",
             "kind": "exact"
         }
     ],
@@ -32,7 +33,6 @@
         "php vendor/bin/pest tests/PivotTest.php",
         "php -d extension=php_polars.so php vendor/bin/pest tests/Polars/PolarsPivotTest.php"
     ],
-    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
     "cases": [
         {
             "name": "longer_simple",
@@ -177,7 +177,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

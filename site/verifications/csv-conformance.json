@@ -1,9 +1,9 @@
 {
-    "title": "CSV conformance corpus: the contract with phit",
-    "label": "CSV corpus",
+    "title": "CSV conformance",
+    "label": "CSV conformance",
     "kind": "contract",
-    "checked": "The PHP CSV reader's names, problems, and column values for every case in the committed corpus, read through the Phit\\read_csv() contract, and the same results at block sizes from 1 to 64 rows.",
-    "description": "The corpus records phibble's answers, and phit commits a byte-identical copy and checks its native reader against it. The answers themselves are checked against readr in the CSV reading record.",
+    "checked": "Names, problem counts, and column values of the PHP CSV reader for 120 corpus cases, through the Phit\\read_csv() contract. Identical results at block sizes from 1 to 64 rows.",
+    "description": "bin/generate-csv-conformance writes the PHP reader's results to the corpus. phit holds a byte-identical copy and checks its native reader against it. The CSV reading record compares these results with readr.",
     "versions": {
         "PHP": "8.5.10"
     },
@@ -17,7 +17,7 @@
     "comparison": [
         {
             "id": "corpus",
-            "applies_to": "column names, problem counts, and every column's values and types",
+            "applies_to": "Names, problem counts, column values, and types",
             "kind": "exact"
         }
     ],
@@ -544,7 +544,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

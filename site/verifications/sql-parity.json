@@ -1,24 +1,25 @@
 {
-    "title": "SQL backends: parity with DataFrame",
+    "title": "SQL parity",
     "label": "SQL parity",
     "kind": "integration",
-    "checked": "Pipelines run as SQL on SQLite, PostgreSQL, and MySQL, collected, and compared with the same pipeline on a DataFrame: verbs, row order, windows, joins, byte-order text, aggregates of booleans, edge-case arithmetic, and declared driver types.",
+    "checked": "SqlTable pipelines on SQLite, PostgreSQL, and MySQL against the same pipelines on a DataFrame: verbs, row order, window functions, joins, byte-order text, boolean aggregates, edge-case arithmetic, and driver column types.",
+    "description": "Each test runs a pipeline as SQL, collects the result, and compares it with the DataFrame result or a fixed expectation.",
     "versions": {
         "PHP": "8.5.10",
         "SQLite": "3.45.2",
         "PostgreSQL": "17.0 (Laravel Herd)",
         "MySQL": "8.0.46"
     },
-    "inputs": "Inline SELECT ... UNION ALL data defined in tests/SqlTest.php, tests/SqlReviewTest.php, and tests/DriverTypesTest.php. The tests create only temporary tables.",
+    "inputs": "Inline SELECT ... UNION ALL data in tests/SqlTest.php, tests/SqlReviewTest.php, and tests/DriverTypesTest.php; temporary tables only.",
     "comparison": [
         {
             "id": "same",
-            "applies_to": "the rows, row order, types, generated SQL, or exception each test expects. Most tests compare the collected result with the same pipeline on a DataFrame, rounding doubles to 9 decimal places.",
+            "applies_to": "Rows, row order, types, generated SQL, or exception class; doubles rounded to 9 decimal places",
             "kind": "exact"
         }
     ],
     "known_differences": [
-        "MySQL stores no Inf or NaN, and SQLite stores no NaN. Those values come back as NA, and the comparison maps them to NA on the DataFrame side.",
+        "MySQL stores no Inf or NaN, and SQLite stores no NaN. These values return as NA and are compared as NA.",
         "Joins do not warn about unexpected many-to-many matches."
     ],
     "reproduce": "PHIBBLE_TEST_PGSQL=\"pgsql:host=127.0.0.1;port=5432;dbname=postgres\" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL=\"mysql:host=127.0.0.1;port=3306\" PHIBBLE_TEST_MYSQL_USER=root php vendor/bin/pest tests/SqlTest.php tests/SqlReviewTest.php tests/DriverTypesTest.php",
@@ -516,7 +517,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

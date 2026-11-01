@@ -1,8 +1,8 @@
 {
-    "title": "Writing a CSV file",
-    "label": "CSV writing",
+    "title": "CSV write",
+    "label": "CSV write",
     "group": "CSV",
-    "description": "Write the events table to a CSV file with writeCsv(). The table is read before the clock starts. Writing is plain PHP.",
+    "description": "The events table written to a CSV file with writeCsv(), in PHP.",
     "workload": "1,000,000 rows, 5 columns: id int, key int, g string, x double with about 2% NA, t datetime",
     "dataset": {
         "rows": 1000000,
@@ -13,7 +13,7 @@
     },
     "check": {
         "result_rows": 1000000,
-        "note": "Every implementation returned the same number of result rows in every run."
+        "note": "Identical result row counts across implementations and runs."
     },
     "implementations": {
         "DataFrame": "DataFrame::writeCsv()"
@@ -21,10 +21,10 @@
     "measure": "Elapsed time",
     "unit": "ms",
     "statistic": "median",
-    "method": "Each run is a fresh PHP process. The clock runs from the writeCsv() call until the file is written. Process startup and reading the input are excluded. Each implementation runs one warm-up, then the implementations alternate for 7 rounds in a rotated order.",
-    "time_spent_in": "the PHP process, with SQLite and Polars running in it as linked libraries",
+    "method": "Fresh PHP process per run. Timing of the writeCsv() call. Reading the input and process startup excluded. One warm-up per implementation, then 7 rounds with implementations alternating in rotated order.",
+    "time_spent_in": "The PHP process; SQLite and Polars run in it as linked libraries.",
     "memory_measure": "peak anonymous memory",
-    "memory_method": "Peak anonymous memory is RssAnon from /proc/PID/status, sampled every millisecond by peakmem (phit's bench/peakmem.c), for the whole process, with the input tables loaded. peak_rss_mib is the kernel's peak resident set size from getrusage(), which also counts mapped file pages. php_peak_mib is memory_get_peak_usage(true) at the end of the run; it does not count memory that SQLite or Polars allocate outside PHP's allocator.",
+    "memory_method": "Peak anonymous memory: RssAnon from /proc/PID/status, sampled every millisecond by peakmem (phit bench/peakmem.c), whole process, inputs included. Peak resident set size: getrusage() maximum, mapped file pages included. PHP allocator peak: memory_get_peak_usage(true) at the end of the run; SQLite and Polars allocations excluded.",
     "environment": {
         "threads": {
             "DataFrame": 1

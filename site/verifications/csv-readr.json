@@ -1,8 +1,9 @@
 {
-    "title": "CSV reading and writing: agreement with readr",
-    "label": "CSV and readr",
+    "title": "CSV reading",
+    "label": "CSV reading",
     "kind": "reference",
-    "checked": "Column names, guessed and declared types, values, factor levels, and parsing problems for 39 CSV files read by each of phibble's three CSV readers, and the text written by toCsv() and CsvWriter::formatDouble().",
+    "checked": "Column names, guessed and declared types, values, factor levels, and parsing problems for 39 CSV files, read by each of three CSV readers. CSV text written by toCsv() and CsvWriter::formatDouble().",
+    "description": "tests/r/io.R reads each case with readr::read_delim() and records names, types, values, and problems; write cases add readr::format_csv() output. tests/IoTest.php reads the same files with identical options. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
     "reference": "readr 2.2.0 read_delim(), problems(), and format_csv(), on R 4.6.1",
     "versions": {
         "R": "4.6.1",
@@ -26,25 +27,24 @@
     "comparison": [
         {
             "id": "read",
-            "applies_to": "column names, types, factor levels, the presence of problems, and the rows readr::problems() names. Values compare exactly; doubles are parsed from readr's shortest round-trip text and compared with ===. NA must be NA in the same positions.",
+            "applies_to": "Names, types, levels, values, and problem rows; doubles parsed from readr's shortest round-trip text, NA in identical positions",
             "kind": "exact"
         },
         {
             "id": "write",
-            "applies_to": "the CSV text, byte for byte",
+            "applies_to": "Written CSV text; byte for byte",
             "kind": "exact"
         }
     ],
     "known_differences": [
-        "phibble guesses a column of whole numbers as int, where readr guesses double. These columns are compared as doubles.",
-        "In the empty_rows case, readr numbers an empty line's problem one lower than other rows, and phibble numbers it like any row. The problem row numbers are not compared for that case."
+        "Whole-number columns guess as int; readr guesses double. These columns are compared as doubles.",
+        "empty_rows: readr numbers an empty line's problem one lower than other rows. Problem row numbers are not compared for this case."
     ],
     "data": "tests/fixtures/io",
     "reproduce": [
         "Rscript tests/r/io.R",
         "php vendor/bin/pest tests/IoTest.php"
     ],
-    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
     "cases": [
         {
             "name": "guess",
@@ -880,7 +880,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

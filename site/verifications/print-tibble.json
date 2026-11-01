@@ -1,8 +1,9 @@
 {
-    "title": "Printing: agreement with tibble",
+    "title": "Printing",
     "label": "Printing",
     "kind": "reference",
-    "checked": "The text of echo $df, format(), and glimpse() for 38 tables, including dates, factors, list-columns, grouped and rowwise tables, wide tables, and empty tables.",
+    "checked": "Printed output of echo, format(), and glimpse() for 38 tables: numeric magnitudes and rounding, dates, factors, list-columns, grouped, rowwise, wide, and empty tables.",
+    "description": "tests/r/print.R writes tibble's output for each table to tests/fixtures/print. tests/PrintTest.php builds the same tables in phibble and compares the text. Fixtures regenerated with the listed R versions on 2026-11-01; output byte-identical to the committed files.",
     "reference": "tibble 3.3.1 and pillar 1.11.1 print() and glimpse(), on R 4.6.1",
     "versions": {
         "R": "4.6.1",
@@ -15,14 +16,14 @@
     "inputs": [
         {
             "name": "print cases",
-            "detail": "Tables built in tests/PrintTest.php and tests/r/print.R with the same values",
+            "detail": "Identical tables in tests/PrintTest.php and tests/r/print.R",
             "url": "tests/r/print.R"
         }
     ],
     "comparison": [
         {
             "id": "text",
-            "applies_to": "the printed text, byte for byte",
+            "applies_to": "Printed text; byte for byte",
             "kind": "exact"
         }
     ],
@@ -31,7 +32,6 @@
         "Rscript tests/r/print.R",
         "php vendor/bin/pest tests/PrintTest.php"
     ],
-    "description": "The fixtures were regenerated with these R versions on 2026-11-01 and were byte-identical to the committed files.",
     "cases": [
         {
             "name": "basic",
@@ -223,7 +223,7 @@
     ],
     "environment": {
         "date": "2026-11-01",
-        "commit": "2c8879d",
+        "commit": "9147f43",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
