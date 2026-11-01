@@ -135,12 +135,15 @@ penguins of each species, 100 rows at a time:
 
 {{< include examples/_chunk-totals.md >}}
 
-For a file too large to hold as PHP arrays, keep the data in Polars. A
-`PolarsTable`, or phpolars on its own, runs the pipeline in Polars, and only
-the result comes back to PHP. phpolars' [lazy CSV example](https://phpolars.phpstats.org/docs/examples/lazy-csv)
+For a file too large to hold as PHP arrays, use
+[phpolars](https://github.com/phpstats/phpolars). The data stays in Polars,
+and only the result comes back to PHP. phpolars' own API works on Polars
+directly, and `PolarsTable` keeps phibble's and phplyr's API. `PolarsTable`
+needs the php_polars extension, which phpolars provides. phpolars'
+[lazy CSV example](https://phpolars.phpstats.org/docs/examples/lazy-csv)
 queries a large file without loading it, and its
-[phibble and phplyr guide](https://phpolars.phpstats.org/docs/phibble)
-shows `PolarsTable`.
+[phibble and phplyr guide](https://phpolars.phpstats.org/docs/phibble) shows
+`PolarsTable`.
 
 ## Writing CSV
 
