@@ -136,7 +136,7 @@ $typeExpected = $json('tests/fixtures/expr/types.json');
 $drivers = ['sqlite' => 'SQLite', 'pgsql' => 'PostgreSQL', 'mysql' => 'MySQL'];
 $readers = ['php' => 'PHP reader', 'native (emulated)' => 'phit reader, emulated in PHP', 'native (phit)' => 'phit reader'];
 $rVersions = fn (string ...$names) => array_intersect_key($r['versions'], array_flip(['R', ...$names, 'jsonlite']));
-$regenerated = "The fixtures were regenerated with these R versions on {$r['checked']} and were byte-identical to the committed files.";
+$regenerated = "Fixtures regenerated with the listed R versions on {$r['checked']}; output byte-identical to the committed files.";
 $backendVersions = function () use ($runtime, $databases) {
     return array_filter(['PHP' => $runtime['PHP'], 'SQLite' => $runtime['SQLite']] + $databases + ['php_polars' => $runtime['php_polars']]);
 };
@@ -148,18 +148,19 @@ $backendOf = fn (array $t) => match (true) {
 $caseLabel = fn (array $t) => end($t['labels']);
 $suite = 'php vendor/bin/pest';
 $withDatabases = 'PHIBBLE_TEST_PGSQL="pgsql:host=127.0.0.1;port=5432;dbname=postgres" PHIBBLE_TEST_PGSQL_USER=postgres PHIBBLE_TEST_MYSQL="mysql:host=127.0.0.1;port=3306" PHIBBLE_TEST_MYSQL_USER=root';
-$rounded = 'Numbers on both sides are rounded to 9 decimal places with PHP round(), then compared exactly. Inf, -Inf, and NaN count as NA, because the JSON fixtures cannot hold them. NA must be NA in the same positions.';
+$rounded = 'Column values; numbers rounded to 9 decimal places with PHP round() on both sides, Inf, -Inf, and NaN read as NA, and NA in identical positions';
 
 $topics = [
     'print-tibble' => [
-        'title' => 'Printing: agreement with tibble',
+        'title' => 'Printing',
         'label' => 'Printing',
         'kind' => 'reference',
-        'checked' => 'The text of echo $df, format(), and glimpse() for 38 tables, including dates, factors, list-columns, grouped and rowwise tables, wide tables, and empty tables.',
+        'checked' => 'Printed output of echo, format(), and glimpse() for 38 tables: numeric magnitudes and rounding, dates, factors, list-columns, grouped, rowwise, wide, and empty tables.',
+        'description' => 'tests/r/print.R writes tibble\'s output for each table to tests/fixtures/print. tests/PrintTest.php builds the same tables in phibble and compares the text.',
         'reference' => "tibble {$r['versions']['tibble']} and pillar {$r['versions']['pillar']} print() and glimpse(), on R {$r['versions']['R']}",
         'versions' => $rVersions('tibble', 'pillar', 'dplyr') + ['PHP' => $runtime['PHP']],
-        'inputs' => [['name' => 'print cases', 'detail' => 'Tables built in tests/PrintTest.php and tests/r/print.R with the same values', 'url' => 'tests/r/print.R']],
-        'comparison' => [['id' => 'text', 'applies_to' => 'the printed text, byte for byte', 'kind' => 'exact']],
+        'inputs' => [['name' => 'print cases', 'detail' => 'Identical tables in tests/PrintTest.php and tests/r/print.R', 'url' => 'tests/r/print.R']],
+        'comparison' => [['id' => 'text', 'applies_to' => 'Printed text; byte for byte', 'kind' => 'exact']],
         'data' => 'tests/fixtures/print',
         'reproduce' => ['Rscript tests/r/print.R', "{$suite} tests/PrintTest.php"],
         'match' => fn (array $t) => $t['file'] === 'tests/PrintTest.php' ? [
@@ -173,10 +174,11 @@ $topics = [
         ] : null,
     ],
     'csv-readr' => [
-        'title' => 'CSV reading and writing: agreement with readr',
-        'label' => 'CSV and readr',
+        'title' => 'CSV reading',
+        'label' => 'CSV reading',
         'kind' => 'reference',
-        'checked' => 'Column names, guessed and declared types, values, factor levels, and parsing problems for 39 CSV files read by each of phibble\'s three CSV readers, and the text written by toCsv() and CsvWriter::formatDouble().',
+        'checked' => 'Column names, guessed and declared types, values, factor levels, and parsing problems for 39 CSV files, read by each of three CSV readers. CSV text written by toCsv() and CsvWriter::formatDouble().',
+        'description' => 'tests/r/io.R reads each case with readr::read_delim() and records names, types, values, and problems; write cases add readr::format_csv() output. tests/IoTest.php reads the same files with identical options.',
         'reference' => "readr {$r['versions']['readr']} read_delim(), problems(), and format_csv(), on R {$r['versions']['R']}",
         'versions' => $rVersions('readr', 'vroom') + array_filter(['phit' => $runtime['phit']]),
         'inputs' => [
@@ -184,12 +186,12 @@ $topics = [
             ['name' => 'readr results', 'detail' => 'One JSON file per case, written by tests/r/io.R', 'url' => 'tests/fixtures/io/expected'],
         ],
         'comparison' => [
-            ['id' => 'read', 'applies_to' => 'column names, types, factor levels, the presence of problems, and the rows readr::problems() names. Values compare exactly; doubles are parsed from readr\'s shortest round-trip text and compared with ===. NA must be NA in the same positions.', 'kind' => 'exact'],
-            ['id' => 'write', 'applies_to' => 'the CSV text, byte for byte', 'kind' => 'exact'],
+            ['id' => 'read', 'applies_to' => 'Names, types, levels, values, and problem rows; doubles parsed from readr\'s shortest round-trip text, NA in identical positions', 'kind' => 'exact'],
+            ['id' => 'write', 'applies_to' => 'Written CSV text; byte for byte', 'kind' => 'exact'],
         ],
         'known_differences' => [
-            'phibble guesses a column of whole numbers as int, where readr guesses double. These columns are compared as doubles.',
-            'In the empty_rows case, readr numbers an empty line\'s problem one lower than other rows, and phibble numbers it like any row. The problem row numbers are not compared for that case.',
+            'Whole-number columns guess as int; readr guesses double. These columns are compared as doubles.',
+            'empty_rows: readr numbers an empty line\'s problem one lower than other rows. Problem row numbers are not compared for this case.',
         ],
         'data' => 'tests/fixtures/io',
         'reproduce' => ['Rscript tests/r/io.R', "{$suite} tests/IoTest.php"],
@@ -201,18 +203,19 @@ $topics = [
         },
     ],
     'expressions-dplyr' => [
-        'title' => 'Expressions: agreement with dplyr',
+        'title' => 'Expressions',
         'label' => 'Expressions',
         'kind' => 'reference',
-        'checked' => 'The column each expression gives in mutate(), grouped mutate(), and grouped summarise(), on every backend: arithmetic, comparison and logic with NA, conditionals, rounding, strings, offsets, ranks, cumulative functions, and aggregates.',
+        'checked' => 'Results of mutate(), grouped mutate(), and grouped summarise() expressions on all five backends: arithmetic, comparison and logic with NA, conditionals, rounding, strings, offsets, ranks, cumulative functions, and aggregates.',
+        'description' => 'tests/r/expr.R evaluates each expression with dplyr on a 7-row table and writes the results. The PHP tests evaluate the same expressions on the same table in each backend.',
         'reference' => "dplyr {$r['versions']['dplyr']} and stringr {$r['versions']['stringr']}, on R {$r['versions']['R']}",
         'versions' => $rVersions('dplyr', 'stringr') + $backendVersions(),
-        'inputs' => [['name' => 'expression cases', 'detail' => 'A 7-row table with NA in every column, defined in tests/Support/ExprCases.php and tests/r/expr.R', 'url' => 'tests/fixtures/expr/expected.json']],
+        'inputs' => [['name' => 'expression cases', 'detail' => '7 rows, NA in every column', 'url' => 'tests/fixtures/expr/expected.json']],
         'comparison' => [
             ['id' => 'rounded', 'applies_to' => $rounded, 'kind' => 'exact'],
-            ['id' => 'rounded-native', 'applies_to' => $rounded.' The verb must also run in Polars, with no fallback to a DataFrame.', 'kind' => 'exact'],
+            ['id' => 'rounded-native', 'applies_to' => 'Polars column values; as above, with no fallback to a DataFrame', 'kind' => 'exact'],
         ],
-        'exclusions' => ['The round case is not run on SQL databases. SQL ROUND does not round half to even, so SqlTable always evaluates round() in memory.'],
+        'exclusions' => ['round: not run on SQL databases. SQL ROUND does not round half to even; SqlTable evaluates round() in memory.'],
         'data' => 'tests/fixtures/expr/expected.json',
         'reproduce' => ['Rscript tests/r/expr.R', "{$withDatabases} {$suite} tests/ExprTest.php tests/SqlTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsExprTest.php"],
         'match' => function (array $t) use ($backendOf, $caseLabel, $exprExpected) {
@@ -231,14 +234,15 @@ $topics = [
         },
     ],
     'aggregate-types' => [
-        'title' => 'Aggregate result types: agreement with dplyr',
+        'title' => 'Aggregate types',
         'label' => 'Aggregate types',
         'kind' => 'reference',
-        'checked' => 'The column type of each aggregate in a grouped summarise() when every group holds only NA, so the type cannot come from the values.',
+        'checked' => 'Result type of 22 aggregates in a grouped summarise() where every group holds only NA.',
+        'description' => 'tests/r/expr-types.R records the column type dplyr gives each aggregate. tests/AggregateTypeTest.php runs the same summaries on a DataFrame.',
         'reference' => "dplyr {$r['versions']['dplyr']} summarise(), on R {$r['versions']['R']}",
         'versions' => $rVersions('dplyr') + ['PHP' => $runtime['PHP']],
         'inputs' => [['name' => 'all-NA table', 'detail' => '4 rows in 2 groups; NA double, integer, logical, character, and date columns', 'url' => 'tests/r/expr-types.R']],
-        'comparison' => [['id' => 'type', 'applies_to' => 'the result type abbreviation (dbl, int, lgl, chr, date), and that every value is NA', 'kind' => 'exact']],
+        'comparison' => [['id' => 'type', 'applies_to' => 'Result type and values; type abbreviation (dbl, int, lgl, chr, date), every value NA', 'kind' => 'exact']],
         'data' => 'tests/fixtures/expr/types.json',
         'reproduce' => ['Rscript tests/r/expr-types.R', "{$suite} tests/AggregateTypeTest.php"],
         'match' => fn (array $t) => $t['file'] === 'tests/AggregateTypeTest.php' && $t['labels'] !== [] ? [
@@ -250,18 +254,19 @@ $topics = [
         ] : null,
     ],
     'lubridate-stringr' => [
-        'title' => 'Dates and strings: agreement with lubridate and stringr',
-        'label' => 'lubridate and stringr',
+        'title' => 'Dates and strings',
+        'label' => 'Dates and strings',
         'kind' => 'reference',
-        'checked' => 'Date parsing, date parts, rounding, periods, time zones, and stringr pattern, padding, truncation, and case functions in mutate(), on every backend.',
+        'checked' => 'Date parsing, date parts, date rounding, periods, and time zones; string patterns, padding, truncation, and case. mutate() on all five backends.',
+        'description' => 'tests/r/lubridate_stringr.R evaluates each case with lubridate and stringr and writes the results. The PHP tests evaluate the same expressions in each backend.',
         'reference' => "lubridate {$r['versions']['lubridate']} and stringr {$r['versions']['stringr']}, on R {$r['versions']['R']}",
         'versions' => $rVersions('lubridate', 'stringr') + $backendVersions(),
-        'inputs' => [['name' => 'date and string cases', 'detail' => 'A 5-row table of dates, datetimes, and text with NA, plus per-case vectors, defined in tests/Support/LubridateStringrCases.php and tests/r/lubridate_stringr.R', 'url' => 'tests/fixtures/expr/lubridate_stringr.json']],
+        'inputs' => [['name' => 'date and string cases', 'detail' => '5 rows of dates, datetimes, and text with NA; per-case vectors', 'url' => 'tests/fixtures/expr/lubridate_stringr.json']],
         'comparison' => [
-            ['id' => 'rounded', 'applies_to' => 'Dates compare as YYYY-MM-DD and datetimes as "YYYY-MM-DD HH:MM:SS +hhmm" in their time zone. Numbers are rounded to 9 decimal places with PHP round(), then compared exactly. NA must be NA in the same positions.', 'kind' => 'exact'],
-            ['id' => 'rounded-native', 'applies_to' => 'As rounded, and the verb must run in Polars with no fallback to a DataFrame, except str_to_title(), which needs ICU word breaks and runs on a DataFrame.', 'kind' => 'exact'],
+            ['id' => 'rounded', 'applies_to' => 'Column values; dates as YYYY-MM-DD, datetimes as YYYY-MM-DD HH:MM:SS +hhmm in their time zone, numbers rounded to 9 decimal places, NA in identical positions', 'kind' => 'exact'],
+            ['id' => 'rounded-native', 'applies_to' => 'Polars column values; as above, with no fallback to a DataFrame except str_to_title(), which requires ICU word breaks', 'kind' => 'exact'],
         ],
-        'known_differences' => ['On SQL databases, a function with no faithful SQL translation runs in memory after the query. Those cases are compared the same way.'],
+        'known_differences' => ['SQL databases: functions without a faithful SQL translation run in memory after the query. These cases are compared identically.'],
         'data' => 'tests/fixtures/expr/lubridate_stringr.json',
         'reproduce' => ['Rscript tests/r/lubridate_stringr.R', "{$withDatabases} {$suite} tests/LubridateStringrTest.php tests/SqlTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsLubridateStringrTest.php"],
         'match' => function (array $t) use ($backendOf, $caseLabel, $lsExpected) {
@@ -280,16 +285,17 @@ $topics = [
         },
     ],
     'join-by' => [
-        'title' => 'Inequality, rolling, and overlap joins: agreement with dplyr',
-        'label' => 'join_by joins',
+        'title' => 'Joins',
+        'label' => 'Joins',
         'kind' => 'reference',
-        'checked' => 'Output columns and rows of joins with join_by() conditions: inequalities, closest() rolling joins, between, within, and overlaps, across join types and the keep and naMatches options, on every backend.',
+        'checked' => 'Output columns and rows of join_by() joins on all five backends: inequality, closest() rolling, between, within, and overlap conditions, across join types and the keep and naMatches options.',
+        'description' => 'tests/r/joins.R runs each join with dplyr and writes the output. The PHP tests run the same joins on the same tables in each backend.',
         'reference' => "dplyr {$r['versions']['dplyr']} join_by(), on R {$r['versions']['R']}",
         'versions' => $rVersions('dplyr') + $backendVersions(),
-        'inputs' => [['name' => 'join cases', 'detail' => 'Two small tables with NA keys, and two interval tables, defined in tests/Support/JoinCases.php and tests/r/joins.R', 'url' => 'tests/fixtures/joins/expected.json']],
+        'inputs' => [['name' => 'join cases', 'detail' => 'Two tables with NA keys; two interval tables', 'url' => 'tests/fixtures/joins/expected.json']],
         'comparison' => [
-            ['id' => 'ordered', 'applies_to' => 'column names, and rows in order, with numbers compared as doubles. NA must be NA in the same positions.', 'kind' => 'exact'],
-            ['id' => 'unordered', 'applies_to' => 'column names, and rows after sorting, with numbers compared as doubles, because SQL and Polars joins do not fix the row order. The Polars join must run with no fallback to a DataFrame.', 'kind' => 'exact'],
+            ['id' => 'ordered', 'applies_to' => 'Columns and rows in order; numbers as doubles, NA in identical positions', 'kind' => 'exact'],
+            ['id' => 'unordered', 'applies_to' => 'Columns and sorted rows; SQL and Polars joins have no defined row order, Polars with no fallback to a DataFrame', 'kind' => 'exact'],
         ],
         'data' => 'tests/fixtures/joins/expected.json',
         'reproduce' => ['Rscript tests/r/joins.R', "{$withDatabases} {$suite} tests/ContractV1Test.php tests/SqlTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsContractTest.php"],
@@ -310,14 +316,15 @@ $topics = [
         },
     ],
     'pivot-tidyr' => [
-        'title' => 'Pivots: agreement with tidyr',
+        'title' => 'Pivots',
         'label' => 'Pivots',
         'kind' => 'reference',
-        'checked' => 'pivotLongerSpec() and pivotWiderSpec() output columns, rows, and warnings for spec-driven pivots, including NA dropping, names_sep-style specs, value types, and duplicate keys.',
+        'checked' => 'Output columns, rows, and warnings of pivotLongerSpec() and pivotWiderSpec(): NA dropping, multi-part names, value types, and duplicate keys.',
+        'description' => 'tests/r/pivot.R writes each input, spec, and tidyr result. The PHP tests apply the same specs on a DataFrame and a PolarsTable.',
         'reference' => "tidyr {$r['versions']['tidyr']} pivot_longer_spec() and pivot_wider_spec(), on R {$r['versions']['R']}",
         'versions' => $rVersions('tidyr', 'dplyr') + array_filter(['PHP' => $runtime['PHP'], 'php_polars' => $runtime['php_polars']]),
-        'inputs' => [['name' => 'pivot cases', 'detail' => 'Inputs and specs written with the expected output by tests/r/pivot.R', 'url' => 'tests/fixtures/pivot/cases.json']],
-        'comparison' => [['id' => 'rows', 'applies_to' => 'column names, rows in order, and the warning text. Numbers compare as doubles, and a list cell of length 1 compares as its value, as jsonlite writes it.', 'kind' => 'exact']],
+        'inputs' => [['name' => 'pivot cases', 'detail' => 'Inputs, specs, and tidyr output', 'url' => 'tests/fixtures/pivot/cases.json']],
+        'comparison' => [['id' => 'rows', 'applies_to' => 'Columns, rows in order, and warnings; numbers as doubles, a length-1 list cell as its value', 'kind' => 'exact']],
         'data' => 'tests/fixtures/pivot/cases.json',
         'reproduce' => ['Rscript tests/r/pivot.R', "{$suite} tests/PivotTest.php", "php -d extension=php_polars.so {$suite} tests/Polars/PolarsPivotTest.php"],
         'match' => fn (array $t) => str_starts_with($t['test'], 'matches tidyr pivot specs') ? [
@@ -329,14 +336,14 @@ $topics = [
         ] : null,
     ],
     'csv-conformance' => [
-        'title' => 'CSV conformance corpus: the contract with phit',
-        'label' => 'CSV corpus',
+        'title' => 'CSV conformance',
+        'label' => 'CSV conformance',
         'kind' => 'contract',
-        'checked' => 'The PHP CSV reader\'s names, problems, and column values for every case in the committed corpus, read through the Phit\\read_csv() contract, and the same results at block sizes from 1 to 64 rows.',
-        'description' => 'The corpus records phibble\'s answers, and phit commits a byte-identical copy and checks its native reader against it. The answers themselves are checked against readr in the CSV reading record.',
+        'checked' => 'Names, problem counts, and column values of the PHP CSV reader for 120 corpus cases, through the Phit\\read_csv() contract. Identical results at block sizes from 1 to 64 rows.',
+        'description' => 'bin/generate-csv-conformance writes the PHP reader\'s results to the corpus. phit holds a byte-identical copy and checks its native reader against it. The CSV reading record compares these results with readr.',
         'versions' => ['PHP' => $runtime['PHP']],
         'inputs' => [['name' => 'CSV conformance corpus', 'detail' => '120 cases: delimiters, quoting, comments, blank lines, encodings, NA strings, type guessing, and declared types', 'url' => 'tests/fixtures/csv-conformance.json']],
-        'comparison' => [['id' => 'corpus', 'applies_to' => 'column names, problem counts, and every column\'s values and types', 'kind' => 'exact']],
+        'comparison' => [['id' => 'corpus', 'applies_to' => 'Names, problem counts, column values, and types', 'kind' => 'exact']],
         'data' => 'tests/fixtures/csv-conformance.json',
         'reproduce' => ['bin/generate-csv-conformance', "{$suite} tests/CsvConformanceTest.php"],
         'match' => fn (array $t) => $t['file'] === 'tests/CsvConformanceTest.php' ? [
@@ -350,17 +357,18 @@ $topics = [
         ] : null,
     ],
     'sql-parity' => [
-        'title' => 'SQL backends: parity with DataFrame',
+        'title' => 'SQL parity',
         'label' => 'SQL parity',
         'kind' => 'integration',
-        'checked' => 'Pipelines run as SQL on SQLite, PostgreSQL, and MySQL, collected, and compared with the same pipeline on a DataFrame: verbs, row order, windows, joins, byte-order text, aggregates of booleans, edge-case arithmetic, and declared driver types.',
+        'checked' => 'SqlTable pipelines on SQLite, PostgreSQL, and MySQL against the same pipelines on a DataFrame: verbs, row order, window functions, joins, byte-order text, boolean aggregates, edge-case arithmetic, and driver column types.',
+        'description' => 'Each test runs a pipeline as SQL, collects the result, and compares it with the DataFrame result or a fixed expectation.',
         'versions' => array_diff_key($backendVersions(), ['php_polars' => true]),
-        'inputs' => 'Inline SELECT ... UNION ALL data defined in tests/SqlTest.php, tests/SqlReviewTest.php, and tests/DriverTypesTest.php. The tests create only temporary tables.',
+        'inputs' => 'Inline SELECT ... UNION ALL data in tests/SqlTest.php, tests/SqlReviewTest.php, and tests/DriverTypesTest.php; temporary tables only.',
         'comparison' => [
-            ['id' => 'same', 'applies_to' => 'the rows, row order, types, generated SQL, or exception each test expects. Most tests compare the collected result with the same pipeline on a DataFrame, rounding doubles to 9 decimal places.', 'kind' => 'exact'],
+            ['id' => 'same', 'applies_to' => 'Rows, row order, types, generated SQL, or exception class; doubles rounded to 9 decimal places', 'kind' => 'exact'],
         ],
         'known_differences' => [
-            'MySQL stores no Inf or NaN, and SQLite stores no NaN. Those values come back as NA, and the comparison maps them to NA on the DataFrame side.',
+            'MySQL stores no Inf or NaN, and SQLite stores no NaN. These values return as NA and are compared as NA.',
             'Joins do not warn about unexpected many-to-many matches.',
         ],
         'reproduce' => "{$withDatabases} {$suite} tests/SqlTest.php tests/SqlReviewTest.php tests/DriverTypesTest.php",
@@ -371,13 +379,14 @@ $topics = [
         ] : null,
     ],
     'polars-backend' => [
-        'title' => 'Polars backend: the Table contract and fallback',
+        'title' => 'Polars backend',
         'label' => 'Polars backend',
         'kind' => 'contract',
-        'checked' => 'PolarsTable against phibble\'s Table contract: joins, grouping and group order, summarise .groups, factors, list-columns, type round trips, strict mode, and the fallback to a DataFrame for closures and rowwise work.',
+        'checked' => 'PolarsTable against the Table contract: joins, grouping and group order, summarise .groups, factors, list-columns, type round trips, strict mode, and DataFrame fallback for closures and rowwise operations.',
+        'description' => 'Each test runs a PolarsTable operation and compares it with the DataFrame result or a fixed expectation.',
         'versions' => array_filter(['PHP' => $runtime['PHP'], 'php_polars' => $runtime['php_polars']]),
-        'inputs' => 'Small tables defined in tests/Polars/.',
-        'comparison' => [['id' => 'contract', 'applies_to' => 'the values, types, groups, and exceptions each test expects, which are the DataFrame results', 'kind' => 'exact']],
+        'inputs' => 'Tables defined in tests/Polars/.',
+        'comparison' => [['id' => 'contract', 'applies_to' => 'Values, types, groups, and exceptions', 'kind' => 'exact']],
         'reproduce' => "php -d extension=php_polars.so {$suite} tests/Polars",
         'match' => fn (array $t) => str_starts_with($t['file'], 'tests/Polars/') ? [
             'name' => $t['test'],
