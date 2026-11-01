@@ -30,7 +30,9 @@ beforeAll(function () {
 afterAll(function () {
     proc_terminate($GLOBALS['csvUrl']['process']);
     proc_close($GLOBALS['csvUrl']['process']);
-    array_map(unlink(...), glob($GLOBALS['csvUrl']['dir'].'/*'));
+    array_map(unlink(...), glob($GLOBALS['csvUrl']['dir'].'/tmp/*') ?: []);
+    @rmdir($GLOBALS['csvUrl']['dir'].'/tmp');
+    array_map(unlink(...), glob($GLOBALS['csvUrl']['dir'].'/*.*') ?: []);
     rmdir($GLOBALS['csvUrl']['dir']);
 });
 
@@ -39,18 +41,33 @@ function csvUrl(string $file): string
     return $GLOBALS['csvUrl']['base'].'/'.$file;
 }
 
-function phibbleDownloads(): array
+/**
+ * Run $code in a PHP process whose temporary directory is this test's own,
+ * so downloads by other processes cannot show up. Returns the code's result
+ * and the phibble downloads left in that directory afterwards.
+ *
+ * @return array{result: mixed, downloads: list<string>}
+ */
+function inOwnTempDir(string $code): array
 {
-    return glob(sys_get_temp_dir().'/phibble-url*.csv*') ?: [];
+    $temp = $GLOBALS['csvUrl']['dir'].'/tmp';
+    is_dir($temp) || mkdir($temp);
+    $script = 'require '.var_export(dirname(__DIR__).'/vendor/autoload.php', true).';'
+        .'try { $result = (function () { '.$code.' })(); } catch (Throwable $e) { $result = ["exception" => get_class($e), "message" => $e->getMessage()]; }'
+        .'echo serialize(["result" => $result, "downloads" => array_map(basename(...), glob(sys_get_temp_dir()."/phibble-url*") ?: [])]);';
+    $out = shell_exec(escapeshellarg(PHP_BINARY).' -d sys_temp_dir='.escapeshellarg($temp).' -r '.escapeshellarg($script));
+
+    return unserialize((string) $out);
 }
 
 it('reads a CSV file from a URL as it reads the local file', function () {
-    $before = phibbleDownloads();
-    $df = DataFrame::fromCsv(csvUrl('scores.csv'));
+    $local = DataFrame::fromCsv($GLOBALS['csvUrl']['dir'].'/scores.csv');
+    $run = inOwnTempDir('$df = Phibble\DataFrame::fromCsv('.var_export(csvUrl('scores.csv'), true).');'
+        .'return ["rows" => $df->toRows(), "types" => array_map(fn ($t) => $t->value, $df->types())];');
 
-    expect($df->toRows())->toBe(DataFrame::fromCsv($GLOBALS['csvUrl']['dir'].'/scores.csv')->toRows())
-        ->and($df->types())->toBe(DataFrame::fromCsv($GLOBALS['csvUrl']['dir'].'/scores.csv')->types())
-        ->and(phibbleDownloads())->toBe($before);
+    expect($run['result']['rows'])->toBe($local->toRows())
+        ->and($run['result']['types'])->toBe(array_map(fn ($t) => $t->value, $local->types()))
+        ->and($run['downloads'])->toBe([]);
 });
 
 it('decompresses a URL ending in .gz', function () {
@@ -59,22 +76,20 @@ it('decompresses a URL ending in .gz', function () {
 });
 
 it('reads a URL in chunks and deletes the download afterwards', function () {
-    $before = phibbleDownloads();
-    $chunks = [];
-    DataFrame::fromCsvChunked(csvUrl('scores.csv'), function (DataFrame $chunk, int $position) use (&$chunks) {
-        $chunks[$position] = $chunk->id;
-    }, chunkSize: 2);
+    $run = inOwnTempDir('$chunks = [];'
+        .'Phibble\DataFrame::fromCsvChunked('.var_export(csvUrl('scores.csv'), true).', function ($chunk, int $position) use (&$chunks) { $chunks[$position] = $chunk->id; }, chunkSize: 2);'
+        .'return $chunks;');
 
-    expect($chunks)->toBe([1 => [1, 2], 3 => [3]])
-        ->and(phibbleDownloads())->toBe($before);
+    expect($run['result'])->toBe([1 => [1, 2], 3 => [3]])
+        ->and($run['downloads'])->toBe([]);
 });
 
 it('names the URL and the HTTP error when the request fails', function () {
-    $before = phibbleDownloads();
+    $run = inOwnTempDir('Phibble\DataFrame::fromCsv('.var_export(csvUrl('missing.csv'), true).');');
 
-    expect(fn () => DataFrame::fromCsv(csvUrl('missing.csv')))
-        ->toThrow(RuntimeException::class, "Cannot read CSV URL '".csvUrl('missing.csv')."'")
-        ->and(phibbleDownloads())->toBe($before);
+    expect($run['result']['exception'])->toBe(RuntimeException::class)
+        ->and($run['result']['message'])->toStartWith("Cannot read CSV URL '".csvUrl('missing.csv')."'")
+        ->and($run['downloads'])->toBe([]);
 });
 
 it('says when allow_url_fopen is off', function () {
