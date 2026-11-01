@@ -308,9 +308,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 2024-03-03,south,11.0,0.4,22,FALSE</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Phibble\DataFrame<span class="ot">;</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">$readings</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'readings.csv'</span><span class="ot">,</span> types<span class="ot">:</span> [<span class="st">'station'</span> =&gt; <span class="st">'factor'</span>])<span class="ot">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$readings</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">$readings</span> <span class="op">=</span> DataFrame::fromCsv(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'readings.csv'</span><span class="ot">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> [<span class="st">'station'</span> =&gt; <span class="st">'factor'</span>]<span class="ot">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$readings</span><span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 6 × 6
   date       station temp_c rain_mm wind_kmh windy
   &lt;date&gt;     &lt;fct&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;int&gt; &lt;lgl&gt;
@@ -321,12 +324,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 5 2024-03-03 north     10.2     0          9 FALSE
 6 2024-03-03 south     11       0.4       22 FALSE</code></pre>
 <ul>
-<li>Each column’s type is guessed from its values, as readr’s <code>read_csv()</code> guesses it. The guess uses up to 1,000 sampled rows (<code>guessMax</code>).</li>
-<li>Whole numbers are read as int, where readr reads double.</li>
-<li><code>types: ['station' =&gt; 'factor']</code> overrides the guess, which reads <code>station</code> as a string.</li>
-<li><code>NA</code> and empty fields are missing values, which phibble stores as <code>null</code>.</li>
+<li>Types are guessed from up to 1,000 sampled rows. Declare a type when those rows could mislead the guess.</li>
+<li>Whole numbers become int, where readr’s <code>read_csv()</code> gives double.</li>
+<li><code>types</code> overrides a guess. Without it, <code>station</code> would be a string.</li>
+<li><code>NA</code> and empty fields become <code>null</code>.</li>
 </ul>
-<p>The <a href="https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/read-a-csv.php">runnable script</a> loads Composer’s autoloader and reads <code>readings.csv</code> from the working directory.</p>
+<p>Runnable script: <a href="https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/read-a-csv.php">read-a-csv.php</a>. Run it from the directory that holds <code>readings.csv</code>.</p>
 <p>Reference: <a href="../io.html">Reading and writing data</a> · <a href="../types.html">Types</a>.</p>
 
 
