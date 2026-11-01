@@ -7,6 +7,8 @@ change the public API.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-01
+
 ### Changed
 
 - `row_number()` takes at most one argument, and `ntile()` takes `x` and `n`
@@ -335,7 +337,8 @@ and cmdstanphp.
   query builders and `->phibble()` for lazy SQL tables. Global scopes such as
   soft deletes apply.
 
-[Unreleased]: https://github.com/phpstats/phibble/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/phpstats/phibble/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/phpstats/phibble/releases/tag/v0.7.0
 [0.6.1]: https://github.com/phpstats/phibble/releases/tag/v0.6.1
 [0.6.0]: https://github.com/phpstats/phibble/releases/tag/v0.6.0
 [0.5.3]: https://github.com/phpstats/phibble/releases/tag/v0.5.3

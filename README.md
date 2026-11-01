@@ -27,7 +27,7 @@ In a new directory, install phibble and download the Palmer penguins data:
 
 ```bash
 composer require phpstats/phibble
-curl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.6.1/docs/data/penguins.csv
+curl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.7.0/docs/data/penguins.csv
 ```
 
 Then save this script as `summary.php` and run `php summary.php`:

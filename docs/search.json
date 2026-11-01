@@ -950,7 +950,7 @@
     "href": "getting-started.html",
     "title": "Getting started",
     "section": "",
-    "text": "composer require phpstats/phibble\nphibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions. These are optional:\n\n\n\nOptional\nEnables\n\n\n\n\nThe phit extension, 0.2.0 or later\nNative CSV reading in fromCsv(), fromCsvChunked(), and csvChunks(). Results match the PHP reader.\n\n\nThe php_polars extension from phpolars\nPolarsTable and polars(), described in Backends.\n\n\nilluminate/database\nThe -&gt;toDataFrame() and -&gt;phibble() macros, described in Laravel. Laravel applications already have it.\n\n\n\nThe examples use the Palmer penguins data:\ncurl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.6.1/docs/data/penguins.csv",
+    "text": "composer require phpstats/phibble\nphibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions. These are optional:\n\n\n\nOptional\nEnables\n\n\n\n\nThe phit extension, 0.2.0 or later\nNative CSV reading in fromCsv(), fromCsvChunked(), and csvChunks(). Results match the PHP reader.\n\n\nThe php_polars extension from phpolars\nPolarsTable and polars(), described in Backends.\n\n\nilluminate/database\nThe -&gt;toDataFrame() and -&gt;phibble() macros, described in Laravel. Laravel applications already have it.\n\n\n\nThe examples use the Palmer penguins data:\ncurl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.7.0/docs/data/penguins.csv",
     "crumbs": [
       "Getting started",
       "Getting started"
@@ -961,7 +961,7 @@
     "href": "getting-started.html#installation",
     "title": "Getting started",
     "section": "",
-    "text": "composer require phpstats/phibble\nphibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions. These are optional:\n\n\n\nOptional\nEnables\n\n\n\n\nThe phit extension, 0.2.0 or later\nNative CSV reading in fromCsv(), fromCsvChunked(), and csvChunks(). Results match the PHP reader.\n\n\nThe php_polars extension from phpolars\nPolarsTable and polars(), described in Backends.\n\n\nilluminate/database\nThe -&gt;toDataFrame() and -&gt;phibble() macros, described in Laravel. Laravel applications already have it.\n\n\n\nThe examples use the Palmer penguins data:\ncurl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.6.1/docs/data/penguins.csv",
+    "text": "composer require phpstats/phibble\nphibble requires PHP 8.3, 8.4, or 8.5, and the mbstring and PDO extensions. These are optional:\n\n\n\nOptional\nEnables\n\n\n\n\nThe phit extension, 0.2.0 or later\nNative CSV reading in fromCsv(), fromCsvChunked(), and csvChunks(). Results match the PHP reader.\n\n\nThe php_polars extension from phpolars\nPolarsTable and polars(), described in Backends.\n\n\nilluminate/database\nThe -&gt;toDataFrame() and -&gt;phibble() macros, described in Laravel. Laravel applications already have it.\n\n\n\nThe examples use the Palmer penguins data:\ncurl -LO https://raw.githubusercontent.com/phpstats/phibble/v0.7.0/docs/data/penguins.csv",
     "crumbs": [
       "Getting started",
       "Getting started"
