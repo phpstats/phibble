@@ -575,7 +575,7 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 1 Adelie      152
 2 Chinstrap    68
 3 Gentoo      124</code></pre>
-<p>For a file too large to hold as PHP arrays, keep the data in Polars. A <code>PolarsTable</code>, or phpolars on its own, runs the pipeline in Polars, and only the result comes back to PHP. phpolars’ <a href="https://phpolars.phpstats.org/docs/examples/lazy-csv">lazy CSV example</a> queries a large file without loading it, and its <a href="https://phpolars.phpstats.org/docs/phibble">phibble and phplyr guide</a> shows <code>PolarsTable</code>.</p>
+<p>For a file too large to hold as PHP arrays, use <a href="https://github.com/phpstats/phpolars">phpolars</a>. The data stays in Polars, and only the result comes back to PHP. phpolars’ own API works on Polars directly, and <code>PolarsTable</code> keeps phibble’s and phplyr’s API. <code>PolarsTable</code> needs the php_polars extension, which phpolars provides. phpolars’ <a href="https://phpolars.phpstats.org/docs/examples/lazy-csv">lazy CSV example</a> queries a large file without loading it, and its <a href="https://phpolars.phpstats.org/docs/phibble">phibble and phplyr guide</a> shows <code>PolarsTable</code>.</p>
 </section>
 <section id="writing-csv" class="level2">
 <h2 class="anchored" data-anchor-id="writing-csv">Writing CSV</h2>
