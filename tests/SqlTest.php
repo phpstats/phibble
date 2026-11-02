@@ -245,12 +245,10 @@ it('translates date parts and string functions to SQL', function (Closure $conne
 
 // Stored tables use the physical row id (SQLite rowid, PostgreSQL ctid) as
 // the source order. The PostgreSQL table is TEMP and disappears with the session.
+// MySQL tables have no physical row id, so MySQL is not in the dataset.
 it('keeps source order on stored tables with physical row ids', function (Closure $connect) {
     $pdo = $connect();
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-    if ($driver === 'mysql') {
-        test()->markTestSkipped('MySQL tables have no physical row id like SQLite\'s rowid or PostgreSQL\'s ctid; SqlTable numbers MySQL rows with ROW_NUMBER(), which the other row-order tests cover.');
-    }
     $suffix = substr(md5((string) mt_rand()), 0, 6);
     $temp = $driver === 'pgsql' ? 'TEMP ' : '';
     $pdo->exec("CREATE {$temp}TABLE ev_{$suffix} (g TEXT, x INTEGER)");
@@ -276,7 +274,7 @@ it('keeps source order on stored tables with physical row ids', function (Closur
         ->and($pipeline($sql)->collect()->ungroup()->toRows())->toBe($pipeline($df)->ungroup()->toRows())
         ->and($sql->distinct(['g'])->collect()->column('g'))->toBe(['b', 'a', 'c'])
         ->and($sqlJoin->collect()->toRows())->toBe($memoryJoin->toRows());
-})->with('connections');
+})->with(fn () => array_map(fn ($c) => [$c], array_intersect_key(sqlConnections(), ['sqlite' => 1, 'pgsql' => 1])));
 
 // R compares strings in C (byte) order and case-sensitively. PostgreSQL's
 // locale collations and MySQL's default (case-insensitive) collation don't.
