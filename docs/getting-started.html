@@ -483,7 +483,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 1 EWR   Newark Liberty Intl  40.7 -74.2
 2 JFK   John F Kennedy Intl  40.6 -73.8
 3 LGA   La Guardia           40.8 -73.9</code></pre>
-<p><code>DataFrame::fromRows()</code> takes a list of associative arrays, and keys missing from a row are NA. <code>DataFrame::fromColumns()</code> takes an array of columns and accepts explicit types.</p>
+<p><code>DataFrame::fromRows()</code> takes a list of associative arrays, and keys missing from a row are NA. <code>DataFrame::fromColumns()</code> takes an array of columns, or an object with a <code>toColumns()</code> method such as phit’s <code>tidy()</code> result, and accepts explicit types.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$rows</span> <span class="op">=</span> DataFrame::fromRows([</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'species'</span> =&gt; <span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'island'</span> =&gt; <span class="st">'Torgersen'</span><span class="ot">,</span> <span class="st">'body_mass_g'</span> =&gt; <span class="dv">3750</span>]<span class="ot">,</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'species'</span> =&gt; <span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'island'</span> =&gt; <span class="st">'Torgersen'</span>]<span class="ot">,</span></span>
