@@ -18,6 +18,9 @@
             "kind": "exact"
         }
     ],
+    "exclusions": [
+        "Source order of stored tables runs on SQLite and PostgreSQL only: MySQL tables have no physical row id like SQLite's rowid or PostgreSQL's ctid, and SqlTable numbers MySQL rows with ROW_NUMBER(), which the other row-order cases cover."
+    ],
     "known_differences": [
         "MySQL stores no Inf or NaN, and SQLite stores no NaN. These values return as NA and are compared as NA.",
         "Joins do not warn about unexpected many-to-many matches."
@@ -494,12 +497,6 @@
             "status": "pass"
         },
         {
-            "name": "keeps source order on stored tables with physical row ids",
-            "implementation": "MySQL",
-            "status": "skipped",
-            "reason": "MySQL tables have no physical row id like SQLite's rowid or PostgreSQL's ctid; SqlTable numbers MySQL rows with ROW_NUMBER(), which the other row-order tests cover."
-        },
-        {
             "name": "compares, sorts, groups and joins text in byte order like R",
             "implementation": "SQLite",
             "status": "pass"
@@ -532,7 +529,7 @@
     ],
     "environment": {
         "date": "2026-11-02",
-        "commit": "7ea971e",
+        "commit": "1abdeb1",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }

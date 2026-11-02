@@ -2648,7 +2648,7 @@
     ],
     "environment": {
         "date": "2026-11-02",
-        "commit": "7ea971e",
+        "commit": "1abdeb1",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
