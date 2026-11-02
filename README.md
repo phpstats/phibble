@@ -97,3 +97,7 @@ vendor/bin/pest
 
 See the [development guide](https://phibble.phpstats.org/docs/development.html)
 for the R comparison scripts, database tests, and documentation build.
+
+## License
+
+phibble is released under the [MIT license](LICENSE).

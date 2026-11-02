@@ -8,8 +8,8 @@ use Closure;
 use InvalidArgumentException;
 
 /**
- * Column name repair, a port of vctrs::vec_as_names() as used by tibble
- * and readr. Modes:
+ * Column name repair that follows vctrs::vec_as_names() (MIT-licensed), as
+ * tibble and readr use it. Modes:
  *
  * - minimal: names are only made non-null.
  * - unique: empty, `...`, `..j` and duplicated names get a `...n` suffix,

@@ -8,7 +8,8 @@ namespace Phibble\Format;
  * Numbers formatted the way pillar does: three significant figures,
  * aligned on the decimal point, with trailing zeros left as spaces.
  * Columns too wide for decimal notation switch to scientific notation.
- * This is a port of pillar's split_decimal() and assemble_decimal().
+ * The steps follow pillar's split_decimal() and assemble_decimal()
+ * (pillar is MIT-licensed).
  *
  * @internal
  */
