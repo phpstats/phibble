@@ -145,3 +145,20 @@ it('prints rowwise tables like dplyr', function () {
         ->and((string) $df->rowwise(['g']))->toBe(printFixture('rowwise_id'))
         ->and($df->rowwise()->glimpse())->toBe(printFixture('glimpse_rowwise'));
 })->skip(! method_exists(DataFrame::class, 'rowwise'), 'DataFrame::rowwise() not available yet');
+
+// R 4.6.1's format(x, trim = TRUE) at the boundary between fixed and
+// scientific notation, which glimpse() follows for double columns.
+it('chooses fixed or scientific notation for doubles as R does', function (array $values, array $expected) {
+    expect(Phibble\Format\Glimpse::formatNumbers($values))->toBe($expected);
+})->with([
+    'scientific is narrower' => [[1.0, 1e5], ['1e+00', '1e+05']],
+    'large exponent' => [[1.0, 1e16], ['1e+00', '1e+16']],
+    'shared mantissa digits' => [[1.5, 1e15], ['1.5e+00', '1.0e+15']],
+    'small value' => [[0.0001, 1.0], ['1e-04', '1e+00']],
+    'small and large' => [[1e-5, 123456.0], ['1.00000e-05', '1.23456e+05']],
+    'fixed is narrower' => [[123456.7, 0.001], ['123456.700', '0.001']],
+    'negative' => [[-1.0, 1e-10], ['-1e+00', '1e-10']],
+    'extreme exponents' => [[1e-300, 1e300], ['1e-300', '1e+300']],
+    'seven digits' => [[0.1234567, 1e5], ['1.234567e-01', '1.000000e+05']],
+    'NA and repeating decimals' => [[1 / 3, null, 2 / 3], ['0.3333333', 'NA', '0.6666667']],
+]);

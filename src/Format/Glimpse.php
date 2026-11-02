@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phibble\Format;
 
+use Closure;
 use DateTimeInterface;
 use Phibble\Contracts\Table;
 use Phibble\Time;
@@ -150,87 +151,64 @@ final class Glimpse
     }
 
     /**
-     * R's format() for a double vector (formatReal with 7 significant
-     * digits): a shared number of decimals, or scientific notation for the
-     * whole vector when that is narrower.
+     * Doubles as R's format() shows them with the default 7 significant
+     * digits (?format, ?options): every value rounded to 7 significant
+     * digits and shown in full, with one shared number of decimals, or in
+     * scientific notation for the whole vector when that is narrower. Fixed
+     * notation wins ties, as with scipen = 0.
+     *
+     * Both notations are rendered and their widths measured.
      *
      * @param list<int|float|null> $values
      * @return list<string>
      */
     public static function formatNumbers(array $values): array
     {
-        $neg = false;
-        $rgt = PHP_INT_MIN;
-        $mxl = PHP_INT_MIN;
-        $mnl = PHP_INT_MAX;
-        $mxsl = PHP_INT_MIN;
-        $mxns = PHP_INT_MIN;
-        $anyFinite = false;
-        foreach ($values as $x) {
-            if ($x === null || ! is_finite((float) $x)) {
-                continue;
-            }
-            $anyFinite = true;
-            $x = (float) $x;
-            $negative = $x < 0;
-            if ($x == 0.0) {
-                $kp = 0;
-                $nsig = 1;
-            } else {
-                [$mantissa, $exponent] = explode('e', sprintf('%.6e', abs($x)));
-                $kp = (int) $exponent;
-                $nsig = strlen(rtrim(str_replace('.', '', $mantissa), '0')) ?: 1;
-            }
-            $left = $kp + 1;
-            $sleft = ($negative ? 1 : 0) + ($left <= 0 ? 1 : $left);
-            $right = $nsig - $left;
-            if ($negative) {
-                $neg = true;
-            }
-            $rgt = max($rgt, $right);
-            $mxl = max($mxl, $left);
-            $mnl = min($mnl, $left);
-            $mxsl = max($mxsl, $sleft);
-            $mxns = max($mxns, $nsig);
+        $finite = array_values(array_filter(
+            array_map(fn ($x) => $x === null ? null : (float) $x, $values),
+            fn ($x) => $x !== null && is_finite($x),
+        ));
+
+        $decimals = 0;
+        $mantissaDigits = 0;
+        foreach ($finite as $x) {
+            [$digits, $exponent] = self::significant($x);
+            $decimals = max($decimals, $digits - 1 - $exponent);
+            $mantissaDigits = max($mantissaDigits, $digits - 1);
         }
 
-        $scientific = false;
-        $digits = 0;
-        if ($anyFinite) {
-            if ($mxl < 0) {
-                $mxsl = 1 + ($neg ? 1 : 0);
-            }
-            $rgt = max($rgt, 0);
-            $fixedWidth = $mxsl + $rgt + ($rgt !== 0 ? 1 : 0);
-            $expDigits = ($mxl > 100 || $mnl <= -99) ? 2 : 1;
-            $sciDigits = $mxns - 1;
-            $sciWidth = ($neg ? 1 : 0) + ($sciDigits > 0 ? 1 : 0) + $sciDigits + 4 + $expDigits;
-            if ($fixedWidth <= $sciWidth) {
-                $digits = $rgt;
-            } else {
-                $scientific = true;
-                $digits = $sciDigits;
-            }
-        }
+        $fixed = fn (float $x) => sprintf("%.{$decimals}f", $x);
+        $scientific = function (float $x) use ($mantissaDigits): string {
+            [$mantissa, $exponent] = explode('e', sprintf("%.{$mantissaDigits}e", $x));
 
-        return array_map(function ($x) use ($scientific, $digits): string {
-            if ($x === null) {
-                return 'NA';
-            }
-            $x = (float) $x;
-            if (is_nan($x)) {
-                return 'NaN';
-            }
-            if (is_infinite($x)) {
-                return $x > 0 ? 'Inf' : '-Inf';
-            }
-            if (! $scientific) {
-                return sprintf("%.{$digits}f", $x);
-            }
-            [$mantissa, $exponent] = explode('e', sprintf("%.{$digits}e", $x));
-            $exponent = (int) $exponent;
+            return $mantissa.'e'.((int) $exponent < 0 ? '-' : '+').str_pad((string) abs((int) $exponent), 2, '0', STR_PAD_LEFT);
+        };
+        $width = fn (Closure $render) => max(array_map(fn (float $x) => strlen($render($x)), $finite) ?: [0]);
+        // Past 50 decimals fixed notation is far wider than scientific.
+        $render = $finite !== [] && ($decimals > 50 || $width($scientific) < $width($fixed)) ? $scientific : $fixed;
 
-            return $mantissa.'e'.($exponent < 0 ? '-' : '+').str_pad((string) abs($exponent), 2, '0', STR_PAD_LEFT);
+        return array_map(fn ($x) => match (true) {
+            $x === null => 'NA',
+            is_nan((float) $x) => 'NaN',
+            is_infinite((float) $x) => $x > 0 ? 'Inf' : '-Inf',
+            default => $render((float) $x),
         }, $values);
+    }
+
+    /**
+     * The significant digits a value keeps at 7 significant digits, with
+     * trailing zeros dropped, and its decimal exponent.
+     *
+     * @return array{0: int, 1: int}
+     */
+    private static function significant(float $x): array
+    {
+        if ($x == 0.0) {
+            return [1, 0];
+        }
+        [$mantissa, $exponent] = explode('e', sprintf('%.6e', abs($x)));
+        $digits = strlen(rtrim(str_replace('.', '', $mantissa), '0'));
+
+        return [max($digits, 1), (int) $exponent];
     }
 }
