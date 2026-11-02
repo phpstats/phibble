@@ -62,7 +62,8 @@ three New York City airports from nycflights13:
 {{< include examples/_tribble.md >}}
 
 `DataFrame::fromRows()` takes a list of associative arrays, and keys missing
-from a row are NA. `DataFrame::fromColumns()` takes an array of columns and
+from a row are NA. `DataFrame::fromColumns()` takes an array of columns, or
+an object with a `toColumns()` method such as phit's `tidy()` result, and
 accepts explicit types.
 
 {{< include examples/_from-rows.md >}}

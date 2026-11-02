@@ -669,8 +669,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="dataframe-fromcolumns" class="level3">
 <h3 class="anchored" data-anchor-id="dataframe-fromcolumns"><code>DataFrame::fromColumns()</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromColumns(<span class="dt">array</span> <span class="va">$columns</span><span class="ot">,</span> <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> [])<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>DataFrame::fromColumns(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">|</span><span class="dt">array</span> <span class="va">$columns</span><span class="ot">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">array</span> <span class="va">$types</span> <span class="op">=</span> []<span class="ot">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">:</span> DataFrame</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Build a DataFrame from columns: name =&gt; list of values, or name =&gt; Column.</p>
+<p>An object with a public <code>toColumns()</code> method, such as phit’s <code>Phit\Table</code> or another phibble table, is read through that method.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -689,7 +693,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>$columns</code></td>
-<td><code>array&lt;string, list&lt;mixed&gt;|Column&gt;</code></td>
+<td><code>array&lt;string, list&lt;mixed&gt;|Column&gt;|object</code></td>
 <td></td>
 <td></td>
 </tr>
@@ -703,6 +707,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 <p><strong>Static method</strong> of <code>Phibble\DataFrame</code><br>
 <strong>Returns</strong> <code>DataFrame</code><br>
+<strong>Throws</strong> <code>InvalidArgumentException</code>: when an object has no <code>toColumns()</code> method, or it returns something other than an array.<br>
 <strong>Examples</strong> <a href="../types.html">Types</a>, <a href="../getting-started.html">Getting started</a></p>
 </section>
 <section id="dataframe-fromcsv" class="level3">
@@ -1280,6 +1285,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>A Table is collected.</li>
 <li>A list of associative arrays (or objects) is rows.</li>
 <li>An associative array of lists is columns.</li>
+<li>An object with <code>toColumns()</code>, such as phit’s <code>Phit\Table</code>, is read as columns.</li>
 <li>An object with <code>all()</code> or <code>toArray()</code> (a Laravel Collection) is unwrapped.</li>
 </ul>
 <table class="caption-top table">

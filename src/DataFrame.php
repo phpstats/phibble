@@ -92,11 +92,19 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     /**
      * Build a DataFrame from columns: name => list of values, or name => Column.
      *
-     * @param array<string, list<mixed>|Column> $columns
+     * An object with a public toColumns() method, such as phit's Phit\Table or
+     * another phibble table, is read through that method.
+     *
+     * @param array<string, list<mixed>|Column>|object $columns
      * @param array<string, Type|string> $types Explicit types by column name.
+     * @throws InvalidArgumentException When an object has no toColumns() method, or it returns something other than an array.
      */
-    public static function fromColumns(array $columns, array $types = []): self
+    public static function fromColumns(array|object $columns, array $types = []): self
     {
+        if (is_object($columns)) {
+            $columns = self::columnsOf($columns)
+                ?? throw new InvalidArgumentException('fromColumns() needs an array of columns or an object with toColumns(), got '.get_debug_type($columns).'.');
+        }
         $lengths = array_map(fn ($c) => is_array($c) ? count($c) : $c->count(), $columns);
         $rows = $lengths === [] ? 0 : max($lengths);
 
@@ -458,6 +466,8 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      * - A Table is collected.
      * - A list of associative arrays (or objects) is rows.
      * - An associative array of lists is columns.
+     * - An object with toColumns(), such as phit's Phit\Table, is read as
+     *   columns.
      * - An object with all() or toArray() (a Laravel Collection) is unwrapped.
      *
      * @param string $nameRepair check_unique, unique, universal or minimal
@@ -466,6 +476,9 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     {
         if ($data instanceof Table) {
             return $data->collect();
+        }
+        if (is_object($data) && ($columns = self::columnsOf($data)) !== null) {
+            return self::tibble($columns, $nameRepair);
         }
         if (is_object($data) && ! $data instanceof \Traversable && (method_exists($data, 'all') || method_exists($data, 'toArray'))) {
             $data = method_exists($data, 'all') ? $data->all() : $data->toArray();
@@ -494,6 +507,25 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
         }
 
         return self::tibble($data, $nameRepair);
+    }
+
+    /**
+     * The columns of an object with a public toColumns() method, or null
+     * without one.
+     *
+     * @return array<string, list<mixed>>|null
+     */
+    private static function columnsOf(object $object): ?array
+    {
+        if (! is_callable([$object, 'toColumns'])) {
+            return null;
+        }
+        $columns = $object->toColumns();
+        if (! is_array($columns)) {
+            throw new InvalidArgumentException(get_debug_type($object).'::toColumns() must return an array of columns, got '.get_debug_type($columns).'.');
+        }
+
+        return $columns;
     }
 
     /**

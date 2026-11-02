@@ -7,6 +7,11 @@ change the public API.
 
 ## [Unreleased]
 
+### Added
+
+- `DataFrame::fromColumns()` and `as_tibble()` read any object with a public
+  `toColumns()` method, such as phit 0.6's `Phit\Table` from `tidy()`.
+
 ### Changed
 
 - phibble supports phit 0.4.0 or later. It no longer checks for phit 0.1.0's

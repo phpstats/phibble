@@ -141,18 +141,24 @@ Build a DataFrame from rows. Column order follows first appearance; keys missing
 ### `DataFrame::fromColumns()` {#dataframe-fromcolumns}
 
 ```php
-DataFrame::fromColumns(array $columns, array $types = []): DataFrame
+DataFrame::fromColumns(
+    object|array $columns,
+    array $types = [],
+): DataFrame
 ```
 
 Build a DataFrame from columns: name => list of values, or name => Column.
 
+An object with a public `toColumns()` method, such as phit's `Phit\Table` or another phibble table, is read through that method.
+
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `$columns` | <code>array&lt;string, list&lt;mixed&gt;&#124;Column&gt;</code> |  |  |
+| `$columns` | <code>array&lt;string, list&lt;mixed&gt;&#124;Column&gt;&#124;object</code> |  |  |
 | `$types` | <code>array&lt;string, Type&#124;string&gt;</code> | <code>[]</code> | Explicit types by column name. |
 
 **Static method** of `Phibble\DataFrame`\
 **Returns** `DataFrame`\
+**Throws** `InvalidArgumentException`: when an object has no `toColumns()` method, or it returns something other than an array.\
 **Examples** [Types](../types.qmd), [Getting started](../getting-started.qmd)
 
 ### `DataFrame::fromCsv()` {#dataframe-fromcsv}
@@ -433,6 +439,8 @@ Convert tables, rows, columns, collections, or other iterables into a DataFrame,
 - A Table is collected.
 - A list of associative arrays (or objects) is rows.
 - An associative array of lists is columns.
+- An object with `toColumns()`, such as phit's `Phit\Table`, is read as
+  columns.
 - An object with `all()` or `toArray()` (a Laravel Collection) is unwrapped.
 
 | Parameter | Type | Default | Description |

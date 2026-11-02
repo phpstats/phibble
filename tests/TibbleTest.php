@@ -109,3 +109,50 @@ it('repairs names on request', function () {
     expect(fn () => DataFrame::tribble(['a', 'a'], 1, 2))->toThrow(InvalidArgumentException::class)
         ->and(as_tibble([['' => 1]], nameRepair: 'unique')->columns())->toBe(['...1']);
 });
+
+/** An object that hands over its columns, as phit's Phit\Table does. */
+function columnsObject(array $columns): object
+{
+    return new class($columns)
+    {
+        public function __construct(private array $columns) {}
+
+        public function toColumns(): array
+        {
+            return $this->columns;
+        }
+
+        public function toArray(): array
+        {
+            return [['term' => 'unused']];
+        }
+    };
+}
+
+it('reads an object with toColumns() in fromColumns() and as_tibble()', function () {
+    $tidy = columnsObject(['term' => ['(Intercept)', 'wt'], 'estimate' => [37.29, -5.34], 'p_value' => [0.0, null]]);
+
+    $fromColumns = DataFrame::fromColumns($tidy, types: ['term' => 'factor']);
+    $asTibble = Phibble\as_tibble($tidy);
+
+    expect($fromColumns->columns())->toBe(['term', 'estimate', 'p_value'])
+        ->and($fromColumns->type('term'))->toBe(Phibble\Type::Factor)
+        ->and($fromColumns->column('estimate'))->toBe([37.29, -5.34])
+        ->and($asTibble->toRows())->toBe([
+            ['term' => '(Intercept)', 'estimate' => 37.29, 'p_value' => 0.0],
+            ['term' => 'wt', 'estimate' => -5.34, 'p_value' => null],
+        ])
+        ->and(DataFrame::fromColumns(penguins())->toRows())->toBe(penguins()->toRows());
+});
+
+it('rejects objects without columns in fromColumns()', function () {
+    expect(fn () => DataFrame::fromColumns(new stdClass()))
+        ->toThrow(InvalidArgumentException::class, 'fromColumns() needs an array of columns or an object with toColumns(), got stdClass.')
+        ->and(fn () => DataFrame::fromColumns(new class
+        {
+            public function toColumns(): string
+            {
+                return 'no';
+            }
+        }))->toThrow(InvalidArgumentException::class, '::toColumns() must return an array of columns, got string.');
+});
