@@ -2,9 +2,12 @@
 title: "Query a database table"
 ---
 
-Total the orders and revenue for each region of an SQLite `orders` table,
-with phibble's methods compiled to one SQL query that the database runs. The
-script needs the pdo_sqlite extension.
+Summarize 2013's hourly weather at the three New York City airports in an
+SQLite table, with phibble's methods compiled to one SQL query that the
+database runs. The table holds nycflights13's `weather` data from the
+[PHPstats datasets](https://github.com/phpstats/datasets#weather): the
+script reads the CSV and loads five columns into an in-memory SQLite
+database before the code shown. It needs the pdo_sqlite extension.
 
 ::: {.panel-tabset group="syntax"}
 ## PHP 8.5+
@@ -25,11 +28,16 @@ script needs the pdo_sqlite extension.
 
 {{< include _database-table-output-2.md >}}
 
-- Table methods only build the query. Nothing runs on the database until the rows
-  are needed.
-- `showQuery()` shows the SQL with `?` placeholders, and `bindings()` gives
-  their values.
-- `collect()` runs the query and returns a `DataFrame`.
+- Each airport has about 8,700 hourly readings with a temperature.
+- Newark (EWR) had the most precipitation, 43.8 inches over the year, and JFK
+  the least, 34.7 inches. Mean temperatures differ by about 1 °F, and JFK had
+  the strongest gust, 66.7 mph.
+- `max(..., na_rm: true)` skips the hours without a gust; `mean()` and
+  `sum()` need no `na_rm` here, because the filter keeps only hours with a
+  temperature and every such hour has a precipitation value.
+- Table methods only build the query. Nothing runs on the database until
+  `collect()` returns a `DataFrame`. `showQuery()` shows the SQL with `?`
+  placeholders.
 - The same code runs on PostgreSQL and MySQL.
 
 Runnable scripts: [PHP 8.5+](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/database-table.php)

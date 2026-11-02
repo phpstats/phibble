@@ -2,28 +2,27 @@
 title: "Read a CSV file into a typed table"
 ---
 
-Read [`readings.csv`](https://raw.githubusercontent.com/phpstats/phibble/main/docs/data/readings.csv)
-into a `DataFrame`, with one column's type declared and the rest guessed:
-
-```text
-date,station,temp_c,rain_mm,wind_kmh,windy
-2024-03-01,north,7.5,0.0,12,FALSE
-2024-03-01,south,9.1,1.2,31,TRUE
-2024-03-02,north,6.8,NA,18,FALSE
-2024-03-02,south,8.4,3.5,35,TRUE
-2024-03-03,north,10.2,0.0,9,FALSE
-2024-03-03,south,11.0,0.4,22,FALSE
-```
+Read hourly weather at the three New York City airports in 2013, from
+nycflights13's `weather` table in the
+[PHPstats datasets](https://github.com/phpstats/datasets#weather), straight
+from its URL. One column's type is declared, and the rest are guessed:
 
 {{< include _read-a-csv.md >}}
 
-- Types are guessed from up to 1,000 sampled rows. Declare a type when
-  those rows could mislead the guess.
-- Whole numbers become int, where readr's `read_csv()` gives double.
-- `types` overrides a guess. Without it, `station` would be a string.
-- `NA` and empty fields become `null`.
+- The 26,115 rows give 16 columns. `rownames` holds the row names the table
+  had in R.
+- Whole numbers, such as `year`, `hour`, and `wind_dir`, become int, where
+  readr's `read_csv()` gives double. Decimals become double.
+- `time_hour` holds ISO 8601 text such as `2013-01-01T06:00:00Z`, which is
+  guessed as a datetime in UTC.
+- `types` declares `origin` a factor, with the levels EWR, JFK, and LGA in
+  sorted order. Without it, `origin` would be a string.
+- Empty fields become NA: one hour has no temperature, 20,778 of 26,115 have
+  no wind gust, and 2,729 have no pressure.
+- Types are guessed from up to 1,000 sampled rows. Declare a type when those
+  rows could mislead the guess.
 
 Runnable script: [read-a-csv.php](https://raw.githubusercontent.com/phpstats/phibble/main/docs/examples/read-a-csv.php).
-Run it from the directory that holds `readings.csv`.
+It reads the file over HTTPS, so `allow_url_fopen` must be on.
 
 Reference: [Reading and writing data](../io.qmd) · [Types](../types.qmd).

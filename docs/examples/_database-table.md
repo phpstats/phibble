@@ -2,47 +2,32 @@
 use Phibble\Sql\SqlTable;
 
 use function Phibble\tbl;
-use function Phibble\Expr\{col, desc, n, sum};
+use function Phibble\Expr\{col, desc, max, mean, n, sum};
 
-$pdo = new PDO('sqlite::memory:');
-$pdo->exec('CREATE TABLE orders (
-    region TEXT, product TEXT, units INTEGER, price REAL
-)');
-$pdo->exec("INSERT INTO orders VALUES
-    ('east', 'lamp', 3, 24.0),
-    ('east', 'desk', 1, 180.0),
-    ('west', 'lamp', 5, 24.0),
-    ('west', 'chair', 4, 65.0),
-    ('north', 'desk', 2, 180.0),
-    ('north', 'lamp', 1, 24.0),
-    ('west', 'desk', 1, 180.0),
-    ('east', 'chair', 0, 65.0)");
+$weather = tbl($pdo, 'weather');
 
-$orders = tbl($pdo, 'orders');
-
-$revenue = $orders |>
-    (fn (SqlTable $t) => $t->filter(col('units')->gt(0))) |>
-    (fn (SqlTable $t) => $t->mutate([
-        'revenue' => col('units')->mul(col('price')),
-    ])) |>
-    (fn (SqlTable $t) => $t->groupBy(['region'])) |>
+$airports = $weather |>
+    (fn (SqlTable $t) => $t->filter(col('temp')->isNa()->not())) |>
+    (fn (SqlTable $t) => $t->groupBy(['origin'])) |>
     (fn (SqlTable $t) => $t->summarize([
-        'orders' => n(),
-        'revenue' => sum(col('revenue')),
+        'hours' => n(),
+        'temp' => mean(col('temp')),
+        'precip' => sum(col('precip')),
+        'gust' => max(col('wind_gust'), na_rm: true),
     ])) |>
-    (fn (SqlTable $t) => $t->arrange([desc(col('revenue'))]));
+    (fn (SqlTable $t) => $t->arrange([desc(col('precip'))]));
 
-echo $revenue->showQuery(), "\n\n";
-echo $revenue->collect(), "\n";
+echo $airports->showQuery(), "\n\n";
+echo $airports->collect(), "\n";
 ```
 
 ```{.text .output}
-SELECT "region", "orders", "revenue" FROM (SELECT "region", "orders", "revenue", ROW_NUMBER() OVER (ORDER BY ("region" IS NULL), "region") AS "__phibble_row" FROM (SELECT "region" AS "region", COUNT(*) AS "orders", (CASE WHEN COUNT(*) > COUNT("revenue") THEN NULL ELSE COALESCE(SUM("revenue"), 0) END) AS "revenue" FROM (SELECT "region", "product", "units", "price", ("units" * "price") AS "revenue", "__phibble_row" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "orders") AS q1 WHERE ("units" > ?)) AS q2) AS q3 GROUP BY "region") AS q4) AS q5 ORDER BY ("revenue" IS NULL), "revenue" DESC, ("__phibble_row" IS NULL), "__phibble_row"
+SELECT "origin", "hours", "temp", "precip", "gust" FROM (SELECT "origin", "hours", "temp", "precip", "gust", ROW_NUMBER() OVER (ORDER BY ("origin" IS NULL), "origin") AS "__phibble_row" FROM (SELECT "origin" AS "origin", COUNT(*) AS "hours", (CASE WHEN COUNT(*) > COUNT("temp") THEN NULL ELSE (CASE WHEN COUNT("temp") = 0 THEN NULL ELSE AVG(CAST("temp" AS REAL)) END) END) AS "temp", (CASE WHEN COUNT(*) > COUNT("precip") THEN NULL ELSE COALESCE(SUM("precip"), 0) END) AS "precip", (CASE WHEN COUNT("wind_gust") = 0 THEN -9e999 ELSE MAX("wind_gust") END) AS "gust" FROM (SELECT * FROM (SELECT *, rowid AS "__phibble_row" FROM "weather") AS q1 WHERE (NOT ("temp" IS NULL))) AS q2 GROUP BY "origin") AS q3) AS q4 ORDER BY ("precip" IS NULL), "precip" DESC, ("__phibble_row" IS NULL), "__phibble_row"
 
-# A tibble: 3 × 3
-  region orders revenue
-  <chr>   <int>   <dbl>
-1 west        3     560
-2 north       2     384
-3 east        2     252
+# A tibble: 3 × 5
+  origin hours  temp precip  gust
+  <chr>  <int> <dbl>  <dbl> <dbl>
+1 EWR     8702  55.5   43.8  58.7
+2 LGA     8706  55.8   38.1  62.1
+3 JFK     8706  54.5   34.7  66.7
 ```

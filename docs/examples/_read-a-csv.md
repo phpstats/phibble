@@ -1,22 +1,48 @@
 ```php
 use Phibble\DataFrame;
 
-$readings = DataFrame::fromCsv(
-    'readings.csv',
-    types: ['station' => 'factor'],
+use function Phibble\Expr\{col, is_na, sum};
+
+$weather = DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/'
+        .'main/csv/weather.csv',
+    types: ['origin' => 'factor'],
 );
 
-echo $readings, "\n";
+echo $weather->glimpse(), "\n";
+
+echo implode(', ', $weather->levels('origin')), "\n\n";
+
+echo $weather->summarize([
+    'temp' => sum(is_na(col('temp'))),
+    'wind_gust' => sum(is_na(col('wind_gust'))),
+    'pressure' => sum(is_na(col('pressure'))),
+]), "\n";
 ```
 
 ```{.text .output}
-# A tibble: 6 × 6
-  date       station temp_c rain_mm wind_kmh windy
-  <date>     <fct>    <dbl>   <dbl>    <int> <lgl>
-1 2024-03-01 north      7.5     0         12 FALSE
-2 2024-03-01 south      9.1     1.2       31 TRUE 
-3 2024-03-02 north      6.8    NA         18 FALSE
-4 2024-03-02 south      8.4     3.5       35 TRUE 
-5 2024-03-03 north     10.2     0          9 FALSE
-6 2024-03-03 south     11       0.4       22 FALSE
+Rows: 26,115
+Columns: 16
+$ rownames   <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, …
+$ origin     <fct> EWR, EWR, EWR, EWR, EWR, EWR, EWR, EWR, EWR, EWR, EWR, EWR,…
+$ year       <int> 2013, 2013, 2013, 2013, 2013, 2013, 2013, 2013, 2013, 2013,…
+$ month      <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ day        <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+$ hour       <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, …
+$ temp       <dbl> 39.02, 39.02, 39.02, 39.92, 39.02, 37.94, 39.02, 39.92, 39.…
+$ dewp       <dbl> 26.06, 26.96, 28.04, 28.04, 28.04, 28.04, 28.04, 28.04, 28.…
+$ humid      <dbl> 59.37, 61.63, 64.43, 62.21, 64.43, 67.21, 64.43, 62.21, 62.…
+$ wind_dir   <int> 270, 250, 240, 250, 260, 240, 240, 250, 260, 260, 260, 330,…
+$ wind_speed <dbl> 10.35702, 8.05546, 11.50780, 12.65858, 12.65858, 11.50780, …
+$ wind_gust  <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 20.…
+$ precip     <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ pressure   <dbl> 1012.0, 1012.3, 1012.5, 1012.2, 1011.9, 1012.4, 1012.2, 101…
+$ visib      <dbl> 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,…
+$ time_hour  <dttm> 2013-01-01 06:00:00, 2013-01-01 07:00:00, 2013-01-01 08:00…
+EWR, JFK, LGA
+
+# A tibble: 1 × 3
+   temp wind_gust pressure
+  <int>     <int>    <int>
+1     1     20778     2729
 ```

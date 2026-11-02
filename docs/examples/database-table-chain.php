@@ -2,36 +2,39 @@
 
 require __DIR__.'/vendor/autoload.php';
 
+use Phibble\DataFrame;
+
+$weather = DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/main/csv/weather.csv'
+);
+$pdo = new PDO('sqlite::memory:');
+$pdo->exec('CREATE TABLE weather (
+    origin TEXT, month INTEGER, temp REAL, precip REAL, wind_gust REAL
+)');
+$insert = $pdo->prepare('INSERT INTO weather VALUES (?, ?, ?, ?, ?)');
+$pdo->beginTransaction();
+foreach ($weather->select(['origin', 'month', 'temp', 'precip', 'wind_gust'])->toRows() as $row) {
+    $insert->execute(array_values($row));
+}
+$pdo->commit();
+
 // ---
 
 use function Phibble\tbl;
-use function Phibble\Expr\{col, desc, n, sum};
+use function Phibble\Expr\{col, desc, max, mean, n, sum};
 
-$pdo = new PDO('sqlite::memory:');
-$pdo->exec('CREATE TABLE orders (
-    region TEXT, product TEXT, units INTEGER, price REAL
-)');
-$pdo->exec("INSERT INTO orders VALUES
-    ('east', 'lamp', 3, 24.0),
-    ('east', 'desk', 1, 180.0),
-    ('west', 'lamp', 5, 24.0),
-    ('west', 'chair', 4, 65.0),
-    ('north', 'desk', 2, 180.0),
-    ('north', 'lamp', 1, 24.0),
-    ('west', 'desk', 1, 180.0),
-    ('east', 'chair', 0, 65.0)");
+$weather = tbl($pdo, 'weather');
 
-$orders = tbl($pdo, 'orders');
-
-$revenue = $orders
-    ->filter(col('units')->gt(0))
-    ->mutate(['revenue' => col('units')->mul(col('price'))])
-    ->groupBy(['region'])
+$airports = $weather
+    ->filter(col('temp')->isNa()->not())
+    ->groupBy(['origin'])
     ->summarize([
-        'orders' => n(),
-        'revenue' => sum(col('revenue')),
+        'hours' => n(),
+        'temp' => mean(col('temp')),
+        'precip' => sum(col('precip')),
+        'gust' => max(col('wind_gust'), na_rm: true),
     ])
-    ->arrange([desc(col('revenue'))]);
+    ->arrange([desc(col('precip'))]);
 
-echo $revenue->showQuery(), "\n\n";
-echo $revenue->collect(), "\n";
+echo $airports->showQuery(), "\n\n";
+echo $airports->collect(), "\n";
