@@ -1,5 +1,8 @@
 ```php
-$penguins = DataFrame::fromCsv('penguins.csv')->asFactor('species');
+$penguins = DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/'
+        .'main/csv/penguins.csv'
+)->asFactor('species');
 
 echo json_encode($penguins->levels('species')), "\n";
 $codes = $penguins->storage('species')->codes();

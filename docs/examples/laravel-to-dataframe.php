@@ -10,4 +10,4 @@ $df = Penguin::query()
     ->get()
     ->toDataFrame();
 
-echo $df->select(['species', 'island', 'body_mass'])->head(3);
+echo $df->select(['species', 'island', 'body_mass_g'])->head(3);

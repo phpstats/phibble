@@ -1,18 +1,16 @@
 ```php
-$pdo = new PDO('sqlite::memory:');
-$sales = tbl($pdo, <<<'SQL'
-    SELECT 'a' AS store, 1 AS week, 10 AS units
-    UNION ALL SELECT 'a', 2, 14 UNION ALL SELECT 'a', 3, 9
-    UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL
-    SQL);
+$weather = tbl($pdo, 'weather');
 
-$out = $sales
-    ->groupBy(['store'])
-    ->arrange(['store', 'week'])
+$out = $weather
+    ->filter(col('month')->between(6, 8))
+    ->groupBy(['origin', 'month'])
+    ->summarize(['precip' => sum(col('precip'))])
+    ->groupBy(['origin'])
+    ->arrange(['origin', 'month'])
     ->mutate([
-        'running' => cumsum(col('units')),
-        'of_best' => col('units')
-            ->div(max(col('units'), na_rm: true)),
+        'running' => cumsum(col('precip')),
+        'of_wettest' => col('precip')
+            ->div(max(col('precip'), na_rm: true)),
     ]);
 
 echo $out->showQuery(), "\n\n";

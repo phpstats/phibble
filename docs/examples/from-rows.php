@@ -1,12 +1,12 @@
 <?php
 
 $rows = DataFrame::fromRows([
-    ['id' => 1, 'dose' => 2.5, 'arm' => 'a'],
-    ['id' => 2, 'arm' => 'b'],
+    ['species' => 'Adelie', 'island' => 'Torgersen', 'body_mass_g' => 3750],
+    ['species' => 'Adelie', 'island' => 'Torgersen'],
 ]);
 $cols = DataFrame::fromColumns(
-    ['id' => [1, 2], 'arm' => ['a', 'b']],
-    types: ['arm' => 'factor'],
+    ['species' => ['Adelie', 'Gentoo'], 'island' => ['Torgersen', 'Biscoe']],
+    types: ['species' => 'factor'],
 );
 
 echo $rows, "\n\n", $cols;

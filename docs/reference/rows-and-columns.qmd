@@ -208,7 +208,8 @@ Rename columns.
 
 **Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
 **Returns** `Table`\
-**Throws** `ColumnNotFound`: when an old name does not exist.
+**Throws** `ColumnNotFound`: when an old name does not exist.\
+**Examples** [Getting started](../getting-started.qmd)
 
 ### `NameRepair::repair()` {#namerepair-repair}
 
@@ -250,7 +251,7 @@ A closure runs once per row. An Expr runs once per group, a whole column at a ti
 
 **Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
 **Returns** `Table`\
-**Examples** [Expressions](../expr.qmd), [Getting started](../getting-started.qmd), [phibble for Laravel developers](../laravel.qmd)
+**Examples** [Reading and writing data](../io.qmd), [Expressions](../expr.qmd), [Getting started](../getting-started.qmd)
 
 ### `->arrange()` {#arrange}
 

@@ -1,25 +1,28 @@
 ```php
-$orders = tibble(total: [20.0, null, 35.0]);
+$penguins = DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/'
+        .'main/csv/penguins.csv'
+)->head(4)->select(['species', 'body_mass_g']);
 
-echo $orders->mutate([
-    'with_tax' => col('total')->mul(1.1),
+echo $penguins->mutate([
+    'mass_kg' => col('body_mass_g')->div(1000),
 ]), "\n";
-
-echo $orders->summarize([
-    'mean' => mean(col('total')),
-    'mean_known' => mean(col('total'), na_rm: true),
+echo $penguins->summarize([
+    'mean' => mean(col('body_mass_g')),
+    'mean_known' => mean(col('body_mass_g'), na_rm: true),
 ]);
 ```
 
 ```{.text .output}
-# A tibble: 3 × 2
-  total with_tax
-  <dbl>    <dbl>
-1    20     22  
-2    NA     NA  
-3    35     38.5
+# A tibble: 4 × 3
+  species body_mass_g mass_kg
+  <chr>         <int>   <dbl>
+1 Adelie         3750    3.75
+2 Adelie         3800    3.8 
+3 Adelie         3250    3.25
+4 Adelie           NA   NA   
 # A tibble: 1 × 2
    mean mean_known
   <dbl>      <dbl>
-1    NA       27.5
+1    NA       3600
 ```

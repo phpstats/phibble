@@ -6,7 +6,7 @@ $summary = $penguins
     ->groupBy(['species'])
     ->summarize([
         'n' => n(),
-        'mass' => mean(col('body_mass'), na_rm: true),
+        'mass' => mean(col('body_mass_g'), na_rm: true),
     ]);
 
 echo get_class($summary), "\n\n";

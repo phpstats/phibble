@@ -7,8 +7,8 @@ Load, transform, and summarize typed data frames in PHP. Tables are
 immutable, and `null` represents missing data. Names and semantics follow R's
 tibble, readr, and dplyr.
 
-This summary reads the Palmer penguins data,
-[`penguins.csv`](https://raw.githubusercontent.com/phpstats/phibble/{{< var release >}}/docs/data/penguins.csv):
+This summary reads the Palmer penguins data from the
+[PHPstats datasets](https://github.com/phpstats/datasets#penguins) by URL:
 
 {{< include examples/_tour.md >}}
 

@@ -1,22 +1,23 @@
 ```php
-$scores = tibble(
-    student: ['ana', 'ben', 'cy'],
-    score: [81.5, 74.0, null],
-    passed: fn (DataFrame $t) => array_map(
-        fn ($s) => $s === null ? null : $s >= 75,
-        $t['score'],
+$penguins = tibble(
+    species: 'Adelie',
+    island: ['Torgersen', 'Torgersen', 'Torgersen', 'Torgersen'],
+    body_mass_g: [3750, 3800, 3250, null],
+    heavy: fn (DataFrame $t) => array_map(
+        fn ($m) => $m === null ? null : $m >= 3500,
+        $t['body_mass_g'],
     ),
-    term: 'fall',
 );
 
-echo $scores;
+echo $penguins;
 ```
 
 ```{.text .output}
-# A tibble: 3 × 4
-  student score passed term 
-  <chr>   <dbl> <lgl>  <chr>
-1 ana      81.5 TRUE   fall 
-2 ben      74   FALSE  fall 
-3 cy       NA   NA     fall
+# A tibble: 4 × 4
+  species island    body_mass_g heavy
+  <chr>   <chr>           <int> <lgl>
+1 Adelie  Torgersen        3750 TRUE 
+2 Adelie  Torgersen        3800 TRUE 
+3 Adelie  Torgersen        3250 FALSE
+4 Adelie  Torgersen          NA NA
 ```

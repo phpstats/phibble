@@ -144,6 +144,9 @@ group in row order.
 | `cumall`, `cumany` | Follow dplyr's NA rules. |
 | `consecutive_id(...)` | Increments when any argument changes. |
 
+Here JFK's monthly precipitation in 2013, in inches, from nycflights13's
+weather:
+
 {{< include examples/_expr-window.md >}}
 
 ## NA and arithmetic

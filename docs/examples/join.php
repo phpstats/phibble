@@ -1,14 +1,12 @@
 <?php
 
-$penguins = DataFrame::fromCsv('penguins.csv');
-$islands = tribble(
-    ['island', 'area_km2'],
-    ['Biscoe', 6.1],
-    ['Dream', 0.9],
-);
+$data = 'https://raw.githubusercontent.com/phpstats/datasets/main/csv';
+$weather = DataFrame::fromCsv("{$data}/weather.csv");
+$airports = DataFrame::fromCsv("{$data}/airports.csv");
 
-$joined = $penguins
-    ->distinct(['species', 'island'])
-    ->join($islands, ['island'], 'left');
+$stations = $weather
+    ->distinct(['origin'])
+    ->join($airports, [['origin', 'faa']], 'left')
+    ->select(['origin', 'name', 'lat', 'lon', 'alt']);
 
-echo $joined;
+echo $stations;

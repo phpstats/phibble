@@ -1,10 +1,10 @@
 <?php
 
 $expr = lag(
-    col('score'),
+    col('body_mass_g'),
     n: 2,
     default: 0,
-    order_by: col('week'),
+    order_by: col('year'),
 );
 $json = json_encode($expr->toArray());
 

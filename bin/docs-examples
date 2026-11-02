@@ -4,7 +4,7 @@
 /*
  * Run every docs/examples/*.php and write docs/examples/_<name>.md with the
  * example's code and its actual output, for Quarto to include. Examples run
- * with docs/data as the working directory, after a hidden prelude that
+ * with docs/examples as the working directory, after a hidden prelude that
  * imports DataFrame, Time, Type, SqlTable, the Phibble\ functions (tibble, tribble,
  * as_tibble, enframe, deframe, tbl) and every Phibble\Expr\ helper.
  *
@@ -63,7 +63,7 @@ foreach (glob($root.'/docs/examples/*.php') as $file) {
     file_put_contents($script, str_contains($code, $standalone)
         ? "<?php\n\ndeclare(strict_types=1);\n\n".str_replace($standalone, $autoload, $code)."\n"
         : "<?php\n\ndeclare(strict_types=1);\n\n{$autoload}\n\n".$prelude."\n".$code."\n");
-    $proc = proc_open([$php, $script], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $root.'/docs/data');
+    $proc = proc_open([$php, $script], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $root.'/docs/examples');
     $out = stream_get_contents($pipes[1]);
     $err = stream_get_contents($pipes[2]);
     $status = proc_close($proc);

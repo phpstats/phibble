@@ -1,30 +1,27 @@
 ```php
-$orders = tribble(
-    ['order', 'item', 'day'],
-    [1, 'tea', 3],
-    [2, 'tea', 9],
-    [3, 'coffee', 4],
-);
-$prices = tribble(
-    ['item', 'from_day', 'price'],
-    ['tea', 1, 2.5],
-    ['tea', 5, 2.75],
-    ['coffee', 1, 4.0],
-    ['coffee', 6, 4.5],
-);
+$data = 'https://raw.githubusercontent.com/phpstats/datasets/main/csv';
+$flights = DataFrame::fromCsv("{$data}/flights.csv", nMax: 1000)
+    ->filter(col('origin')->eq('EWR')->and(col('time_hour')->between(
+        ymd_hms('2013-01-01 16:00:00'),
+        ymd_hms('2013-01-01 18:00:00'),
+    )))
+    ->distinct(['origin', 'time_hour']);
+$weather = DataFrame::fromCsv("{$data}/weather.csv")
+    ->select(['origin', 'time_hour', 'temp', 'wind_speed'])
+    ->rename(['observed' => 'time_hour']);
 
-echo $orders->join(
-    $prices,
-    ['item', ['closest', 'day', '>=', 'from_day']],
+echo $flights->join(
+    $weather,
+    ['origin', ['closest', 'time_hour', '>=', 'observed']],
     'left',
 );
 ```
 
 ```{.text .output}
 # A tibble: 3 × 5
-  order item     day from_day price
-  <int> <chr>  <int>    <int> <dbl>
-1     1 tea        3        1  2.5 
-2     2 tea        9        5  2.75
-3     3 coffee     4        1  4
+  origin time_hour           observed             temp wind_speed
+  <chr>  <dttm>              <dttm>              <dbl>      <dbl>
+1 EWR    2013-01-01 16:00:00 2013-01-01 16:00:00  41         15.0
+2 EWR    2013-01-01 17:00:00 2013-01-01 16:00:00  41         15.0
+3 EWR    2013-01-01 18:00:00 2013-01-01 18:00:00  39.2       16.1
 ```

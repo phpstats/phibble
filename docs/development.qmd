@@ -104,8 +104,8 @@ bin/api-reference
 ## Documentation
 
 The site is a Quarto project in `docs/`. Every example is a PHP file in
-`docs/examples/`. `bin/docs-examples` runs each example with `docs/data` as the
-working directory and writes its code and output to
+`docs/examples/`. `bin/docs-examples` runs each example with `docs/examples` as
+the working directory and writes its code and output to
 `docs/examples/_<name>.md`, which the pages include. Quarto never runs PHP.
 
 `bin/render-docs` refreshes the examples, renders the site, and copies the
@@ -118,10 +118,6 @@ PHP=php85 bin/render-docs
 
 `bin/docs-examples name` refreshes one example. Set `QUARTO` when the `quarto`
 command is not on the path.
-
-`docs/_variables.yml` names the latest release. The data URLs in the docs and
-the README point at that tag, and `tests/SiteTest.php` fails until a new
-CHANGELOG release is matched there and in the README.
 
 The documentation is published at <https://phibble.phpstats.org/docs>.
 GitHub Pages serves only redirects there: the `pages` workflow runs

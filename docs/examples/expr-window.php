@@ -1,17 +1,15 @@
 <?php
 
-$sales = tribble(
-    ['store', 'week', 'units'],
-    ['a', 1, 10], ['a', 2, 14], ['a', 3, 9],
-    ['b', 1, 7], ['b', 2, 7], ['b', 3, 12],
-);
+$data = 'https://raw.githubusercontent.com/phpstats/datasets/main/csv';
+$monthly = DataFrame::fromCsv("{$data}/weather.csv")
+    ->filter(col('origin')->eq('JFK'))
+    ->groupBy(['month'])
+    ->summarize(['precip' => sum(col('precip'))]);
 
-echo $sales
-    ->groupBy(['store'])
-    ->mutate([
-        'prev' => lag(col('units')),
-        'change' => col('units')->sub(lag(col('units'))),
-        'running' => cumsum(col('units')),
-        'rank' => min_rank(desc(col('units'))),
-        'tile' => ntile(col('units'), n: 2),
-    ]);
+echo $monthly->mutate([
+    'prev' => lag(col('precip')),
+    'change' => col('precip')->sub(lag(col('precip'))),
+    'running' => cumsum(col('precip')),
+    'rank' => min_rank(desc(col('precip'))),
+    'half' => ntile(col('precip'), 2),
+]);

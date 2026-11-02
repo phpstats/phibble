@@ -17,8 +17,8 @@ Read and write CSV and JSON, and load query results from databases.
 - an open stream.
 
 ```php
-$url = 'https://vincentarelbundock.github.io/Rdatasets'
-    .'/csv/carData/Mroz.csv';
+$url = 'https://raw.githubusercontent.com/phpstats/datasets'
+    .'/main/csv/mroz.csv';
 $mroz = DataFrame::fromCsv($url);
 ```
 
@@ -65,7 +65,7 @@ readr's options are named arguments in camelCase:
 
 `types` also accepts an array by column name. A value is a `Type`, a type name
 such as `'factor'`, or a letter. The key `.default` sets the type of every
-column not named.
+column not named. Here `_ffddii_i` skips `rownames` and `sex`:
 
 {{< include examples/_col-types.md >}}
 
@@ -125,26 +125,17 @@ readr's `read_delim_chunked()` does. It passes each chunk to a callback with
 the 1-based index of the chunk's first row, and stops if the callback returns
 `false`. `DataFrame::csvChunks()` returns the same chunks as a generator keyed
 by that index. Memory depends on the chunk size, so a file larger than the
-memory limit can be filtered down as it is read:
+memory limit can be filtered down as it is read. Here the 336,776 nycflights13
+departures from New York City in 2013 are filtered to those bound for Los
+Angeles, 50,000 rows at a time:
 
-```php
-$chunks = DataFrame::csvChunks(
-    'feed.tsv',
-    chunkSize: 10_000,
-    delimiter: "\t",
-    types: ['.default' => 'c'],
-);
+{{< include examples/_chunk-filter.md >}}
 
-$kept = [];
-foreach ($chunks as $chunk) {
-    $kept[] = $chunk->filter(col('category')->eq('Running'));
-}
-$running = DataFrame::concat($kept);
-```
+Only Newark and JFK have flights to Los Angeles: 4,912 and 11,262.
 
 Types not given are guessed from the first chunk, and every later chunk is
 parsed as those types. As in readr, `guessMax` defaults to the chunk size.
-Give every type, as above, to skip guessing. A value in a later chunk that
+Give every type, such as `types: ['.default' => 'c']`, to skip guessing. A value in a later chunk that
 does not fit its column's type becomes NA. Factors without levels take their
 levels from each chunk.
 
@@ -235,7 +226,8 @@ $accounts = DataFrame::fromPdo(
 
 Explicit types always take precedence over declared ones. `fromQuery()`, the
 Laravel `->toDataFrame()` macro, and `SqlTable::collect()` follow the same
-rules.
+rules. This example loads nycflights13's airports into an in-memory SQLite
+table and runs a query with two bound values:
 
 {{< include examples/_pdo.md >}}
 

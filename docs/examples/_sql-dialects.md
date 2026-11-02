@@ -5,10 +5,10 @@ use Phibble\Sql\PostgresDialect;
 use Phibble\Sql\SqliteDialect;
 
 $expressions = [
-    'mean, NA aware' => mean(col('bp')),
-    'ratio' => col('bp')->div(col('baseline')),
-    'contains' => str_detect(col('name'), 'north'),
-    'in, with NA' => col('arm')->isIn(['a', null]),
+    'mean, NA aware' => mean(col('body_mass_g')),
+    'ratio' => col('bill_length_mm')->div(col('bill_depth_mm')),
+    'contains' => str_detect(col('island'), 'Dream'),
+    'in, with NA' => col('sex')->isIn(['female', null]),
 ];
 
 $dialects = [
@@ -29,30 +29,30 @@ foreach ($dialects as $dialect) {
 
 $window = new Compiler(
     new PostgresDialect(),
-    groups: ['clinic'],
-    order: [[col('visit'), false]],
+    groups: ['species'],
+    order: [[col('year'), false]],
 );
-echo $window->compile(cumsum(col('bp')))->sql, "\n";
+echo $window->compile(cumsum(col('body_mass_g')))->sql, "\n";
 ```
 
 ```{.text .output}
 -- SQLite
-mean, NA aware  (CASE WHEN COUNT(*) > COUNT("bp") THEN NULL ELSE (CASE WHEN COUNT("bp") = 0 THEN NULL ELSE AVG(CAST("bp" AS REAL)) END) END)
-ratio           (CASE WHEN "baseline" = 0 THEN (CASE WHEN "bp" > 0 THEN 9e999 WHEN "bp" < 0 THEN -9e999 WHEN "bp" = 0 THEN NULL END) ELSE CAST("bp" AS REAL) / "baseline" END)
-contains        (INSTR("name", ?) > 0)
-in, with NA     (COALESCE("arm" IN (?), FALSE) OR "arm" IS NULL)
+mean, NA aware  (CASE WHEN COUNT(*) > COUNT("body_mass_g") THEN NULL ELSE (CASE WHEN COUNT("body_mass_g") = 0 THEN NULL ELSE AVG(CAST("body_mass_g" AS REAL)) END) END)
+ratio           (CASE WHEN "bill_depth_mm" = 0 THEN (CASE WHEN "bill_length_mm" > 0 THEN 9e999 WHEN "bill_length_mm" < 0 THEN -9e999 WHEN "bill_length_mm" = 0 THEN NULL END) ELSE CAST("bill_length_mm" AS REAL) / "bill_depth_mm" END)
+contains        (INSTR("island", ?) > 0)
+in, with NA     (COALESCE("sex" IN (?), FALSE) OR "sex" IS NULL)
 
 -- PostgreSQL
-mean, NA aware  (CASE WHEN COUNT(*) > COUNT("bp") THEN NULL ELSE (CASE WHEN COUNT("bp") = 0 THEN 'NaN'::float8 ELSE AVG(CAST("bp" AS DOUBLE PRECISION)) END) END)
-ratio           (CASE WHEN "baseline" = 0 THEN (CASE WHEN "bp" > 0 THEN 'Infinity'::float8 WHEN "bp" < 0 THEN '-Infinity'::float8 WHEN "bp" = 0 THEN 'NaN'::float8 END) ELSE CAST("bp" AS DOUBLE PRECISION) / "baseline" END)
-contains        (POSITION(? IN "name") > 0)
-in, with NA     (COALESCE("arm" IN (?), FALSE) OR "arm" IS NULL)
+mean, NA aware  (CASE WHEN COUNT(*) > COUNT("body_mass_g") THEN NULL ELSE (CASE WHEN COUNT("body_mass_g") = 0 THEN 'NaN'::float8 ELSE AVG(CAST("body_mass_g" AS DOUBLE PRECISION)) END) END)
+ratio           (CASE WHEN "bill_depth_mm" = 0 THEN (CASE WHEN "bill_length_mm" > 0 THEN 'Infinity'::float8 WHEN "bill_length_mm" < 0 THEN '-Infinity'::float8 WHEN "bill_length_mm" = 0 THEN 'NaN'::float8 END) ELSE CAST("bill_length_mm" AS DOUBLE PRECISION) / "bill_depth_mm" END)
+contains        (POSITION(? IN "island") > 0)
+in, with NA     (COALESCE("sex" IN (?), FALSE) OR "sex" IS NULL)
 
 -- MySQL
-mean, NA aware  (CASE WHEN COUNT(*) > COUNT(`bp`) THEN NULL ELSE (CASE WHEN COUNT(`bp`) = 0 THEN NULL ELSE AVG(CAST(`bp` AS DOUBLE)) END) END)
-ratio           (CASE WHEN `baseline` = 0 THEN (CASE WHEN `bp` > 0 THEN NULL WHEN `bp` < 0 THEN NULL WHEN `bp` = 0 THEN NULL END) ELSE CAST(`bp` AS DOUBLE) / `baseline` END)
-contains        (LOCATE(?, `name`) > 0)
-in, with NA     (COALESCE(`arm` IN (?), FALSE) OR `arm` IS NULL)
+mean, NA aware  (CASE WHEN COUNT(*) > COUNT(`body_mass_g`) THEN NULL ELSE (CASE WHEN COUNT(`body_mass_g`) = 0 THEN NULL ELSE AVG(CAST(`body_mass_g` AS DOUBLE)) END) END)
+ratio           (CASE WHEN `bill_depth_mm` = 0 THEN (CASE WHEN `bill_length_mm` > 0 THEN NULL WHEN `bill_length_mm` < 0 THEN NULL WHEN `bill_length_mm` = 0 THEN NULL END) ELSE CAST(`bill_length_mm` AS DOUBLE) / `bill_depth_mm` END)
+contains        (LOCATE(?, `island`) > 0)
+in, with NA     (COALESCE(`sex` IN (?), FALSE) OR `sex` IS NULL)
 
-(CASE WHEN COUNT(*) OVER (PARTITION BY "clinic" ORDER BY ("visit" IS NULL), "visit" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) > COUNT("bp") OVER (PARTITION BY "clinic" ORDER BY ("visit" IS NULL), "visit" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) THEN NULL ELSE SUM("bp") OVER (PARTITION BY "clinic" ORDER BY ("visit" IS NULL), "visit" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) END)
+(CASE WHEN COUNT(*) OVER (PARTITION BY "species" ORDER BY ("year" IS NULL), "year" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) > COUNT("body_mass_g") OVER (PARTITION BY "species" ORDER BY ("year" IS NULL), "year" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) THEN NULL ELSE SUM("body_mass_g") OVER (PARTITION BY "species" ORDER BY ("year" IS NULL), "year" ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) END)
 ```

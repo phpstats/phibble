@@ -1,5 +1,5 @@
 ```php
-$heavy = col('body_mass')->gt(5000)
+$heavy = col('body_mass_g')->gt(5000)
     ->and(col('species')->isIn(['Gentoo', 'Chinstrap']));
 
 echo json_encode($heavy->toArray(), JSON_PRETTY_PRINT), "\n";
@@ -17,7 +17,7 @@ echo json_encode($heavy->columns()), "\n";
             "args": [
                 {
                     "type": "col",
-                    "name": "body_mass"
+                    "name": "body_mass_g"
                 },
                 {
                     "type": "lit",
@@ -44,5 +44,5 @@ echo json_encode($heavy->columns()), "\n";
         }
     ]
 }
-["body_mass","species"]
+["body_mass_g","species"]
 ```

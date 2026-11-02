@@ -1,25 +1,21 @@
 ```php
-$penguins = DataFrame::fromCsv('penguins.csv');
-$islands = tribble(
-    ['island', 'area_km2'],
-    ['Biscoe', 6.1],
-    ['Dream', 0.9],
-);
+$data = 'https://raw.githubusercontent.com/phpstats/datasets/main/csv';
+$weather = DataFrame::fromCsv("{$data}/weather.csv");
+$airports = DataFrame::fromCsv("{$data}/airports.csv");
 
-$joined = $penguins
-    ->distinct(['species', 'island'])
-    ->join($islands, ['island'], 'left');
+$stations = $weather
+    ->distinct(['origin'])
+    ->join($airports, [['origin', 'faa']], 'left')
+    ->select(['origin', 'name', 'lat', 'lon', 'alt']);
 
-echo $joined;
+echo $stations;
 ```
 
 ```{.text .output}
-# A tibble: 5 × 3
-  species   island    area_km2
-  <chr>     <chr>        <dbl>
-1 Adelie    Torgersen     NA  
-2 Adelie    Biscoe         6.1
-3 Adelie    Dream          0.9
-4 Gentoo    Biscoe         6.1
-5 Chinstrap Dream          0.9
+# A tibble: 3 × 5
+  origin name                  lat   lon   alt
+  <chr>  <chr>               <dbl> <dbl> <int>
+1 EWR    Newark Liberty Intl  40.7 -74.2    18
+2 JFK    John F Kennedy Intl  40.6 -73.8    13
+3 LGA    La Guardia           40.8 -73.9    22
 ```

@@ -1,19 +1,31 @@
 <?php
 
+$data = 'https://raw.githubusercontent.com/phpstats/datasets/main/csv';
 $pdo = new PDO('sqlite::memory:');
-$sales = tbl($pdo, <<<'SQL'
-    SELECT 'a' AS store, 1 AS week, 10 AS units
-    UNION ALL SELECT 'a', 2, 14 UNION ALL SELECT 'a', 3, 9
-    UNION ALL SELECT 'b', 1, 7 UNION ALL SELECT 'b', 2, NULL
-    SQL);
+$pdo->exec('CREATE TABLE weather (
+    origin TEXT, month INTEGER, day INTEGER, temp REAL, precip REAL
+)');
+$insert = $pdo->prepare('INSERT INTO weather VALUES (?, ?, ?, ?, ?)');
+$pdo->beginTransaction();
+foreach (DataFrame::fromCsv("{$data}/weather.csv")->select(['origin', 'month', 'day', 'temp', 'precip'])->toRows() as $row) {
+    $insert->execute(array_values($row));
+}
+$pdo->commit();
 
-$out = $sales
-    ->groupBy(['store'])
-    ->arrange(['store', 'week'])
+// ---
+
+$weather = tbl($pdo, 'weather');
+
+$out = $weather
+    ->filter(col('month')->between(6, 8))
+    ->groupBy(['origin', 'month'])
+    ->summarize(['precip' => sum(col('precip'))])
+    ->groupBy(['origin'])
+    ->arrange(['origin', 'month'])
     ->mutate([
-        'running' => cumsum(col('units')),
-        'of_best' => col('units')
-            ->div(max(col('units'), na_rm: true)),
+        'running' => cumsum(col('precip')),
+        'of_wettest' => col('precip')
+            ->div(max(col('precip'), na_rm: true)),
     ]);
 
 echo $out->showQuery(), "\n\n";

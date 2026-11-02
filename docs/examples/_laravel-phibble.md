@@ -8,7 +8,7 @@ $summary = Penguin::query()
     ->groupBy(['species', 'sex'])
     ->summarize([
         'n' => n(),
-        'mass' => mean(col('body_mass')),
+        'mass' => mean(col('body_mass_g')),
     ]);
 
 echo $summary->collect();

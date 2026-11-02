@@ -1,6 +1,9 @@
 <?php
 
-$penguins = DataFrame::fromCsv('penguins.csv')
+$penguins = DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/'
+        .'main/csv/penguins.csv'
+)
     ->asFactor('species')
     ->filter(col('species')->ne('Chinstrap'));
 

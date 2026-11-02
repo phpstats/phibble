@@ -17,11 +17,10 @@ These are optional:
 | The php_polars extension from [phpolars](https://github.com/phpstats/phpolars) | `PolarsTable` and `polars()`, described in [Backends](backends.qmd). |
 | `illuminate/database` | The `->toDataFrame()` and `->phibble()` macros, described in [Laravel](laravel.qmd). Laravel applications already have it. |
 
-The examples use the Palmer penguins data:
-
-```bash
-curl -LO https://raw.githubusercontent.com/phpstats/phibble/{{< var release >}}/docs/data/penguins.csv
-```
+The examples read public datasets, such as the Palmer penguins and
+nycflights13's weather, by URL from the
+[PHPstats datasets](https://github.com/phpstats/datasets). Reading a URL needs
+PHP's `allow_url_fopen` setting, which is on by default.
 
 ## Imports
 
@@ -41,8 +40,10 @@ calls phibble's expression helper. Write `\round($x)` for PHP's function.
 
 ## Load
 
-`DataFrame::fromCsv()` reads a CSV file and guesses each column's type.
-[Reading and writing data](io.qmd) covers its options, JSON, and databases.
+`DataFrame::fromCsv()` reads a CSV file, or a URL, and guesses each column's
+type. Here it reads the Palmer penguins data, whose `rownames` column holds the
+row numbers the table had in R. [Reading and writing data](io.qmd) covers the
+options, JSON, and databases.
 
 {{< include examples/_read-csv.md >}}
 
@@ -51,9 +52,12 @@ calls phibble's expression helper. Write `\round($x)` for PHP's function.
 - A list gives one value per row, and a single value is repeated.
 - A closure receives the columns built so far.
 
+These values are the first four penguins in the data:
+
 {{< include examples/_tibble.md >}}
 
-`tribble()` takes the column names first, then one list per row:
+`tribble()` takes the column names first, then one list per row. These are the
+three New York City airports from nycflights13:
 
 {{< include examples/_tribble.md >}}
 
@@ -142,13 +146,17 @@ group, where `n()` and `sum()` are 0:
 
 `distinct()` keeps the first row of each combination of the given columns.
 `join()` takes the other table, the keys, and the type: `inner`, `left`,
-`right`, `full`, `semi`, `anti`, or `cross`. Joins follow dplyr 1.1, and NA
-keys match each other.
+`right`, `full`, `semi`, `anti`, or `cross`. A pair such as
+`['origin', 'faa']` joins keys with different names. Joins follow dplyr 1.1,
+and NA keys match each other. Here each airport in nycflights13's weather data
+gets its name, position, and altitude from the airports table:
 
 {{< include examples/_join.md >}}
 
 A condition can also compare columns, as in dplyr's `join_by()`. Here each
-order gets the latest price set on or before its day:
+hour with Newark departures on 1 January 2013 gets the latest weather reading
+at or before it. Newark has no reading for 17:00 UTC, so that hour takes the
+16:00 reading:
 
 {{< include examples/_join-by.md >}}
 

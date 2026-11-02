@@ -5,8 +5,6 @@ project:
     - "*.qmd"
     - "examples/*.qmd"
     - "reference/*.qmd"
-  resources:
-    - data/*.csv
 
 website:
   site-url: "https://phibble.phpstats.org/docs/"

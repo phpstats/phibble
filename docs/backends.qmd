@@ -35,14 +35,16 @@ use Phibble\DataFrame;
 use function Phibble\{tbl, polars};
 use function Phibble\Expr\{col, mean, n};
 
-$df = DataFrame::fromCsv('sales.csv');
-$sql = tbl($pdo, 'sales');
+$df = DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/main/csv/weather.csv'
+);
+$sql = tbl($pdo, 'weather');
 $fast = polars($df);
 
 $summary = fn ($t) => $t
-    ->filter(col('units')->gt(0))
-    ->groupBy(['store'])
-    ->summarize(['n' => n(), 'avg' => mean(col('price'))]);
+    ->filter(col('temp')->isNa()->not())
+    ->groupBy(['origin'])
+    ->summarize(['n' => n(), 'temp' => mean(col('temp'))]);
 
 $summary($df);
 $summary($sql)->collect();

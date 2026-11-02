@@ -11,7 +11,9 @@ $count = function (DataFrame $chunk) use (&$totals) {
     }
 };
 
-DataFrame::fromCsvChunked('penguins.csv', $count, chunkSize: 100);
+DataFrame::fromCsvChunked(
+    'https://raw.githubusercontent.com/phpstats/datasets/'
+        .'main/csv/penguins.csv', $count, chunkSize: 100);
 ksort($totals);
 
 echo tibble(

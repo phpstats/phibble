@@ -1,18 +1,16 @@
 ```php
-$df = tibble(id: [1, 2], score: [2.5, null]);
-
+$df = tibble(species: ['Adelie', 'Adelie'], body_mass_g: [3750, null]);
 echo $df->toJson(), "\n";
 echo $df->toJson('columns'), "\n";
-
-echo DataFrame::fromJson('{"id": [1, 2], "ok": [true, null]}');
+echo DataFrame::fromJson('{"faa": ["EWR", "JFK"], "alt": [18, 13]}');
 ```
 
 ```{.text .output}
-[{"id":1,"score":2.5},{"id":2,"score":null}]
-{"id":[1,2],"score":[2.5,null]}
+[{"species":"Adelie","body_mass_g":3750},{"species":"Adelie","body_mass_g":null}]
+{"species":["Adelie","Adelie"],"body_mass_g":[3750,null]}
 # A tibble: 2 × 2
-     id ok   
-  <int> <lgl>
-1     1 TRUE 
-2     2 NA
+  faa     alt
+  <chr> <int>
+1 EWR      18
+2 JFK      13
 ```

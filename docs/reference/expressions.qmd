@@ -151,7 +151,7 @@ NA gives NA. Division by zero gives Inf or -Inf, and 0 / 0 gives NaN, as in R.
 
 **Method** of `Phibble\Expr\Expr`\
 **Returns** `Call`\
-**Examples** [Expressions](../expr.qmd), [SQL tables](../sql.qmd), [Getting started](../getting-started.qmd)
+**Examples** [Expressions](../expr.qmd), [Getting started](../getting-started.qmd), [SQL tables](../sql.qmd)
 
 ### `Expr->mod()` {#expr-mod}
 
@@ -217,7 +217,7 @@ R's == operator. NA on either side gives NA. Numbers and logicals compare numeri
 
 **Method** of `Phibble\Expr\Expr`\
 **Returns** `Call`\
-**Examples** [phibble for Laravel developers](../laravel.qmd), [SQL tables](../sql.qmd)
+**Examples** [Reading and writing data](../io.qmd), [Expressions](../expr.qmd), [Getting started](../getting-started.qmd)
 
 ### `Expr->ne()` {#expr-ne}
 
@@ -324,7 +324,7 @@ R's & operator, with three-valued logic: false wins over NA, and NA with true gi
 
 **Method** of `Phibble\Expr\Expr`\
 **Returns** `Call`\
-**Examples** [Expressions](../expr.qmd)
+**Examples** [Expressions](../expr.qmd), [Getting started](../getting-started.qmd)
 
 ### `Expr->or()` {#expr-or}
 
@@ -407,7 +407,8 @@ NA in the value or either bound gives NA. Equivalent to `between()`.
 | `$high` | <code>mixed</code> |  | The upper bound. |
 
 **Method** of `Phibble\Expr\Expr`\
-**Returns** `Call`
+**Returns** `Call`\
+**Examples** [Getting started](../getting-started.qmd), [SQL tables](../sql.qmd)
 
 ### `Expr->desc()` {#expr-desc}
 

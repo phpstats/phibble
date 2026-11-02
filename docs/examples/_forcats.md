@@ -1,5 +1,8 @@
 ```php
-$penguins = DataFrame::fromCsv('penguins.csv')->asFactor('species');
+$penguins = DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/'
+        .'main/csv/penguins.csv'
+)->asFactor('species');
 
 $mean = fn ($xs) => array_sum(array_filter($xs))
     / count(array_filter($xs));
@@ -9,8 +12,8 @@ $versions = [
     'fctRelevel Gentoo' => $penguins
         ->fctRelevel('species', ['Gentoo']),
     'fctInfreq' => $penguins->fctInfreq('species'),
-    'fctReorder by body_mass' => $penguins
-        ->fctReorder('species', 'body_mass', $mean),
+    'fctReorder by body_mass_g' => $penguins
+        ->fctReorder('species', 'body_mass_g', $mean),
     'fctRev' => $penguins->fctRev('species'),
     'fctRecode' => $penguins
         ->fctRecode('species', ['Chinstrap penguin' => 'Chinstrap']),
@@ -27,7 +30,7 @@ foreach ($versions as $label => $f) {
 sorted (default)          ["Adelie","Chinstrap","Gentoo"]
 fctRelevel Gentoo         ["Gentoo","Adelie","Chinstrap"]
 fctInfreq                 ["Adelie","Gentoo","Chinstrap"]
-fctReorder by body_mass   ["Adelie","Chinstrap","Gentoo"]
+fctReorder by body_mass_g ["Adelie","Chinstrap","Gentoo"]
 fctRev                    ["Gentoo","Chinstrap","Adelie"]
 fctRecode                 ["Adelie","Chinstrap penguin","Gentoo"]
 fctCollapse               ["brush-tailed","Chinstrap"]

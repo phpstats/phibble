@@ -271,7 +271,8 @@ The chunks `fromCsvChunked()` reads, as a generator keyed by the 1-based index o
 | `...$options` | <code>mixed</code> |  |  |
 
 **Static method** of `Phibble\DataFrame`\
-**Returns** `Generator<int, DataFrame>`
+**Returns** `Generator<int, DataFrame>`\
+**Examples** [Reading and writing data](../io.qmd)
 
 ### `DataFrame::fromJson()` {#dataframe-fromjson}
 

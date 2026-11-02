@@ -17,7 +17,7 @@ The rows as a list of associative arrays.
 
 **Method** of `DataFrame`, `SqlTable`, `PolarsTable`\
 **Returns** `list<array<string, mixed>>`\
-**Examples** [SQL tables](../sql.qmd)
+**Examples** [Reading and writing data](../io.qmd), [SQL tables](../sql.qmd)
 
 ### `->toColumns()` {#tocolumns}
 

@@ -1,18 +1,31 @@
 <?php
 
+$data = 'https://raw.githubusercontent.com/phpstats/datasets/main/csv';
 $pdo = new PDO('sqlite::memory:');
-$visits = tbl($pdo, <<<'SQL'
-    SELECT 1 AS clinic_id, 120 AS bp
-    UNION ALL SELECT 2, 135
-    UNION ALL SELECT NULL, 128
-    SQL);
-$clinics = tbl($pdo, <<<'SQL'
-    SELECT 1 AS id, 'north' AS name
-    UNION ALL SELECT NULL, 'unassigned'
-    SQL);
+$pdo->exec('CREATE TABLE weather (
+    origin TEXT, month INTEGER, day INTEGER, temp REAL, precip REAL
+)');
+$insert = $pdo->prepare('INSERT INTO weather VALUES (?, ?, ?, ?, ?)');
+$pdo->beginTransaction();
+foreach (DataFrame::fromCsv("{$data}/weather.csv")->select(['origin', 'month', 'day', 'temp', 'precip'])->toRows() as $row) {
+    $insert->execute(array_values($row));
+}
+$pdo->commit();
+$pdo->exec('CREATE TABLE airports (faa TEXT, name TEXT, alt INTEGER)');
+$insert = $pdo->prepare('INSERT INTO airports VALUES (?, ?, ?)');
+foreach (DataFrame::fromCsv("{$data}/airports.csv")->select(['faa', 'name', 'alt'])->toRows() as $row) {
+    $insert->execute(array_values($row));
+}
 
-$joined = $visits
-    ->join($clinics, [['clinic_id', 'id']], 'left');
+// ---
+
+$weather = tbl($pdo, 'weather');
+$airports = tbl($pdo, 'airports');
+
+$joined = $weather
+    ->groupBy(['origin'])
+    ->summarize(['temp' => mean(col('temp'), na_rm: true)])
+    ->join($airports, [['origin', 'faa']], 'left');
 
 echo $joined->showQuery(), "\n\n";
-echo $joined->arrange(['bp'])->collect();
+echo $joined->arrange(['origin'])->collect();

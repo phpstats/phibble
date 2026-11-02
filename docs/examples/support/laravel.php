@@ -1,7 +1,7 @@
 <?php
 
 // Hidden setup for the Laravel examples: Eloquent on an in-memory SQLite
-// database holding docs/data/penguins.csv. In a Laravel app the framework
+// database holding palmerpenguins' penguins from phpstats/datasets. In a Laravel app the framework
 // configures the connection, and package discovery registers the macros.
 
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -18,16 +18,19 @@ Capsule::schema()->create('penguins', function ($table) {
     $table->increments('id');
     $table->string('species');
     $table->string('island');
-    $table->float('bill_len')->nullable();
-    $table->float('bill_dep')->nullable();
-    $table->integer('flipper_len')->nullable();
-    $table->integer('body_mass')->nullable();
+    $table->float('bill_length_mm')->nullable();
+    $table->float('bill_depth_mm')->nullable();
+    $table->integer('flipper_length_mm')->nullable();
+    $table->integer('body_mass_g')->nullable();
     $table->string('sex')->nullable();
     $table->integer('year');
 });
 $rows = array_map(
-    fn (array $r) => array_map(fn ($v) => $v instanceof DateTimeInterface ? $v->format('Y-m-d') : $v, $r),
-    DataFrame::fromCsv('penguins.csv')->toRows(),
+    fn (array $r) => ['id' => $r['rownames']] + array_diff_key($r, ['rownames' => true]),
+    DataFrame::fromCsv(
+    'https://raw.githubusercontent.com/phpstats/datasets/'
+        .'main/csv/penguins.csv'
+)->toRows(),
 );
 foreach (array_chunk($rows, 100) as $chunk) {
     Capsule::table('penguins')->insert($chunk);
@@ -43,6 +46,6 @@ final class Penguin extends Model
 
     public function scopeMeasured($query)
     {
-        return $query->whereNotNull('body_mass');
+        return $query->whereNotNull('body_mass_g');
     }
 }

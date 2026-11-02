@@ -56,7 +56,8 @@ Stack tables by row, matching columns by name. Columns missing from a table are 
 | `$tables` | <code>list&lt;Table&gt;</code> |  |  |
 
 **Static method** of `Phibble\DataFrame`\
-**Returns** `DataFrame`
+**Returns** `DataFrame`\
+**Examples** [Reading and writing data](../io.qmd)
 
 ### `DataFrame::bindCols()` {#dataframe-bindcols}
 

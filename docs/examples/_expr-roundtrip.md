@@ -1,9 +1,9 @@
 ```php
 $expr = lag(
-    col('score'),
+    col('body_mass_g'),
     n: 2,
     default: 0,
-    order_by: col('week'),
+    order_by: col('year'),
 );
 $json = json_encode($expr->toArray());
 
@@ -14,6 +14,6 @@ var_dump($back == $expr);
 ```
 
 ```{.text .output}
-{"type":"call","fn":"lag","args":[{"type":"col","name":"score"}],"named":{"n":{"type":"lit","value":2},"default":{"type":"lit","value":0},"order_by":{"type":"col","name":"week"}}}
+{"type":"call","fn":"lag","args":[{"type":"col","name":"body_mass_g"}],"named":{"n":{"type":"lit","value":2},"default":{"type":"lit","value":0},"order_by":{"type":"col","name":"year"}}}
 bool(true)
 ```

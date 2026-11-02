@@ -13,7 +13,7 @@ $byYear = Penguin::query()
     ->measured()
     ->phibble()
     ->groupBy(['species', 'year'])
-    ->summarize(['mass' => mean(col('body_mass'))])
+    ->summarize(['mass' => mean(col('body_mass_g'))])
     ->collect();
 
 echo $byYear->head(3), "\n";

@@ -1,8 +1,6 @@
 <?php
 
-$df = tibble(id: [1, 2], score: [2.5, null]);
-
+$df = tibble(species: ['Adelie', 'Adelie'], body_mass_g: [3750, null]);
 echo $df->toJson(), "\n";
 echo $df->toJson('columns'), "\n";
-
-echo DataFrame::fromJson('{"id": [1, 2], "ok": [true, null]}');
+echo DataFrame::fromJson('{"faa": ["EWR", "JFK"], "alt": [18, 13]}');

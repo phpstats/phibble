@@ -5,8 +5,8 @@ $collection = new class
     public function all(): array
     {
         return [
-            ['id' => 1, 'name' => 'Ana'],
-            (object) ['id' => 2, 'name' => 'Ben'],
+            ['species' => 'Adelie', 'body_mass_g' => 3750],
+            (object) ['species' => 'Gentoo', 'body_mass_g' => 4500],
         ];
     }
 };

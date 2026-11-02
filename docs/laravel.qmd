@@ -14,7 +14,8 @@ is the whole setup, since package discovery registers two macros:
 ## The example data
 
 Each example on this page queries this model, over a `penguins` table loaded
-from [`penguins.csv`](https://github.com/phpstats/phibble/blob/main/docs/data/penguins.csv):
+from the Palmer penguins data in the
+[PHPstats datasets](https://github.com/phpstats/datasets#penguins):
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -27,7 +28,7 @@ final class Penguin extends Model
 
     public function scopeMeasured($query)
     {
-        return $query->whereNotNull('body_mass');
+        return $query->whereNotNull('body_mass_g');
     }
 }
 ```
@@ -88,7 +89,7 @@ $summary = Penguin::query()->phibble() |>
     group_by('species', 'sex') |>
     summarize(
         n: n(),
-        mass: mean(col('body_mass'), naRm: true),
+        mass: mean(col('body_mass_g'), naRm: true),
     ) |>
     arrange(desc('mass'));
 ```
@@ -103,7 +104,7 @@ $summary = phplyr(Penguin::query()->phibble())
     ->groupBy('species', 'sex')
     ->summarize(
         n: n(),
-        mass: mean(col('body_mass'), naRm: true),
+        mass: mean(col('body_mass_g'), naRm: true),
     )
     ->arrange(desc('mass'))
     ->get();

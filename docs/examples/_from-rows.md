@@ -1,11 +1,11 @@
 ```php
 $rows = DataFrame::fromRows([
-    ['id' => 1, 'dose' => 2.5, 'arm' => 'a'],
-    ['id' => 2, 'arm' => 'b'],
+    ['species' => 'Adelie', 'island' => 'Torgersen', 'body_mass_g' => 3750],
+    ['species' => 'Adelie', 'island' => 'Torgersen'],
 ]);
 $cols = DataFrame::fromColumns(
-    ['id' => [1, 2], 'arm' => ['a', 'b']],
-    types: ['arm' => 'factor'],
+    ['species' => ['Adelie', 'Gentoo'], 'island' => ['Torgersen', 'Biscoe']],
+    types: ['species' => 'factor'],
 );
 
 echo $rows, "\n\n", $cols;
@@ -13,14 +13,14 @@ echo $rows, "\n\n", $cols;
 
 ```{.text .output}
 # A tibble: 2 × 3
-     id  dose arm  
-  <int> <dbl> <chr>
-1     1   2.5 a    
-2     2  NA   b    
+  species island    body_mass_g
+  <chr>   <chr>           <int>
+1 Adelie  Torgersen        3750
+2 Adelie  Torgersen          NA
 
 # A tibble: 2 × 2
-     id arm  
-  <int> <fct>
-1     1 a    
-2     2 b
+  species island   
+  <fct>   <chr>    
+1 Adelie  Torgersen
+2 Gentoo  Biscoe
 ```

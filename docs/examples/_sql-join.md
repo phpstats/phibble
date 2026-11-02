@@ -1,32 +1,23 @@
 ```php
-$pdo = new PDO('sqlite::memory:');
-$visits = tbl($pdo, <<<'SQL'
-    SELECT 1 AS clinic_id, 120 AS bp
-    UNION ALL SELECT 2, 135
-    UNION ALL SELECT NULL, 128
-    SQL);
-$clinics = tbl($pdo, <<<'SQL'
-    SELECT 1 AS id, 'north' AS name
-    UNION ALL SELECT NULL, 'unassigned'
-    SQL);
+$weather = tbl($pdo, 'weather');
+$airports = tbl($pdo, 'airports');
 
-$joined = $visits
-    ->join($clinics, [['clinic_id', 'id']], 'left');
+$joined = $weather
+    ->groupBy(['origin'])
+    ->summarize(['temp' => mean(col('temp'), na_rm: true)])
+    ->join($airports, [['origin', 'faa']], 'left');
 
 echo $joined->showQuery(), "\n\n";
-echo $joined->arrange(['bp'])->collect();
+echo $joined->arrange(['origin'])->collect();
 ```
 
 ```{.text .output}
-SELECT "clinic_id", "bp", "name" FROM (SELECT jq1x."clinic_id" AS "clinic_id", jq1x."bp" AS "bp", jq1y."name" AS "name", jq1x."__phibble_row" AS "__phibble_row", jq1y."__phibble_row" AS "__phibble_row_1" FROM (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS clinic_id, 120 AS bp
-UNION ALL SELECT 2, 135
-UNION ALL SELECT NULL, 128) AS phibble_source) AS jq1x LEFT JOIN (SELECT *, ROW_NUMBER() OVER () AS "__phibble_row" FROM (SELECT 1 AS id, 'north' AS name
-UNION ALL SELECT NULL, 'unassigned') AS phibble_source) AS jq1y ON (jq1x."clinic_id" IS jq1y."id")) AS q2 ORDER BY ("__phibble_row" IS NULL), "__phibble_row", ("__phibble_row_1" IS NULL), "__phibble_row_1"
+SELECT "origin", "temp", "name", "alt" FROM (SELECT jq3x."origin" AS "origin", jq3x."temp" AS "temp", jq3y."name" AS "name", jq3y."alt" AS "alt", jq3x."__phibble_row" AS "__phibble_row", jq3y."__phibble_row" AS "__phibble_row_1" FROM (SELECT "origin", "temp", ROW_NUMBER() OVER (ORDER BY ("origin" IS NULL), "origin") AS "__phibble_row" FROM (SELECT "origin" AS "origin", (CASE WHEN COUNT("temp") = 0 THEN NULL ELSE AVG(CAST("temp" AS REAL)) END) AS "temp" FROM (SELECT *, rowid AS "__phibble_row" FROM "weather") AS q1 GROUP BY "origin") AS q2) AS jq3x LEFT JOIN (SELECT *, rowid AS "__phibble_row" FROM "airports") AS jq3y ON (jq3x."origin" IS jq3y."faa")) AS q4 ORDER BY ("__phibble_row" IS NULL), "__phibble_row", ("__phibble_row_1" IS NULL), "__phibble_row_1"
 
-# A tibble: 3 × 3
-  clinic_id    bp name      
-      <int> <int> <chr>     
-1         1   120 north     
-2        NA   128 unassigned
-3         2   135 <NA>
+# A tibble: 3 × 4
+  origin  temp name                  alt
+  <chr>  <dbl> <chr>               <int>
+1 EWR     55.5 Newark Liberty Intl    18
+2 JFK     54.5 John F Kennedy Intl    13
+3 LGA     55.8 La Guardia             22
 ```

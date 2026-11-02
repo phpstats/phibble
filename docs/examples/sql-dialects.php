@@ -6,10 +6,10 @@ use Phibble\Sql\PostgresDialect;
 use Phibble\Sql\SqliteDialect;
 
 $expressions = [
-    'mean, NA aware' => mean(col('bp')),
-    'ratio' => col('bp')->div(col('baseline')),
-    'contains' => str_detect(col('name'), 'north'),
-    'in, with NA' => col('arm')->isIn(['a', null]),
+    'mean, NA aware' => mean(col('body_mass_g')),
+    'ratio' => col('bill_length_mm')->div(col('bill_depth_mm')),
+    'contains' => str_detect(col('island'), 'Dream'),
+    'in, with NA' => col('sex')->isIn(['female', null]),
 ];
 
 $dialects = [
@@ -30,7 +30,7 @@ foreach ($dialects as $dialect) {
 
 $window = new Compiler(
     new PostgresDialect(),
-    groups: ['clinic'],
-    order: [[col('visit'), false]],
+    groups: ['species'],
+    order: [[col('year'), false]],
 );
-echo $window->compile(cumsum(col('bp')))->sql, "\n";
+echo $window->compile(cumsum(col('body_mass_g')))->sql, "\n";

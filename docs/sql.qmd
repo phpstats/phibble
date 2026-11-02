@@ -27,8 +27,9 @@ Which calls query the database:
 - Other methods and `showQuery()` run nothing. `showQuery()` returns the SQL with `?`
   placeholders, and `bindings()` returns their values in order.
 
-This example queries an in-memory SQLite table, `penguins`, loaded from
-`penguins.csv`:
+This example queries an in-memory SQLite table, `penguins`, loaded from the
+Palmer penguins data in the
+[PHPstats datasets](https://github.com/phpstats/datasets#penguins):
 
 {{< include examples/_sql-tbl-code.md >}}
 
@@ -159,6 +160,10 @@ step.
   given, then the `arrange()` order, then the source order.
 - Grouped `mutate()` and `filter()` compile to `OVER (PARTITION BY ...)`.
 
+This example totals the precipitation at each airport for June to August
+2013, in inches, from a SQLite table of nycflights13's weather, then takes a
+running total and each month's share of the wettest month:
+
 {{< include examples/_sql-window-code.md >}}
 
 <details>
@@ -177,7 +182,8 @@ The output columns follow `DataFrame::join()`: x's columns, then y's other
 columns, with `.x` and `.y` suffixes on clashing names. NA keys match each
 other, as in dplyr, through `IS` in SQLite, `IS NOT DISTINCT FROM` in
 PostgreSQL, and `<=>` in MySQL. Pass `naMatches: false` for SQL's usual
-equality.
+equality. This example joins each airport's mean 2013 temperature, from
+nycflights13's weather, to its name and altitude from the airports table:
 
 {{< include examples/_sql-join-code.md >}}
 
