@@ -101,3 +101,5 @@ for the R comparison scripts, database tests, and documentation build.
 ## License
 
 phibble is released under the [MIT license](LICENSE).
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) lists the code that follows
+other projects' source, with their licenses.
