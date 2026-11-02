@@ -249,7 +249,7 @@ it('keeps source order on stored tables with physical row ids', function (Closur
     $pdo = $connect();
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     if ($driver === 'mysql') {
-        test()->markTestSkipped('MySQL tables use ROW_NUMBER(), covered by the other tests.');
+        test()->markTestSkipped('MySQL tables have no physical row id like SQLite\'s rowid or PostgreSQL\'s ctid; SqlTable numbers MySQL rows with ROW_NUMBER(), which the other row-order tests cover.');
     }
     $suffix = substr(md5((string) mt_rand()), 0, 6);
     $temp = $driver === 'pgsql' ? 'TEMP ' : '';

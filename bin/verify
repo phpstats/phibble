@@ -81,17 +81,22 @@ $r = json_decode((string) file_get_contents('tests/r/versions.json'), true);
 $key = fn (string $class, string $name) => $class.'|'.preg_replace('/[^A-Za-z0-9]+/', '', $name);
 
 $skipReasons = [];
+$class = null;
+$unescape = fn (string $s) => strtr($s, ["|'" => "'", '||' => '|', '|n' => "\n", '|r' => "\r", '|[' => '[', '|]' => ']']);
+$value = "((?:\\|.|[^'|])*)";
 foreach (file($teamcity) ?: [] as $line) {
-    if (preg_match("/^##teamcity\\[testIgnored name='(.*?)' message='(.*?)'/", $line, $m)) {
-        $unescape = fn (string $s) => strtr($s, ["|'" => "'", '||' => '|', '|n' => "\n", '|r' => "\r", '|[' => '[', '|]' => ']']);
-        if (preg_match("/\\\\P\\\\Tests\\\\([A-Za-z0-9\\\\]+)::/", $line, $c)) {
-            $name = preg_replace('/^__pest_evaluable_/', '', $unescape($m[1]));
-            $skipReasons[$key('Tests\\'.$c[1], $name)] = $unescape($m[2]);
-        }
+    // testIgnored carries no class; it follows its testStarted, which does.
+    if (str_starts_with($line, '##teamcity[testStarted') && preg_match("/\\\\P\\\\Tests\\\\([A-Za-z0-9\\\\]+)::/", $line, $c)) {
+        $class = 'Tests\\'.$c[1];
+    }
+    if ($class !== null && preg_match("/^##teamcity\\[testIgnored name='{$value}' message='{$value}'/", $line, $m)) {
+        $name = preg_replace('/^__pest_evaluable_/', '', $unescape($m[1]));
+        $skipReasons[$key($class, $name)] = $unescape($m[2]);
     }
 }
 
 $tests = [];
+$unexplained = [];
 foreach (simplexml_load_file($junit)->xpath('//testcase') as $case) {
     $name = (string) $case['name'];
     $class = (string) $case['class'];
@@ -111,9 +116,12 @@ foreach (simplexml_load_file($junit)->xpath('//testcase') as $case) {
     };
     $reason = match ($status) {
         'fail' => trim(strtok(trim((string) ($case->failure ?? $case->error)), "\n") ?: 'The test failed.'),
-        'skipped' => $skipReasons[$key($class, $name)] ?? 'The suite skipped this test without a reason.',
+        'skipped' => $skipReasons[$key($class, $name)] ?? null,
         default => null,
     };
+    if ($status === 'skipped' && $reason === null) {
+        $unexplained[] = $name;
+    }
     $tests[] = [
         'file' => explode('::', (string) $case['file'])[0],
         'test' => preg_replace('/^it /', '', $description),
@@ -121,6 +129,11 @@ foreach (simplexml_load_file($junit)->xpath('//testcase') as $case) {
         'status' => $status,
         'reason' => $reason,
     ];
+}
+
+if ($unexplained !== []) {
+    fwrite(STDERR, "Skipped without a message; give each skip a reason:\n  ".implode("\n  ", $unexplained)."\n");
+    exit(1);
 }
 
 // ---------------------------------------------------------------------
