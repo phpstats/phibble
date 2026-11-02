@@ -497,7 +497,7 @@
             "name": "keeps source order on stored tables with physical row ids",
             "implementation": "MySQL",
             "status": "skipped",
-            "reason": "The suite skipped this test without a reason."
+            "reason": "MySQL tables have no physical row id like SQLite's rowid or PostgreSQL's ctid; SqlTable numbers MySQL rows with ROW_NUMBER(), which the other row-order tests cover."
         },
         {
             "name": "compares, sorts, groups and joins text in byte order like R",
@@ -531,8 +531,8 @@
         }
     ],
     "environment": {
-        "date": "2026-11-01",
-        "commit": "84bf041",
+        "date": "2026-11-02",
+        "commit": "7ea971e",
         "php": "8.5.10",
         "os": "macOS 27.0.1 (arm64)"
     }
