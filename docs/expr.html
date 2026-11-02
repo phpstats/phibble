@@ -457,51 +457,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>summarize()</code> needs one value per group. Anything else throws a <code>LengthException</code>.</li>
 <li><code>arrange()</code> sorts by expressions over the whole table, ignoring groups. Wrap a key in <code>desc()</code> to sort it in descending order.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)<span class="ot">;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$out</span> <span class="op">=</span> <span class="va">$penguins</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(is_na(col(<span class="st">'body_mass'</span>))-&gt;not())</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'species'</span>])</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    -&gt;mutate([</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'z'</span> =&gt; col(<span class="st">'body_mass'</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>            -&gt;sub(mean(col(<span class="st">'body_mass'</span>)))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            -&gt;div(sd(col(<span class="st">'body_mass'</span>)))<span class="ot">,</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'rank'</span> =&gt; min_rank(desc(col(<span class="st">'body_mass'</span>)))<span class="ot">,</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'size'</span> =&gt; case_when(</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            col(<span class="st">'body_mass'</span>)-&gt;ge(<span class="dv">5000</span>)<span class="ot">,</span> <span class="st">'large'</span><span class="ot">,</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            col(<span class="st">'body_mass'</span>)-&gt;ge(<span class="dv">3500</span>)<span class="ot">,</span> <span class="st">'medium'</span><span class="ot">,</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">default</span><span class="ot">:</span> <span class="st">'small'</span><span class="ot">,</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        )<span class="ot">,</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    ])</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'rank'</span>)-&gt;le(<span class="dv">2</span>))</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    -&gt;select([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'body_mass'</span><span class="ot">,</span> <span class="st">'z'</span><span class="ot">,</span> <span class="st">'rank'</span><span class="ot">,</span> <span class="st">'size'</span>])<span class="ot">;</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$out</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'https://raw.githubusercontent.com/phpstats/datasets/'</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="st">'main/csv/penguins.csv'</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">$out</span> <span class="op">=</span> <span class="va">$penguins</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(is_na(col(<span class="st">'body_mass_g'</span>))-&gt;not())</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'species'</span>])</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    -&gt;mutate([</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'z'</span> =&gt; col(<span class="st">'body_mass_g'</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            -&gt;sub(mean(col(<span class="st">'body_mass_g'</span>)))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            -&gt;div(sd(col(<span class="st">'body_mass_g'</span>)))<span class="ot">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'rank'</span> =&gt; min_rank(desc(col(<span class="st">'body_mass_g'</span>)))<span class="ot">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'size'</span> =&gt; case_when(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            col(<span class="st">'body_mass_g'</span>)-&gt;ge(<span class="dv">5000</span>)<span class="ot">,</span> <span class="st">'large'</span><span class="ot">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            col(<span class="st">'body_mass_g'</span>)-&gt;ge(<span class="dv">3500</span>)<span class="ot">,</span> <span class="st">'medium'</span><span class="ot">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">default</span><span class="ot">:</span> <span class="st">'small'</span><span class="ot">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        )<span class="ot">,</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'rank'</span>)-&gt;le(<span class="dv">2</span>))</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    -&gt;select([<span class="st">'species'</span><span class="ot">,</span> <span class="st">'body_mass_g'</span><span class="ot">,</span> <span class="st">'z'</span><span class="ot">,</span> <span class="st">'rank'</span><span class="ot">,</span> <span class="st">'size'</span>])<span class="ot">;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$out</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 6 × 5
 # Groups:   species [3]
-  species   body_mass     z  rank size  
-  &lt;chr&gt;         &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;chr&gt; 
-1 Adelie         4725  2.23     2 medium
-2 Adelie         4775  2.34     1 medium
-3 Gentoo         6300  2.43     1 large 
-4 Gentoo         6050  1.93     2 large 
-5 Chinstrap      4550  2.13     2 medium
-6 Chinstrap      4800  2.78     1 medium</code></pre>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">'penguins.csv'</span>)<span class="ot">;</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$penguins</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'island'</span>])</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'n'</span> =&gt; n()<span class="ot">,</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass'</span> =&gt; mean(col(<span class="st">'body_mass'</span>))<span class="ot">,</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass_rm'</span> =&gt; mean(col(<span class="st">'body_mass'</span>)<span class="ot">,</span> na_rm<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">,</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'q90'</span> =&gt; quantile(col(<span class="st">'body_mass'</span>)<span class="ot">,</span> <span class="fl">0.9</span><span class="ot">,</span> na_rm<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">,</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'species'</span> =&gt; n_distinct(col(<span class="st">'species'</span>))<span class="ot">,</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'any_heavy'</span> =&gt; any(</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            col(<span class="st">'body_mass'</span>)-&gt;gt(<span class="dv">6000</span>)<span class="ot">,</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            na_rm<span class="ot">:</span> <span class="kw">true</span><span class="ot">,</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        )<span class="ot">,</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    ])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+  species   body_mass_g     z  rank size  
+  &lt;chr&gt;           &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;chr&gt; 
+1 Adelie           4725  2.23     2 medium
+2 Adelie           4775  2.34     1 medium
+3 Gentoo           6300  2.43     1 large 
+4 Gentoo           6050  1.93     2 large 
+5 Chinstrap        4550  2.13     2 medium
+6 Chinstrap        4800  2.78     1 medium</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'https://raw.githubusercontent.com/phpstats/datasets/'</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="st">'main/csv/penguins.csv'</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$penguins</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'island'</span>])</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'n'</span> =&gt; n()<span class="ot">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass'</span> =&gt; mean(col(<span class="st">'body_mass_g'</span>))<span class="ot">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mass_rm'</span> =&gt; mean(col(<span class="st">'body_mass_g'</span>)<span class="ot">,</span> na_rm<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'q90'</span> =&gt; quantile(col(<span class="st">'body_mass_g'</span>)<span class="ot">,</span> <span class="fl">0.9</span><span class="ot">,</span> na_rm<span class="ot">:</span> <span class="kw">true</span>)<span class="ot">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'species'</span> =&gt; n_distinct(col(<span class="st">'species'</span>))<span class="ot">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'any_heavy'</span> =&gt; any(</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            col(<span class="st">'body_mass_g'</span>)-&gt;gt(<span class="dv">6000</span>)<span class="ot">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            na_rm<span class="ot">:</span> <span class="kw">true</span><span class="ot">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        )<span class="ot">,</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    ])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 3 × 7
   island        n  mass mass_rm   q90 species any_heavy
   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt; &lt;lgl&gt;    
@@ -784,31 +790,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$sales</span> <span class="op">=</span> tribble(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'store'</span><span class="ot">,</span> <span class="st">'week'</span><span class="ot">,</span> <span class="st">'units'</span>]<span class="ot">,</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'a'</span><span class="ot">,</span> <span class="dv">1</span><span class="ot">,</span> <span class="dv">10</span>]<span class="ot">,</span> [<span class="st">'a'</span><span class="ot">,</span> <span class="dv">2</span><span class="ot">,</span> <span class="dv">14</span>]<span class="ot">,</span> [<span class="st">'a'</span><span class="ot">,</span> <span class="dv">3</span><span class="ot">,</span> <span class="dv">9</span>]<span class="ot">,</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'b'</span><span class="ot">,</span> <span class="dv">1</span><span class="ot">,</span> <span class="dv">7</span>]<span class="ot">,</span> [<span class="st">'b'</span><span class="ot">,</span> <span class="dv">2</span><span class="ot">,</span> <span class="dv">7</span>]<span class="ot">,</span> [<span class="st">'b'</span><span class="ot">,</span> <span class="dv">3</span><span class="ot">,</span> <span class="dv">12</span>]<span class="ot">,</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<p>Here JFK’s monthly precipitation in 2013, in inches, from nycflights13’s weather:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> <span class="st">'https://raw.githubusercontent.com/phpstats/datasets/main/csv'</span><span class="ot">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">$monthly</span> <span class="op">=</span> DataFrame::fromCsv(<span class="st">"</span>{<span class="va">$data</span>}<span class="st">/weather.csv"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    -&gt;filter(col(<span class="st">'origin'</span>)-&gt;eq(<span class="st">'JFK'</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'month'</span>])</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    -&gt;summarize([<span class="st">'precip'</span> =&gt; sum(col(<span class="st">'precip'</span>))])<span class="ot">;</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$sales</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    -&gt;groupBy([<span class="st">'store'</span>])</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    -&gt;mutate([</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'prev'</span> =&gt; lag(col(<span class="st">'units'</span>))<span class="ot">,</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'change'</span> =&gt; col(<span class="st">'units'</span>)-&gt;sub(lag(col(<span class="st">'units'</span>)))<span class="ot">,</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'running'</span> =&gt; cumsum(col(<span class="st">'units'</span>))<span class="ot">,</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'rank'</span> =&gt; min_rank(desc(col(<span class="st">'units'</span>)))<span class="ot">,</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'tile'</span> =&gt; ntile(col(<span class="st">'units'</span>)<span class="ot">,</span> n<span class="ot">:</span> <span class="dv">2</span>)<span class="ot">,</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    ])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre class="text output"><code># A tibble: 6 × 8
-# Groups:   store [2]
-  store  week units  prev change running  rank  tile
-  &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;int&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt;
-1 a         1    10    NA     NA      10     2     1
-2 a         2    14    10      4      24     1     2
-3 a         3     9    14     -5      33     3     1
-4 b         1     7    NA     NA       7     2     1
-5 b         2     7     7      0      14     2     1
-6 b         3    12     7      5      26     1     2</code></pre>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$monthly</span>-&gt;mutate([</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'prev'</span> =&gt; lag(col(<span class="st">'precip'</span>))<span class="ot">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'change'</span> =&gt; col(<span class="st">'precip'</span>)-&gt;sub(lag(col(<span class="st">'precip'</span>)))<span class="ot">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'running'</span> =&gt; cumsum(col(<span class="st">'precip'</span>))<span class="ot">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'rank'</span> =&gt; min_rank(desc(col(<span class="st">'precip'</span>)))<span class="ot">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'half'</span> =&gt; ntile(col(<span class="st">'precip'</span>)<span class="ot">,</span> <span class="dv">2</span>)<span class="ot">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text output"><code># A tibble: 12 × 7
+   month precip  prev change running  rank  half
+   &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt; &lt;int&gt;
+ 1     1   2.44 NA    NA        2.44     7     1
+ 2     2   2.73  2.44  0.290    5.17     4     2
+ 3     3   2.23  2.73 -0.500    7.4      9     1
+ 4     4   1.78  2.23 -0.450    9.18    11     1
+ 5     5   3.28  1.78  1.50    12.5      3     2
+ 6     6   7.95  3.28  4.67    20.4      1     2
+ 7     7   2.26  7.95 -5.69    22.7      8     1
+ 8     8   2.73  2.26  0.470   25.4      5     2
+ 9     9   1.92  2.73 -0.810   27.3     10     1
+10    10   0.32  1.92 -1.6     27.6     12     1
+11    11   2.55  0.32  2.23    30.2      6     2
+12    12   4.50  2.55  1.95    34.7      2     2</code></pre>
 </section>
 </section>
 <section id="na-and-arithmetic" class="level2">
@@ -856,7 +866,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>Desc</code> marks a sort key or ranking as descending.</li>
 </ul>
 <p><code>columns()</code> lists the columns an expression reads, and <code>toArray()</code> returns the tree as plain arrays:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$heavy</span> <span class="op">=</span> col(<span class="st">'body_mass'</span>)-&gt;gt(<span class="dv">5000</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$heavy</span> <span class="op">=</span> col(<span class="st">'body_mass_g'</span>)-&gt;gt(<span class="dv">5000</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    -&gt;<span class="op">and</span>(col(<span class="st">'species'</span>)-&gt;isIn([<span class="st">'Gentoo'</span><span class="ot">,</span> <span class="st">'Chinstrap'</span>]))<span class="ot">;</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="fu">json_encode</span>(<span class="va">$heavy</span>-&gt;toArray()<span class="ot">,</span> <span class="cn">JSON_PRETTY_PRINT</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
@@ -871,7 +881,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             "args": [
                 {
                     "type": "col",
-                    "name": "body_mass"
+                    "name": "body_mass_g"
                 },
                 {
                     "type": "lit",
@@ -898,16 +908,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         }
     ]
 }
-["body_mass","species"]</code></pre>
+["body_mass_g","species"]</code></pre>
 <p><code>Phibble\Expr\Functions::REGISTRY</code> lists every function a <code>Call</code> may name, with its arguments and options.</p>
 <section id="serialization" class="level3">
 <h3 class="anchored" data-anchor-id="serialization">Serialization</h3>
 <p><code>toArray()</code> returns a JSON-friendly array, and <code>Expr::fromArray()</code> rebuilds the expression. Each node has a <code>type</code> key: <code>col</code>, <code>lit</code>, <code>call</code>, or <code>desc</code>. A call lists its positional arguments under <code>args</code> and its options under <code>named</code>. A date literal carries <code>dtype</code> (<code>date</code>, <code>datetime</code>, or <code>time</code>).</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$expr</span> <span class="op">=</span> lag(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    col(<span class="st">'score'</span>)<span class="ot">,</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    col(<span class="st">'body_mass_g'</span>)<span class="ot">,</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    n<span class="ot">:</span> <span class="dv">2</span><span class="ot">,</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="ot">:</span> <span class="dv">0</span><span class="ot">,</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    order_by<span class="ot">:</span> col(<span class="st">'week'</span>)<span class="ot">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    order_by<span class="ot">:</span> col(<span class="st">'year'</span>)<span class="ot">,</span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="va">$json</span> <span class="op">=</span> <span class="fu">json_encode</span>(<span class="va">$expr</span>-&gt;toArray())<span class="ot">;</span></span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
@@ -915,7 +925,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="va">$back</span> <span class="op">=</span> Phibble\Expr\Expr::fromArray(<span class="fu">json_decode</span>(<span class="va">$json</span><span class="ot">,</span> <span class="kw">true</span>))<span class="ot">;</span></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">var_dump</span>(<span class="va">$back</span> <span class="op">==</span> <span class="va">$expr</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre class="text output"><code>{"type":"call","fn":"lag","args":[{"type":"col","name":"score"}],"named":{"n":{"type":"lit","value":2},"default":{"type":"lit","value":0},"order_by":{"type":"col","name":"week"}}}
+<pre class="text output"><code>{"type":"call","fn":"lag","args":[{"type":"col","name":"body_mass_g"}],"named":{"n":{"type":"lit","value":2},"default":{"type":"lit","value":0},"order_by":{"type":"col","name":"year"}}}
 bool(true)</code></pre>
 </section>
 <section id="reference-tests" class="level3">

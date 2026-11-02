@@ -404,8 +404,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>an <code>http://</code> or <code>https://</code> URL, which needs PHP’s <code>allow_url_fopen</code>. The file is downloaded to a temporary file, read, and deleted, and a failed download throws with the URL and the reason,</li>
 <li>an open stream.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$url</span> <span class="op">=</span> <span class="st">'https://vincentarelbundock.github.io/Rdatasets'</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="st">'/csv/carData/Mroz.csv'</span><span class="ot">;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">$url</span> <span class="op">=</span> <span class="st">'https://raw.githubusercontent.com/phpstats/datasets'</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="st">'/main/csv/mroz.csv'</span><span class="ot">;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">$mroz</span> <span class="op">=</span> DataFrame::fromCsv(<span class="va">$url</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="options" class="level3">
 <h3 class="anchored" data-anchor-id="options">Options</h3>
@@ -582,28 +582,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<p><code>types</code> also accepts an array by column name. A value is a <code>Type</code>, a type name such as <code>'factor'</code>, or a letter. The key <code>.default</code> sets the type of every column not named.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'penguins.csv'</span><span class="ot">,</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> <span class="st">'ffddii_i'</span><span class="ot">,</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$penguins</span>-&gt;glimpse()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="va">$some</span> <span class="op">=</span> DataFrame::fromCsv(</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'penguins.csv'</span><span class="ot">,</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> [<span class="st">'species'</span> =&gt; <span class="st">'factor'</span><span class="ot">,</span> <span class="st">'.default'</span> =&gt; <span class="st">'_'</span>]<span class="ot">,</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    select<span class="ot">:</span> [<span class="st">'species'</span>]<span class="ot">,</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$some</span>-&gt;glimpse()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>types</code> also accepts an array by column name. A value is a <code>Type</code>, a type name such as <code>'factor'</code>, or a letter. The key <code>.default</code> sets the type of every column not named. Here <code>_ffddii_i</code> skips <code>rownames</code> and <code>sex</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$data</span> <span class="op">=</span> <span class="st">'https://raw.githubusercontent.com/phpstats/datasets/main/csv'</span><span class="ot">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="va">$penguins</span> <span class="op">=</span> DataFrame::fromCsv(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span>{<span class="va">$data</span>}<span class="st">/penguins.csv"</span><span class="ot">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> <span class="st">'_ffddii_i'</span><span class="ot">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$penguins</span>-&gt;glimpse()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="va">$some</span> <span class="op">=</span> DataFrame::fromCsv(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span>{<span class="va">$data</span>}<span class="st">/penguins.csv"</span><span class="ot">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> [<span class="st">'species'</span> =&gt; <span class="st">'factor'</span><span class="ot">,</span> <span class="st">'.default'</span> =&gt; <span class="st">'_'</span>]<span class="ot">,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    select<span class="ot">:</span> [<span class="st">'species'</span>]<span class="ot">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$some</span>-&gt;glimpse()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>Rows: 344
 Columns: 7
-$ species     &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad…
-$ island      &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgersen, Tor…
-$ bill_len    &lt;dbl&gt; 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, 42.0, …
-$ bill_dep    &lt;dbl&gt; 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, 20.2, …
-$ flipper_len &lt;int&gt; 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186, 180,…
-$ body_mass   &lt;int&gt; 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, 4250, …
-$ year        &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…
+$ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adel…
+$ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgerse…
+$ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, …
+$ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, …
+$ flipper_length_mm &lt;int&gt; 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186…
+$ body_mass_g       &lt;int&gt; 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, …
+$ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…
 Rows: 344
 Columns: 1
 $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie…</code></pre>
@@ -656,44 +657,53 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <h2 class="anchored" data-anchor-id="large-csv-files">Large CSV files</h2>
 <section id="reading-in-chunks" class="level3">
 <h3 class="anchored" data-anchor-id="reading-in-chunks">Reading in chunks</h3>
-<p><code>DataFrame::fromCsvChunked()</code> reads a file a chunk of rows at a time, as readr’s <code>read_delim_chunked()</code> does. It passes each chunk to a callback with the 1-based index of the chunk’s first row, and stops if the callback returns <code>false</code>. <code>DataFrame::csvChunks()</code> returns the same chunks as a generator keyed by that index. Memory depends on the chunk size, so a file larger than the memory limit can be filtered down as it is read:</p>
+<p><code>DataFrame::fromCsvChunked()</code> reads a file a chunk of rows at a time, as readr’s <code>read_delim_chunked()</code> does. It passes each chunk to a callback with the 1-based index of the chunk’s first row, and stops if the callback returns <code>false</code>. <code>DataFrame::csvChunks()</code> returns the same chunks as a generator keyed by that index. Memory depends on the chunk size, so a file larger than the memory limit can be filtered down as it is read. Here the 336,776 nycflights13 departures from New York City in 2013 are filtered to those bound for Los Angeles, 50,000 rows at a time:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">$chunks</span> <span class="op">=</span> DataFrame::csvChunks(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'feed.tsv'</span><span class="ot">,</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    chunkSize<span class="ot">:</span> <span class="dv">10_000</span><span class="ot">,</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    delimiter<span class="ot">:</span> <span class="st">"</span><span class="sc">\t</span><span class="st">"</span><span class="ot">,</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> [<span class="st">'.default'</span> =&gt; <span class="st">'c'</span>]<span class="ot">,</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="va">$kept</span> <span class="op">=</span> []<span class="ot">;</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$chunks</span> <span class="kw">as</span> <span class="va">$chunk</span>) {</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="va">$kept</span>[] <span class="op">=</span> <span class="va">$chunk</span>-&gt;filter(col(<span class="st">'category'</span>)-&gt;eq(<span class="st">'Running'</span>))<span class="ot">;</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="va">$running</span> <span class="op">=</span> DataFrame::concat(<span class="va">$kept</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Types not given are guessed from the first chunk, and every later chunk is parsed as those types. As in readr, <code>guessMax</code> defaults to the chunk size. Give every type, as above, to skip guessing. A value in a later chunk that does not fit its column’s type becomes NA. Factors without levels take their levels from each chunk.</p>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'https://raw.githubusercontent.com/phpstats/datasets/'</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="st">'main/csv/flights.csv'</span><span class="ot">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    chunkSize<span class="ot">:</span> <span class="dv">50_000</span><span class="ot">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="va">$kept</span> <span class="op">=</span> []<span class="ot">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">foreach</span> (<span class="va">$chunks</span> <span class="kw">as</span> <span class="va">$chunk</span>) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="va">$kept</span>[] <span class="op">=</span> <span class="va">$chunk</span>-&gt;filter(col(<span class="st">'dest'</span>)-&gt;eq(<span class="st">'LAX'</span>))<span class="ot">;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="va">$lax</span> <span class="op">=</span> DataFrame::concat(<span class="va">$kept</span>)<span class="ot">;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$lax</span>-&gt;groupBy([<span class="st">'origin'</span>])-&gt;summarize([<span class="st">'flights'</span> =&gt; n()])<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text output"><code># A tibble: 2 × 2
+  origin flights
+  &lt;chr&gt;    &lt;int&gt;
+1 EWR       4912
+2 JFK      11262</code></pre>
+<p>Only Newark and JFK have flights to Los Angeles: 4,912 and 11,262.</p>
+<p>Types not given are guessed from the first chunk, and every later chunk is parsed as those types. As in readr, <code>guessMax</code> defaults to the chunk size. Give every type, such as <code>types: ['.default' =&gt; 'c']</code>, to skip guessing. A value in a later chunk that does not fit its column’s type becomes NA. Factors without levels take their levels from each chunk.</p>
 <p>Every other option works as it does in <code>fromCsv()</code>. Each chunk’s problems raise their own warning, with rows numbered from the start of the file.</p>
 <p>With the <a href="https://github.com/phpstats/phit">phit</a> extension loaded, chunks are read natively with <code>Phit\CsvReader</code>, with the same results as the PHP reader.</p>
 </section>
 <section id="memory" class="level3">
 <h3 class="anchored" data-anchor-id="memory">Memory</h3>
 <p>A whole-file read holds every value as an element of a PHP array, with either reader, so its memory grows with the file. <code>fromCsvChunked()</code> holds one chunk at a time, so its memory follows the chunk size. An aggregate that can be combined, such as a count or a sum, can be computed for each chunk and the results added up. This script counts the penguins of each species, 100 rows at a time:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">$totals</span> <span class="op">=</span> []<span class="ot">;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="va">$count</span> <span class="op">=</span> <span class="kw">function</span> (DataFrame <span class="va">$chunk</span>) <span class="kw">use</span> (<span class="op">&amp;</span><span class="va">$totals</span>) {</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">$counts</span> <span class="op">=</span> <span class="va">$chunk</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        -&gt;groupBy([<span class="st">'species'</span>])</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        -&gt;summarize([<span class="st">'n'</span> =&gt; n()])<span class="ot">;</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">foreach</span> (<span class="va">$counts</span> <span class="kw">as</span> <span class="va">$row</span>) {</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">$totals</span>[<span class="va">$row</span>-&gt;species] <span class="op">??=</span> <span class="dv">0</span><span class="ot">;</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">$totals</span>[<span class="va">$row</span>-&gt;species] <span class="op">+=</span> <span class="va">$row</span>-&gt;n<span class="ot">;</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>}<span class="ot">;</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>DataFrame::fromCsvChunked(<span class="st">'penguins.csv'</span><span class="ot">,</span> <span class="va">$count</span><span class="ot">,</span> chunkSize<span class="ot">:</span> <span class="dv">100</span>)<span class="ot">;</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ksort</span>(<span class="va">$totals</span>)<span class="ot">;</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> tibble(</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    species<span class="ot">:</span> <span class="fu">array_keys</span>(<span class="va">$totals</span>)<span class="ot">,</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    n<span class="ot">:</span> <span class="fu">array_values</span>(<span class="va">$totals</span>)<span class="ot">,</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">$totals</span> <span class="op">=</span> []<span class="ot">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="va">$count</span> <span class="op">=</span> <span class="kw">function</span> (DataFrame <span class="va">$chunk</span>) <span class="kw">use</span> (<span class="op">&amp;</span><span class="va">$totals</span>) {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">$counts</span> <span class="op">=</span> <span class="va">$chunk</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        -&gt;groupBy([<span class="st">'species'</span>])</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        -&gt;summarize([<span class="st">'n'</span> =&gt; n()])<span class="ot">;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">foreach</span> (<span class="va">$counts</span> <span class="kw">as</span> <span class="va">$row</span>) {</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">$totals</span>[<span class="va">$row</span>-&gt;species] <span class="op">??=</span> <span class="dv">0</span><span class="ot">;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">$totals</span>[<span class="va">$row</span>-&gt;species] <span class="op">+=</span> <span class="va">$row</span>-&gt;n<span class="ot">;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>}<span class="ot">;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>DataFrame::fromCsvChunked(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'https://raw.githubusercontent.com/phpstats/datasets/'</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="st">'main/csv/penguins.csv'</span><span class="ot">,</span> <span class="va">$count</span><span class="ot">,</span> chunkSize<span class="ot">:</span> <span class="dv">100</span>)<span class="ot">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ksort</span>(<span class="va">$totals</span>)<span class="ot">;</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> tibble(</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    species<span class="ot">:</span> <span class="fu">array_keys</span>(<span class="va">$totals</span>)<span class="ot">,</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    n<span class="ot">:</span> <span class="fu">array_values</span>(<span class="va">$totals</span>)<span class="ot">,</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 3 × 2
   species       n
   &lt;chr&gt;     &lt;int&gt;
@@ -706,13 +716,13 @@ $ species &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Ad
 <section id="writing-csv" class="level2">
 <h2 class="anchored" data-anchor-id="writing-csv">Writing CSV</h2>
 <p><code>writeCsv($path)</code> writes a file and <code>toCsv()</code> returns the text. The format follows readr’s <code>write_csv()</code>. Values are quoted only when needed, NA is written as <code>NA</code>, logicals as <code>TRUE</code> and <code>FALSE</code>, dates in ISO 8601, and datetimes in UTC with a <code>Z</code>. Times are written as hms writes a column: one number of fraction digits for the column, and hours padded with spaces to one width. Factors are written as their labels, and list-columns throw.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tribble(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'name'</span><span class="ot">,</span> <span class="st">'note'</span><span class="ot">,</span> <span class="st">'score'</span><span class="ot">,</span> <span class="st">'seen'</span>]<span class="ot">,</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Ana'</span><span class="ot">,</span> <span class="st">'likes "quotes"'</span><span class="ot">,</span> <span class="fl">1e5</span><span class="ot">,</span> <span class="kw">true</span>]<span class="ot">,</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Ben'</span><span class="ot">,</span> <span class="st">'a, b'</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">false</span>]<span class="ot">,</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toCsv()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tribble(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'name'</span><span class="ot">,</span> <span class="st">'note'</span><span class="ot">,</span> <span class="st">'score'</span><span class="ot">,</span> <span class="st">'seen'</span>]<span class="ot">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Ana'</span><span class="ot">,</span> <span class="st">'likes "quotes"'</span><span class="ot">,</span> <span class="fl">1e5</span><span class="ot">,</span> <span class="kw">true</span>]<span class="ot">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'Ben'</span><span class="ot">,</span> <span class="st">'a, b'</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">false</span>]<span class="ot">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toCsv()<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code>name,note,score,seen
 Ana,"likes ""quotes""",100000,TRUE
 Ben,"a, b",NA,FALSE</code></pre>
@@ -721,19 +731,17 @@ Ben,"a, b",NA,FALSE</code></pre>
 <section id="writing-and-reading-json" class="level2">
 <h2 class="anchored" data-anchor-id="writing-and-reading-json">Writing and reading JSON</h2>
 <p><code>toJson()</code> writes a list of records, and <code>toJson('columns')</code> writes an object of columns. NA is written as <code>null</code> and kept in every record. <code>DataFrame::fromJson()</code> reads either shape and detects which one it has.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tibble(id<span class="ot">:</span> [<span class="dv">1</span><span class="ot">,</span> <span class="dv">2</span>]<span class="ot">,</span> score<span class="ot">:</span> [<span class="fl">2.5</span><span class="ot">,</span> <span class="kw">null</span>])<span class="ot">;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toJson()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toJson(<span class="st">'columns'</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> DataFrame::fromJson(<span class="st">'{"id": [1, 2], "ok": [true, null]}'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre class="text output"><code>[{"id":1,"score":2.5},{"id":2,"score":null}]
-{"id":[1,2],"score":[2.5,null]}
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> tibble(species<span class="ot">:</span> [<span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'Adelie'</span>]<span class="ot">,</span> body_mass_g<span class="ot">:</span> [<span class="dv">3750</span><span class="ot">,</span> <span class="kw">null</span>])<span class="ot">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toJson()<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span>-&gt;toJson(<span class="st">'columns'</span>)<span class="ot">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span><span class="ot">;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> DataFrame::fromJson(<span class="st">'{"faa": ["EWR", "JFK"], "alt": [18, 13]}'</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text output"><code>[{"species":"Adelie","body_mass_g":3750},{"species":"Adelie","body_mass_g":null}]
+{"species":["Adelie","Adelie"],"body_mass_g":[3750,null]}
 # A tibble: 2 × 2
-     id ok   
-  &lt;int&gt; &lt;lgl&gt;
-1     1 TRUE 
-2     2 NA</code></pre>
+  faa     alt
+  &lt;chr&gt; &lt;int&gt;
+1 EWR      18
+2 JFK      13</code></pre>
 </section>
 <section id="databases" class="level2">
 <h2 class="anchored" data-anchor-id="databases">Databases</h2>
@@ -793,33 +801,29 @@ Ben,"a, b",NA,FALSE</code></pre>
 <li>A longer value is rounded: <code>12345678901234567.89</code> reads as <code>12345678901234568.0</code>.</li>
 <li>A <code>string</code> type keeps the database’s exact decimal text.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="va">$accounts</span> <span class="op">=</span> DataFrame::fromPdo(</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">$pdo</span><span class="ot">,</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SELECT id, balance FROM accounts'</span><span class="ot">,</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> [<span class="st">'balance'</span> =&gt; <span class="st">'string'</span>]<span class="ot">,</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Explicit types always take precedence over declared ones. <code>fromQuery()</code>, the Laravel <code>-&gt;toDataFrame()</code> macro, and <code>SqlTable::collect()</code> follow the same rules.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">'CREATE TABLE visits (</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="st">    id INTEGER, clinic TEXT, bp REAL, seen TEXT</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="st">)'</span>)<span class="ot">;</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span>-&gt;<span class="fu">exec</span>(<span class="st">"INSERT INTO visits VALUES</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="st">    (1, 'north', 121.5, '2024-05-01'),</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="st">    (2, 'south', NULL, '2024-05-02'),</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="st">    (3, 'north', 133.0, '2024-05-02')"</span>)<span class="ot">;</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> DataFrame::fromPdo(</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="va">$pdo</span><span class="ot">,</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SELECT * FROM visits WHERE clinic = ?'</span><span class="ot">,</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'north'</span>]<span class="ot">,</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$df</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<pre class="text output"><code># A tibble: 2 × 4
-     id clinic    bp seen      
-  &lt;int&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;date&gt;    
-1     1 north   122. 2024-05-01
-2     3 north   133  2024-05-02</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="va">$accounts</span> <span class="op">=</span> DataFrame::fromPdo(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">$pdo</span><span class="ot">,</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SELECT id, balance FROM accounts'</span><span class="ot">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    types<span class="ot">:</span> [<span class="st">'balance'</span> =&gt; <span class="st">'string'</span>]<span class="ot">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Explicit types always take precedence over declared ones. <code>fromQuery()</code>, the Laravel <code>-&gt;toDataFrame()</code> macro, and <code>SqlTable::collect()</code> follow the same rules. This example loads nycflights13’s airports into an in-memory SQLite table and runs a query with two bound values:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="va">$high</span> <span class="op">=</span> DataFrame::fromPdo(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">$pdo</span><span class="ot">,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SELECT * FROM airports WHERE tzone = ? AND alt &gt; ? ORDER BY alt DESC'</span><span class="ot">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'America/New_York'</span><span class="ot">,</span> <span class="dv">2000</span>]<span class="ot">,</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)<span class="ot">;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> <span class="va">$high</span><span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text output"><code># A tibble: 7 × 4
+  faa   name                                           alt tzone           
+  &lt;chr&gt; &lt;chr&gt;                                        &lt;int&gt; &lt;chr&gt;           
+1 BLF   Mercer County Airport                         2857 America/New_York
+2 BKW   Raleigh County Memorial Airport               2504 America/New_York
+3 LWB   Greenbrier Valley Airport                     2302 America/New_York
+4 JST   John Murtha Johnstown-Cambria County Airport  2284 America/New_York
+5 2G9   Somerset County Airport                       2275 America/New_York
+6 AVL   Asheville Regional Airport                    2165 America/New_York
+7 BFD   Bradford Regional Airport                     2143 America/New_York</code></pre>
 </section>
 <section id="query-builders" class="level3">
 <h3 class="anchored" data-anchor-id="query-builders">Query builders</h3>
@@ -834,23 +838,23 @@ Ben,"a, b",NA,FALSE</code></pre>
 <section id="laravel-collections" class="level2">
 <h2 class="anchored" data-anchor-id="laravel-collections">Laravel collections</h2>
 <p><code>DataFrame::fromCollection()</code> reads any object with an <code>all()</code> or <code>toArray()</code> method, such as a Laravel <code>Collection</code>. The items may be arrays, objects, or Eloquent models. <code>toCollection()</code> returns an <code>Illuminate\Support\Collection</code> of row arrays and throws when Laravel is not installed.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="va">$collection</span> <span class="op">=</span> <span class="kw">new</span> <span class="kw">class</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">function</span> all()<span class="ot">:</span> <span class="dt">array</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>            [<span class="st">'id'</span> =&gt; <span class="dv">1</span><span class="ot">,</span> <span class="st">'name'</span> =&gt; <span class="st">'Ana'</span>]<span class="ot">,</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>            <span class="dt">(object)</span> [<span class="st">'id'</span> =&gt; <span class="dv">2</span><span class="ot">,</span> <span class="st">'name'</span> =&gt; <span class="st">'Ben'</span>]<span class="ot">,</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        ]<span class="ot">;</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>}<span class="ot">;</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> DataFrame::fromCollection(<span class="va">$collection</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="va">$collection</span> <span class="op">=</span> <span class="kw">new</span> <span class="kw">class</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">function</span> all()<span class="ot">:</span> <span class="dt">array</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>            [<span class="st">'species'</span> =&gt; <span class="st">'Adelie'</span><span class="ot">,</span> <span class="st">'body_mass_g'</span> =&gt; <span class="dv">3750</span>]<span class="ot">,</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>            <span class="dt">(object)</span> [<span class="st">'species'</span> =&gt; <span class="st">'Gentoo'</span><span class="ot">,</span> <span class="st">'body_mass_g'</span> =&gt; <span class="dv">4500</span>]<span class="ot">,</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        ]<span class="ot">;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>}<span class="ot">;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="kw">echo</span> DataFrame::fromCollection(<span class="va">$collection</span>)<span class="ot">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <pre class="text output"><code># A tibble: 2 × 2
-     id name 
-  &lt;int&gt; &lt;chr&gt;
-1     1 Ana  
-2     2 Ben</code></pre>
+  species body_mass_g
+  &lt;chr&gt;         &lt;int&gt;
+1 Adelie         3750
+2 Gentoo         4500</code></pre>
 
 
 </section>
