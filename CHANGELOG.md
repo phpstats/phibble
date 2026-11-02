@@ -9,9 +9,10 @@ change the public API.
 
 ### Changed
 
-- `glimpse()` formats double columns with an implementation written from R's
-  documented `format()` behavior. Its output is unchanged: it matches R on
-  3,197 test vectors and on every glimpse fixture.
+- `glimpse()` formats double columns with a new implementation, written
+  from a specification of R's documented `format()` behavior and observed
+  output. Its output is unchanged: it matches R on 3,197 test vectors and on
+  every glimpse fixture.
 - `THIRD_PARTY_NOTICES.md` lists the code that follows pillar, vctrs, and hms,
   with their MIT licenses.
 

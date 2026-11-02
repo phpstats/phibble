@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phibble\Format;
 
-use Closure;
 use DateTimeInterface;
 use Phibble\Contracts\Table;
 use Phibble\Time;
@@ -151,64 +150,13 @@ final class Glimpse
     }
 
     /**
-     * Doubles as R's format() shows them with the default 7 significant
-     * digits (?format, ?options): every value rounded to 7 significant
-     * digits and shown in full, with one shared number of decimals, or in
-     * scientific notation for the whole vector when that is narrower. Fixed
-     * notation wins ties, as with scipen = 0.
-     *
-     * Both notations are rendered and their widths measured.
+     * Doubles as R's format() shows them, with 7 significant digits.
      *
      * @param list<int|float|null> $values
      * @return list<string>
      */
     public static function formatNumbers(array $values): array
     {
-        $finite = array_values(array_filter(
-            array_map(fn ($x) => $x === null ? null : (float) $x, $values),
-            fn ($x) => $x !== null && is_finite($x),
-        ));
-
-        $decimals = 0;
-        $mantissaDigits = 0;
-        foreach ($finite as $x) {
-            [$digits, $exponent] = self::significant($x);
-            $decimals = max($decimals, $digits - 1 - $exponent);
-            $mantissaDigits = max($mantissaDigits, $digits - 1);
-        }
-
-        $fixed = fn (float $x) => sprintf("%.{$decimals}f", $x);
-        $scientific = function (float $x) use ($mantissaDigits): string {
-            [$mantissa, $exponent] = explode('e', sprintf("%.{$mantissaDigits}e", $x));
-
-            return $mantissa.'e'.((int) $exponent < 0 ? '-' : '+').str_pad((string) abs((int) $exponent), 2, '0', STR_PAD_LEFT);
-        };
-        $width = fn (Closure $render) => max(array_map(fn (float $x) => strlen($render($x)), $finite) ?: [0]);
-        // Past 50 decimals fixed notation is far wider than scientific.
-        $render = $finite !== [] && ($decimals > 50 || $width($scientific) < $width($fixed)) ? $scientific : $fixed;
-
-        return array_map(fn ($x) => match (true) {
-            $x === null => 'NA',
-            is_nan((float) $x) => 'NaN',
-            is_infinite((float) $x) => $x > 0 ? 'Inf' : '-Inf',
-            default => $render((float) $x),
-        }, $values);
-    }
-
-    /**
-     * The significant digits a value keeps at 7 significant digits, with
-     * trailing zeros dropped, and its decimal exponent.
-     *
-     * @return array{0: int, 1: int}
-     */
-    private static function significant(float $x): array
-    {
-        if ($x == 0.0) {
-            return [1, 0];
-        }
-        [$mantissa, $exponent] = explode('e', sprintf('%.6e', abs($x)));
-        $digits = strlen(rtrim(str_replace('.', '', $mantissa), '0'));
-
-        return [max($digits, 1), (int) $exponent];
+        return NumberFormat::format($values);
     }
 }
