@@ -27,7 +27,7 @@ these exceptions:
 
 The [Table contract](contract.qmd) page states the rules each backend follows.
 
-## Choosing and switching
+## Switching backends {#choosing-and-switching}
 
 ```php
 use Phibble\DataFrame;

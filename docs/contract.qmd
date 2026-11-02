@@ -131,7 +131,7 @@ where R raises an error or where exact agreement is impractical.
   states R's rule: 15 significant digits, in fixed or scientific notation,
   whichever is shorter.
 
-## Testing a backend
+## Backend tests {#testing-a-backend}
 
 The simplest test of a backend is to run the same operations on the backend
 and on `DataFrame` and compare the results. `tests/SqlTest.php` does this for

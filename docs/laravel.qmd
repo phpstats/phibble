@@ -11,7 +11,7 @@ is the whole setup, since package discovery registers two macros:
 - `->phibble()` on query builders, Eloquent builders, and relations returns a
   lazy `SqlTable` that compiles table methods to SQL.
 
-## The example data
+## Example data {#the-example-data}
 
 Each example on this page queries this model, over a `penguins` table loaded
 from the Palmer penguins data in the
@@ -33,7 +33,7 @@ final class Penguin extends Model
 }
 ```
 
-## From a collection or query to a DataFrame
+## DataFrames from collections and queries {#from-a-collection-or-query-to-a-dataframe}
 
 {{< include examples/_laravel-to-dataframe.md >}}
 
@@ -41,7 +41,7 @@ final class Penguin extends Model
 - Eloquent casts and accessors apply only to loaded models, as after `get()`
   here. `Penguin::query()->toDataFrame()` reads the raw rows.
 
-## Queries that stay in the database
+## Lazy queries {#queries-that-stay-in-the-database}
 
 {{< include examples/_laravel-phibble.md >}}
 
@@ -71,7 +71,7 @@ This grouped filter keeps the heaviest penguin on each island.
 
 Reference: [SQL tables](sql.qmd).
 
-## With phplyr
+## phplyr {#with-phplyr}
 
 [phplyr](https://github.com/phpstats/phplyr) runs dplyr's functions on the same
 lazy table, so this pipeline also runs in the database.
@@ -134,7 +134,7 @@ the Vega libraries once per page:
 @phizScripts
 ```
 
-## Using the result
+## Results {#using-the-result}
 
 - `$df->toRows()` gives a list of associative arrays, for JSON responses and
   Blade loops.
@@ -144,7 +144,7 @@ the Vega libraries once per page:
 - `$df->toModelData()` gives the columns in the form phit's model functions
   accept.
 
-## Running the examples
+## Example setup {#running-the-examples}
 
 The example scripts run outside a Laravel application.
 [`support/laravel.php`](https://github.com/phpstats/phibble/blob/main/docs/examples/support/laravel.php)

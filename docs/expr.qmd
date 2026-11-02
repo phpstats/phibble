@@ -12,7 +12,7 @@ represent R's value, as [SQL tables](sql.qmd#known-differences) lists.
 Table methods also accept PHP closures. A closure can only run in PHP, so a SQL or
 Polars table loads its rows to run one.
 
-## Building expressions
+## Construction {#building-expressions}
 
 `col('price')` reads a column. Methods on any expression build operator
 calls, and arguments that are not expressions become literals, as with
@@ -37,7 +37,7 @@ Functions in the `Phibble\Expr` namespace build the other calls:
 - A function outside the [list below](#functions) throws when the expression
   is built.
 
-## Using expressions with table methods {#using-expressions-with-verbs}
+## Expressions in table methods {#using-expressions-with-verbs}
 
 Each method evaluates expressions per group:
 

@@ -25,7 +25,7 @@ and are skipped without it. To run them, load the extension:
 php -d extension=/path/to/libphit.dylib vendor/bin/pest
 ```
 
-## Comparing with R
+## R comparisons {#comparing-with-r}
 
 Many tests compare phibble with R. Scripts in `tests/r/` run the same
 operations in R and write the expected results to `tests/fixtures/`:

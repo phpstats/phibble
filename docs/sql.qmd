@@ -48,7 +48,7 @@ Palmer penguins data in the
 
 Each method wraps the previous query in a subquery.
 
-## What compiles to SQL
+## SQL translation {#what-compiles-to-sql}
 
 `select()`, `rename()`, `filter()`, `mutate()`, `arrange()`, `groupBy()`,
 `summarize()`, `distinct()`, `slice()`, `head()`, and `join()` compile when
@@ -66,7 +66,7 @@ semantics:
 - Text compares in byte order and case-sensitively, through `COLLATE "C"` in
   PostgreSQL and `utf8mb4_0900_bin` in MySQL.
 
-## When the table falls back to memory
+## Fallback to memory {#when-the-table-falls-back-to-memory}
 
 When an argument has no faithful SQL translation, the `SqlTable` runs the
 query so far, collects its rows into PHP, and runs the method in memory. The
