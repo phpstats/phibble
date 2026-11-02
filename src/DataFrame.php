@@ -1872,7 +1872,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
     }
 
     /**
-     * Columns for model fitting (Phit\fit_lm, Phit\fit_glm, Phit\model_matrix):
+     * Columns for model fitting with formulas (Phit\fit_ols, Phit\fit_generalized_linear, Phit\model_matrix):
      *
      * - float, int: list<float|int|null>
      * - bool: list<bool|null> (a two-level contrast, as in R)

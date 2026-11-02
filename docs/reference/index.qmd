@@ -497,7 +497,7 @@ Every public function and method, by task. Methods marked *all tables* are part 
 
 | Function or method | Kind | Purpose |
 | --- | --- | --- |
-| [`->toModelData()`](types.qmd#tomodeldata) | method, DataFrame | Columns for model fitting (`Phit\fit_lm`, `Phit\fit_glm`, `Phit\model_matrix`): |
+| [`->toModelData()`](types.qmd#tomodeldata) | method, DataFrame | Columns for model fitting with formulas (`Phit\fit_ols`, `Phit\fit_generalized_linear`, `Phit\model_matrix`): |
 | [`->toMatrix()`](types.qmd#tomatrix) | method, DataFrame | Rows of numeric columns as floats, the shape phit's fit_* functions take for x. |
 | [`->toVector()`](types.qmd#tovector) | method, DataFrame | A numeric column as floats, the shape phit's fit_* functions take for y. |
 
