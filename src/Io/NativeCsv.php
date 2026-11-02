@@ -53,17 +53,7 @@ final class NativeCsv
     {
         return self::$enabled
             && getenv('PHIBBLE_NATIVE_CSV') !== '0'
-            && (self::$reader !== null || self::extensionAgrees());
-    }
-
-    /**
-     * Whether the phit extension is loaded and reads quotes as vroom does.
-     * phit 0.1.0 ends a quoted field at its first lone quote, where vroom
-     * toggles quoting, so phibble reads CSV in PHP with it.
-     */
-    public static function extensionAgrees(): bool
-    {
-        return function_exists('Phit\\read_csv') && version_compare((string) phpversion('phit'), '0.1.0', '>');
+            && (self::$reader !== null || extension_loaded('phit'));
     }
 
     /** Whether these options can be handed to the native reader. */
@@ -74,13 +64,13 @@ final class NativeCsv
             && ! str_ends_with(strtolower($path), '.gz');
     }
 
-    /** Whether phit can read in chunks (Phit\CsvReader, from phit 0.2.0). */
+    /** Whether chunks are read with Phit\CsvReader, which a stand-in reader does not replace. */
     public static function chunksAvailable(): bool
     {
         return self::$enabled
             && getenv('PHIBBLE_NATIVE_CSV') !== '0'
             && self::$reader === null
-            && class_exists('Phit\\CsvReader');
+            && extension_loaded('phit');
     }
 
     /**

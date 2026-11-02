@@ -138,7 +138,7 @@ final readonly class DataFrame implements Table, ArrayAccess, Stringable
      * Factors without levels take their levels from each chunk. Each
      * chunk's problems raise their own warning, with rows numbered from the
      * start of the file. Options are those of fromCsv(), and $file may be a
-     * URL as there. With phit 0.2.0 or later loaded, the chunks are read
+     * URL as there. With the phit extension loaded, the chunks are read
      * natively by Phit\CsvReader.
      *
      * @param string|resource $file

@@ -128,8 +128,8 @@ it('rejects a chunk size below one', function () {
 })->throws(InvalidArgumentException::class, 'The chunk size must be at least 1, got 0.');
 
 it('reads the same chunks with phit as in PHP', function () {
-    if (! Phibble\Io\NativeCsv::chunksAvailable()) {
-        test()->markTestSkipped('Phit\CsvReader is not available (phit 0.2.0 or later not loaded).');
+    if (! extension_loaded('phit')) {
+        test()->markTestSkipped('Phit\CsvReader is not available (phit extension not loaded).');
     }
     $csv = "junk\nid,name,score,day,flag\n# note\n1, a ,1.5,2024-01-02,TRUE\n2,\"b \"\"q\"\"\",NA,2024-01-03,FALSE\n"
         ."3,c,x,2024-01-04,TRUE\n4,d,2.5,2024-01-05\n5,e,3.5,2024-01-06,TRUE,extra\n6,\"multi\nline\",4,2024-01-07,FALSE\n";

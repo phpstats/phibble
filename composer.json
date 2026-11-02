@@ -18,7 +18,7 @@
     "suggest": {
         "ext-pdo_sqlite": "Used by the test suite for the PDO source",
         "illuminate/database": "Laravel integration: Collection::toDataFrame() and query builder ->phibble() / ->toDataFrame() macros (auto-discovered)",
-        "ext-phit": "Native CSV reading with Phit\\read_csv (phit 0.1.1 or later) and Phit\\CsvReader for chunks (phit 0.2.0 or later), from phpstats/phit",
+        "ext-phit": "Native CSV reading with Phit\\read_csv and Phit\\CsvReader (phit 0.4.0 or later), from phpstats/phit",
         "ext-php_polars": "The Polars backend (Phibble\\Polars\\PolarsTable), from phpstats/phpolars"
     },
     "autoload": {

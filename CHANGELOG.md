@@ -7,6 +7,12 @@ change the public API.
 
 ## [Unreleased]
 
+### Changed
+
+- phibble supports phit 0.4.0 or later. It no longer checks for phit 0.1.0's
+  quoting or for `Phit\CsvReader` from phit 0.2.0: with phit loaded, CSV files
+  and chunks are read natively.
+
 ## [0.7.0] - 2026-11-01
 
 ### Changed

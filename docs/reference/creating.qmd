@@ -225,7 +225,7 @@ DataFrame::fromCsvChunked(
 
 Read delimited text in chunks, as `readr::read_delim_chunked()`: each chunk of at most `$chunkSize` rows is passed to `$callback` with the 1-based index of its first row. Returning false from the callback stops reading. Memory follows the chunk size, not the file's.
 
-Types not given are guessed from the first chunk (guessMax defaults to the chunk size, as in readr) and every later chunk is parsed as those types. Give types, for example ['.default' => 'c'], to skip guessing. Factors without levels take their levels from each chunk. Each chunk's problems raise their own warning, with rows numbered from the start of the file. Options are those of `fromCsv()`, and `$file` may be a URL as there. With phit 0.2.0 or later loaded, the chunks are read natively by `Phit\CsvReader`.
+Types not given are guessed from the first chunk (guessMax defaults to the chunk size, as in readr) and every later chunk is parsed as those types. Give types, for example ['.default' => 'c'], to skip guessing. Factors without levels take their levels from each chunk. Each chunk's problems raise their own warning, with rows numbered from the start of the file. Options are those of `fromCsv()`, and `$file` may be a URL as there. With the phit extension loaded, the chunks are read natively by `Phit\CsvReader`.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |

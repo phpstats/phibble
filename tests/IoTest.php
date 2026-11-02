@@ -53,9 +53,6 @@ function withCsvReader(string $reader, Closure $fn): mixed
     if ($reader === 'extension' && ! function_exists('Phit\\read_csv')) {
         test()->markTestSkipped('Phit\read_csv() is not available (phit extension not loaded).');
     }
-    if ($reader === 'extension' && ! Phibble\Io\NativeCsv::extensionAgrees()) {
-        test()->markTestSkipped('This phit reads quotes unlike vroom, so phibble does not use it.');
-    }
     Phibble\Io\NativeCsv::enable($reader !== 'php');
     Phibble\Io\NativeCsv::using($reader === 'emulated' ? emulatedStatsReadCsv(...) : null);
     try {
