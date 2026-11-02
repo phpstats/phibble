@@ -349,13 +349,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-example-data" id="toc-the-example-data" class="nav-link active" data-scroll-target="#the-example-data">The example data</a></li>
-  <li><a href="#from-a-collection-or-query-to-a-dataframe" id="toc-from-a-collection-or-query-to-a-dataframe" class="nav-link" data-scroll-target="#from-a-collection-or-query-to-a-dataframe">From a collection or query to a DataFrame</a></li>
-  <li><a href="#queries-that-stay-in-the-database" id="toc-queries-that-stay-in-the-database" class="nav-link" data-scroll-target="#queries-that-stay-in-the-database">Queries that stay in the database</a></li>
-  <li><a href="#with-phplyr" id="toc-with-phplyr" class="nav-link" data-scroll-target="#with-phplyr">With phplyr</a></li>
+  <li><a href="#the-example-data" id="toc-the-example-data" class="nav-link active" data-scroll-target="#the-example-data">Example data</a></li>
+  <li><a href="#from-a-collection-or-query-to-a-dataframe" id="toc-from-a-collection-or-query-to-a-dataframe" class="nav-link" data-scroll-target="#from-a-collection-or-query-to-a-dataframe">DataFrames from collections and queries</a></li>
+  <li><a href="#queries-that-stay-in-the-database" id="toc-queries-that-stay-in-the-database" class="nav-link" data-scroll-target="#queries-that-stay-in-the-database">Lazy queries</a></li>
+  <li><a href="#with-phplyr" id="toc-with-phplyr" class="nav-link" data-scroll-target="#with-phplyr">phplyr</a></li>
   <li><a href="#charts-with-phiz" id="toc-charts-with-phiz" class="nav-link" data-scroll-target="#charts-with-phiz">Charts with phiz</a></li>
-  <li><a href="#using-the-result" id="toc-using-the-result" class="nav-link" data-scroll-target="#using-the-result">Using the result</a></li>
-  <li><a href="#running-the-examples" id="toc-running-the-examples" class="nav-link" data-scroll-target="#running-the-examples">Running the examples</a></li>
+  <li><a href="#using-the-result" id="toc-using-the-result" class="nav-link" data-scroll-target="#using-the-result">Results</a></li>
+  <li><a href="#running-the-examples" id="toc-running-the-examples" class="nav-link" data-scroll-target="#running-the-examples">Example setup</a></li>
   </ul>
 </nav>
     </div>
@@ -387,7 +387,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>-&gt;phibble()</code> on query builders, Eloquent builders, and relations returns a lazy <code>SqlTable</code> that compiles table methods to SQL.</li>
 </ul>
 <section id="the-example-data" class="level2">
-<h2 class="anchored" data-anchor-id="the-example-data">The example data</h2>
+<h2 class="anchored" data-anchor-id="the-example-data">Example data</h2>
 <p>Each example on this page queries this model, over a <code>penguins</code> table loaded from the Palmer penguins data in the <a href="https://github.com/phpstats/datasets#penguins">PHPstats datasets</a>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> Illuminate\Database\Eloquent\Model<span class="ot">;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -404,7 +404,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="from-a-collection-or-query-to-a-dataframe" class="level2">
-<h2 class="anchored" data-anchor-id="from-a-collection-or-query-to-a-dataframe">From a collection or query to a DataFrame</h2>
+<h2 class="anchored" data-anchor-id="from-a-collection-or-query-to-a-dataframe">DataFrames from collections and queries</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">$df</span> <span class="op">=</span> Penguin::query()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    -&gt;where(<span class="st">'year'</span><span class="ot">,</span> <span class="dv">2009</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    -&gt;get()</span>
@@ -423,7 +423,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </section>
 <section id="queries-that-stay-in-the-database" class="level2">
-<h2 class="anchored" data-anchor-id="queries-that-stay-in-the-database">Queries that stay in the database</h2>
+<h2 class="anchored" data-anchor-id="queries-that-stay-in-the-database">Lazy queries</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">function</span> Phibble\Expr\{col<span class="ot">,</span> mean<span class="ot">,</span> n}<span class="ot">;</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="va">$summary</span> <span class="op">=</span> Penguin::query()</span>
@@ -485,7 +485,7 @@ The SQL from <code>showQuery()</code>
 <p>Reference: <a href="./sql.html">SQL tables</a>.</p>
 </section>
 <section id="with-phplyr" class="level2">
-<h2 class="anchored" data-anchor-id="with-phplyr">With phplyr</h2>
+<h2 class="anchored" data-anchor-id="with-phplyr">phplyr</h2>
 <p><a href="https://github.com/phpstats/phplyr">phplyr</a> runs dplyr’s functions on the same lazy table, so this pipeline also runs in the database.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset" data-group="syntax">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">PHP 8.5+</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">PHP 8.3–8.4</a></li></ul>
@@ -847,7 +847,7 @@ The SQL from <code>showQuery()</code>
 @phizScripts</code></pre>
 </section>
 <section id="using-the-result" class="level2">
-<h2 class="anchored" data-anchor-id="using-the-result">Using the result</h2>
+<h2 class="anchored" data-anchor-id="using-the-result">Results</h2>
 <ul>
 <li><code>$df-&gt;toRows()</code> gives a list of associative arrays, for JSON responses and Blade loops.</li>
 <li><code>$df-&gt;toJson()</code> gives the rows as a JSON string, and <code>toJson('columns')</code> gives the columns.</li>
@@ -856,7 +856,7 @@ The SQL from <code>showQuery()</code>
 </ul>
 </section>
 <section id="running-the-examples" class="level2">
-<h2 class="anchored" data-anchor-id="running-the-examples">Running the examples</h2>
+<h2 class="anchored" data-anchor-id="running-the-examples">Example setup</h2>
 <p>The example scripts run outside a Laravel application. <a href="https://github.com/phpstats/phibble/blob/main/docs/examples/support/laravel.php"><code>support/laravel.php</code></a> creates an in-memory SQLite connection, loads the CSV, registers the macros, and defines <code>Penguin</code>.</p>
 
 

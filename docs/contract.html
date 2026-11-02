@@ -322,7 +322,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#joins" id="toc-joins" class="nav-link" data-scroll-target="#joins">Joins</a></li>
   </ul></li>
   <li><a href="#errors-and-allowed-differences" id="toc-errors-and-allowed-differences" class="nav-link" data-scroll-target="#errors-and-allowed-differences">Errors and allowed differences</a></li>
-  <li><a href="#testing-a-backend" id="toc-testing-a-backend" class="nav-link" data-scroll-target="#testing-a-backend">Testing a backend</a></li>
+  <li><a href="#testing-a-backend" id="toc-testing-a-backend" class="nav-link" data-scroll-target="#testing-a-backend">Backend tests</a></li>
   </ul>
 </nav>
     </div>
@@ -535,7 +535,7 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 </section>
 <section id="testing-a-backend" class="level2">
-<h2 class="anchored" data-anchor-id="testing-a-backend">Testing a backend</h2>
+<h2 class="anchored" data-anchor-id="testing-a-backend">Backend tests</h2>
 <p>The simplest test of a backend is to run the same operations on the backend and on <code>DataFrame</code> and compare the results. <code>tests/SqlTest.php</code> does this for <code>SqlTable</code>. It loads the same data into a database, runs each operation both ways, and compares the collected rows. It also runs every case in <code>tests/fixtures/expr/expected.json</code>, the dplyr results that <code>tests/r/expr.R</code> produces, so each backend is checked against R as well as against <code>DataFrame</code>.</p>
 
 

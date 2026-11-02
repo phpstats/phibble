@@ -350,8 +350,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#opening-a-table" id="toc-opening-a-table" class="nav-link active" data-scroll-target="#opening-a-table">Opening a table</a></li>
-  <li><a href="#what-compiles-to-sql" id="toc-what-compiles-to-sql" class="nav-link" data-scroll-target="#what-compiles-to-sql">What compiles to SQL</a></li>
-  <li><a href="#when-the-table-falls-back-to-memory" id="toc-when-the-table-falls-back-to-memory" class="nav-link" data-scroll-target="#when-the-table-falls-back-to-memory">When the table falls back to memory</a>
+  <li><a href="#what-compiles-to-sql" id="toc-what-compiles-to-sql" class="nav-link" data-scroll-target="#what-compiles-to-sql">SQL translation</a></li>
+  <li><a href="#when-the-table-falls-back-to-memory" id="toc-when-the-table-falls-back-to-memory" class="nav-link" data-scroll-target="#when-the-table-falls-back-to-memory">Fallback to memory</a>
   <ul class="collapse">
   <li><a href="#on-every-database" id="toc-on-every-database" class="nav-link" data-scroll-target="#on-every-database">On every database</a></li>
   <li><a href="#by-database" id="toc-by-database" class="nav-link" data-scroll-target="#by-database">By database</a></li>
@@ -458,7 +458,7 @@ The SQL from <code>showQuery()</code>
 <p>Each method wraps the previous query in a subquery.</p>
 </section>
 <section id="what-compiles-to-sql" class="level2">
-<h2 class="anchored" data-anchor-id="what-compiles-to-sql">What compiles to SQL</h2>
+<h2 class="anchored" data-anchor-id="what-compiles-to-sql">SQL translation</h2>
 <p><code>select()</code>, <code>rename()</code>, <code>filter()</code>, <code>mutate()</code>, <code>arrange()</code>, <code>groupBy()</code>, <code>summarize()</code>, <code>distinct()</code>, <code>slice()</code>, <code>head()</code>, and <code>join()</code> compile when their arguments are expressions or column names. The compiled SQL keeps R’s semantics:</p>
 <ul>
 <li>An aggregate returns NA when its group contains NA, unless <code>na_rm: true</code>. phibble adds a check on the count of non-NULL values, since SQL aggregates skip NULL.</li>
@@ -471,7 +471,7 @@ The SQL from <code>showQuery()</code>
 </ul>
 </section>
 <section id="when-the-table-falls-back-to-memory" class="level2">
-<h2 class="anchored" data-anchor-id="when-the-table-falls-back-to-memory">When the table falls back to memory</h2>
+<h2 class="anchored" data-anchor-id="when-the-table-falls-back-to-memory">Fallback to memory</h2>
 <p>When an argument has no faithful SQL translation, the <code>SqlTable</code> runs the query so far, collects its rows into PHP, and runs the method in memory. The method returns a <code>DataFrame</code>, so every later step also runs in memory, with <code>DataFrame</code>’s values apart from the <a href="#known-differences">known differences</a>. Here <code>mul()</code> compiles, and <code>round()</code> and a closure fall back:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode php code-with-copy"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">$pdo</span> <span class="op">=</span> <span class="kw">new</span> <span class="bu">PDO</span>(<span class="st">'sqlite::memory:'</span>)<span class="ot">;</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">$t</span> <span class="op">=</span> tbl(<span class="va">$pdo</span><span class="ot">,</span> <span class="vs">&lt;&lt;&lt;'SQL'</span></span>

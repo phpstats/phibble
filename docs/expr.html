@@ -349,8 +349,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#building-expressions" id="toc-building-expressions" class="nav-link active" data-scroll-target="#building-expressions">Building expressions</a></li>
-  <li><a href="#using-expressions-with-verbs" id="toc-using-expressions-with-verbs" class="nav-link" data-scroll-target="#using-expressions-with-verbs">Using expressions with table methods</a></li>
+  <li><a href="#building-expressions" id="toc-building-expressions" class="nav-link active" data-scroll-target="#building-expressions">Construction</a></li>
+  <li><a href="#using-expressions-with-verbs" id="toc-using-expressions-with-verbs" class="nav-link" data-scroll-target="#using-expressions-with-verbs">Expressions in table methods</a></li>
   <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a>
   <ul class="collapse">
   <li><a href="#scalar-functions" id="toc-scalar-functions" class="nav-link" data-scroll-target="#scalar-functions">Scalar functions</a></li>
@@ -393,7 +393,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Build column computations with <code>col()</code> and the functions in <code>Phibble\Expr</code>, and pass them to table methods. An expression runs on every backend: <code>DataFrame</code> evaluates it, <code>SqlTable</code> compiles it to SQL, and <code>PolarsTable</code> maps it to Polars. Each backend follows R’s semantics and runs a function in memory when it has no exact translation. Results can still differ where a database cannot represent R’s value, as <a href="./sql.html#known-differences">SQL tables</a> lists.</p>
 <p>Table methods also accept PHP closures. A closure can only run in PHP, so a SQL or Polars table loads its rows to run one.</p>
 <section id="building-expressions" class="level2">
-<h2 class="anchored" data-anchor-id="building-expressions">Building expressions</h2>
+<h2 class="anchored" data-anchor-id="building-expressions">Construction</h2>
 <p><code>col('price')</code> reads a column. Methods on any expression build operator calls, and arguments that are not expressions become literals, as with <code>lit(3)</code>:</p>
 <table class="caption-top table">
 <colgroup>
@@ -449,7 +449,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </section>
 <section id="using-expressions-with-verbs" class="level2">
-<h2 class="anchored" data-anchor-id="using-expressions-with-verbs">Using expressions with table methods</h2>
+<h2 class="anchored" data-anchor-id="using-expressions-with-verbs">Expressions in table methods</h2>
 <p>Each method evaluates expressions per group:</p>
 <ul>
 <li><code>filter()</code> keeps rows where the expression is true. NA counts as false.</li>
