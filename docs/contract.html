@@ -460,7 +460,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td><code>groupBy($names, drop: false)</code>, <code>dropsEmptyGroups()</code></td>
-<td>dplyr’s <code>.drop = FALSE</code>: grouped operations also visit empty groups. A factor key yields every level; a non-factor key yields its observed values, or NA under an empty group. Row verbs keep the flag; <code>groupBy()</code> and <code>ungroup()</code> reset it.</td>
+<td>dplyr’s <code>.drop = FALSE</code>: grouped operations also visit empty groups. A factor key yields every level; a non-factor key yields its observed values, or NA under an empty group. Row operations keep the flag; <code>groupBy()</code> and <code>ungroup()</code> reset it.</td>
 </tr>
 <tr class="even">
 <td><code>rowwise($idColumns)</code>, <code>isRowwise()</code></td>
