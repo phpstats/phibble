@@ -9,7 +9,7 @@ from every operation. It is the shared table type for
 [phiz](https://github.com/phpstats/phiz), and
 [CmdStanPHP](https://github.com/phpstats/CmdStanPHP).
 
-Documentation: <https://phpstats.github.io/phibble/>
+Documentation: <https://phibble.phpstats.org/docs>
 
 ## Install
 
@@ -93,5 +93,5 @@ composer install
 vendor/bin/pest
 ```
 
-See the [development guide](https://phpstats.github.io/phibble/development.html)
+See the [development guide](https://phibble.phpstats.org/docs/development.html)
 for the R comparison scripts, database tests, and documentation build.

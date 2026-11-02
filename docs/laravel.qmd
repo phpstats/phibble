@@ -115,7 +115,7 @@ $summary = phplyr(Penguin::query()->phibble())
 
 ## Charts with phiz
 
-[phiz](https://phpstats.github.io/phiz/) builds Vega-Lite charts in the style
+[phiz](https://phiz.phpstats.org/docs) builds Vega-Lite charts in the style
 of ggplot2, and `Plot::of()` accepts a `DataFrame`.
 
 {{< include examples/_laravel-chart.md >}}
